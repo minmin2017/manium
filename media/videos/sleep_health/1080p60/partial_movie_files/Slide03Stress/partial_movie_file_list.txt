@@ -1,0 +1,9 @@
+# This file is used internally by FFMPEG.
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/sleep_health/1080p60/partial_movie_files/Slide03Stress/2541713666_2072929124_223132457.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/sleep_health/1080p60/partial_movie_files/Slide03Stress/3673027041_1781619541_3209183973.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/sleep_health/1080p60/partial_movie_files/Slide03Stress/3673027041_4279480222_2473016320.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/sleep_health/1080p60/partial_movie_files/Slide03Stress/3673027041_3653640325_944204117.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/sleep_health/1080p60/partial_movie_files/Slide03Stress/3673027041_202504486_1172795670.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/sleep_health/1080p60/partial_movie_files/Slide03Stress/3673027041_2034764211_4157919976.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/sleep_health/1080p60/partial_movie_files/Slide03Stress/3673027041_281226156_3944823126.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/sleep_health/1080p60/partial_movie_files/Slide03Stress/3673027041_3331251594_3918987398.mp4'

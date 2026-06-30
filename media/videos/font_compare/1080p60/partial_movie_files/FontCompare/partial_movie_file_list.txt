@@ -1,0 +1,8 @@
+# This file is used internally by FFMPEG.
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/font_compare/1080p60/partial_movie_files/FontCompare/2257293077_4136003098_1107445240.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/font_compare/1080p60/partial_movie_files/FontCompare/2135761390_2924579097_755557321.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/font_compare/1080p60/partial_movie_files/FontCompare/2135761390_728774602_2169448422.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/font_compare/1080p60/partial_movie_files/FontCompare/2135761390_2924579097_3563331502.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/font_compare/1080p60/partial_movie_files/FontCompare/2135761390_1746219806_3205841577.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/font_compare/1080p60/partial_movie_files/FontCompare/2135761390_2924579097_796977423.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/font_compare/1080p60/partial_movie_files/FontCompare/2135761390_3794933938_2344302383.mp4'

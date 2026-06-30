@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1920pt" height="1080pt" viewBox="0 0 1920 1080" version="1.1">
+<defs>
+<image id="image73" width="9" height="9" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAABmJLR0QA/wD/AP+gvaeTAAABAUlEQVQYlY2QP0sCYQCHn/ePeZqYiARBQWPS0NRShEO4B621BjUEfY7aGkPoU9xctEiDEC0RWBwekhRX0enhee/7Ngm29Uy/4Rl+PPAPhGtXy8bo5jAsbgtV2hOTL+2UbRdqrqWVfRaNwau23/OnKsl/Fld3zjQawhtGOl6RI8+hTQQcS6ONjzaVcRT1yC2AcGSJRGbqFmU7AHJut99hMW6p+EFa5WGVQaW5MeUkEM3wCkADsPk+8H68xvDRP5rEcr1SdSd4Ip4elwBC4C6u628ftfpSUs4vn/trqdgKoz8SQOoK+/d34eFTv7SRZfnL2QR6OpSUL92getANwArSWekXk+Vf55+iNtkAAAAASUVORK5CYII="/>
+</defs>
+<g id="surface64">
+<use xlink:href="#image73" transform="matrix(1,0,0,1,30,19)"/>
+</g>
+</svg>

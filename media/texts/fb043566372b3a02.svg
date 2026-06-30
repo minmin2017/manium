@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="854pt" height="480pt" viewBox="0 0 854 480" version="1.1">
+<defs>
+<image id="image243" width="11" height="11" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAABmJLR0QA/wD/AP+gvaeTAAABPElEQVQYlWNgYGBgmD9/vsHs2bNlGLCAefPm+cDYjI2Njc48PDxr1AUuXFMU+3x8903L579//uKSluR65SA2x3P13QyXz58/r66pqUlkefTo0XkmJqaZMjrv3mjp3Jact/BRpLHOH2OGe4xJktr/nl3fdHXb779/JzEwMDAwIlv5f4vIkvuPBD0YeRn5hP99eMWryGnKaPfwOUyeBVnxhzM8OaLMvx8yvv3PysjA1coY/+A5sjwTMkew4cGH559FDjz6JMbw+iPfDnTPoph8brmj8+Jr1k7//zN8UhZ+Wv///6VERkaG/1hNNlR6VhJkeLqIh+W3bpT5SWeGo0qy2IKTgYGBgeHned/WX+cDDCBsvy3//6MGANwZoaGr2CKXcEgy//vLxsCwgSFueeq7t7PizRkYgk/gNB0fAAB3+HaINfwG1gAAAABJRU5ErkJggg=="/>
+</defs>
+<g id="surface234">
+<use xlink:href="#image243" transform="matrix(1,0,0,1,30,20)"/>
+</g>
+</svg>

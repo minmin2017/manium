@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="854pt" height="480pt" viewBox="0 0 854 480" version="1.1">
+<defs>
+<image id="image265" width="11" height="11" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAABmJLR0QA/wD/AP+gvaeTAAABMElEQVQYlWNkQANxDqYu/xgYNdj4WBfO23T0M7IcEzIn2dnS4x/D712mut8nM37/uRzdIBZkjgjPF/mwIAZGabG/DKICPyTm7kZVjGLyx888W1iZ/t//9ZPhx+evzLPRTWZE5nxpU4hnYPo3+R/Tb26mP+x7uX898GBsYPiH1WRm/t9e/38w8TJ+5WBiYv/r8oZThBunMzgMWAX+/WD68/cHIwOLJPM/EUd+AQzFP3bwqfw/pRn+k4HnzpW/iv9u/pVluPZaYTXDf9aW/3tlpP/PZGCFu/nXdp6pLHyiif9+/WJ7+0uE+fFHMQZN4dsM7My/vjD8+fWJ+ecbY0ZvhhcsDAwMDKxszBsZvr4yZmZkeinG9PGUmPSnmwws7M4MP3/pM/z5epbRm+EFesgQBABfgmoNicG7EgAAAABJRU5ErkJggg=="/>
+</defs>
+<g id="surface256">
+<use xlink:href="#image265" transform="matrix(1,0,0,1,30,20)"/>
+</g>
+</svg>

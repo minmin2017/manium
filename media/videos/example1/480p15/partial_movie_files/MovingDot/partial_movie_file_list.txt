@@ -1,0 +1,5 @@
+# This file is used internally by FFMPEG.
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/example1/480p15/partial_movie_files/MovingDot/1584795214_3208191516_3032720707.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/example1/480p15/partial_movie_files/MovingDot/4072820271_208550973_3181307157.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/example1/480p15/partial_movie_files/MovingDot/4072820271_800441460_1712057490.mp4'
+file 'file:/home/minmin/Desktop/animation_1brown3blue/media/videos/example1/480p15/partial_movie_files/MovingDot/4072820271_1521855597_1025297708.mp4'

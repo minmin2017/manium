@@ -1,0 +1,2438 @@
+{
+  "/home/minmin/Desktop/animation_1brown3blue/manim/setup.py": {
+    "mtime": 1782528620.329506,
+    "hash": "9396aa9cefed50149550afb760554e58"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/example_scenes.py": {
+    "mtime": 1782528620.3075056,
+    "hash": "daaf7004c4ab3e30031d5def87f24605"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/logger.py": {
+    "mtime": 1782528620.3165057,
+    "hash": "612661a5bac4a43b3d6d38b02178466f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/extract_scene.py": {
+    "mtime": 1782528620.3165057,
+    "hash": "fbebc0154c633dab12787f6670955589"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/__init__.py": {
+    "mtime": 1782528620.3135056,
+    "hash": "bb35d22ee758962bda505e092bcb47e2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/window.py": {
+    "mtime": 1782528620.329506,
+    "hash": "e853b85335e3dbe02b8b3d92d9ea7a50"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/module_loader.py": {
+    "mtime": 1782528620.3235059,
+    "hash": "fd8182e2789c40a04d6553e97770776e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/constants.py": {
+    "mtime": 1782528620.3155057,
+    "hash": "e4e4e61984bfb4bef690e1f70272d5bf"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/shader_wrapper.py": {
+    "mtime": 1782528620.3245058,
+    "hash": "b42947c15f9f87b6cfd8a8346df69c24"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/__main__.py": {
+    "mtime": 1782528620.3135056,
+    "hash": "9c8e0b3129664cc7753eb286a5d02f2a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/typing.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "8ffdb4b97da7ad92831c1d6a6a170281"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/config.py": {
+    "mtime": 1782528620.3155057,
+    "hash": "bfe0772fed7a32896796f0a256242d36"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/simple_functions.py": {
+    "mtime": 1782528620.328506,
+    "hash": "95f66dcad79355e89db16837b50aa4fd"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/debug.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "362042ada43dac909b272d0b4273975b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/file_ops.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "4c3c071bb4d2d39061d07e2f63a70743"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/shaders.py": {
+    "mtime": 1782528620.328506,
+    "hash": "f1d717a57a3b0a4deb0875db4ef02236"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/tex.py": {
+    "mtime": 1782528620.328506,
+    "hash": "9cec57e5e39f04a28efb99cc104ac297"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/rate_functions.py": {
+    "mtime": 1782528620.328506,
+    "hash": "d02d72e4415fdf03b428f3453ededd4a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/family_ops.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "3d1560f947e5d6246c5abf7e0a69df42"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/directories.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "25d19bde2f0ac3ecaedf705c57460b54"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/color.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "80387617ed358eff742f3326f8b4f176"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/sounds.py": {
+    "mtime": 1782528620.328506,
+    "hash": "d89e82a97e6febeb20d3182cc481f504"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/__init__.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/images.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "378c7a428e00108ce6005e6faf2f0789"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/dict_ops.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "f7c6588f27b624ec9d907bff5c0ac2bf"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/space_ops.py": {
+    "mtime": 1782528620.328506,
+    "hash": "6eaf974133fa3bd01eeee5a18d4b122b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/bezier.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "a46de36e084a97f766b1cdb3a36d90ab"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/tex_to_symbol_count.py": {
+    "mtime": 1782528620.329506,
+    "hash": "6378be1f0fcd3794d270ed107a5f3271"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/iterables.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "cf95708442634add04c66f7d422147bc"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/cache.py": {
+    "mtime": 1782528620.3275058,
+    "hash": "4b2411ad73aaa3fbc43002483e26ecd6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/tex_file_writing.py": {
+    "mtime": 1782528620.328506,
+    "hash": "03aa4cd68f6cd688625b644e2ad3324a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/utils/paths.py": {
+    "mtime": 1782528620.328506,
+    "hash": "7251be563c517d44757f4214dfe74d0e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/coordinate_systems.py": {
+    "mtime": 1782528620.3165057,
+    "hash": "155d16b130efea79c477eac5dfb4d790"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/frame.py": {
+    "mtime": 1782528620.3165057,
+    "hash": "d3a3ca9d77aa4021b098b8524932d716"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/mobject.py": {
+    "mtime": 1782528620.3175058,
+    "hash": "3f19e4df4ccdf6dc59fe4f6060b22525"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/interactive.py": {
+    "mtime": 1782528620.3175058,
+    "hash": "6a93ea887c98d419193b9a6299e429ff"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/functions.py": {
+    "mtime": 1782528620.3165057,
+    "hash": "83188a187e8bd04c0fdb722ebef56ad4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/number_line.py": {
+    "mtime": 1782528620.3185058,
+    "hash": "3923fe29ac82e07d73a25d4b2e8e007f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/value_tracker.py": {
+    "mtime": 1782528620.3235059,
+    "hash": "e4dccc9188ebd03cce519cdcd312c62d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/boolean_ops.py": {
+    "mtime": 1782528620.3165057,
+    "hash": "12d7af8c7d9bb3d68a501771d97060c3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/shape_matchers.py": {
+    "mtime": 1782528620.3195057,
+    "hash": "be0b741fe22aa3a3f21a9fdc4543d32f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/three_dimensions.py": {
+    "mtime": 1782528620.3215058,
+    "hash": "ed90f475217807b1797c2e4bd7874137"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/__init__.py": {
+    "mtime": 1782528620.3165057,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/geometry.py": {
+    "mtime": 1782528620.3175058,
+    "hash": "d1081e80ceaf14073f16c198ae1ea0c2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/vector_field.py": {
+    "mtime": 1782528620.3235059,
+    "hash": "a4d8f6c5abee261a1a8978d2ccdd796d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/probability.py": {
+    "mtime": 1782528620.3195057,
+    "hash": "684df232ead9bbe07cc6d0905ab6dbe1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/changing.py": {
+    "mtime": 1782528620.3165057,
+    "hash": "40a8f31a19e2486d2f054de2b6e9dad7"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/matrix.py": {
+    "mtime": 1782528620.3175058,
+    "hash": "5f9f659f52696c150efb5f3ad0040817"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/mobject_update_utils.py": {
+    "mtime": 1782528620.3185058,
+    "hash": "04fbd5ff126a3814b8d372ddf53bb6c4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/numbers.py": {
+    "mtime": 1782528620.3185058,
+    "hash": "d4451dfbdc40c5e5ee0bf64109173179"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/types/vectorized_mobject.py": {
+    "mtime": 1782528620.3235059,
+    "hash": "48b64f1ac4d4988c729e3a7982e23afa"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/types/dot_cloud.py": {
+    "mtime": 1782528620.3215058,
+    "hash": "7bfbe602eca2e6799b9c523513c0f7f2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/types/image_mobject.py": {
+    "mtime": 1782528620.3215058,
+    "hash": "f5e85a7e547033b21c846844ad11ddec"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/types/__init__.py": {
+    "mtime": 1782528620.3215058,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/types/point_cloud_mobject.py": {
+    "mtime": 1782528620.322506,
+    "hash": "f4c71336783810e3eda6413aae5eab8d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/types/surface.py": {
+    "mtime": 1782528620.322506,
+    "hash": "7dd89ff079df10b9cec244c904fe5baf"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/svg/tex_mobject.py": {
+    "mtime": 1782528620.3205059,
+    "hash": "10517aa7687e9d203ef78ace0a823281"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/svg/string_mobject.py": {
+    "mtime": 1782528620.3205059,
+    "hash": "c540e26ec3b7db3384179b30ac97d751"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/svg/__init__.py": {
+    "mtime": 1782528620.3195057,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/svg/text_mobject.py": {
+    "mtime": 1782528620.3215058,
+    "hash": "e66edfbc76346a341bbcecd8a01e17cb"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/svg/special_tex.py": {
+    "mtime": 1782528620.3205059,
+    "hash": "166a662738dc089dbd89db57480866c4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/svg/brace.py": {
+    "mtime": 1782528620.3195057,
+    "hash": "a4c65a758d36475202561da47edba4ef"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/svg/svg_mobject.py": {
+    "mtime": 1782528620.3205059,
+    "hash": "609e236ec40e4135dff09bed1d112367"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/svg/drawings.py": {
+    "mtime": 1782528620.3195057,
+    "hash": "d07e258218b9afe73e806d62aa6caa92"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/mobject/svg/old_tex_mobject.py": {
+    "mtime": 1782528620.3195057,
+    "hash": "25f6277a509bccc6ef0b4ba1f580f10c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/rotation.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "63b4242e2e39d900b5903daaef70703e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/creation.py": {
+    "mtime": 1782528620.3135056,
+    "hash": "826563ee491e545cc0bda90a12c4ed67"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/animation.py": {
+    "mtime": 1782528620.3135056,
+    "hash": "8b708ce6f5fd244e29e21d4032855e91"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/transform_matching_parts.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "6ae19ce91a124e11d51656d6260e24c2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/composition.py": {
+    "mtime": 1782528620.3135056,
+    "hash": "8550f0c61dd8fed3644b5c7a6df65916"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/specialized.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "1d013767530f0d9f342cf97e13ef5152"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/__init__.py": {
+    "mtime": 1782528620.3135056,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/update.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "fa31a9e0aa59575e299d785a8ff330db"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/movement.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "1460962a9a0348b27dbcdfff04f079f1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/fading.py": {
+    "mtime": 1782528620.3135056,
+    "hash": "78dd5ebcfe1dc600e0089e15c45d4ee0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/growing.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "0e120e6e14a04b18088b93c81d1dff6e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/transform.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "57864cef846f2d8a145aa00b850f74df"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/indication.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "9fc925cc354ff0a9e8227778333fa4a5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/animation/numbers.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "067d61de59935007cb9ef5f91ec9204e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/scene/scene_file_writer.py": {
+    "mtime": 1782528620.3245058,
+    "hash": "01e8bb410789553d90c7ce63f5ae5b71"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/scene/scene.py": {
+    "mtime": 1782528620.3235059,
+    "hash": "18258cd1089069125516e5487bdb0c15"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/scene/__init__.py": {
+    "mtime": 1782528620.3235059,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/scene/scene_embed.py": {
+    "mtime": 1782528620.3235059,
+    "hash": "3cb08e0a653c9c31ca09e8a445ba53a3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/scene/interactive_scene.py": {
+    "mtime": 1782528620.3235059,
+    "hash": "c5862bab2e96d35a076467bf41214154"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/camera/__init__.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/camera/camera.py": {
+    "mtime": 1782528620.3145058,
+    "hash": "4187600aafdfbae4d7d7fd90f9235b6f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/camera/camera_frame.py": {
+    "mtime": 1782528620.3155057,
+    "hash": "db8b62530aad195634d69bc5921aad24"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/event_handler/event_type.py": {
+    "mtime": 1782528620.3165057,
+    "hash": "056ed054edb545bf310a4b10b76d7bfa"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/event_handler/event_listner.py": {
+    "mtime": 1782528620.3155057,
+    "hash": "3d38ef9dd6e2a6c8594f64fdab0ea998"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/event_handler/__init__.py": {
+    "mtime": 1782528620.3155057,
+    "hash": "bb291d2379539cdba4096d96f84bcfa7"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/event_handler/event_dispatcher.py": {
+    "mtime": 1782528620.3155057,
+    "hash": "8718b3151602beae6ba1a46023046245"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/logo/logo.py": {
+    "mtime": 1782528620.3105056,
+    "hash": "2f913f32f917f20ca8f5cf67a1a14a5f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/example.py": {
+    "mtime": 1782528620.3035057,
+    "hash": "2e28df349969ec03ecc3a5c90389085d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/manim_example_ext.py": {
+    "mtime": 1782528620.3075056,
+    "hash": "bfd4f622029c0197861f6ae720bac38d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/conf.py": {
+    "mtime": 1782528620.3055055,
+    "hash": "2db885630f678240a9fd670d9e6e89ea"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/example_scenes/opengl.py": {
+    "mtime": 1782528654.942985,
+    "hash": "0b48b9a61a7008b1ae4cfdfc6f3a8434"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/example_scenes/customtex.py": {
+    "mtime": 1782528654.942985,
+    "hash": "7092882719ecf77295771de28023900c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/example_scenes/advanced_tex_fonts.py": {
+    "mtime": 1782528654.9419851,
+    "hash": "6831f7312a1f92cde552070d8e130d91"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/example_scenes/basic.py": {
+    "mtime": 1782528654.942985,
+    "hash": "4f41d7569188a37b2ec0d0e178526997"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/scripts/template_docsting_with_example.py": {
+    "mtime": 1782528654.9719856,
+    "hash": "33b05cd6254d4edfe6b3364c33cad35e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/scripts/release.py": {
+    "mtime": 1782528654.9719856,
+    "hash": "f7e72535cebdc18e2b6d5c0b9391ef30"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/scripts/extract_frames.py": {
+    "mtime": 1782528654.9709854,
+    "hash": "da7c8cc3a55787662ab82f01848faa8e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/scripts/make_and_open_docs.py": {
+    "mtime": 1782528654.9709854,
+    "hash": "b36164d4c4361a3c1562501aa69f2938"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/conf.py": {
+    "mtime": 1782528654.936985,
+    "hash": "defbb5d3287a4d0d88ef8a74b7dcfd26"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/manim-binder.min.js": {
+    "mtime": 1782528654.9089847,
+    "hash": "212715163abf0257463bd73fd1f8469d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/responsiveSvg.js": {
+    "mtime": 1782528654.931985,
+    "hash": "e91c50d0939ae6e46802ba02d070596f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/__init__.py": {
+    "mtime": 1782528654.9439852,
+    "hash": "44c9c6fae115e0e1b9c565687d239329"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/constants.py": {
+    "mtime": 1782528654.948985,
+    "hash": "0b95de6c2e681af45fcd56f3c911ef12"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/data_structures.py": {
+    "mtime": 1782528654.948985,
+    "hash": "f0b38b51657d87d7f07f4c364e1c6f16"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/__main__.py": {
+    "mtime": 1782528654.9439852,
+    "hash": "8dfb45d258d0561ded44dccdcaef7285"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/typing.py": {
+    "mtime": 1782528654.9649854,
+    "hash": "efe77eea4f4067f283ba9c65db4f257b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/plugins/plugins_flags.py": {
+    "mtime": 1782528654.9599853,
+    "hash": "344bf2c2c31ade38a31fedf3f3dad080"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/plugins/__init__.py": {
+    "mtime": 1782528654.9599853,
+    "hash": "0e8cef9aab876ec68a5e38d384d9db5e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/_config/cli_colors.py": {
+    "mtime": 1782528654.9439852,
+    "hash": "b6cd5725725cb7472740faa7030fb641"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/_config/utils.py": {
+    "mtime": 1782528654.9449852,
+    "hash": "116328576213f2a4faca45ae66023ea6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/_config/__init__.py": {
+    "mtime": 1782528654.9439852,
+    "hash": "e6a5e1ef47d97466b6eb9802e270fee3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/_config/logger_utils.py": {
+    "mtime": 1782528654.9449852,
+    "hash": "6414903b4503b329378b6403a7ff4c8e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/parameter_parsing.py": {
+    "mtime": 1782528654.9689856,
+    "hash": "ee63d87d0d0bcba16b8742094ebb1644"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/module_ops.py": {
+    "mtime": 1782528654.9689856,
+    "hash": "b7a629ca35f4076ad2e38b10fa46d53c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/tex_templates.py": {
+    "mtime": 1782528654.9709854,
+    "hash": "5fbd10158138e3dc80ebd51fc4a333f4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/simple_functions.py": {
+    "mtime": 1782528654.9699855,
+    "hash": "387e7a317765dfe53ff2125de6a285c7"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/family.py": {
+    "mtime": 1782528654.9679854,
+    "hash": "2183d542f58387ba4a559fc712171413"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/polylabel.py": {
+    "mtime": 1782528654.9699855,
+    "hash": "0a7c9094ffed56d9ca2417522040afeb"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/exceptions.py": {
+    "mtime": 1782528654.9679854,
+    "hash": "0abb490bfa8628ff09ebc5ed3a2e4ee5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/debug.py": {
+    "mtime": 1782528654.9669855,
+    "hash": "4a1ab34330f7cc09654e704b9a4b5f04"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/deprecation.py": {
+    "mtime": 1782528654.9669855,
+    "hash": "b40690c690f0cbba655464c1d25b5429"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/file_ops.py": {
+    "mtime": 1782528654.9679854,
+    "hash": "22c8a5dd011025d5dcc20901125de8e0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/tex.py": {
+    "mtime": 1782528654.9709854,
+    "hash": "1732a817c42bfe28a6a889ad520c5f67"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/opengl.py": {
+    "mtime": 1782528654.9689856,
+    "hash": "e6ef5e3d6954822e38fae4c88fa5cea0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/hashing.py": {
+    "mtime": 1782528654.9689856,
+    "hash": "76bd092b3386d72a7f75e8b15f128d7e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/rate_functions.py": {
+    "mtime": 1782528654.9699855,
+    "hash": "1d1890f4363b01b2e80763d927903d4f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/config_ops.py": {
+    "mtime": 1782528654.9669855,
+    "hash": "2558068141caa554ddb79f31e5e49980"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/family_ops.py": {
+    "mtime": 1782528654.9679854,
+    "hash": "77128fb430c785c80bf72a62da08800c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/qhull.py": {
+    "mtime": 1782528654.9699855,
+    "hash": "a537162f92645e926eaf920aa7c96a24"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/sounds.py": {
+    "mtime": 1782528654.9699855,
+    "hash": "02979514a094a35a91f370ab4287a35e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/__init__.py": {
+    "mtime": 1782528654.9649854,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/images.py": {
+    "mtime": 1782528654.9689856,
+    "hash": "75edfb9e058c74d2bd4a9417a2994df3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/space_ops.py": {
+    "mtime": 1782528654.9699855,
+    "hash": "a3dafcb80581bd41e7d0c3b1de3c8b7c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/bezier.py": {
+    "mtime": 1782528654.9659855,
+    "hash": "d86001ecd2ee2f6efde3abdad9baa91e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/iterables.py": {
+    "mtime": 1782528654.9689856,
+    "hash": "3479fdde92a4bb2c768af5936eed3426"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/commands.py": {
+    "mtime": 1782528654.9669855,
+    "hash": "b659e1afb847272b15f90cce638c1c14"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/unit.py": {
+    "mtime": 1782528654.9709854,
+    "hash": "fbf010ce251ea6fc5870dd09d04bffac"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/tex_file_writing.py": {
+    "mtime": 1782528654.9709854,
+    "hash": "1d6047bc75d3a39dfdc825f91963044b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/paths.py": {
+    "mtime": 1782528654.9689856,
+    "hash": "b40e440466887b55d5be068198a41950"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/typst_file_writing.py": {
+    "mtime": 1782528654.9709854,
+    "hash": "a4d6a32d5096e960017f516e0d72eeb2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/caching.py": {
+    "mtime": 1782528654.9659855,
+    "hash": "bd304754b429841cc393ad18edaacedb"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/ipython_magic.py": {
+    "mtime": 1782528654.9689856,
+    "hash": "82a572c347d49d6b6d3096afed48e22a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/color/DVIPSNAMES.py": {
+    "mtime": 1782528654.9659855,
+    "hash": "c20ee9e58e017f138ec149b95ba4d421"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/color/X11.py": {
+    "mtime": 1782528654.9669855,
+    "hash": "7b18f5f6a80bc4aa240371ffb066c08d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/color/XKCD.py": {
+    "mtime": 1782528654.9669855,
+    "hash": "dab008b80952d579dc04e5f82b18d66f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/color/__init__.py": {
+    "mtime": 1782528654.9669855,
+    "hash": "5c694171ee177ba62da2a0ce5b54b63d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/color/SVGNAMES.py": {
+    "mtime": 1782528654.9659855,
+    "hash": "9b1450aab484d726df5657d9d655666d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/color/AS2700.py": {
+    "mtime": 1782528654.9659855,
+    "hash": "0c40bdd379e88a0bfc9cde2a6f67cfdc"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/color/manim_colors.py": {
+    "mtime": 1782528654.9669855,
+    "hash": "4250ff62908af5abb11cbd809b9d9bba"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/color/core.py": {
+    "mtime": 1782528654.9669855,
+    "hash": "bb5ffe9a97a9b259a5ea4627ce88767a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/color/BS381.py": {
+    "mtime": 1782528654.9659855,
+    "hash": "b324ffb7d3629b8d9d8f1699731c0d45"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/docbuild/autocolor_directive.py": {
+    "mtime": 1782528654.9679854,
+    "hash": "93c9968a5f36bd1ed90d7f5b40bed640"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/docbuild/autoaliasattr_directive.py": {
+    "mtime": 1782528654.9679854,
+    "hash": "7e25aceef4a2e99a5c830b5bdae95bc0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/docbuild/module_parsing.py": {
+    "mtime": 1782528654.9679854,
+    "hash": "c57066dbf831daafb018ce5652b46c1f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/docbuild/__init__.py": {
+    "mtime": 1782528654.9679854,
+    "hash": "ff201f95b6dce5620b5c00b63feca43a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/docbuild/manim_directive.py": {
+    "mtime": 1782528654.9679854,
+    "hash": "22f2ac62633e02e0e0f79f8d33ff618d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/testing/frames_comparison.py": {
+    "mtime": 1782528654.9709854,
+    "hash": "79eb324d67e8eb33e4f0b490ffaf21b4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/testing/_show_diff.py": {
+    "mtime": 1782528654.9699855,
+    "hash": "b97e40300c95abdbfee2f0f9169bced0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/testing/__init__.py": {
+    "mtime": 1782528654.9699855,
+    "hash": "918cbbc9c572eae284755f4acc761a8b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/testing/_frames_testers.py": {
+    "mtime": 1782528654.9699855,
+    "hash": "425b49032ea6fbfe2c62739a7e51d720"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/utils/testing/_test_class_makers.py": {
+    "mtime": 1782528654.9699855,
+    "hash": "0ee1bbfd6e040080a259669915a72057"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/frame.py": {
+    "mtime": 1782528654.948985,
+    "hash": "676e310c2304b0da8e7c4bf8389f7631"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/mobject.py": {
+    "mtime": 1782528654.9539852,
+    "hash": "ccebfed14260c37438f92d9cef52493e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/value_tracker.py": {
+    "mtime": 1782528654.9589853,
+    "hash": "a5c7878d01966f669d5cb9751b142ac6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/utils.py": {
+    "mtime": 1782528654.9589853,
+    "hash": "506a3fa3d9fd18d6a85ce315113ef160"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/__init__.py": {
+    "mtime": 1782528654.948985,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/table.py": {
+    "mtime": 1782528654.9569852,
+    "hash": "bf0ddcea1ae29029beec9652598b60ee"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/logo.py": {
+    "mtime": 1782528654.9529853,
+    "hash": "1bf15310db1ad31958dd96d94fd33849"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/vector_field.py": {
+    "mtime": 1782528654.9599853,
+    "hash": "1a44b38292cdf28a639d0bad28331e8e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/matrix.py": {
+    "mtime": 1782528654.9539852,
+    "hash": "258ab04cc0f5cf0810daa65658b87fd0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/graph.py": {
+    "mtime": 1782528654.9509852,
+    "hash": "7f50a32d8191c151944ecbab1978c1c4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/three_d/three_d_utils.py": {
+    "mtime": 1782528654.9579854,
+    "hash": "0c76595ffdd642c7cd74838276cc191b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/three_d/polyhedra.py": {
+    "mtime": 1782528654.9579854,
+    "hash": "a36f8b34558016df1b1a795b8c701ce3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/three_d/three_dimensions.py": {
+    "mtime": 1782528654.9589853,
+    "hash": "6148f63e9fd7f238a5e2f860fcd00b9c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/three_d/__init__.py": {
+    "mtime": 1782528654.9579854,
+    "hash": "91a700b74b09a2ab690479c1bb340be8"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/geometry/tips.py": {
+    "mtime": 1782528654.9509852,
+    "hash": "1979cd43489e7788960ceac06785b574"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/geometry/line.py": {
+    "mtime": 1782528654.9499853,
+    "hash": "dd78dc9a81d149db775788d90fc0b384"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/geometry/boolean_ops.py": {
+    "mtime": 1782528654.9499853,
+    "hash": "5432d73496b04b70c60bb3999084396e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/geometry/shape_matchers.py": {
+    "mtime": 1782528654.9509852,
+    "hash": "9d5560232b23bfa929f4ff159f51608b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/geometry/__init__.py": {
+    "mtime": 1782528654.948985,
+    "hash": "fd7dfdc0726661302ccc0758bf4c308e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/geometry/labeled.py": {
+    "mtime": 1782528654.9499853,
+    "hash": "3517bf1e0466224d6d491a5d81c0c2ef"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/geometry/arc.py": {
+    "mtime": 1782528654.9499853,
+    "hash": "6a5ccb11e706b9e1dc36b17ef9aacd39"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/geometry/polygram.py": {
+    "mtime": 1782528654.9509852,
+    "hash": "0bd154ade202d85e97a544027ffbec52"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/types/vectorized_mobject.py": {
+    "mtime": 1782528654.9589853,
+    "hash": "3af38347af1e5477061618873bf805a1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/types/image_mobject.py": {
+    "mtime": 1782528654.9589853,
+    "hash": "d85a12d71e7bf35f776760588705f378"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/types/__init__.py": {
+    "mtime": 1782528654.9589853,
+    "hash": "58cf91e2a4413b1c5ba52f9274dcaf36"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/types/point_cloud_mobject.py": {
+    "mtime": 1782528654.9589853,
+    "hash": "f2800d15863cbbbee9b4583943600805"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/graphing/coordinate_systems.py": {
+    "mtime": 1782528654.9529853,
+    "hash": "ca6f880685a637c88311a0a28cebfb3f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/graphing/functions.py": {
+    "mtime": 1782528654.9529853,
+    "hash": "77e0f2b79d187eaa95188a0284a4972c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/graphing/number_line.py": {
+    "mtime": 1782528654.9529853,
+    "hash": "1cdb840a9c9a6ca5781e9cd3e6236fbd"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/graphing/__init__.py": {
+    "mtime": 1782528654.9509852,
+    "hash": "3829e971d1ff02e38e3a5371be0ea6c5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/graphing/scale.py": {
+    "mtime": 1782528654.9529853,
+    "hash": "85979a866cd00161ba017b8661858fed"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/graphing/probability.py": {
+    "mtime": 1782528654.9529853,
+    "hash": "e31b95beb8fdcd085570b19aff9bff22"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/text/tex_mobject.py": {
+    "mtime": 1782528654.9569852,
+    "hash": "cef57194cc0fca7de5b05a5a61249791"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/text/typst_mobject.py": {
+    "mtime": 1782528654.9579854,
+    "hash": "1b086c038c5521dcee8e225de828829d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/text/code_mobject.py": {
+    "mtime": 1782528654.9569852,
+    "hash": "ed506d714b503617f53ca9bcc7eec992"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/text/__init__.py": {
+    "mtime": 1782528654.9569852,
+    "hash": "6627100bc9c5ecf42381f0de240e3d44"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/text/text_mobject.py": {
+    "mtime": 1782528654.9579854,
+    "hash": "b7aca12fe3b5d2069232cae64c213927"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/text/numbers.py": {
+    "mtime": 1782528654.9569852,
+    "hash": "6a6a9ee21c65904a83cf676334fa5098"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/opengl/opengl_image_mobject.py": {
+    "mtime": 1782528654.9549854,
+    "hash": "2959461f262f41ba23e91b08248e5e06"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/opengl/opengl_point_cloud_mobject.py": {
+    "mtime": 1782528654.9549854,
+    "hash": "9fca2b4f16317db47e0fc74a5d4411bd"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/opengl/opengl_mobject.py": {
+    "mtime": 1782528654.9549854,
+    "hash": "e50d2cbc0d3e80d16e2e11cc30afed92"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/opengl/dot_cloud.py": {
+    "mtime": 1782528654.9539852,
+    "hash": "1a803910174012bcac7fefbe4a093362"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/opengl/opengl_geometry.py": {
+    "mtime": 1782528654.9539852,
+    "hash": "d402945acb149d2b545cc1211bd73e13"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/opengl/opengl_vectorized_mobject.py": {
+    "mtime": 1782528654.9559853,
+    "hash": "752a6a7bdf0e8ccebafb5fa3c34b4285"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/opengl/opengl_surface.py": {
+    "mtime": 1782528654.9559853,
+    "hash": "8abe683aba93c28a8b702ea88fbe4e8a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/opengl/__init__.py": {
+    "mtime": 1782528654.9539852,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/opengl/opengl_three_dimensions.py": {
+    "mtime": 1782528654.9559853,
+    "hash": "64dd19e3a3b043eb3376e6957de92ff5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/opengl/opengl_compatibility.py": {
+    "mtime": 1782528654.9539852,
+    "hash": "7fefd1a816c507125d73b4778c4b333d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/svg/__init__.py": {
+    "mtime": 1782528654.9559853,
+    "hash": "89e6d4dd7ed212abc49cccc81aaa92d5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/svg/brace.py": {
+    "mtime": 1782528654.9569852,
+    "hash": "65b307fe22f3aff869bbb51b4a3d9097"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/mobject/svg/svg_mobject.py": {
+    "mtime": 1782528654.9569852,
+    "hash": "496b452ec2d8b3d85e57cdc52693136e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/rotation.py": {
+    "mtime": 1782528654.945985,
+    "hash": "5f2dd165dbdedc7d8767e140109c2977"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/speedmodifier.py": {
+    "mtime": 1782528654.9469852,
+    "hash": "d0f581f4df5d39922c9366b1c4f2210f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/creation.py": {
+    "mtime": 1782528654.945985,
+    "hash": "5582f8a5bed6c9e5e342c562f3b19226"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/animation.py": {
+    "mtime": 1782528654.9449852,
+    "hash": "b4d74c3218fa65a6bd0ca13473ec56f4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/transform_matching_parts.py": {
+    "mtime": 1782528654.9469852,
+    "hash": "3fafff02515e540a7eb5adde6e023041"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/composition.py": {
+    "mtime": 1782528654.945985,
+    "hash": "501a40b082bf909ac26fbf24d1c577ac"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/specialized.py": {
+    "mtime": 1782528654.945985,
+    "hash": "240ac18d5af3ac98ae28f37b0b823da8"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/__init__.py": {
+    "mtime": 1782528654.9449852,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/movement.py": {
+    "mtime": 1782528654.945985,
+    "hash": "55dff76af16e60237409aa2df1ad8d72"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/fading.py": {
+    "mtime": 1782528654.945985,
+    "hash": "f515391b04a43835b90adc1a06c4735f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/changing.py": {
+    "mtime": 1782528654.945985,
+    "hash": "e5090a60f1b3930feb6b9ebb95de36c9"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/growing.py": {
+    "mtime": 1782528654.945985,
+    "hash": "ca028a03f39348567e9be563c4944007"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/transform.py": {
+    "mtime": 1782528654.9469852,
+    "hash": "729f027705de80bce99d295e457644f4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/indication.py": {
+    "mtime": 1782528654.945985,
+    "hash": "d8bcb087c539afab6fcf43ba65778fc1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/numbers.py": {
+    "mtime": 1782528654.945985,
+    "hash": "3fbd921bd4470f2b68922a51380259d2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/updaters/__init__.py": {
+    "mtime": 1782528654.9469852,
+    "hash": "3ac3e065533d984f9c15e3d97a79c47a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/updaters/update.py": {
+    "mtime": 1782528654.9469852,
+    "hash": "fc2665eafdf1ecd5eb05588c6d61f554"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/animation/updaters/mobject_update_utils.py": {
+    "mtime": 1782528654.9469852,
+    "hash": "642e3675c737954f1b088bfe0988d2a1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/renderer/opengl_renderer_window.py": {
+    "mtime": 1782528654.9609854,
+    "hash": "ad48106e9608388abae95b0374433881"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/renderer/vectorized_mobject_rendering.py": {
+    "mtime": 1782528654.9639854,
+    "hash": "31ad98062ed19c05a458b56df786f70c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/renderer/cairo_renderer.py": {
+    "mtime": 1782528654.9599853,
+    "hash": "72f7344ec68c5f91cfcbbb384af66a16"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/renderer/__init__.py": {
+    "mtime": 1782528654.9599853,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/renderer/shader.py": {
+    "mtime": 1782528654.9609854,
+    "hash": "8a33e3937456711e92c878752244be86"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/renderer/opengl_renderer.py": {
+    "mtime": 1782528654.9609854,
+    "hash": "7eab56573a9ea64f2e33836be33c35f4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/renderer/shader_wrapper.py": {
+    "mtime": 1782528654.9609854,
+    "hash": "4f35ad0a7b5706173a50df3ae94dbfa7"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/scene/section.py": {
+    "mtime": 1782528654.9649854,
+    "hash": "fbffd88ffa5e5b0d6fbaf629ecf46916"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/scene/scene_file_writer.py": {
+    "mtime": 1782528654.9649854,
+    "hash": "713775e0d416ef6ad4130da10965afb6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/scene/scene.py": {
+    "mtime": 1782528654.9639854,
+    "hash": "674d2f92fb7be7c6d1921491f5b16980"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/scene/three_d_scene.py": {
+    "mtime": 1782528654.9649854,
+    "hash": "781d718827b424c3eae683b4de10b842"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/scene/__init__.py": {
+    "mtime": 1782528654.9639854,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/scene/moving_camera_scene.py": {
+    "mtime": 1782528654.9639854,
+    "hash": "dd28819fc9d9a2e232250c181533d046"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/scene/vector_space_scene.py": {
+    "mtime": 1782528654.9649854,
+    "hash": "63cb3ce5d659d3c0396735351caa007a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/scene/zoomed_scene.py": {
+    "mtime": 1782528654.9649854,
+    "hash": "e547387803ada00aa6e1a6d14e22bffa"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/camera/multi_camera.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "2b1204ad249a92373da3d28f24c8af39"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/camera/three_d_camera.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "bdf2dc934f8819da90cfbb54d0d74b4f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/camera/__init__.py": {
+    "mtime": 1782528654.9469852,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/camera/camera.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "5bc050ffa0b69ede1d19a0dae9889c90"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/camera/mapping_camera.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "da38a8d1d82c1d54349cc727424b459b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/camera/moving_camera.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "e9a8539caabbb2c71b1ebde44f548c0a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/default_group.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "81bc7b84263c54f5b2fb4f748eb82641"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/__init__.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "aaf523127bb12bd2f0655ce0f9c04e81"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/plugins/__init__.py": {
+    "mtime": 1782528654.948985,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/plugins/commands.py": {
+    "mtime": 1782528654.948985,
+    "hash": "4c0b8946889b22e8ebbb34c74dbe3d0d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/render/ease_of_access_options.py": {
+    "mtime": 1782528654.948985,
+    "hash": "e43d336047a6d44b5d453fcebbd7e0e6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/render/output_options.py": {
+    "mtime": 1782528654.948985,
+    "hash": "61bc5633f266e2d4ccc024feba6cd4e1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/render/render_options.py": {
+    "mtime": 1782528654.948985,
+    "hash": "10f3ebe10f1e608cf502dfee83dc92b5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/render/global_options.py": {
+    "mtime": 1782528654.948985,
+    "hash": "fe9c950eb4fc431ed6916df4cb99a808"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/render/__init__.py": {
+    "mtime": 1782528654.948985,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/render/commands.py": {
+    "mtime": 1782528654.948985,
+    "hash": "5570b7ce6032eb493bae79a5791adcf3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/cfg/group.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "f99d93459c2ae4dcdea911c119a6721b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/cfg/__init__.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/init/__init__.py": {
+    "mtime": 1782528654.948985,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/init/commands.py": {
+    "mtime": 1782528654.948985,
+    "hash": "a165f2a8700a33f9ac7cd509d79e9506"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/checkhealth/__init__.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/checkhealth/checks.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "8d69f96036f95897bf00527a4f2f2c52"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/cli/checkhealth/commands.py": {
+    "mtime": 1782528654.9479852,
+    "hash": "1d296b9a0c7473ddf6289a953f39c0b7"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/opengl/__init__.py": {
+    "mtime": 1782528654.9599853,
+    "hash": "cdbe52f0c8dc346e51d53ab7b569e28a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_linear_transformation_scene.py": {
+    "mtime": 1782528655.014986,
+    "hash": "49a854988da07f599783b763e87710c2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_code_mobject.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "c852c538990002f11db2140a3ed0a6b1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/conftest.py": {
+    "mtime": 1782528654.9719856,
+    "hash": "7ca45a62481e8953213f0c645eb42156"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/template_generate_graphical_units_data.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "8c502150a59941022da4e556a9a3d32e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/__init__.py": {
+    "mtime": 1782528654.9719856,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_ipython_magic.py": {
+    "mtime": 1782528655.014986,
+    "hash": "e58a3f9251e5a642cd554227f0fa2e87"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/assert_utils.py": {
+    "mtime": 1782528654.9719856,
+    "hash": "ab1cb070b8913be660e82b0a6cbc8d33"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_camera.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "b30101336e91b8ffcf7950c83756e8c7"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_config.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "df636af8a724b803f2096c0fea851f88"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_plugins/__init__.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_plugins/test_plugins.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "0e23fd3ebe7919c065a6922d92dbbdbc"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_plugins/simple_scenes.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "9a49c5296546765915f4c51c6c3226aa"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/interface/test_commands.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "33256809dab9115f14e12960931338ad"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/utils/logging_tester.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "d824deabafeb75eb7a55f5a475dda480"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/utils/test_polylabels.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "b3cf8c40badbe2f53ee1054fddf7718c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/utils/__init__.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/utils/testing_utils.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "fa8e9a0d7482eb459d6d54e224870aa3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/utils/video_tester.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "e5466fc736b68bf8bd0c4ba329e628bf"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_logging/basic_scenes_square_to_circle.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "91deabc6fbeb379c4ec4e24b6bb86ed5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_logging/bad_tex_scene.py": {
+    "mtime": 1782528655.014986,
+    "hash": "1ee789e6995ba4db4466f38576cc60ea"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_logging/basic_scenes_error.py": {
+    "mtime": 1782528655.014986,
+    "hash": "d2889ed9a892206334f8738d42a695c0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_logging/basic_scenes_write_stuff.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "0f5d7fa08f9eb2009bfa2c5b6d704831"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_logging/__init__.py": {
+    "mtime": 1782528655.014986,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_logging/test_logging.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "cd4a39a33544c19fd2845bda9a548c34"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/miscellaneous/test_version.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "2102cd9512c39d948e60b4f6fb40baf0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/_subdivision_matrices.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "c495154dce886b8ac850fd78073c31ba"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/test_hashing.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "b447267bf63cfca9fd7d53b959693e83"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/test_color_helpers.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "9be33b88ece19fca30cb74e84dd0c9f6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/test_color.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "56f93e37876fbec64d3f2944353d57f4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/test_units.py": {
+    "mtime": 1782528654.9769857,
+    "hash": "dc2fd698ad1097dae207ae59733debb1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/test_file_ops.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "ba9dd37ad828f082ca6e459f0a26ebac"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/test_bezier.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "2736b97527714c1098a674d0378136e0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/test_tex.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "d358f0da9590323121d3fcff060432c4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/test_space_ops.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "efebaeda9c96d18f46d924e9d24d0158"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/test_deprecation.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "be9becc566acf82f2ea0f6eaea670b5e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/test_manim_color.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "839bad7a4aabd48141877ba1231ae13a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/utils/_split_matrices.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "980e527941edc129106038eb39e4526c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/test_matrix.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "d564ac897f70e4926fb0831a3392d24a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/test_graph.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "23e043110903ccd80d6b0eadb8ade0a5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/test_value_tracker.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "41c6eeb04b42392cffc165b3ceaca33e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/test_image.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "3a5bb027302f1176e4df938b309531c4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/test_table.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "ff084ba167685af65f32e0a41ab391ad"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/test_boolean_ops.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "96276953e4c3298c41db17605de85883"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/mobject/test_opengl_metaclass.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "75ed2ee3feb12b584ef7f29dc43913ff"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/mobject/test_mobject.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "f1a3e94de7151a133902a3fe6e72f684"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/mobject/test_get_set.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "8b13e9472d10fb78285a75c20f63ad5a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/mobject/test_family.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "a6fb5b87c256484cb82fa47d9cc51928"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/mobject/test_set_attr.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "d4bdd3aac87d980b3334e5875cbf9172"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/mobject/test_copy.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "105e1b39e8e7f05f7455f8029a63e7ee"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/geometry/test_unit_geometry.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "e94304aa5c4a3eb034df01efa8e8b57c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/types/vectorized_mobject/test_dashed_vmobject.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "5908fe9ad9a946748017d668885a35bc"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/types/vectorized_mobject/test_stroke.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "ddbc41bbbe9b50284423fa9c76ee37b9"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/types/vectorized_mobject/test_vectorized_mobject.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "7724f17e69c00b254a46f62647e8f0a5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/graphing/test_axes_shift.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "c13829f83e0b341c9df4ace2a1630741"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/graphing/test_ticks.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "7c22d551becb7c2654fdef14c1b977c6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/graphing/test_number_line.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "cb19eee1756fa1aaa21f9baaeccafdb4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/graphing/test_coordinate_system.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "b4675ddfbabd367c6413d83463aa5d28"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/text/test_markup.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "81a15de96572d1131686408a46e4469f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/text/test_text_mobject.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "eb20c677ed1add661e0e00e6017abc5f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/text/test_typst_mobject.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "f012092826c1a62870db895e23c74d16"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/text/test_texmobject.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "38a4d2720b2dc4dee97e9d89706fb41a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/text/test_numbers.py": {
+    "mtime": 1782528654.9749856,
+    "hash": "81cc0fecaaa45f85248ead98b585dc22"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/mobject/svg/test_svg_mobject.py": {
+    "mtime": 1782528654.9739854,
+    "hash": "2e10fd57f5b091d39d18beb5a9a6f94e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/animation/test_updaters.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "57ff572d61195d11da3f38acd9f36cf3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/animation/test_composition.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "45df8f4cd56c058bbb226c2872bb10a3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/animation/test_override_animation.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "4eb4517cad13e5b1a5bc5a2405998354"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/animation/test_animation.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "0257fdb03d4e573a55eaba2491162eb3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/animation/test_animate.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "9c0274cb7be01f3565f457f171c8a61e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/animation/test_transform.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "d019d966cb4a5f5b215b166648e788f6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/animation/test_creation.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "3099a9f3ef32ad449e7dafdcb9d4bb90"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/scene/test_sound.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "64e296b0d62558937bebae8834412d35"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/scene/test_threed_scene.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "1f7e2d909a42e856d9cca06226a3f631"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/scene/test_scene.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "9b1ce15007ecb015e5eea723822e36a6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/module/scene/test_auto_zoom.py": {
+    "mtime": 1782528654.9759855,
+    "hash": "b9d49ca8be3178bb280f59eb99842c84"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_mobjects.py": {
+    "mtime": 1782528655.013986,
+    "hash": "1f5fd65e937c8791181b88866176a513"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_text.py": {
+    "mtime": 1782528655.014986,
+    "hash": "3d6623e8e400c0632d1d2457cee0ea33"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_tables.py": {
+    "mtime": 1782528655.014986,
+    "hash": "bcdf1c3de36c5eca8e3403ed83a4f06f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_updaters.py": {
+    "mtime": 1782528655.014986,
+    "hash": "0dae2e72f16f59c637ff0387348fa84d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_specialized.py": {
+    "mtime": 1782528655.014986,
+    "hash": "fd6b5f2474e4d09942eaf897510058bd"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_boolops.py": {
+    "mtime": 1782528655.013986,
+    "hash": "4c0363116c919103f58700a55c83c8c5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/conftest.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "1b077bc043b346f012d9f032afaa4ee1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_composition.py": {
+    "mtime": 1782528655.013986,
+    "hash": "ce3809def415550ddb3fb6b6c9a00a58"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_axes.py": {
+    "mtime": 1782528655.013986,
+    "hash": "0d0ed8d5b40778dfa049d042696ed08a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_opengl.py": {
+    "mtime": 1782528655.014986,
+    "hash": "9721c6e51af6a0bf8d38bb3206e6541a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_functions.py": {
+    "mtime": 1782528655.013986,
+    "hash": "c5fa085680872524d49572de74665fd6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_banner.py": {
+    "mtime": 1782528655.013986,
+    "hash": "431dfd7b88277262aeb0b67ced71b06e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_tex_mobject.py": {
+    "mtime": 1782528655.014986,
+    "hash": "8d516bb9cf6ae0d9cf99489751573f67"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/__init__.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_vector_scene.py": {
+    "mtime": 1782528655.014986,
+    "hash": "588b4e4e5c5c14a64a02835661f9853c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_geometry.py": {
+    "mtime": 1782528655.013986,
+    "hash": "9503d5d8eae6d7f4fb31066657193582"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_indication.py": {
+    "mtime": 1782528655.013986,
+    "hash": "ba6a3837ed766d384d7b873b94c83f5f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_brace.py": {
+    "mtime": 1782528655.013986,
+    "hash": "3f48154466bcd70775cef540989f21b1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_movements.py": {
+    "mtime": 1782528655.013986,
+    "hash": "ffe6f555a6e18bcb25d824cff6451a16"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_transform_matching_parts.py": {
+    "mtime": 1782528655.014986,
+    "hash": "99e800186b3906b27bc1113acd6c21fd"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_animation.py": {
+    "mtime": 1782528655.013986,
+    "hash": "60025d08ddea0fe293e48d628525391b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_img_and_svg.py": {
+    "mtime": 1782528655.013986,
+    "hash": "b2872f5706415a7ffdc7ee398d7402bf"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_modifier_methods.py": {
+    "mtime": 1782528655.013986,
+    "hash": "91dbb79fbd3f6d98a40c5bace532fba8"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_coordinate_systems.py": {
+    "mtime": 1782528655.013986,
+    "hash": "0ed015f2726df0e78111ff608b12ef63"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_utils.py": {
+    "mtime": 1782528655.014986,
+    "hash": "9d9c266c7517905418331c9281bede27"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_speed.py": {
+    "mtime": 1782528655.014986,
+    "hash": "a55c819512af17c6904507fa57d5ebdc"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_transform.py": {
+    "mtime": 1782528655.014986,
+    "hash": "c9661bdd94ee8d659425b5930a521654"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_polyhedra.py": {
+    "mtime": 1782528655.014986,
+    "hash": "abf51f6a4158c77b6a8cafb189376ea9"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_threed.py": {
+    "mtime": 1782528655.014986,
+    "hash": "011f9f808ec6fd2b7a66e3175d84c5ff"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_numbers.py": {
+    "mtime": 1782528655.014986,
+    "hash": "7b561222c982dbabc87aad72c38113ed"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_creation.py": {
+    "mtime": 1782528655.013986,
+    "hash": "79513a7cae91e07a55000787674df8de"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/test_probability.py": {
+    "mtime": 1782528655.014986,
+    "hash": "0be9df43fec63633e61db0b3dc8404fb"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_sound_opengl.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "6fb2fa5b34af7012f549e1e4a812ff73"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_scene_opengl.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "7e5be25acef1c33da7758575e6ef71bd"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_stroke_opengl.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "a2a7f07403fcdd5eba13015370b1ab50"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_color_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "29267c858c84e7137438ae3ccf4a35f8"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_graph_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "dee0b904f98cc91a03709e9e8b531c74"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_opengl_vectorized_mobject.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "94fb15729a36cc26038c71b84072c932"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_copy_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "47a9010f5462a22db2e3ed4126540f71"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_number_line_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "9136882c355684f7c05d3e8539bc317d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_opengl_mobject.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "bc8803ae41f91b5aa1739dc309a3efe2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_ticks_opengl.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "0720ed1eea5dd186793ff06f545e1d4d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_numbers_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "8c72168a829296cbeb293ddc3eb49790"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_value_tracker_opengl.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "ccd6c96c9b69f39b8ee2dbb3f967e462"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_coordinate_system_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "397438cdb743f63fe3f1090c81ddb2b7"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_texmobject_opengl.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "037e1b86937f5ee674352c338c9cbc40"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_ipython_magic_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "b20b4b42b0d4413ab305634fe6703110"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_text_mobject_opengl.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "184e512b995e9d22064902c7e6bd9cda"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_composition_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "d7912f8b16c7d869e5775106cb99d550"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_unit_geometry_opengl.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "cfae089e663c5407f940d6768c6f5921"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/__init__.py": {
+    "mtime": 1782528654.9769857,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_animate_opengl.py": {
+    "mtime": 1782528654.9769857,
+    "hash": "e6c02838da63bbf71eb956d5016dfff1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_config_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "6565f741ab24cd6d60ec3c103008a162"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_axes_shift_opengl.py": {
+    "mtime": 1782528654.9769857,
+    "hash": "07e1f161d788136160ea7f62d358bcd1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_svg_mobject_opengl.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "8838868e824c45ccd117380ae03ba636"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_opengl_surface.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "238b9102b2f72aba30a4496a87a9d176"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_override_animation_opengl.py": {
+    "mtime": 1782528654.9789855,
+    "hash": "843b9b52aafe802011e4713c121e18c3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_family_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "26be63d9c5fab2f1d7dd4dfe1ac4fec2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/opengl/test_markup_opengl.py": {
+    "mtime": 1782528654.9779856,
+    "hash": "9eceed200ba2d65eb03ecdfceeeecaf6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/test_sections.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "258a26002db4891927f4af06d6c5cb49"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/test_play_logic.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "91b4403debe6a1056a0a2276ad3cb7e1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/test_caching_related.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "1c718cf3cc28714a235f8d20a22673fb"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/conftest.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "e2f247e9e54932a57fa071d76164e751"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/test_cairo_renderer.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "4029de0eaf9061a06888f8d7bd7c7e65"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/infallible_scenes.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "28f3b452b8e0b98c4653f23c0b136ca4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/__init__.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/test_file_writer.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "255dd0e597e7a8360fe5aa355fbfe589"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/simple_scenes.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "e974bdf7d976c5f8586166c18da2abef"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/test_cli_flags.py": {
+    "mtime": 1782528655.0169861,
+    "hash": "cc35cb560238d53bda35e2113a5f52a7"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/opengl/test_play_logic_opengl.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "ab16ad880b9b47f78e92c085c7806fcb"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/opengl/__init__.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/opengl/test_caching_related_opengl.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "595438db74fe190f81cb0491893ca2fa"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/opengl/test_opengl_renderer.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "7d22b13da7cb939f6be6f23c00168df7"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/opengl/test_cli_flags_opengl.py": {
+    "mtime": 1782528655.0159862,
+    "hash": "9da09a43b352300fa9e94aeb68622040"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/helpers/graphical_units.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "6c61810141f1b15f112a2c97f6b5e2f4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/helpers/__init__.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/helpers/video_utils.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "91d695a49a2ff2c072763e0073f7c0c1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/helpers/path_utils.py": {
+    "mtime": 1782528654.9729855,
+    "hash": "d120a4640afa64ecc8b765b725cbf436"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/LICENSE.md": {
+    "mtime": 1782528620.3035057,
+    "hash": "55f009c590c86762af3c558edc2e302a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/requirements.txt": {
+    "mtime": 1782528620.329506,
+    "hash": "7391afe366827717f5447324b9b798af"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/README.md": {
+    "mtime": 1782528620.3035057,
+    "hash": "13da1b4693c6012d790ef07d3b17705e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/default_config.yml": {
+    "mtime": 1782528620.3155057,
+    "hash": "84f60d6e6231d1877b6966f4bf975738"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/tex_templates.yml": {
+    "mtime": 1782528620.326506,
+    "hash": "f803711950de4bc8c289d130fb29158e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/manimlib/shaders/inserts/NOTE.md": {
+    "mtime": 1782528620.3245058,
+    "hash": "d08fac10252434e4f3a398efad02ab64"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/requirements.txt": {
+    "mtime": 1782528620.3035057,
+    "hash": "7059f405cb9b855098b50364dd64c497"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/index.rst": {
+    "mtime": 1782528620.3075056,
+    "hash": "2c1aa0106a31ee12880a35fa772e4b8f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/development/about.rst": {
+    "mtime": 1782528620.3055055,
+    "hash": "9625442b92459f8362a1d7b3245a220e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/development/contributing.rst": {
+    "mtime": 1782528620.3055055,
+    "hash": "545b0190cfdd215221bb758ca8b9ddce"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/development/changelog.rst": {
+    "mtime": 1782528620.3055055,
+    "hash": "36cd764502fd10f4728c234596addd5a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/documentation/constants.rst": {
+    "mtime": 1782528620.3065057,
+    "hash": "ebe12e52ceb252d37bc44fce70aad51c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/documentation/custom_config.rst": {
+    "mtime": 1782528620.3065057,
+    "hash": "41cfc7f8e7fec621aa9729ab26561398"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/documentation/utils/index.rst": {
+    "mtime": 1782528620.3065057,
+    "hash": "2905b28b048897693c8ee7d08d439a14"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/documentation/mobject/index.rst": {
+    "mtime": 1782528620.3065057,
+    "hash": "bee65469d4ed5fab7890662967aa871c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/documentation/animation/index.rst": {
+    "mtime": 1782528620.3065057,
+    "hash": "7118b463aed9d7e26a141acd3c99449e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/documentation/shaders/index.rst": {
+    "mtime": 1782528620.3065057,
+    "hash": "3d363736b103264426b54484c5705cc1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/documentation/scene/index.rst": {
+    "mtime": 1782528620.3065057,
+    "hash": "09d1dc9b598aac9449914bf674b2da20"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/documentation/camera/index.rst": {
+    "mtime": 1782528620.3065057,
+    "hash": "d97c1d75d592a586a88f23f96af0b666"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/getting_started/installation.rst": {
+    "mtime": 1782528620.3075056,
+    "hash": "cd8f5382ec3deb92cf0a03f34b8c3615"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/getting_started/structure.rst": {
+    "mtime": 1782528620.3075056,
+    "hash": "276311ba398c62858831b46994f6e5be"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/getting_started/configuration.rst": {
+    "mtime": 1782528620.3065057,
+    "hash": "7e3b5966ac591dab4d8bc2be78058653"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/getting_started/example_scenes.rst": {
+    "mtime": 1782528620.3075056,
+    "hash": "6b9313fedaba86e13a9d3fe1d3da800e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/getting_started/quickstart.rst": {
+    "mtime": 1782528620.3075056,
+    "hash": "609d1207b408dd28acbbbc82dd8c7a24"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/getting_started/whatsnew.rst": {
+    "mtime": 1782528620.3075056,
+    "hash": "15345c12709479d5bd277faee8beadd9"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/lgtm.yml": {
+    "mtime": 1782528654.942985,
+    "hash": "e0f5094fe39e4b050627d3e2f4c78f50"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/crowdin.yml": {
+    "mtime": 1782528654.860984,
+    "hash": "e599d1e33838ea20851e2f378a026017"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/README.md": {
+    "mtime": 1782528654.860984,
+    "hash": "bf6c99a6b0dde1a33ad6184a08d82cde"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/CODE_OF_CONDUCT.md": {
+    "mtime": 1782528654.860984,
+    "hash": "b8ff2b888ba514fc6767680d2565f9dd"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/CONTRIBUTING.md": {
+    "mtime": 1782528654.860984,
+    "hash": "0dace294034167e9c9a9942e1d16415c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/agents/typst_selector.md": {
+    "mtime": 1782528654.860984,
+    "hash": "461acb7b91c789146a55823b42c22ac5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/rtd-requirements.txt": {
+    "mtime": 1782528654.9009845,
+    "hash": "f182e92851e908dd13f3a0d87ade36d2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/requirements.txt": {
+    "mtime": 1782528654.9009845,
+    "hash": "90f706e6584b323b400b345fc7dccba5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/examples.rst": {
+    "mtime": 1782528654.938985,
+    "hash": "a02d321dacad44c40fb80962cd7c8c0e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/installation.rst": {
+    "mtime": 1782528654.939985,
+    "hash": "fe9434634baf91a189a1d65907c1e41a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/plugins.rst": {
+    "mtime": 1782528654.939985,
+    "hash": "4a052f780a3fe384d3d398b605ad60b3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/index.rst": {
+    "mtime": 1782528654.939985,
+    "hash": "ad48cf89f15aca6d6c2ed61610f42888"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/tutorials_guides.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "b69fac232411a5e6d845ebed2442816f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/robots.txt": {
+    "mtime": 1782528654.9409852,
+    "hash": "7d04fcfd4e85b699024c80956b85042f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/conduct.md": {
+    "mtime": 1782528654.860984,
+    "hash": "b8ff2b888ba514fc6767680d2565f9dd"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing.rst": {
+    "mtime": 1782528654.936985,
+    "hash": "5197d350c9f15216fff95c79175ab737"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "b3649dd6a6b070609af0ff2300304915"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/reference.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "60be0e2b60f7b48c01a7de0308db01b8"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/installation/jupyter.rst": {
+    "mtime": 1782528654.939985,
+    "hash": "fbbc5f26da370a821773758f8efb7ed1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/installation/docker.rst": {
+    "mtime": 1782528654.939985,
+    "hash": "3745addccbead5b10d19f3497dab37ea"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/installation/conda.rst": {
+    "mtime": 1782528654.939985,
+    "hash": "f64c9fbd455db73d5a4ae6b07f95a0b3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/installation/uv.md": {
+    "mtime": 1782528654.939985,
+    "hash": "a6242f6cae21877d40050426abcb9d41"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/guides/index.rst": {
+    "mtime": 1782528654.939985,
+    "hash": "486ea2aaa69ff6cc18cb913205b98a14"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/guides/using_text.rst": {
+    "mtime": 1782528654.939985,
+    "hash": "8fbf62ffada28c6369e79569148aa3de"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/guides/configuration.rst": {
+    "mtime": 1782528654.938985,
+    "hash": "f55f61d8dbc87d568563c605af23cc35"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/guides/deep_dive.rst": {
+    "mtime": 1782528654.939985,
+    "hash": "37e2f0996b8a8478dc37419199fe96be"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/guides/add_voiceovers.rst": {
+    "mtime": 1782528654.938985,
+    "hash": "5a0779fcf07025d5a2aabda9788fceb2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/docs.rst": {
+    "mtime": 1782528654.937985,
+    "hash": "3922dac8dfd3a5b82839d2cd8c3896de"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/development.md": {
+    "mtime": 1782528654.936985,
+    "hash": "9c5bff85cbb1178f4b08d4997c127116"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/performance.rst": {
+    "mtime": 1782528654.937985,
+    "hash": "7fcad179d5ac5b3d5354993eb966f251"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/internationalization.rst": {
+    "mtime": 1782528654.937985,
+    "hash": "7ad5d7e3ce6b4735cd5e372802532640"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/testing.rst": {
+    "mtime": 1782528654.937985,
+    "hash": "57d49793550caf54c32711f637620a4f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/docs/examples.rst": {
+    "mtime": 1782528654.937985,
+    "hash": "40c4f1afb6f3ec4d815ca348103e3dce"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/docs/typings.rst": {
+    "mtime": 1782528654.937985,
+    "hash": "f0505f2666b4e29a521e9bb790c13ae3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/docs/references.rst": {
+    "mtime": 1782528654.937985,
+    "hash": "2778477ca1b2a746629a7789296532fe"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/docs/docstrings.rst": {
+    "mtime": 1782528654.937985,
+    "hash": "4c5838e4a34e674e6e0238848c7642db"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/docs/admonitions.rst": {
+    "mtime": 1782528654.937985,
+    "hash": "13edbbb84568cb6823a49f39f83d9848"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/contributing/docs/types.rst": {
+    "mtime": 1782528654.937985,
+    "hash": "12eb3ed95982249883825ec8574ce780"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/faq/internals.md": {
+    "mtime": 1782528654.938985,
+    "hash": "78ff50c7d4aa7abf582609066b46584f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/faq/general.md": {
+    "mtime": 1782528654.938985,
+    "hash": "bdb2fc025bebac453b0ae6ac234cbe05"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/faq/index.rst": {
+    "mtime": 1782528654.938985,
+    "hash": "42e7c2370ad9e513b9f03d7f3e359c57"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/faq/installation.md": {
+    "mtime": 1782528654.938985,
+    "hash": "b133b4f39ca738a2f9d086f4b65f0cd0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/faq/help.md": {
+    "mtime": 1782528654.938985,
+    "hash": "27b90b5b083d5323e3d125dad111c3b9"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/faq/opengl.md": {
+    "mtime": 1782528654.938985,
+    "hash": "1c51ca514198ca794fdc478c068a5e3d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_templates/logo-text.html": {
+    "mtime": 1782528654.933985,
+    "hash": "f4aa85f53955d2da4c8ec046089c619d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_templates/autosummary/class.rst": {
+    "mtime": 1782528654.932985,
+    "hash": "2130ef283ae7091859f44cab3538c41f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_templates/autosummary/module.rst": {
+    "mtime": 1782528654.932985,
+    "hash": "40f9cb0572ae6d248dea881bc592cd84"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/manim-binder.min.js.LICENSE.txt": {
+    "mtime": 1782528654.9089847,
+    "hash": "c1a19abb78cf9cde35b8b3bd4cf9adc0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/reference_index/mobjects.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "c7987114eb0549a27c4fa9ef900e50a5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/reference_index/utilities_misc.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "eb53e4dc519bca509750897967764868"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/reference_index/configuration.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "82c40509148ed551db4c03b549293e4d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/reference_index/scenes.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "88ab692ebf2d34f04b3e71dc9f83976c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/reference_index/animations.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "cac0e84e237c5751811f6f1e5ef67d7d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/reference_index/cameras.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "20e453b155d7cafd8c76010a58d7a234"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.19.2-changelog.md": {
+    "mtime": 1782528654.935985,
+    "hash": "ed1027ad0ec2296caacbdec62e6aac32"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.18.0.post0-changelog.rst": {
+    "mtime": 1782528654.934985,
+    "hash": "67db0ba912173a9de84aa85a8a6e9943"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.13.0-changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "697bf5b12d8b8acbb797d774ef52a779"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.5.0-changelog.rst": {
+    "mtime": 1782528654.935985,
+    "hash": "845b404a451598d3180f34b75e5ce5c4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.19.1-changelog.md": {
+    "mtime": 1782528654.935985,
+    "hash": "8be8c7aaada97c85708c9c7fad512a62"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.10.0-changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "5591e42a2f8d5e1145c11db32479a79c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.1.1-changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "ca046b7a406f2e7d36c2aabc304671c5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.12.0-changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "caef12e036b58797515788662a86fa53"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.2.0-changelog.rst": {
+    "mtime": 1782528654.935985,
+    "hash": "284b6a1d6ead90ac3c2284452ad0105d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.14.0-changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "9a6893e47ba234ac35b5ecefd4b82b08"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.8.0-changelog.rst": {
+    "mtime": 1782528654.936985,
+    "hash": "79e356929d1f37a8b2412abc3af967d1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.11.0-changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "718095b6f366d6f935cf6cc7146b1b4b"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.1.0-changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "6d4fab1dc1f89db57f4070e4685b61cb"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.19.0-changelog.rst": {
+    "mtime": 1782528654.935985,
+    "hash": "6f8dac994ce64def35125cb290a28bf3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.18.1-changelog.md": {
+    "mtime": 1782528654.934985,
+    "hash": "3305c4f9acf606c79187980e8e2b8a55"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.17.0-changelog.rst": {
+    "mtime": 1782528654.934985,
+    "hash": "8aea26c4a81f048421b7bc27c0802fb3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.15.2-changelog.rst": {
+    "mtime": 1782528654.934985,
+    "hash": "d0d34334b9cdca8afa02be5f558156a1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.18.0-changelog.rst": {
+    "mtime": 1782528654.934985,
+    "hash": "ba96fca8a88d83c2c2ec6fdb45f05bd1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.9.0-changelog.rst": {
+    "mtime": 1782528654.936985,
+    "hash": "b38712aadf48fcca5d84e59e27b0cff3"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.17.3-changelog.rst": {
+    "mtime": 1782528654.934985,
+    "hash": "7b5f0e2f0f79775ca3430726fa9c7a9c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.3.0-changelog.rst": {
+    "mtime": 1782528654.935985,
+    "hash": "5b35a0c4e0bdd52d182b5c3aa9fa3e2a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.4.0-changelog.rst": {
+    "mtime": 1782528654.935985,
+    "hash": "8e07616875d2ee3bbfb5e9443aa2ba3e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.20.1-changelog.md": {
+    "mtime": 1782528654.935985,
+    "hash": "1dc55693aac649e63d22ac09a5494fcf"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.15.1-changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "337c2ed4726607a3ef864b31752a699d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.20.0-changelog.md": {
+    "mtime": 1782528654.935985,
+    "hash": "9db5a426bf749126e79fd00c0b4a9530"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.17.1-changelog.rst": {
+    "mtime": 1782528654.934985,
+    "hash": "d993c75abf97fdd71dde773a0bd649ae"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.6.0-changelog.rst": {
+    "mtime": 1782528654.936985,
+    "hash": "ea3e62acd93667967e5bc87ab0a51cb4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.7.0-changelog.rst": {
+    "mtime": 1782528654.936985,
+    "hash": "492f21bcd9d79782ed25d86bdc1472f7"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.17.2-changelog.rst": {
+    "mtime": 1782528654.934985,
+    "hash": "eba7efbf35f86846cf08c53306c68604"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.13.1-changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "0a864b29ef79039c0ec14e729aa32f5a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.15.0-changelog.rst": {
+    "mtime": 1782528654.933985,
+    "hash": "1a9b4a0301c5f63ab8d48980e67894ff"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/changelog/0.16.0-changelog.rst": {
+    "mtime": 1782528654.934985,
+    "hash": "bff0c4f84408126d644a77dd13bea664"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/tutorials/output_and_config.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "2bb49ea9e0449418532daf941ecb92e6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/tutorials/index.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "8c4f0d7d28159bb34a705eb06ca7e4ef"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/tutorials/building_blocks.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "384fb48ed711e669a77b469b7790b308"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/tutorials/quickstart.rst": {
+    "mtime": 1782528654.9409852,
+    "hash": "003e909a605ff416f52e0d3b6f424656"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docker/texlive-profile.txt": {
+    "mtime": 1782528654.860984,
+    "hash": "65814a3b16f920afe6b65577143c85a2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docker/readme.md": {
+    "mtime": 1782528654.860984,
+    "hash": "ef8f7866ec30833b795adf6a45f4d42e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/manim/renderer/shaders/include/NOTE.md": {
+    "mtime": 1782528654.9619853,
+    "hash": "1b7d1352318bd99d38c633b67045b4e4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/control_data/logs_data/BasicSceneLoggingTest.txt": {
+    "mtime": 1782528654.9719856,
+    "hash": "99b1d2cc57abafc64718b9cf21d20dec"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/control_data/logs_data/bad_tex_scene_BadTex.txt": {
+    "mtime": 1782528654.9719856,
+    "hash": "7e019687c97df912a3d98f4b15e0d57f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/logo/with_subtext.png": {
+    "mtime": 1782528620.3135056,
+    "hash": "370f596eb187ed50a6fba078b7285936"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/logo/graph.png": {
+    "mtime": 1782528620.3105056,
+    "hash": "af98afffc9c20dd0537e9441f79ee2c1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/logo/cropped.png": {
+    "mtime": 1782528620.3095057,
+    "hash": "348493ef9e1f364015911fa04f8767f1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/logo/white_with_name.png": {
+    "mtime": 1782528620.3115058,
+    "hash": "b9b7977e9f837d42803f2b5a2e3a3610"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/logo/transparent_graph.png": {
+    "mtime": 1782528620.3105056,
+    "hash": "8f1764b6d18952976d736a8231730995"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/logo/with_name.png": {
+    "mtime": 1782528620.3135056,
+    "hash": "d4b703c81b8218a9d7fc6a8481bbe8a1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim/docs/source/_static/icon.png": {
+    "mtime": 1782528620.3045056,
+    "hash": "869210f2193934e98091582751e93010"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/example_scenes/assets/1280px-The_earth_at_night.jpg": {
+    "mtime": 1782528654.9419851,
+    "hash": "0fdcb6f5c3ad1c24cdceac4fb89c57df"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/example_scenes/assets/1280px-Whole_world_-_land_and_oceans.jpg": {
+    "mtime": 1782528654.942985,
+    "hash": "55cdcf38ba82ec49f9b920beca0473cf"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/logo/cropped.png": {
+    "mtime": 1782528654.942985,
+    "hash": "b394f65dbd9d2bfa79c702d7c2c4cced"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/logo/monochromatic/monochromatic_white.svg": {
+    "mtime": 1782528654.9439852,
+    "hash": "55687308d20daf28101f163294dee781"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/logo/monochromatic/monochromatic_black.svg": {
+    "mtime": 1782528654.9439852,
+    "hash": "5b7da955f6a9db29b80eff3f16375a96"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/logo/dark/transparent_background.svg": {
+    "mtime": 1782528654.942985,
+    "hash": "0c2660af1e966ff78513e99b7cc6992d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/logo/dark/dark_background.svg": {
+    "mtime": 1782528654.942985,
+    "hash": "63e270f6fea97b0598d982bc2ca9ea39"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/logo/light/light_background.svg": {
+    "mtime": 1782528654.942985,
+    "hash": "94679d9b26e837b150f26f2519b4e26e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/logo/light/transparent_background.svg": {
+    "mtime": 1782528654.9439852,
+    "hash": "81377123244fee39a177c038ad670cf5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/command.png": {
+    "mtime": 1782528654.9029846,
+    "hash": "8afad4a420e60f654501924763ff8a99"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/logo.png": {
+    "mtime": 1782528654.9029846,
+    "hash": "77802167b9d4e68044cdd0d98de759df"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/transifex_explanation.png": {
+    "mtime": 1782528654.932985,
+    "hash": "7003699d546e4ebc5c67b27bace48d50"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/crowdin-badge.svg": {
+    "mtime": 1782528654.9029846,
+    "hash": "47262beb230a1f574f5dbb3c9831a945"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/snakeviz.png": {
+    "mtime": 1782528654.932985,
+    "hash": "3c179207921ce88e57d7a7358c8a1aee"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/manim-logo-sidebar.svg": {
+    "mtime": 1782528654.931985,
+    "hash": "ed89638d17b51341f0828fc745e7273d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/manim-logo-sidebar-dark.svg": {
+    "mtime": 1782528654.931985,
+    "hash": "7dab4672a630014e83a1a9a70d9039e2"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/pull-requests.png": {
+    "mtime": 1782528654.931985,
+    "hash": "cf5d190521830675a8a813ee461ffa0a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/select_transifex_repo.png": {
+    "mtime": 1782528654.931985,
+    "hash": "47d3009bc68c58458a76e354dbd96f65"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/bezier_subdivision_example.png": {
+    "mtime": 1782528654.9009845,
+    "hash": "14945c0b2aea13bdc818247342718ed6"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/desmos-graph_1.svg": {
+    "mtime": 1782528655.010986,
+    "hash": "e048eb5213347518791181a3cd9380a0"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/cubic_demo.svg": {
+    "mtime": 1782528655.009986,
+    "hash": "1d9e8481c3bcf9d3885cf7d31e18e2dd"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/multiple_transforms.svg": {
+    "mtime": 1782528655.010986,
+    "hash": "d37a9dc0cb2555845806f5f52866659a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/inheritance_test.svg": {
+    "mtime": 1782528655.010986,
+    "hash": "c9ae60bcdb1d9507257c432a17aefe8d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/penrose.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "4ae256b71a29405056c22bcdc5e0b890"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/scale.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "11e0020e861b2bbcc40426da55675f99"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/arcs01.svg": {
+    "mtime": 1782528655.009986,
+    "hash": "a297b8dee1459b1705012329c44cedff"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/rotate.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "185ef2a092649b5e0cad35f9cc24483f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/pixelated_text.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "103a21526cb2a71a6b141580640747f4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/translate.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "4285601102743d3620c072412c710135"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/qcurve_demo.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "1f6aaa181b3ce3405ef58af8d58367d9"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/skewX.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "9d193ce07e1e08c805786130fd6a71f5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/watch_the_decimals.svg": {
+    "mtime": 1782528655.013986,
+    "hash": "d9f4a29f799612753eef75b54e7de804"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/manim-logo-sidebar.svg": {
+    "mtime": 1782528655.010986,
+    "hash": "ed89638d17b51341f0828fc745e7273d"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/heart.svg": {
+    "mtime": 1782528655.010986,
+    "hash": "5229c202101556c5697952db9e0fb198"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/smooth_curves.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "99ec0a046a2a4bdee34572a678c49df9"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/video_icon.svg": {
+    "mtime": 1782528655.013986,
+    "hash": "7c122d840e3d9e6c6facb454f4e52274"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/cubic_and_lineto.svg": {
+    "mtime": 1782528655.009986,
+    "hash": "32ce7f8582d6521f6c6b6fe7186abdba"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/single_state.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "0cd68c1b22db4ab797ca2c22ab8980ca"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/tree_img_640x351.png": {
+    "mtime": 1782528655.0129862,
+    "hash": "75cfc995f5065cdd850fb15e07cde85e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/dash.svg": {
+    "mtime": 1782528655.010986,
+    "hash": "d9c5f226d844df5c242d9293ab77e394"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/line.svg": {
+    "mtime": 1782528655.010986,
+    "hash": "430752338cae7fc69f074b1a57eef28e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/rhomboid.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "fec676675b4aa95bcf22bbe1f8fbc59a"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/aabbb.svg": {
+    "mtime": 1782528655.009986,
+    "hash": "983753f6a37e0d7febb87097e9aaf674"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/states_map.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "72e455ac9b11a91ff28769e7cf571105"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/arcs02.svg": {
+    "mtime": 1782528655.009986,
+    "hash": "734a160d34aeb5c6b301900969bd9ec5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/A.svg": {
+    "mtime": 1782528655.009986,
+    "hash": "b48b0eb07c3a6d95c93b58a8ca3bc97f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/multi_part_path.svg": {
+    "mtime": 1782528655.010986,
+    "hash": "037f33c7b019085b2198be44edcc24e4"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/half_ellipse.svg": {
+    "mtime": 1782528655.010986,
+    "hash": "a9313868de5064f8028a3833c88cbbc1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/path_multiple_moves.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "37af035955a853573469d4a4a410754f"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/matrix.svg": {
+    "mtime": 1782528655.010986,
+    "hash": "1b244d17c6776b7dd3b840b5ef0f7d77"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/curve.svg": {
+    "mtime": 1782528655.009986,
+    "hash": "e1fac99fa25070c93fe7f6eb08fc44d1"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/united-kingdom.svg": {
+    "mtime": 1782528655.013986,
+    "hash": "6e30b63f77202cb536b6e65ea431d5c9"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/skewY.svg": {
+    "mtime": 1782528655.011986,
+    "hash": "70f772a1064eee8cbb3a9d3766a4856e"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_graphical_units/img_svg_resources/weight.svg": {
+    "mtime": 1782528655.013986,
+    "hash": "969789002804c4ac6525eaed745ad95c"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/docs/source/_static/click.wav": {
+    "mtime": 1782528654.9029846,
+    "hash": "cb99a2a0deb61b6a6416a9fdf489dda5"
+  },
+  "/home/minmin/Desktop/animation_1brown3blue/manim-community/tests/test_scene_rendering/click.mp3": {
+    "mtime": 1782528655.0159862,
+    "hash": "91b5adb057f9cd9da100c5c594f15e03"
+  }
+}
