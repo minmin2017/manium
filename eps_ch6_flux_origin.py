@@ -69,7 +69,7 @@ class EP08B_ConductorRHRToFlux(SafeScene):
 
         top_cond = conductor(top_c, True)
         top_lbl = Text("ตัวนำซีกบน (⊙ พุ่งออก)", font_size=21, color=CURRENT)
-        top_lbl.next_to(top_cond, UP, buff=0.22)
+        top_lbl.next_to(top_cond, UP, buff=0.65)  # clear of the 0.62-radius RHR circle
 
         c1 = caption("ตัวนำ 1 เส้น มีกระแสไหล → สร้างสนามวงกลมรอบตัวเอง (กฎมือขวา)")
         self.play(FadeIn(c1), FadeIn(top_cond), FadeIn(top_lbl), run_time=0.9)
@@ -88,7 +88,7 @@ class EP08B_ConductorRHRToFlux(SafeScene):
         # ---------- ตัวนำที่ 2 ----------
         bot_cond = conductor(bot_c, False)
         bot_lbl = Text("ตัวนำซีกล่าง (⊗ พุ่งเข้า)", font_size=21, color=CURRENT)
-        bot_lbl.next_to(bot_cond, DOWN, buff=0.22)
+        bot_lbl.next_to(bot_cond, DOWN, buff=0.65)  # clear of the 0.62-radius RHR circle
 
         c2 = caption("อีกฝั่งของขดเดียวกัน กระแสไหลกลับทิศ (⊗)")
         self.play(FadeIn(c2), FadeIn(bot_cond), FadeIn(bot_lbl), run_time=0.9)
