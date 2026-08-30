@@ -185,17 +185,6 @@ def plane_line(angle, color, length=2.55, width=5, center=STAGE, dashed=False):
                 color=color, stroke_width=width)
 
 
-def swap(old, new):
-    """สลับข้อความในโซนเดียวกันแบบต่อเนื่อง (เก่าหายหมดก่อน ใหม่ค่อยขึ้น)
-
-    ห้ามใช้ self.play(FadeOut(เก่า), FadeIn(ใหม่)) ตรงๆ เพราะทั้งคู่อยู่พิกัด
-    เดียวกัน -> ระหว่างเปลี่ยนจะทับกัน 100% อ่านเป็นตัวอักษรซ้อนกันมั่ว
-    (บั๊กเดียวกับที่ทำให้คลิป EP09 เดิมอ่านไม่ออก) Succession บังคับให้เล่น
-    ทีละตัว ใช้เวลารวมเท่าเดิม
-    """
-    return Succession(FadeOut(old), FadeIn(new))
-
-
 def exam_card(q, a, y=0.35):
     """การ์ด 'จุดออกสอบ' — คำถามจริงจากท้ายบท + คำตอบย่อ"""
     head = Text("จุดออกสอบ", font_size=20, color=EXAMC)
@@ -267,13 +256,15 @@ class S1_Anatomy(SafeThreeDScene):
         self.wait(0.8)
 
         cap2 = self.hud(caption_top("⊙ = กระแสพุ่งออกจากจอ · ⊗ = กระแสพุ่งเข้าจอ"))
-        self.play(swap(cap, cap2), run_time=0.6)
+        self.play(FadeOut(cap), run_time=0.3)
+        self.play(FadeIn(cap2), run_time=0.6)
         self.wait(1.2)
 
         # ---------- C. หมุนกล้องเผยว่าจริงๆ เป็น 3 มิติ ----------
         cap3 = self.hud(caption_top(
             "แต่ ⊙/⊗ ไม่ใช่จุด — มันคือ \"แท่งตัวนำ\" ที่ยาวเข้าไปในกระดาษ", color=OK))
-        self.play(swap(cap2, cap3), run_time=0.6)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
 
         # ป้าย N/S ตรึงกับจอ (hud) ถ้าปล่อยไว้ตอนหมุนกล้อง มันจะค้างอยู่ที่เดิม
         # ขณะที่แท่งขั้วเคลื่อนไป -> ดูเหมือนป้ายหลุดจากตัวขั้ว จึงซ่อนระหว่างหมุน
@@ -285,7 +276,8 @@ class S1_Anatomy(SafeThreeDScene):
 
         # ---------- D. คอมมิวเตเตอร์ + แปรงถ่าน ----------
         cap4 = self.hud(caption_top("ปลายเพลาด้านหน้า = คอมมิวเตเตอร์ (หมุนไปกับอาร์เมเจอร์)"))
-        self.play(swap(cap3, cap4), run_time=0.6)
+        self.play(FadeOut(cap3), run_time=0.3)
+        self.play(FadeIn(cap4), run_time=0.6)
 
         sh = shaft()
         comm = commutator()
@@ -295,7 +287,8 @@ class S1_Anatomy(SafeThreeDScene):
 
         cap5 = self.hud(caption_top(
             "แปรงถ่านอยู่กับที่ — แค่ \"แตะ\" ผิวคอมมิวเตเตอร์ที่หมุนผ่าน", color=WARN))
-        self.play(swap(cap4, cap5), run_time=0.6)
+        self.play(FadeOut(cap4), run_time=0.3)
+        self.play(FadeIn(cap5), run_time=0.6)
         br = brush_pair()
         self.play(FadeIn(br, scale=1.3), run_time=0.9)
         self.wait(1.0)
@@ -303,13 +296,15 @@ class S1_Anatomy(SafeThreeDScene):
         # ---------- E. หมุนให้เห็นรอบตัว ----------
         cap6 = self.hud(caption_top(
             "ตัวนำทุกเส้น + คอมมิวเตเตอร์ = ชุดเดียวกัน หมุนพร้อมกันบนเพลาเดียว"))
-        self.play(swap(cap5, cap6), run_time=0.6)
+        self.play(FadeOut(cap5), run_time=0.3)
+        self.play(FadeIn(cap6), run_time=0.6)
         self.move_camera(theta=-108 * DEGREES, run_time=3.0)
         self.wait(0.8)
 
         # ---------- F. กลับมามองตรง เตรียมเข้าเนื้อหา ----------
         cap7 = self.hud(caption_top("กลับมามองตรงหน้าตัด — เพื่อดูสนามแม่เหล็ก", color=OK))
-        self.play(swap(cap6, cap7), run_time=0.6)
+        self.play(FadeOut(cap6), run_time=0.3)
+        self.play(FadeIn(cap7), run_time=0.6)
         self.move_camera(phi=0, theta=-90 * DEGREES, run_time=2.6)
         self.play(FadeIn(n_lab), FadeIn(s_lab), run_time=0.5)
         self.wait(0.9)
@@ -368,18 +363,21 @@ class S2_NeutralPlane(SafeThreeDScene):
 
         cap2 = self.hud(caption_top(
             "ตัดเส้นแรงมาก → emf มาก · ขนานกับเส้นแรง → emf = 0"))
-        self.play(swap(cap1, cap2), FadeIn(coil), FadeIn(emf_row),
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), FadeIn(coil), FadeIn(emf_row),
                   run_time=0.9)
         self.play(theta.animate.set_value(2 * PI), run_time=4.6, rate_func=linear)
         self.wait(0.4)
 
         # ---------- ปักเส้นระนาบเป็นกลาง ----------
         npl = plane_line(0.0, OK)
+        # ย้ายไปด้านข้าง: ถ้าวางไว้กลาง-บน จะชนแถบคำบรรยาย (CAP_TOP_Y = 2.72)
         np_lab = self.hud(Text("ระนาบเป็นกลาง", font_size=21, color=OK)
-                          .move_to([0, STAGE[1] + 2.95, 0]))
+                          .move_to([2.75, 1.75, 0]))
         cap3 = self.hud(caption_top("จุดบน-ล่างคือที่ emf = 0 → ลากเป็นเส้น = ระนาบเป็นกลาง",
                                     color=OK))
-        self.play(swap(cap2, cap3), Create(npl), FadeIn(np_lab),
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), Create(npl), FadeIn(np_lab),
                   run_time=1.2)
         self.wait(1.0)
 
@@ -392,12 +390,14 @@ class S2_NeutralPlane(SafeThreeDScene):
         br = brush_pair()
         cap4 = self.hud(caption_top(
             "แปรงถ่านลัดวงจรขดลวดตรงนี้ — ถ้ายังมี emf ค้าง กระแสจะพุ่ง ขดไหม้", color=WARN))
-        self.play(swap(cap3, cap4), FadeIn(comm), FadeIn(br), run_time=1.0)
+        self.play(FadeOut(cap3), run_time=0.3)
+        self.play(FadeIn(cap4), FadeIn(comm), FadeIn(br), run_time=1.0)
         self.wait(1.3)
 
         # ---------- ชื่อเรียก + ปิดท้าย ----------
         cap5 = self.hud(caption_top("ชื่อทางการ: ระนาบเป็นกลางทางกล / ทางเรขาคณิต"))
-        self.play(swap(cap4, cap5), run_time=0.6)
+        self.play(FadeOut(cap4), run_time=0.3)
+        self.play(FadeIn(cap5), run_time=0.6)
         self.wait(1.2)
 
         self.play(*[FadeOut(m) for m in (n_pole, s_pole, n_lab, s_lab, front, fld,
@@ -448,7 +448,8 @@ class S3_TwoFields(SafeThreeDScene):
         ref2 = self.hud(page_ref("หน้า 4 · รูปที่ 6-2 (ข)"))
         cap2 = self.hud(caption_top("(ข) สนามจากขดลวดอาร์เมเจอร์อย่างเดียว — แกนตั้งฉาก 90°"))
         marks = face_marks(z=0.0)
-        self.play(swap(cap1, cap2), swap(ref, ref2),
+        self.play(FadeOut(cap1), FadeOut(ref), run_time=0.3)
+        self.play(FadeIn(cap2), FadeIn(ref2),
                   FadeOut(fld), run_time=0.7)
         self.play(LaggedStart(*[FadeIn(m) for m in marks], lag_ratio=0.05),
                   run_time=1.2)
@@ -464,14 +465,16 @@ class S3_TwoFields(SafeThreeDScene):
         cap3 = self.hud(caption_top(
             "ทำไม 90°? เพราะกระแสกลับทิศตรง \"แนวแปรงถ่าน\" พอดี ไม่ใช่ตรงหน้าขั้ว"))
         brush_axis = plane_line(0.0, WARN, length=2.2, width=3)
-        self.play(swap(cap2, cap3), run_time=0.6)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
         self.play(Create(brush_axis), run_time=0.8)
         self.wait(1.4)
 
         # ---------- (ค) บวกเวกเตอร์ -> เบี่ยง ----------
         ref3 = self.hud(page_ref("หน้า 4 · รูปที่ 6-2 (ค)"))
         cap4 = self.hud(caption_top("(ค) สองสนามบวกกันแบบเวกเตอร์ → สนามรวมเอียง"))
-        self.play(swap(cap3, cap4), swap(ref2, ref3),
+        self.play(FadeOut(cap3), FadeOut(ref2), run_time=0.3)
+        self.play(FadeIn(cap4), FadeIn(ref3),
                   FadeOut(marks), FadeOut(brush_axis), run_time=0.7)
 
         self.play(FadeIn(fld), run_time=0.7)
@@ -501,7 +504,8 @@ class S3_TwoFields(SafeThreeDScene):
         cap5 = self.hud(caption_top(
             "ทิศเดียวกัน = เสริมกัน (แรงขึ้น) · ทิศตรงข้าม = หักล้างกัน (อ่อนลง)",
             color=OK))
-        self.play(swap(cap4, cap5), run_time=0.6)
+        self.play(FadeOut(cap4), run_time=0.3)
+        self.play(FadeIn(cap5), run_time=0.6)
         self.wait(1.6)
 
         # ---------- ระนาบเลื่อนตาม ----------
@@ -511,7 +515,8 @@ class S3_TwoFields(SafeThreeDScene):
                           STAGE + np.array([1.1, 1.95, 0]),
                           color=WARN, stroke_width=3, tip_length=0.18)
         cap6 = self.hud(caption_top("สนามเอียง → จุดที่ emf = 0 เลื่อนตามทิศหมุน", color=WARN))
-        self.play(swap(cap5, cap6), run_time=0.6)
+        self.play(FadeOut(cap5), run_time=0.3)
+        self.play(FadeIn(cap6), run_time=0.6)
         self.play(Transform(fld, main_field(tilt)), Create(npl1), Create(rot),
                   run_time=1.8)
         self.wait(1.4)
@@ -563,7 +568,8 @@ class S4_BB_AA(SafeThreeDScene):
 
         cap1 = self.hud(caption_top(
             "กลุ่ม BB — ตัวนำ \"ด้านบนและด้านล่าง\" ของอาร์เมเจอร์", color=WARN))
-        self.play(swap(cap0, cap1), run_time=0.6)
+        self.play(FadeOut(cap0), run_time=0.3)
+        self.play(FadeIn(cap1), run_time=0.6)
         self.play(LaggedStart(*[FadeIn(m) for m in bb_marks], lag_ratio=0.08),
                   run_time=1.2)
 
@@ -577,7 +583,8 @@ class S4_BB_AA(SafeThreeDScene):
         self.wait(0.5)
 
         cap2 = self.hud(caption_top("สนามหลักอ่อนลง ⇒ แรงดันที่ขั้วตก", color=WARN))
-        self.play(swap(cap1, cap2), run_time=0.6)
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), run_time=0.6)
         self.wait(1.3)
 
         # ---------- กลุ่ม AA: ตัวนำบน-ล่าง (ช่องว่างระหว่างขั้ว) ----------
@@ -586,7 +593,8 @@ class S4_BB_AA(SafeThreeDScene):
 
         cap3 = self.hud(caption_top(
             "กลุ่ม AA — ตัวนำ \"ด้านซ้ายและด้านขวา\" ของอาร์เมเจอร์", color=OK))
-        self.play(swap(cap2, cap3), run_time=0.6)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
         self.play(LaggedStart(*[FadeIn(m) for m in aa_marks], lag_ratio=0.10),
                   run_time=1.1)
 
@@ -601,7 +609,8 @@ class S4_BB_AA(SafeThreeDScene):
 
         cap4 = self.hud(caption_top("สนามหลักเบี่ยง ⇒ ระนาบเลื่อน ⇒ แปรงถ่านผิดที่ ⇒ สปาร์ค",
                                     color=EMF))
-        self.play(swap(cap3, cap4), run_time=0.6)
+        self.play(FadeOut(cap3), run_time=0.3)
+        self.play(FadeIn(cap4), run_time=0.6)
         spark = Star(n=7, outer_radius=0.24, inner_radius=0.10, color=EMF,
                      fill_opacity=1.0, stroke_width=0)
         spark.move_to(STAGE + np.array([0, R_ARM + 0.30, 0]))
@@ -613,7 +622,8 @@ class S4_BB_AA(SafeThreeDScene):
         cap5 = self.hud(caption_top(
             "ระวัง: ตัวอักษร A/B ในรูปหนังสือใช้ไม่ตรงกัน — ให้ยึดชื่อผลเสีย ไม่ใช่ตัวอักษร",
             color=EXAMC))
-        self.play(swap(cap4, cap5), run_time=0.6)
+        self.play(FadeOut(cap4), run_time=0.3)
+        self.play(FadeIn(cap5), run_time=0.6)
         self.wait(1.6)
 
         # ---------- สรุป ----------
@@ -683,7 +693,8 @@ class S5_Commutation(SafeScene):
         bplus.add_updater(lambda m: m.move_to(brush.get_center()))
 
         d1 = caption_top("แปรงถ่านบวกแตะซี่คอมมิวเตเตอร์ 2 ซี่พร้อมกัน")
-        self.play(swap(d0, d1), FadeIn(bars), FadeIn(blabels),
+        self.play(FadeOut(d0), run_time=0.3)
+        self.play(FadeIn(d1), FadeIn(bars), FadeIn(blabels),
                   FadeIn(brush), FadeIn(bplus), run_time=1.0)
         self.play(LaggedStart(*[Create(a) for a in coils], lag_ratio=0.2),
                   FadeIn(clabels), run_time=1.1)
@@ -696,7 +707,8 @@ class S5_Commutation(SafeScene):
                       [1.15, 1.72, 0], decimals=0, num_color=CURRENT)
 
         d2 = caption_top("โหลด 100 A แบ่ง 2 เส้นทางขนาน → เส้นทางละ 50 A")
-        self.play(swap(d1, d2), FadeIn(i1), FadeIn(i2), run_time=1.0)
+        self.play(FadeOut(d1), run_time=0.3)
+        self.play(FadeIn(d2), FadeIn(i1), FadeIn(i2), run_time=1.0)
         self.wait(1.2)
 
         # ---------- ขด B ถูกลัดวงจร emf = 0 ----------
@@ -704,12 +716,14 @@ class S5_Commutation(SafeScene):
         bnote = Text("ขด B ถูกลัดวงจร · emf = 0 · ไม่มีกระแส", font_size=21, color=OK)
         bnote.move_to([0, bar_y + 2.15, 0])
         d3 = caption_top("ขดที่กำลังถูกลัดวงจรต้องมี emf = 0 พอดี ไม่งั้นกระแสพุ่ง", color=OK)
-        self.play(swap(d2, d3), Create(hl), FadeIn(bnote), run_time=1.1)
+        self.play(FadeOut(d2), run_time=0.3)
+        self.play(FadeIn(d3), Create(hl), FadeIn(bnote), run_time=1.1)
         self.wait(1.4)
 
         # ---------- ส่งไม้ผลัด ----------
         d4 = caption_top("แปรงถ่านเลื่อน → ซี่ 1 รับเพิ่ม 50→100 A · ซี่ 2 ปล่อย 50→0 A")
-        self.play(swap(d3, d4), run_time=0.6)
+        self.play(FadeOut(d3), run_time=0.3)
+        self.play(FadeIn(d4), run_time=0.6)
         self.play(prog.animate.set_value(1.0),
                   brush_pos.animate.set_value(-1.42), run_time=3.2)
         self.wait(0.7)
@@ -766,7 +780,8 @@ class S6_SelfInduction(SafeScene):
         self.wait(0.6)
 
         d2 = caption_top("กระแสลด → สนามรอบตัวมันยุบตัวลง", color=WARN)
-        self.play(swap(d1, d2), run_time=0.6)
+        self.play(FadeOut(d1), run_time=0.3)
+        self.play(FadeIn(d2), run_time=0.6)
         self.play(cur.animate.set_value(0.0),
                   rings.animate.scale(0.18, about_point=np.array([cx, 0.35, 0]))
                   .set_stroke(opacity=0.15),
@@ -779,7 +794,8 @@ class S6_SelfInduction(SafeScene):
                      color=EMF, stroke_width=6, tip_length=0.22)
         llab = Text("emf เหนี่ยวนำในตัวเอง", font_size=20, color=EMF)
         llab.move_to([cx, -1.65, 0])
-        self.play(swap(d2, d3), FadeOut(rlab), run_time=0.6)
+        self.play(FadeOut(d2), run_time=0.3)
+        self.play(FadeIn(d3), FadeOut(rlab), run_time=0.6)
         self.play(GrowArrow(lenz), FadeIn(llab), run_time=1.0)
         self.wait(1.2)
 
@@ -895,7 +911,8 @@ class S7_Interpole(SafeThreeDScene):
         # ---------- ติดตั้ง interpole ที่ระนาบเป็นกลางทางกล ----------
         cap1 = self.hud(caption_top(
             "แท่งขั้วเล็กๆ ติดตรง \"ระนาบเป็นกลางทางกล\" = ระหว่างขั้วหลัก", color=OK))
-        self.play(swap(cap0, cap1), run_time=0.6)
+        self.play(FadeOut(cap0), run_time=0.3)
+        self.play(FadeIn(cap1), run_time=0.6)
 
         ips = VGroup()
         for sgn in (+1, -1):
@@ -920,7 +937,8 @@ class S7_Interpole(SafeThreeDScene):
             line3(STAGE + np.array([2.05, -R_ARM - 0.68, 0]),
                   STAGE + np.array([0.48, -R_ARM - 0.68, 0]), CURRENT, 0.012),
         )
-        self.play(swap(cap1, cap2), Create(wire), run_time=1.2)
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), Create(wire), run_time=1.2)
         self.wait(1.0)
 
         # ---------- หักล้างสนามอาร์เมเจอร์ตรงระนาบ ----------
@@ -931,18 +949,21 @@ class S7_Interpole(SafeThreeDScene):
         v_ip = Arrow(STAGE + np.array([-1.15, -0.62, 0]),
                      STAGE + np.array([-1.15, 0.62, 0]), buff=0, color=OK,
                      stroke_width=7, tip_length=0.24)
-        self.play(swap(cap2, cap3), run_time=0.6)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
         self.play(GrowArrow(v_arm), GrowArrow(v_ip), run_time=1.0)
         self.wait(0.7)
 
         cap4 = self.hud(caption_top("ทิศตรงข้าม = หักล้างกัน ⇒ ไม่เหลือสนามให้ยุบตัว", color=OK))
-        self.play(swap(cap3, cap4), run_time=0.6)
+        self.play(FadeOut(cap3), run_time=0.3)
+        self.play(FadeIn(cap4), run_time=0.6)
         self.play(FadeOut(v_arm), FadeOut(v_ip), run_time=1.0)
         self.wait(0.9)
 
         cap5 = self.hud(caption_top("ไม่มีสนามยุบ ⇒ ไม่มี emf เหนี่ยวนำในตัวเอง ⇒ ระนาบไม่เลื่อน",
                                     color=OK))
-        self.play(swap(cap4, cap5), run_time=0.6)
+        self.play(FadeOut(cap4), run_time=0.3)
+        self.play(FadeIn(cap5), run_time=0.6)
         self.wait(1.5)
 
         # ---------- กฎขั้ว + ปรับตัวเอง ----------
@@ -1002,7 +1023,8 @@ class S8_Compensating(SafeScene):
             arm_marks.add(conductor_mark(p, np.sin(a) > 0, r=0.10))
 
         cap1 = caption_top("ขดลวดชดเชย = ขดเล็กๆ ฝังใน \"ผิวหน้า\" ของแท่งขั้วหลัก")
-        self.play(swap(cap0, cap1),
+        self.play(FadeOut(cap0), run_time=0.3)
+        self.play(FadeIn(cap1),
                   LaggedStart(*[FadeIn(m) for m in arm_marks], lag_ratio=0.06),
                   run_time=1.4)
 
@@ -1018,7 +1040,8 @@ class S8_Compensating(SafeScene):
 
         # ---------- กระแสตรงข้าม -> สนามตรงข้าม -> หักล้าง ----------
         cap2 = caption_top("กระแสในนั้นทิศตรงข้ามกับตัวนำอาร์เมเจอร์ที่อยู่ใกล้ๆ", color=OK)
-        self.play(swap(cap1, cap2), run_time=0.6)
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), run_time=0.6)
         self.wait(1.2)
 
         steps = VGroup(
@@ -1028,7 +1051,8 @@ class S8_Compensating(SafeScene):
         ).arrange(RIGHT, buff=0.42).move_to([0, 1.62, 0])
         fit_width(steps, 11.5)
         cap3 = caption_top("ต่ออนุกรมกับอาร์เมเจอร์เหมือนกัน ⇒ ปรับตัวเองตามโหลด")
-        self.play(swap(cap2, cap3), run_time=0.5)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.5)
         self.play(LaggedStart(*[FadeIn(s, shift=RIGHT * 0.2) for s in steps],
                               lag_ratio=0.3), run_time=1.6)
         self.wait(1.4)
