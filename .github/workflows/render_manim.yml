@@ -35,6 +35,7 @@ jobs:
           fc-cache -f
 
       - name: Render scenes
+        shell: bash
         env:
           MANIM_THAI_FONT: Loma
         run: |
@@ -45,6 +46,7 @@ jobs:
             "${{ github.event.inputs.scene_file }}" $SCENES
 
       - name: Collect outputs
+        shell: bash
         run: |
           mkdir -p out
           SCENES="${{ github.event.inputs.scene_names }}"
