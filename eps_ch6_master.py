@@ -270,8 +270,11 @@ class S1_Anatomy(SafeThreeDScene):
         # ขณะที่แท่งขั้วเคลื่อนไป -> ดูเหมือนป้ายหลุดจากตัวขั้ว จึงซ่อนระหว่างหมุน
         self.play(FadeOut(n_lab), FadeOut(s_lab), run_time=0.5)
 
+        # phi ต้องน้อย! ถ้าเอียงมาก (เคยลอง 68°) แกนเพลาจะตั้งขึ้นบนจอ ดูเหมือน
+        # เอาเครื่องตั้งขึ้น ซึ่งผิดจากความจริง (แกนหมุนควรพุ่งเข้าไปในกระดาษ)
+        # เอียงน้อยๆ = ยังเป็นภาพตัดขวางแบบหนังสือ แค่เผยความลึกให้เห็น
         self.add(back, bars)
-        self.move_camera(phi=68 * DEGREES, theta=-72 * DEGREES, run_time=3.4)
+        self.move_camera(phi=34 * DEGREES, theta=-84 * DEGREES, run_time=3.4)
         self.wait(1.0)
 
         # ---------- D. คอมมิวเตเตอร์ + แปรงถ่าน ----------
@@ -298,7 +301,7 @@ class S1_Anatomy(SafeThreeDScene):
             "ตัวนำทุกเส้น + คอมมิวเตเตอร์ = ชุดเดียวกัน หมุนพร้อมกันบนเพลาเดียว"))
         self.play(FadeOut(cap5), run_time=0.3)
         self.play(FadeIn(cap6), run_time=0.6)
-        self.move_camera(theta=-108 * DEGREES, run_time=3.0)
+        self.move_camera(theta=-100 * DEGREES, phi=40 * DEGREES, run_time=3.0)
         self.wait(0.8)
 
         # ---------- F. กลับมามองตรง เตรียมเข้าเนื้อหา ----------
