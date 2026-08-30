@@ -369,6 +369,47 @@ class S2_NeutralPlane(SafeThreeDScene):
         self.play(theta.animate.set_value(2 * PI), run_time=4.6, rate_func=linear)
         self.wait(0.4)
 
+        # ---------- ทำไม emf = 0 ตรงนั้น (จุดที่ Min เคยเข้าใจผิดว่าเพราะ B = 0) ----------
+        coil.clear_updaters()
+        emf_row[1].clear_updaters()
+        self.play(FadeOut(coil), FadeOut(emf_row), run_time=0.5)
+
+        self.play(FadeOut(cap2), run_time=0.3)
+        cap2b = self.hud(caption_top(
+            "ระวังเข้าใจผิด: ไม่ใช่เพราะ B = 0 — แต่เพราะตัวนำวิ่ง \"ขนาน\" กับเส้นแรง",
+            color=EXAMC))
+        self.play(FadeIn(cap2b), run_time=0.5)
+
+        top_p = STAGE + np.array([0, R_ARM, 0])
+        v_arr = Arrow(top_p + np.array([-1.05, 0.42, 0]),
+                      top_p + np.array([0.95, 0.42, 0]), buff=0, color=WARN,
+                      stroke_width=6, tip_length=0.22)
+        b_arr = Arrow(top_p + np.array([-1.05, 0.02, 0]),
+                      top_p + np.array([0.95, 0.02, 0]), buff=0, color=FIELD,
+                      stroke_width=6, tip_length=0.22)
+        v_lab = self.hud(Text("v (ทิศเคลื่อนที่)", font_size=19, color=WARN)
+                         .move_to([3.30, top_p[1] + 0.42, 0]))
+        b_lab = self.hud(Text("B (สนาม)", font_size=19, color=FIELD)
+                         .move_to([2.85, top_p[1] + 0.02, 0]))
+        self.play(GrowArrow(v_arr), FadeIn(v_lab), run_time=0.7)
+        self.play(GrowArrow(b_arr), FadeIn(b_lab), run_time=0.7)
+        self.wait(0.6)
+
+        eq = MathTex(r"e = (\vec{v} \times \vec{B})\cdot \vec{l} = 0",
+                     font_size=38, color=EMF).move_to([0, -2.35, 0])
+        self.hud(eq)
+        self.play(FadeIn(eq), run_time=0.8)
+        self.wait(1.0)
+
+        cap2c = self.hud(caption_top(
+            "ขนานกัน → ไม่ตัดเส้นแรงเลย → ไม่เกิด emf (B ยังมีอยู่เต็มที่)", color=OK))
+        self.play(FadeOut(cap2b), run_time=0.3)
+        self.play(FadeIn(cap2c), run_time=0.5)
+        self.wait(1.4)
+        self.play(*[FadeOut(m) for m in (v_arr, b_arr, v_lab, b_lab, eq)],
+                  run_time=0.6)
+        cap2 = cap2c
+
         # ---------- ปักเส้นระนาบเป็นกลาง ----------
         npl = plane_line(0.0, OK)
         # ย้ายไปด้านข้าง: ถ้าวางไว้กลาง-บน จะชนแถบคำบรรยาย (CAP_TOP_Y = 2.72)
@@ -764,9 +805,11 @@ class S6_SelfInduction(SafeScene):
         # วางป้ายไว้นอกวงสนาม (รัศมีใหญ่สุด 1.65) ไม่งั้นเส้นวงพาดทับตัวอักษร
         clab = Text("ขด A", font_size=22, color=CURRENT).move_to([cx - 2.35, 0.35, 0])
 
+        # วางแถวตัวเลขไว้ "ฝั่งขวา" ให้พ้นวงสนาม (วงรัศมี 1.65 รอบ cx กินพื้นที่ซ้าย
+        # ถึง x=-1.4) ไม่งั้นหน่วย "A" ไปทับเส้นวงพอดี
         cur = ValueTracker(50.0)
         crow = live_row("กระแสในขด A", "A", lambda: cur.get_value(),
-                        [-5.55, 1.95, 0], decimals=0, num_color=CURRENT)
+                        [1.95, 1.95, 0], decimals=0, num_color=CURRENT)
 
         d1 = caption_top("ขด A เคลื่อนเข้าหาระนาบเป็นกลาง → กระแสในตัวมันลดลงเป็นศูนย์")
         self.play(FadeIn(d1), Create(coil), FadeIn(clab), FadeIn(crow), run_time=1.2)
