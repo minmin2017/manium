@@ -61,6 +61,27 @@ def caption(txt, color=GRAYTXT, size=23):
     return Text(txt, font_size=size, color=color).move_to([0, CAP_Y, 0])
 
 
+# ---- โซนข้อความ "ด้านบน" (ค่าเริ่มต้นใหม่สำหรับคลิปสอนชุดหลัง 2026-08-31) ----
+# Min แจ้งว่าแถบควบคุมของโปรแกรมเล่นวิดีโอบังข้อความล่างเสมอ -> ให้เอาข้อความ
+# ไว้ด้านบนแทน และปล่อยครึ่งล่างของเฟรมว่างไว้
+CAP_TOP_Y = 2.72             # แถบคำบรรยาย (ใต้หัวเรื่อง)
+REF_Y = 3.45                 # ป้ายอ้างอิงหน้า/รูป (มุมขวาบน ระดับเดียวกับหัวเรื่อง)
+
+
+def caption_top(txt, color=GRAYTXT, size=23, max_w=11.0):
+    """คำบรรยายโซนบน — ใช้แทน caption() เพื่อไม่ให้แถบเล่นวิดีโอบัง"""
+    m = Text(txt, font_size=size, color=color).move_to([0, CAP_TOP_Y, 0])
+    return fit_width(m, max_w)
+
+
+def page_ref(txt, size=17, color="#78909C"):
+    """ป้ายอ้างอิงหนังสือ เช่น 'หน้า 4 · รูปที่ 6-2' — ชิดขวาบน
+    ให้ Min เทียบกับสไลด์/หนังสือจริงได้ทันทีว่ากำลังดูส่วนไหน"""
+    m = Text(txt, font_size=size, color=color)
+    m.move_to([X_MAX - m.width / 2 - 0.28, REF_Y, 0])
+    return m
+
+
 def panel_slot(mob, i, gap=1.25):
     """วางกล่องข้อความในพาเนลขวา ช่องที่ i (0 = บนสุด)"""
     return mob.move_to([PANEL_X, PANEL_TOP - i * gap, 0])

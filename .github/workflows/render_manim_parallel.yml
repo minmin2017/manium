@@ -1,0 +1,70 @@
+name: Render Manim Videos (parallel)
+
+# Fans each scene out to its own runner so N scenes render in the wall-clock
+# time of ONE scene. manim uses a single core per scene and never parallelises
+# internally (see skill §13), so this is the only way a multi-scene video gets
+# faster on cloud. Public repo => Actions minutes are free/unlimited.
+
+on:
+  workflow_dispatch:
+    inputs:
+      scene_file:
+        description: "Python file with the Scene classes, e.g. eps_ch6_master.py"
+        required: true
+      scene_names:
+        description: 'JSON array of scene class names, e.g. ["S1_Anatomy","S2_Plane"]'
+        required: true
+      quality:
+        description: "Manim quality flag letter: l / m / h / k"
+        required: false
+        default: "h"
+      fps:
+        description: "Frame rate"
+        required: false
+        default: "25"
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false          # one bad scene must not cancel the others
+      matrix:
+        scene: ${{ fromJSON(github.event.inputs.scene_names) }}
+    container:
+      image: manimcommunity/manim:latest
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Thai fonts (image already ships manim + full LaTeX)
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends fonts-thai-tlwg
+          fc-cache -f
+
+      - name: Render ${{ matrix.scene }}
+        shell: bash
+        env:
+          MANIM_THAI_FONT: Loma
+        run: |
+          set -e
+          manim -q${{ github.event.inputs.quality }} --fps ${{ github.event.inputs.fps }} \
+            "${{ github.event.inputs.scene_file }}" "${{ matrix.scene }}"
+
+      - name: Collect output
+        shell: bash
+        run: |
+          mkdir -p out
+          find media/videos -name "${{ matrix.scene }}.mp4" \
+            -not -path "*/partial_movie_files/*" -exec cp {} out/ \;
+          ls -la out
+
+      # One artifact per scene; download them all at once with
+      #   gh run download <id> --pattern 'scene-*' --dir <dir>
+      - name: Upload ${{ matrix.scene }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: scene-${{ matrix.scene }}
+          path: out/*.mp4
+          retention-days: 14
