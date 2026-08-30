@@ -55,7 +55,7 @@ jobs:
       - name: Collect outputs
         run: |
           mkdir -p out
-          find media/videos -name "*.mp4" -exec cp {} out/ \;
+          find media/videos -name "*.mp4" -not -path "*/partial_movie_files/*" -exec cp {} out/ \;
           ls -la out
 
       - name: Upload artifact
