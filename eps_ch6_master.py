@@ -379,39 +379,66 @@ class S2_NeutralPlane(SafeThreeDScene):
 
         self.play(FadeOut(cap2), run_time=0.3)
         cap2b = self.hud(caption_top(
-            "ระวังเข้าใจผิด: ไม่ใช่เพราะ B = 0 — แต่เพราะตัวนำวิ่ง \"ขนาน\" กับเส้นแรง",
-            color=EXAMC))
+            "คิดภาพ: เส้นแรง = เส้นเชือกขึงตึงจาก N ไป S · ตัวนำ = ใบมีด", color=EXAMC))
         self.play(FadeIn(cap2b), run_time=0.5)
 
-        top_p = STAGE + np.array([0, R_ARM, 0])
-        v_arr = Arrow(top_p + np.array([-1.05, 0.42, 0]),
-                      top_p + np.array([0.95, 0.42, 0]), buff=0, color=WARN,
-                      stroke_width=6, tip_length=0.22)
-        b_arr = Arrow(top_p + np.array([-1.05, 0.02, 0]),
-                      top_p + np.array([0.95, 0.02, 0]), buff=0, color=FIELD,
-                      stroke_width=6, tip_length=0.22)
-        v_lab = self.hud(Text("v (ทิศเคลื่อนที่)", font_size=19, color=WARN)
-                         .move_to([3.30, top_p[1] + 0.42, 0]))
-        b_lab = self.hud(Text("B (สนาม)", font_size=19, color=FIELD)
-                         .move_to([2.85, top_p[1] + 0.02, 0]))
-        self.play(GrowArrow(v_arr), FadeIn(v_lab), run_time=0.7)
-        self.play(GrowArrow(b_arr), FadeIn(b_lab), run_time=0.7)
-        self.wait(0.6)
+        eqA = MathTex(r"e = B\,l\,v\,\sin\theta", font_size=40, color=EMF)
+        eqA.move_to([4.35, 1.55, 0])
+        self.hud(eqA)
+        self.play(FadeIn(eqA), run_time=0.6)
 
-        eq = MathTex(r"e = (\vec{v} \times \vec{B})\cdot \vec{l} = 0",
-                     font_size=38, color=EMF).move_to([0, -2.35, 0])
-        self.hud(eq)
-        self.play(FadeIn(eq), run_time=0.8)
-        self.wait(1.0)
+        # --- ใบมีดที่ 1: ใต้ขั้ว วิ่งดิ่งลง = ฟันขวางเชือก 90°
+        bx = STAGE[0] - 1.55
+        blade = Line([bx - 0.26, STAGE[1] + 1.30, 0], [bx + 0.26, STAGE[1] + 1.30, 0],
+                     color=WARN, stroke_width=8)
+        varr = Arrow([bx + 0.55, STAGE[1] + 1.15, 0], [bx + 0.55, STAGE[1] + 0.35, 0],
+                     buff=0, color=WARN, stroke_width=5, tip_length=0.18)
+        self.play(FadeIn(blade), GrowArrow(varr), run_time=0.6)
+        self.play(blade.animate.shift(DOWN * 2.55), varr.animate.shift(DOWN * 2.55),
+                  run_time=2.2, rate_func=linear)
 
-        cap2c = self.hud(caption_top(
-            "ขนานกัน → ไม่ตัดเส้นแรงเลย → ไม่เกิด emf (B ยังมีอยู่เต็มที่)", color=OK))
+        r1 = self.hud(Text("ฟันขวางเชือก 90° → ตัดเต็มที่ → emf สูงสุด",
+                           font_size=22, color=WARN).move_to([0, -2.55, 0]))
+        s90 = self.hud(MathTex(r"\sin 90^\circ = 1", font_size=34, color=WARN)
+                       .move_to([4.35, 0.85, 0]))
+        self.play(FadeIn(r1), FadeIn(s90), run_time=0.8)
+        self.wait(1.3)
+
+        # --- ใบมีดที่ 2: ที่ระนาบเป็นกลาง วิ่งแนวนอน = ลู่ไปตามเชือก
+        self.play(FadeOut(blade), FadeOut(varr), FadeOut(r1), FadeOut(s90),
+                  run_time=0.5)
         self.play(FadeOut(cap2b), run_time=0.3)
+        cap2c = self.hud(caption_top(
+            "แต่ตรงบนสุด ตัวนำวิ่ง \"แนวนอน\" — ลู่ไปตามเชือก ไม่ได้ฟันโดนสักเส้น",
+            color=OK))
         self.play(FadeIn(cap2c), run_time=0.5)
-        self.wait(1.4)
-        self.play(*[FadeOut(m) for m in (v_arr, b_arr, v_lab, b_lab, eq)],
-                  run_time=0.6)
-        cap2 = cap2c
+
+        ty = STAGE[1] + R_ARM
+        blade2 = Line([STAGE[0] - 1.45, ty - 0.26, 0], [STAGE[0] - 1.45, ty + 0.26, 0],
+                      color=OK, stroke_width=8)
+        varr2 = Arrow([STAGE[0] - 1.30, ty + 0.55, 0], [STAGE[0] - 0.50, ty + 0.55, 0],
+                      buff=0, color=OK, stroke_width=5, tip_length=0.18)
+        self.play(FadeIn(blade2), GrowArrow(varr2), run_time=0.6)
+        self.play(blade2.animate.shift(RIGHT * 2.90), varr2.animate.shift(RIGHT * 2.90),
+                  run_time=2.2, rate_func=linear)
+
+        s0 = self.hud(MathTex(r"\sin 0^\circ = 0", font_size=34, color=OK)
+                      .move_to([4.35, 0.85, 0]))
+        r2 = self.hud(Text("ไม่ได้ตัดสักเส้น → emf = 0", font_size=23, color=OK)
+                      .move_to([0, -2.55, 0]))
+        self.play(FadeIn(s0), FadeIn(r2), run_time=0.8)
+        self.wait(1.2)
+
+        # --- ตอกย้ำจุดที่มักเข้าใจผิด
+        self.play(FadeOut(cap2c), run_time=0.3)
+        cap2d = self.hud(caption_top(
+            "สำคัญ: เชือกยังอยู่หนาแน่นเท่าเดิม — B ไม่ได้เป็นศูนย์ แค่ไม่ได้ตัดมัน",
+            color=EXAMC))
+        self.play(FadeIn(cap2d), run_time=0.5)
+        self.wait(1.8)
+
+        self.play(*[FadeOut(m) for m in (blade2, varr2, eqA, s0, r2)], run_time=0.6)
+        cap2 = cap2d
 
         # ---------- ปักเส้นระนาบเป็นกลาง ----------
         npl = plane_line(0.0, OK)
@@ -552,6 +579,50 @@ class S3_TwoFields(SafeThreeDScene):
         self.play(FadeIn(cap5), run_time=0.6)
         self.wait(1.6)
 
+        # ---------- โหลดมากขึ้น -> เอียงมากขึ้น (ตัวเลขวิ่งจริง) ----------
+        self.play(FadeOut(cap5), run_time=0.3)
+        cap5b = self.hud(caption_top("โหลดมากขึ้น → Bₐ แรงขึ้น → สนามรวมยิ่งเอียง"))
+        self.play(FadeIn(cap5b), run_time=0.5)
+
+        load = ValueTracker(0.61)      # = 1.25/2.05 ให้ต่อเนื่องจากรูปสามเหลี่ยมเดิม
+
+        def _tip():
+            return origin + np.array([2.05, -2.05 * load.get_value(), 0])
+
+        dyn_arm = always_redraw(lambda: Arrow(
+            origin + np.array([2.05, 0, 0]), _tip(), buff=0, color=CURRENT,
+            stroke_width=7, tip_length=0.24, max_tip_length_to_length_ratio=0.4))
+        dyn_sum = always_redraw(lambda: Arrow(
+            origin, _tip(), buff=0, color=WARN, stroke_width=9, tip_length=0.28,
+            max_tip_length_to_length_ratio=0.4))
+
+        cur_row = live_row("กระแสโหลด", "A", lambda: 65 * load.get_value(),
+                           [-5.95, 1.95, 0], decimals=0, num_color=CURRENT)
+        ang_row = live_row("มุมเอียง", "°",
+                           lambda: np.degrees(np.arctan(load.get_value())),
+                           [1.35, 1.95, 0], decimals=1, num_color=WARN)
+        self.hud(cur_row, ang_row)
+
+        self.play(FadeOut(v_arm), FadeOut(v_sum), FadeOut(dash), run_time=0.4)
+        self.play(FadeIn(dyn_arm), FadeIn(dyn_sum), FadeIn(cur_row), FadeIn(ang_row),
+                  run_time=0.7)
+        self.play(load.animate.set_value(1.30), run_time=2.4)
+        self.wait(0.5)
+        self.play(load.animate.set_value(0.22), run_time=1.9)
+        self.wait(0.4)
+        self.play(load.animate.set_value(0.85), run_time=1.5)
+        self.wait(0.8)
+
+        dyn_arm.clear_updaters()
+        dyn_sum.clear_updaters()
+        cur_row[1].clear_updaters()
+        ang_row[1].clear_updaters()
+        self.play(FadeOut(dyn_arm), FadeOut(dyn_sum), FadeOut(cur_row),
+                  FadeOut(ang_row), run_time=0.6)
+        # ไม่ FadeOut(cap5b) ตรงนี้ — ปล่อยให้บล็อกถัดไปสลับให้ (ถ้าเอาออกก่อน
+        # FadeOut ซ้ำจะดึงมันกลับเข้าฉากแล้วกระพริบ)
+        cap5 = cap5b
+
         # ---------- ระนาบเลื่อนตาม ----------
         tilt = 27 * DEGREES
         npl1 = plane_line(tilt, WARN, width=6)
@@ -565,8 +636,9 @@ class S3_TwoFields(SafeThreeDScene):
                   run_time=1.8)
         self.wait(1.4)
 
+        # v_arm / v_sum / dash ถูกเอาออกไปแล้วตอนสลับเป็นลูกศรแบบไดนามิก
         self.play(*[FadeOut(m) for m in (n_pole, s_pole, n_lab, s_lab, front, fld,
-                                         npl0, npl1, rot, v_main, v_arm, v_sum, dash,
+                                         npl0, npl1, rot, v_main,
                                          sum_lab, cap6, ttl, ref3)], run_time=0.9)
 
         card = exam_card(
@@ -932,6 +1004,30 @@ class S6_SelfInduction(SafeScene):
             "ระนาบเป็นกลางทางไฟฟ้า (electrical / commutating plane)", y=-1.45)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(1.9)
+
+        # ---------- คู่คำถามที่ข้อสอบชอบถามเทียบกัน (6-12 vs 6-13) ----------
+        self.play(FadeOut(lim), FadeOut(card), run_time=0.7)
+
+        head = Text("คู่ที่ข้อสอบชอบถามเทียบกัน", font_size=21, color=EXAMC)
+        q12 = VGroup(
+            Text("6-12  วางแปรงถ่านที่ระนาบ \"ทางกล\"", font_size=23, color=WHITE),
+            Text("→ คอมมิวเตชั่นไม่สมบูรณ์ เกิดสปาร์ค (ระนาบจริงเลื่อนไปแล้ว)",
+                 font_size=21, color=WARN),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        q13 = VGroup(
+            Text("6-13  วางแปรงถ่านที่ระนาบ \"ทางไฟฟ้า\"", font_size=23, color=WHITE),
+            Text("→ สมบูรณ์ ไม่สปาร์ค — แต่เฉพาะที่กระแสโหลดค่านั้นเท่านั้น",
+                 font_size=21, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        pair = VGroup(head, q12, q13).arrange(DOWN, aligned_edge=LEFT, buff=0.52)
+        fit_width(pair, 11.8)
+        pair.move_to([0, 0.35, 0])
+
+        self.play(FadeIn(head), run_time=0.5)
+        self.play(FadeIn(q12, shift=RIGHT * 0.2), run_time=0.9)
+        self.wait(1.2)
+        self.play(FadeIn(q13, shift=RIGHT * 0.2), run_time=0.9)
+        self.wait(2.2)
 
 
 # ================================================================ S7
