@@ -21,26 +21,18 @@ on:
 jobs:
   render:
     runs-on: ubuntu-latest
+    container:
+      image: manimcommunity/manim:latest
+      options: --user root
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: System dependencies (ffmpeg, cairo/pango, LaTeX, Thai fonts)
+      - name: Thai fonts (image already has manim + full LaTeX)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            ffmpeg libcairo2-dev libpango1.0-dev pkg-config python3-dev \
-            texlive texlive-latex-extra texlive-fonts-extra texlive-science \
-            texlive-xetex tipa cm-super fonts-thai-tlwg
+          apt-get update
+          apt-get install -y --no-install-recommends fonts-thai-tlwg
           fc-cache -f
-
-      - name: Install manim
-        run: pip install manim==0.20.1
 
       - name: Render scenes
         env:
@@ -55,7 +47,11 @@ jobs:
       - name: Collect outputs
         run: |
           mkdir -p out
-          find media/videos -name "*.mp4" -not -path "*/partial_movie_files/*" -exec cp {} out/ \;
+          SCENES="${{ github.event.inputs.scene_names }}"
+          SCENES="${SCENES//,/ }"
+          for s in $SCENES; do
+            find media/videos -name "${s}.mp4" -not -path "*/partial_movie_files/*" -exec cp {} out/ \;
+          done
           ls -la out
 
       - name: Upload artifact
