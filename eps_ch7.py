@@ -638,3 +638,179 @@ class EP18_ChapterSummary(SafeScene):
         closer = Text("ครบทั้งบทที่ 7 แล้ว — ไปต่อบทถัดไปได้เลย", font_size=26, color=OK)
         self.play(FadeIn(closer, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
+
+
+# ------------------------------------------------------------------ EP19
+class EP19_Example76_LongShuntWalkthrough(SafeScene):
+    """หน้า 13-14 · ตัวอย่างที่ 7-6 — เดินเลขเต็มข้อของ long-shunt compound
+    (EP17 เทียบแค่แนวคิด/สูตร ตัวนี้ทำตัวเลขจริงให้ดูครบ)"""
+
+    def construct(self):
+        ttl = title("ตัวอย่างที่ 7-6 (Long-shunt)", size=27)
+        ref = page_ref("หน้า 13-14 · รูปที่ 7-7")
+        self.play(FadeIn(ttl), FadeIn(ref), run_time=0.7)
+
+        cap0 = caption_top(
+            "compound 10kW, 230V — Ra=0.15Ω, Rs=0.1Ω (เซรี่), Rf=100Ω (ชันท์)")
+        self.play(FadeIn(cap0), run_time=0.6)
+        self.wait(1.0)
+
+        cap1 = caption_top("ขั้น 1 — long-shunt: ชันท์คร่อม Vt ตรงๆ หา If ได้ทันที",
+                           color=CURRENT)
+        self.play(FadeOut(cap0), run_time=0.3)
+        self.play(FadeIn(cap1), run_time=0.5)
+
+        rows = VGroup(
+            MathTex(r"I_L=\frac{10{,}000}{230}=43.478\ \text{A}", font_size=28, color=WHITE),
+            MathTex(r"I_f=\frac{230}{100}=2.3\ \text{A}", font_size=28, color=WHITE),
+            MathTex(r"I_a=I_s=I_L+I_f=45.78\ \text{A}", font_size=28, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.32).move_to([0, 0.6, 0])
+        fit_width(rows, 10.5)
+        for r in rows:
+            self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.6)
+        self.wait(1.0)
+        self.play(rows.animate.scale(0.55).to_edge(LEFT, buff=0.7).shift(UP * 0.5),
+                  run_time=0.8)
+
+        cap2 = caption_top("ขั้น 2 — แรงดันตกในวงจรอาร์เมเจอร์ (Ra+Rs อนุกรมกัน) แล้วหา E",
+                           color=OK)
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), run_time=0.5)
+
+        rows2 = VGroup(
+            MathTex(r"V_{drop}=I_a(R_a+R_s)=45.78(0.25)=11.44\ \text{V}",
+                   font_size=26, color=OK),
+            MathTex(r"E=V_t+V_{drop}=230+11.44=241.44\ \text{V}", font_size=28, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.30).move_to([1.6, 0.6, 0])
+        fit_width(rows2, 8.5)
+        for r in rows2:
+            self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.7)
+        self.wait(1.1)
+        self.play(rows2.animate.scale(0.6).next_to(rows, DOWN, buff=0.40,
+                                                    aligned_edge=LEFT), run_time=0.8)
+
+        cap3 = caption_top("ขั้น 3 — copper loss ทั้ง 3 ก้อน (Ra, Rs, Rf)", color=CURRENT)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.5)
+
+        rows3 = VGroup(
+            MathTex(r"P_a=45.78^2(0.15)=314.3\ \text{W}", font_size=26, color=CURRENT),
+            MathTex(r"P_s=45.78^2(0.1)=209.6\ \text{W}", font_size=26, color=CURRENT),
+            MathTex(r"P_f=2.3^2(100)=529.0\ \text{W}", font_size=26, color=CURRENT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.28).move_to([1.5, -1.4, 0])
+        fit_width(rows3, 8.0)
+        for r in rows3:
+            self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.6)
+        self.wait(1.2)
+
+        self.fade_out_all(run_time=0.7)
+
+        cap4 = caption_top("ขั้น 4 — ประสิทธิภาพ (core=400W, mechanical=742W)", color=OK)
+        self.play(FadeIn(cap4), run_time=0.6)
+
+        eta_calc = VGroup(
+            MathTex(r"P_{cu}=314.3+209.6+529.0=1{,}052.9\ \text{W}", font_size=26,
+                   color=WHITE),
+            MathTex(r"P_{loss}=1{,}052.9+400+742=2{,}194.9\ \text{W}", font_size=26,
+                   color=WHITE),
+            MathTex(r"\eta=\frac{10{,}000}{12{,}194.9}\times100=\mathbf{82.00\%}",
+                   font_size=34, color=OK),
+        ).arrange(DOWN, buff=0.35).move_to([0, 0.2, 0])
+        fit_width(eta_calc, 11.0)
+        self.play(FadeIn(eta_calc[0]), run_time=0.7)
+        self.wait(0.5)
+        self.play(FadeIn(eta_calc[1]), run_time=0.7)
+        self.wait(0.5)
+        self.play(FadeIn(eta_calc[2], scale=1.2), run_time=0.9)
+        self.wait(1.5)
+
+        self.play(FadeOut(eta_calc), FadeOut(cap4), FadeOut(ttl), FadeOut(ref),
+                  run_time=0.7)
+        card = exam_card(
+            "เอกลักษณ์ของ long-shunt",
+            "Is = Ia (เซรี่ฟิลด์แบกกระแสเดียวกับอาร์เมเจอร์) — If หาได้ทันทีจาก Vt/Rf")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
+
+
+# ------------------------------------------------------------------ EP20
+class EP20_Example77_ShortShuntWalkthrough(SafeScene):
+    """หน้า 15-16 · ตัวอย่างที่ 7-7 — เดินเลขเต็มข้อของ short-shunt compound
+    จุดต่างจาก long-shunt: ต้องหา IL ก่อนถึงจะหา If ได้"""
+
+    def construct(self):
+        ttl = title("ตัวอย่างที่ 7-7 (Short-shunt)", size=27)
+        ref = page_ref("หน้า 15-16 · รูปที่ 7-8")
+        self.play(FadeIn(ttl), FadeIn(ref), run_time=0.7)
+
+        cap0 = caption_top(
+            "compound 25kW, 240V — Ra=0.1Ω, Rs=0.15Ω (เซรี่), Rf=150Ω (ชันท์)")
+        self.play(FadeIn(cap0), run_time=0.6)
+        self.wait(1.0)
+
+        cap1 = caption_top(
+            "ขั้น 1 — short-shunt: เซรี่อยู่ในสายจ่ายไฟ ⇒ ต้องหา IL ก่อนเสมอ",
+            color=WARN)
+        self.play(FadeOut(cap0), run_time=0.3)
+        self.play(FadeIn(cap1), run_time=0.5)
+
+        rows = VGroup(
+            MathTex(r"I_L=I_s=\frac{25{,}000}{240}=104.167\ \text{A}",
+                   font_size=27, color=WARN),
+            MathTex(r"V_{sh}=V_t+I_LR_s=240+104.167(0.15)=255.625\ \text{V}",
+                   font_size=25, color=WHITE),
+            MathTex(r"I_f=\frac{255.625}{150}=1.704\ \text{A}", font_size=27, color=WHITE),
+            MathTex(r"I_a=I_L+I_f=104.167+1.704=105.87\ \text{A}",
+                   font_size=27, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.28).move_to([0, 0.5, 0])
+        fit_width(rows, 11.0)
+        for r in rows:
+            self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.6)
+        self.wait(1.2)
+        self.play(rows.animate.scale(0.5).to_edge(LEFT, buff=0.6).shift(UP * 0.6),
+                  run_time=0.8)
+
+        cap2 = caption_top("ขั้น 2 — แรงเคลื่อน E และ copper loss ทั้ง 3 ก้อน", color=OK)
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), run_time=0.5)
+
+        rows2 = VGroup(
+            MathTex(r"E=V_{sh}+I_aR_a=255.625+10.59=266.21\ \text{V}",
+                   font_size=25, color=OK),
+            MathTex(r"P_a=105.87^2(0.1)=1{,}120.9\ \text{W}", font_size=24, color=CURRENT),
+            MathTex(r"P_s=104.167^2(0.15)=1{,}627.6\ \text{W}", font_size=24, color=CURRENT),
+            MathTex(r"P_f=1.704^2(150)=435.6\ \text{W}", font_size=24, color=CURRENT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.26).move_to([1.6, -0.4, 0])
+        fit_width(rows2, 8.5)
+        for r in rows2:
+            self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.6)
+        self.wait(1.3)
+
+        self.fade_out_all(run_time=0.7)
+
+        cap3 = caption_top("ขั้น 3 — ประสิทธิภาพ (core=845W, mechanical=1,235W)", color=OK)
+        self.play(FadeIn(cap3), run_time=0.6)
+
+        eta_calc = VGroup(
+            MathTex(r"P_{cu}=1{,}120.9+1{,}627.6+435.6=3{,}184.1\ \text{W}",
+                   font_size=25, color=WHITE),
+            MathTex(r"P_{loss}=3{,}184.1+845+1{,}235=5{,}264.1\ \text{W}",
+                   font_size=25, color=WHITE),
+            MathTex(r"\eta=\frac{25{,}000}{30{,}264.1}\times100=\mathbf{82.61\%}",
+                   font_size=34, color=OK),
+        ).arrange(DOWN, buff=0.35).move_to([0, 0.2, 0])
+        fit_width(eta_calc, 11.0)
+        self.play(FadeIn(eta_calc[0]), run_time=0.7)
+        self.wait(0.5)
+        self.play(FadeIn(eta_calc[1]), run_time=0.7)
+        self.wait(0.5)
+        self.play(FadeIn(eta_calc[2], scale=1.2), run_time=0.9)
+        self.wait(1.5)
+
+        self.play(FadeOut(eta_calc), FadeOut(cap3), FadeOut(ttl), FadeOut(ref),
+                  run_time=0.7)
+        card = exam_card(
+            "จุดที่ผิดกันบ่อยที่สุด",
+            "short-shunt: If ≠ Vt/Rf ตรงๆ — ต้องบวกแรงดันตกที่เซรี่ฟิลด์ (ILRs) เข้าไปก่อน")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
