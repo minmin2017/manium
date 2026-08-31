@@ -190,6 +190,15 @@ def plane_line(angle, color, length=2.55, width=5, center=STAGE, dashed=False):
                 color=color, stroke_width=width)
 
 
+def rhr_circle(center, radius, ccw, color=CURRENT, sw=3.0):
+    """สนามวงกลมรอบตัวนำเส้นเดียว (กฎมือขวา) — ccw=True หมุนทวนเข็ม (คู่กับ ⊙ ออกจากจอ)"""
+    ang = TAU * 0.82 * (1 if ccw else -1)
+    arc = Arc(radius=radius, start_angle=-PI / 2, angle=ang,
+             arc_center=center, color=color, stroke_width=sw)
+    arc.add_tip(tip_length=0.12)
+    return arc
+
+
 def exam_card(q, a, y=0.35):
     """การ์ด 'จุดออกสอบ' — คำถามจริงจากท้ายบท + คำตอบย่อ"""
     head = Text("จุดออกสอบ", font_size=20, color=EXAMC)
@@ -1511,4 +1520,187 @@ class S10_Bonus_SpinningArmatureFixedNeutral(SafeScene):
         card = VGroup(s1, s2).arrange(DOWN, buff=0.40).move_to([0, 0.3, 0])
         fit_width(card, 12.0)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(2.0)
+
+
+# ================================================================ S4B (bonus)
+class S4B_BB_AA_ConductorProof(SafeThreeDScene):
+    """หน้า 6-7 · ต่อยอด S4 — โชว์ตัวนำจริง 1 ขดต่อกลุ่ม + สนาม RHR พิสูจน์ทิศ BB/AA
+
+    สร้างตามคำขอ Min (2026-08-31): S4 บอกแค่ผลลัพธ์ ไม่ได้โชว์ว่าตัวนำจริงอยู่ตรงไหน
+    วิธีตรงกับหนังสือหน้า 6-7 (รูป 6-3 ข/ค): หยิบขดลวดจริง 1 ขด (ตัวนำ 2 เส้นห่างกัน
+    180° ผ่านเพลา — วิธีพันขดจริงในเครื่อง) มาดูว่าสนาม RHR ของมันรวมกันชี้ทางไหน
+
+    ตรวจด้วยเวกเตอร์ก่อนสร้าง (2026-08-31): ขดที่ปลายทั้งสองอยู่ในโซน BB (บน-ล่าง)
+    รวมสนามที่ใจกลางแล้วชี้แนวนอน (ต้านสนามหลัก) ส่วนขดในโซน AA (ซ้าย-ขวา) รวมแล้ว
+    ชี้แนวตั้ง (ตั้งฉากสนามหลัก) — ตรงกับหนังสือ แต่นี่คือ "ขดตัวแทน 1 ขด" เท่านั้น
+    ถ้ารวมทุกขดทั้งกลุ่มจริงๆ ผลรวมที่จุดศูนย์กลางจะกลายเป็นแนวตั้งเสมอไม่ว่ากลุ่มไหน
+    (พิสูจน์แล้วด้วยมือ เพราะแต่ละกลุ่มสมมาตรซ้าย-ขวารอบแนวแปรงถ่านเอง) กลไกจริงที่ทำให้
+    ทั้งกลุ่มรวมกันได้ทิศต่างกันคือ Ampere's Circuital Law ตามเส้นทางฟลักซ์ ไม่ใช่บวก
+    เวกเตอร์ตรงจุดเดียว — รายละเอียดอยู่ใน Main_note/DC_Motor_Armature_Reaction_Reference.md
+    ฉากนี้จึงพูดตรงๆ ว่าเป็น "ตัวอย่าง 1 ขด" ไม่ได้อ้างว่าคือผลรวมทั้งกลุ่ม
+    """
+
+    def construct(self):
+        self.set_camera_orientation(phi=0, theta=-90 * DEGREES)
+        ttl = self.hud(title("BB/AA มาจากตัวนำจริงตรงไหน — ดูทีละขด", size=27))
+        ref = self.hud(page_ref("หน้า 6-7 · รูปที่ 6-3 (ข)(ค)"))
+        self.play(FadeIn(ttl), FadeIn(ref), run_time=0.6)
+
+        cap0 = self.hud(caption_top(
+            "ครั้งก่อน (S4) บอกแค่ผลลัพธ์ — รอบนี้ดูตัวนำจริงที่สร้างมันขึ้นมา"))
+        self.play(FadeIn(cap0), run_time=0.6)
+        self.wait(0.6)
+
+        # ---------- ตั้งฉาก: ขั้ว + วงอาร์เมเจอร์เต็ม พร้อมกลุ่ม BB/AA (ทวนจาก S4) ----------
+        n_pole, s_pole = pole_piece(-1, "N"), pole_piece(+1, "S")
+        n_lab = self.hud(Text("N", font_size=34, color=WHITE).move_to(
+            [STAGE[0] - (POLE_X - POLE_W / 2), STAGE[1], 0]))
+        s_lab = self.hud(Text("S", font_size=34, color=WHITE).move_to(
+            [STAGE[0] + (POLE_X - POLE_W / 2), STAGE[1], 0]))
+        front, _, _ = armature_cage()
+        fld = main_field(0.0, n=3, opacity=0.55)
+
+        self.play(FadeOut(cap0), run_time=0.3)
+        cap1 = self.hud(caption_top("ทวนก่อน: ตัวนำบน-ล่าง = กลุ่ม BB · ซ้าย-ขวา = กลุ่ม AA"))
+        self.play(FadeIn(cap1), FadeIn(n_pole), FadeIn(s_pole), FadeIn(n_lab),
+                  FadeIn(s_lab), FadeIn(fld), Create(front), run_time=1.1)
+
+        bb_marks = VGroup()
+        aa_marks = VGroup()
+        for a in slot_angles():
+            u = np.array([np.cos(a), np.sin(a), 0.0])
+            p = STAGE + R_ARM * u
+            out = np.dot(u, np.array([1.0, 0.0, 0.0])) > 0
+            m = conductor_mark(p, out)
+            (bb_marks if abs(np.sin(a)) > 0.55 else aa_marks).add(m)
+
+        self.play(LaggedStart(*[FadeIn(m) for m in bb_marks], lag_ratio=0.06),
+                  run_time=1.0)
+        self.play(LaggedStart(*[FadeIn(m) for m in aa_marks], lag_ratio=0.10),
+                  run_time=0.8)
+        self.wait(0.8)
+        self.play(FadeOut(cap1), run_time=0.3)
+
+        # ---------- ส่วนที่ 1: หยิบขด BB จริง 1 ขด (ตัวนำ 2 เส้น ห่าง 180°) ----------
+        angs = slot_angles()
+        a_bb_in = angs[0]           # 105° — ⊗ (บน-ซ้าย ของแนวแปรงถ่าน)
+        a_bb_out = a_bb_in + PI     # 285° — ⊙ (ล่าง-ขวา, ปลายอีกด้านของขดเดียวกัน)
+        p_bb_in = STAGE + R_ARM * np.array([np.cos(a_bb_in), np.sin(a_bb_in), 0])
+        p_bb_out = STAGE + R_ARM * np.array([np.cos(a_bb_out), np.sin(a_bb_out), 0])
+
+        cap2 = self.hud(caption_top(
+            "หยิบขดจริง 1 ขด จากกลุ่ม BB — ปลาย 2 ข้างห่างกัน 180° ผ่านเพลา", color=WARN))
+        self.play(FadeIn(cap2), bb_marks.animate.set_opacity(0.16),
+                  aa_marks.animate.set_opacity(0.10), run_time=0.6)
+
+        bb1 = conductor_mark(p_bb_in, False, r=0.145, color=WARN)    # ⊗
+        bb2 = conductor_mark(p_bb_out, True, r=0.145, color=WARN)    # ⊙
+        coil_link = DashedLine(p_bb_in, p_bb_out, color=WARN, stroke_width=2,
+                               dash_length=0.10, stroke_opacity=0.55)
+        coil_lbl = self.hud(Text("ขดเดียวกัน — 2 ปลายผ่านเพลาไปคนละฝั่ง",
+                                 font_size=17, color=WARN))
+        coil_lbl.next_to(front, DOWN, buff=0.40)
+
+        self.play(FadeIn(bb1, scale=1.4), FadeIn(bb2, scale=1.4), run_time=0.7)
+        self.play(Create(coil_link), FadeIn(coil_lbl), run_time=0.8)
+        self.wait(0.7)
+
+        circ_bb1 = rhr_circle(p_bb_in, 0.42, ccw=False)
+        circ_bb2 = rhr_circle(p_bb_out, 0.42, ccw=True)
+        cap3 = self.hud(caption_top(
+            "แต่ละเส้นสร้างสนามวงกลมของตัวเอง (กฎมือขวา — เหมือนที่เคยดูมาก่อน)"))
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), Create(circ_bb1), Create(circ_bb2), run_time=1.1)
+        self.wait(0.9)
+
+        # ทิศรวม ณ ใจกลางขด: สูตร (-sin a, cos a) โดย a = มุมด้าน ⊗ (ตรวจด้วยมือแล้ว)
+        net_bb = np.array([-np.sin(a_bb_in), np.cos(a_bb_in), 0.0])
+        arr_bb = Arrow(STAGE, STAGE + 1.15 * net_bb, buff=0, color=OK,
+                       stroke_width=8, tip_length=0.28)
+
+        cap4 = self.hud(caption_top(
+            "รวมสนามสองเส้นของขดนี้ที่ใจกลาง — ชี้แนวนอน ต้านสนามหลัก (สีฟ้า)", color=OK))
+        self.play(FadeOut(cap3), run_time=0.3)
+        self.play(FadeIn(cap4), GrowArrow(arr_bb), run_time=1.0)
+        self.wait(1.3)
+
+        cap5 = self.hud(caption_top(
+            "ทิศตรงข้ามกับสนามหลัก (ลูกศรฟ้า) → หักล้างกัน = BB ทำแรงดันตก", color=WARN))
+        self.play(FadeOut(cap4), run_time=0.3)
+        self.play(FadeIn(cap5), Indicate(fld, color=WARN, scale_factor=1.05), run_time=0.9)
+        self.wait(1.4)
+
+        self.play(*[FadeOut(m) for m in (bb1, bb2, coil_link, coil_lbl, circ_bb1,
+                                         circ_bb2, arr_bb, cap5)],
+                  bb_marks.animate.set_opacity(1.0), run_time=0.8)
+
+        # ---------- ส่วนที่ 2: หยิบขด AA จริง 1 ขด ----------
+        a_aa_out = angs[9]          # 15°  — ⊙ (ใกล้ขั้ว S)
+        a_aa_in = a_aa_out + PI     # 195° — ⊗ (ใกล้ขั้ว N, ปลายอีกด้านของขดเดียวกัน)
+        p_aa_out = STAGE + R_ARM * np.array([np.cos(a_aa_out), np.sin(a_aa_out), 0])
+        p_aa_in = STAGE + R_ARM * np.array([np.cos(a_aa_in), np.sin(a_aa_in), 0])
+
+        cap6 = self.hud(caption_top(
+            "ทีนี้หยิบขดจริง 1 ขด จากกลุ่ม AA — ปลาย 2 ข้างก็ห่างกัน 180° เหมือนกัน",
+            color=OK))
+        self.play(bb_marks.animate.set_opacity(0.10), aa_marks.animate.set_opacity(0.16),
+                  FadeIn(cap6), run_time=0.6)
+
+        aa1 = conductor_mark(p_aa_out, True, r=0.145, color=OK)     # ⊙
+        aa2 = conductor_mark(p_aa_in, False, r=0.145, color=OK)     # ⊗
+        coil_link2 = DashedLine(p_aa_out, p_aa_in, color=OK, stroke_width=2,
+                                dash_length=0.10, stroke_opacity=0.55)
+        coil_lbl2 = self.hud(Text("ขดเดียวกัน — ด้านหนึ่งใต้ขั้ว S อีกด้านใต้ขั้ว N",
+                                  font_size=17, color=OK))
+        coil_lbl2.next_to(front, DOWN, buff=0.40)
+
+        self.play(FadeIn(aa1, scale=1.4), FadeIn(aa2, scale=1.4), run_time=0.7)
+        self.play(Create(coil_link2), FadeIn(coil_lbl2), run_time=0.8)
+        self.wait(0.7)
+
+        circ_aa1 = rhr_circle(p_aa_out, 0.42, ccw=True)
+        circ_aa2 = rhr_circle(p_aa_in, 0.42, ccw=False)
+        cap7 = self.hud(caption_top("สนามวงกลมของแต่ละเส้น — กฎมือขวาเดิม"))
+        self.play(FadeOut(cap6), run_time=0.3)
+        self.play(FadeIn(cap7), Create(circ_aa1), Create(circ_aa2), run_time=1.1)
+        self.wait(0.9)
+
+        net_aa = np.array([-np.sin(a_aa_in), np.cos(a_aa_in), 0.0])
+        arr_aa = Arrow(STAGE, STAGE + 1.15 * net_aa, buff=0, color=OK,
+                       stroke_width=8, tip_length=0.28)
+
+        cap8 = self.hud(caption_top(
+            "รวมสนามสองเส้นของขดนี้ — ชี้แนวตั้ง ตั้งฉากกับสนามหลัก (สีฟ้า)", color=OK))
+        self.play(FadeOut(cap7), run_time=0.3)
+        self.play(FadeIn(cap8), GrowArrow(arr_aa), run_time=1.0)
+        self.wait(1.3)
+
+        cap9 = self.hud(caption_top(
+            "ตั้งฉากกับสนามหลัก → ไม่ได้หักล้าง แต่ดันให้เบี่ยง = AA ทำสปาร์ค", color=OK))
+        self.play(FadeOut(cap8), run_time=0.3)
+        self.play(FadeIn(cap9), run_time=0.6)
+        self.wait(1.4)
+
+        self.play(*[FadeOut(m) for m in (aa1, aa2, coil_link2, coil_lbl2, circ_aa1,
+                                         circ_aa2, arr_aa, cap9)],
+                  aa_marks.animate.set_opacity(1.0), run_time=0.8)
+
+        # ---------- หมายเหตุสำคัญ: นี่คือตัวอย่าง ไม่ใช่ผลรวมทั้งกลุ่ม ----------
+        cap10 = self.hud(caption_top(
+            "ข้อควรระวัง: นี่คือขดตัวแทน 1 ขด — รวมทั้งกลุ่มจริงต้องคิดผ่านกฎของแอมแปร์",
+            color=EXAMC))
+        self.play(FadeIn(cap10), run_time=0.6)
+        self.wait(1.8)
+
+        self.play(*[FadeOut(m) for m in (n_pole, s_pole, n_lab, s_lab, front, fld,
+                                         bb_marks, aa_marks, cap10, ttl, ref)],
+                  run_time=0.9)
+
+        s1 = Text("BB → หักล้างสนามหลัก (แนวนอน)", font_size=27, color=WARN)
+        s2 = Text("AA → ตั้งฉากสนามหลัก (แนวตั้ง)", font_size=27, color=OK)
+        s3 = Text("มาจากตัวนำจริง ไม่ใช่แค่ทฤษฎีลอยๆ", font_size=23, color=GRAYTXT)
+        summary = VGroup(s1, s2, s3).arrange(DOWN, buff=0.35).move_to([0, 0.3, 0])
+        self.hud(summary)
+        self.play(FadeIn(summary, shift=UP * 0.2), run_time=1.0)
         self.wait(2.0)
