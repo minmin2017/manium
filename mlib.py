@@ -319,6 +319,17 @@ class SafeScene(LayoutGuard, Scene):
         super().wait(*args, **kwargs)
         self.layout_check(tag="[ค้างภาพ]")
 
+    def fade_out_all(self, run_time=0.9):
+        """เก็บฉากทั้งหมดในคำสั่งเดียว (แทนการไล่ลิสต์ FadeOut(m) for m in (...))
+
+        เทคนิคจากคอมมูนิตี้ Manim (ยืนยันแล้ว 2026-08-31 ว่าใช้ได้กับ Manim
+        Community Edition ที่โปรเจกต์นี้ใช้จริง — Group(*self.mobjects) เก็บ
+        ทุกอย่างที่ยัง "อยู่ในฉาก" ตอนนั้น) ลดบั๊กแบบลืมใส่ตัวแปรบางตัวในลิสต์
+        FadeOut ที่ต้องไล่เขียนเองทุกครั้ง — ใช้แทนได้เมื่อ "จะเคลียร์ทั้งฉากจริงๆ"
+        เท่านั้น ถ้ายังมีบางอย่างต้องคงไว้ (เช่น ป้ายที่จะ Transform ต่อ) ให้ใช้
+        FadeOut(m1, m2, ...) แบบเดิม"""
+        self.play(FadeOut(Group(*self.mobjects)), run_time=run_time)
+
     def tear_down(self):
         n = getattr(self, "_n_issues", 0)
         print(f"[LAYOUT] ===== สรุป {type(self).__name__}: "
@@ -353,6 +364,18 @@ class SafeThreeDScene(LayoutGuard, ThreeDScene):
         if not show:
             self.remove(*mobs)
         return mobs[0] if len(mobs) == 1 else mobs
+
+    def zoom_to(self, point, zoom=1.8, run_time=1.5):
+        """ซูมกล้อง 3D จริงเข้าหาจุดที่กำหนด (แทนการหรี่แสง/ไฮไลต์อย่างเดียว)
+
+        ยืนยันแล้ว (2026-08-31, เช็คเอกสาร Manim Community เพราะสงสัยว่าจะเป็น
+        API ของ ManimGL คนละเวอร์ชัน — พบว่า move_camera(zoom=...) เป็น API จริง
+        ของ ThreeDScene ใน Manim Community เอง ใช้ได้ตรงกับที่โปรเจกต์นี้เรนเดอร์
+        ผ่านคลาวด์อยู่แล้ว ไม่ต้องเปลี่ยนอะไร) point เป็นพิกัด 3D จริงในฉาก
+        (เช่น STAGE + R_ARM*u ของตัวนำที่จะซูมเข้าไปดู) เรียก zoom_to(ORIGIN, 1.0)
+        เพื่อซูมกลับปกติ"""
+        self.move_camera(zoom=zoom, frame_center=np.asarray(point, dtype=float),
+                         run_time=run_time)
 
     def world_text(self, *mobs):
         """ประกาศว่าตั้งใจให้ข้อความนี้อยู่ในปริภูมิ 3D (เอียงตามกล้องได้)
