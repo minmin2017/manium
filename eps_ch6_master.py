@@ -1484,8 +1484,10 @@ class S10_Bonus_SpinningArmatureFixedNeutral(SafeScene):
 
         ba = Arrow(STAGE + [0, R_ARM - 0.15, 0], STAGE + [0, -(R_ARM - 0.15), 0],
                   buff=0, color=OK, stroke_width=7, tip_length=0.26)
-        ba_lbl = Text("Bₐ (ทิศคงที่)", font_size=19, color=OK)
-        ba_lbl.next_to(ba, LEFT, buff=0.2)
+        # เดิมวางชิดลูกศรตรงกลางวง -> โดนตัวนำที่หมุนผ่านทับตลอดทุกเฟรม ย้ายไปไว้
+        # ใต้วงแทน (ครึ่งล่างของเฟรมว่างอยู่แล้วตามกติกาโซนข้อความบน)
+        ba_lbl = Text("Bₐ ทิศคงที่ (ไม่หมุนตามล้อ)", font_size=19, color=OK)
+        ba_lbl.next_to(ring, DOWN, buff=0.35)
 
         cap1 = caption_top("ตัวนำแต่ละเส้นสลับ ⊙⇄⊗ ตอนหมุนผ่านแนวแปรงถ่าน — นี่คือคอมมิวเตชั่น")
         self.play(FadeIn(marks), FadeIn(ba), FadeIn(ba_lbl), FadeIn(cap1), run_time=1.0)
