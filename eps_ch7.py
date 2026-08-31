@@ -869,3 +869,77 @@ class EP20_Example77_ShortShuntWalkthrough(SafeScene):
             "short-shunt: If ≠ Vt/Rf ตรงๆ — ต้องบวกแรงดันตกที่เซรี่ฟิลด์ (ILRs) เข้าไปก่อน")
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
+
+
+# ------------------------------------------------------------------ EP21
+class EP21_Example71_Walkthrough(SafeScene):
+    """หน้า 8 · ตัวอย่างที่ 7-1 — ข้อแรกของบท เดินเลขเต็มทุกขั้น (เครื่องเล็กที่สุดในบท)"""
+
+    def construct(self):
+        ttl = title("ตัวอย่างที่ 7-1 (ข้อแรกของบท)", size=27)
+        ref = page_ref("หน้า 8 · รูปที่ 6-2")
+        self.play(FadeIn(ttl), FadeIn(ref), run_time=0.7)
+
+        cap0 = caption_top("เครื่องกำเนิดแบบขนาน 120V — Ra=0.4Ω, Rf=60Ω, IL=30A")
+        self.play(FadeIn(cap0), run_time=0.6)
+        self.wait(1.0)
+
+        cap1 = caption_top(
+            "ขั้น 1-2 — เครื่องขนาน: ชันท์ฟิลด์คร่อม Vt ตรงๆ หา If แล้วบวกเข้ากับ IL",
+            color=CURRENT)
+        self.play(FadeOut(cap0), run_time=0.3)
+        self.play(FadeIn(cap1), run_time=0.5)
+
+        rows = VGroup(
+            MathTex(r"I_f=\frac{V_t}{R_f}=\frac{120}{60}=2\ \text{A}", font_size=30,
+                   color=WHITE),
+            MathTex(r"I_a=I_L+I_f=30+2=32\ \text{A}", font_size=30, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.35).move_to([0, 0.7, 0])
+        fit_width(rows, 9.0)
+        for r in rows:
+            self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.7)
+        self.wait(1.1)
+        self.play(rows.animate.scale(0.55).to_edge(LEFT, buff=0.7).shift(UP * 0.6),
+                  run_time=0.8)
+
+        cap2 = caption_top("ขั้น 3 — copper loss ที่อาร์เมเจอร์และชันท์ฟิลด์", color=CURRENT)
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), run_time=0.5)
+
+        rows2 = VGroup(
+            MathTex(r"P_a=32^2(0.4)=409.6\ \text{W}", font_size=28, color=CURRENT),
+            MathTex(r"P_f=2^2(60)=240\ \text{W}", font_size=28, color=CURRENT),
+            MathTex(r"P_{cu}=409.6+240=649.6\ \text{W}", font_size=28, color=WHITE),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.30).move_to([1.6, 0.4, 0])
+        fit_width(rows2, 8.0)
+        for r in rows2:
+            self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.6)
+        self.wait(1.2)
+
+        self.fade_out_all(run_time=0.7)
+
+        cap3 = caption_top("ขั้น 4 — ประสิทธิภาพ (rotational loss = 350W)", color=OK)
+        self.play(FadeIn(cap3), run_time=0.6)
+
+        eta_calc = VGroup(
+            MathTex(r"P_{out}=V_tI_L=120\times30=3{,}600\ \text{W}", font_size=28,
+                   color=WHITE),
+            MathTex(r"P_{loss}=649.6+350=999.6\ \text{W}", font_size=28, color=WHITE),
+            MathTex(r"\eta=\frac{3{,}600}{3{,}600+999.6}\times100=\mathbf{78.27\%}",
+                   font_size=34, color=OK),
+        ).arrange(DOWN, buff=0.35).move_to([0, 0.2, 0])
+        fit_width(eta_calc, 11.0)
+        self.play(FadeIn(eta_calc[0]), run_time=0.7)
+        self.wait(0.5)
+        self.play(FadeIn(eta_calc[1]), run_time=0.7)
+        self.wait(0.5)
+        self.play(FadeIn(eta_calc[2], scale=1.2), run_time=0.9)
+        self.wait(1.5)
+
+        self.play(FadeOut(eta_calc), FadeOut(cap3), FadeOut(ttl), FadeOut(ref),
+                  run_time=0.7)
+        card = exam_card(
+            "สังเกต",
+            "เครื่องเล็ก (3.6kW) → η ต่ำสุดในบท (78.27%) — ยิ่งเครื่องใหญ่ ยิ่งมีประสิทธิภาพสูง")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
