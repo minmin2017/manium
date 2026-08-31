@@ -71,8 +71,8 @@ class EP08B_ConductorRHRToFlux(SafeScene):
         mid_c = STAGE
 
         left_cond = conductor(left_c, False)
-        left_lbl = Text("ตัวนำใกล้ขั้ว N (⊗ พุ่งเข้า)", font_size=21, color=CURRENT)
-        left_lbl.next_to(left_cond, LEFT, buff=0.85)
+        left_lbl = Text("ใกล้ N (⊗ เข้า)", font_size=21, color=CURRENT)
+        left_lbl.next_to(left_cond, UP, buff=0.85)
 
         c1 = caption("ตัวนำ 1 เส้น มีกระแสไหล → สร้างสนามวงกลมรอบตัวเอง (กฎมือขวา)")
         self.play(FadeIn(c1), FadeIn(left_cond), FadeIn(left_lbl), run_time=0.9)
@@ -90,8 +90,8 @@ class EP08B_ConductorRHRToFlux(SafeScene):
 
         # ---------- ตัวนำที่ 2 ----------
         right_cond = conductor(right_c, True)
-        right_lbl = Text("ตัวนำใกล้ขั้ว S (⊙ พุ่งออก)", font_size=21, color=CURRENT)
-        right_lbl.next_to(right_cond, RIGHT, buff=0.85)
+        right_lbl = Text("ใกล้ S (⊙ ออก)", font_size=21, color=CURRENT)
+        right_lbl.next_to(right_cond, UP, buff=0.85)
 
         c2 = caption("อีกฝั่งของขดเดียวกัน กระแสไหลกลับทิศ (⊙)")
         self.play(FadeIn(c2), FadeIn(right_cond), FadeIn(right_lbl), run_time=0.9)
@@ -125,7 +125,7 @@ class EP08B_ConductorRHRToFlux(SafeScene):
         self.wait(0.8)
 
         sum_lbl = Text("บวกเสริมแรง ไม่ใช่หักล้าง", font_size=22, color=OK)
-        sum_lbl.next_to(VGroup(a1, a2), RIGHT, buff=0.9)
+        sum_lbl.next_to(VGroup(a1, a2), DOWN, buff=0.5)
         self.play(FadeIn(sum_lbl), run_time=0.6)
         self.wait(1.0)
 
