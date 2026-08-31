@@ -36,6 +36,34 @@ STAGE = np.array([0.0, 0.15, 0.0])
 # ------------------------------------------------------------------ EP11
 class EP11_LossOverview(SafeScene):
     def construct(self):
+        # ---------- roadmap เปิดเรื่องทั้ง 10 ซีน (ตามแบบ eps_ch6_master.py S1) ----------
+        rttl = title("บทที่ 7 — เราจะเดินทางไปทางไหน", size=28)
+        self.play(FadeIn(rttl, shift=DOWN * 0.15), run_time=0.8)
+
+        steps = [
+            ("1", "การสูญเสีย 2 ชนิด + กำลังไหล", "หน้า 1-3"),
+            ("2", "Copper loss: I²R + อุณหภูมิ + cmil/A", "หน้า 2-3"),
+            ("3", "Eddy current vs Hysteresis", "หน้า 4-6"),
+            ("4", "ประสิทธิภาพ + ตัวอย่างคำนวณเต็มข้อ", "หน้า 7-12"),
+            ("5", "Long-shunt vs Short-shunt", "หน้า 13-16"),
+        ]
+        rows = VGroup()
+        for num, name, pg in steps:
+            n = Text(num, font_size=22, color=OK)
+            t = Text(name, font_size=22, color=GRAYTXT)
+            p = Text(pg, font_size=17, color="#607D8B")
+            row = VGroup(n, t, p).arrange(RIGHT, buff=0.32)
+            rows.add(row)
+        rows.arrange(DOWN, aligned_edge=LEFT, buff=0.36)
+        fit_width(rows, 9.8)
+        rows.move_to([0, -0.3, 0])
+
+        self.play(LaggedStart(*[FadeIn(r, shift=RIGHT * 0.25) for r in rows],
+                              lag_ratio=0.22), run_time=2.2)
+        self.wait(1.3)
+        self.play(FadeOut(rows), FadeOut(rttl), run_time=0.6)
+
+        # ---------- เนื้อหาเดิม ----------
         self.add(title("การสูญเสีย 2 ชนิด — คนละลักษณะ คนละตำแหน่ง"))
         self.add(page_ref("หน้า 1 · 7-1 ถึง 7-3"))
 
