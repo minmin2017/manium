@@ -1604,14 +1604,18 @@ class S4B_BB_AA_ConductorProof(SafeThreeDScene):
 
         bb1 = conductor_mark(p_bb_in, False, r=0.145, color=WARN)    # ⊗
         bb2 = conductor_mark(p_bb_out, True, r=0.145, color=WARN)    # ⊙
+        # หมายเหตุ 2026-08-31: เคยมีป้ายข้อความ "ขดเดียวกัน..." วางด้วย
+        # .next_to(front, DOWN) ตรงนี้ — ลบออกแล้ว เพราะ (1) ข้อมูลซ้ำกับ cap2
+        # ที่บอกไปแล้วด้านบนอยู่แล้ว (2) ตำแหน่งคำนวณจาก front ตอนยังไม่ซูม พอ
+        # ซูมเข้าไปทีหลัง (zoom_to ด้านบน) ขนาด/ตำแหน่งของวงบนจอเปลี่ยน แต่ป้าย
+        # (hud = ตรึงกับจอ) ไม่ขยับตาม ทำให้ไปทับตัวนำ/วง RHR ล่างพอดี — บทเรียน:
+        # ห้ามวางข้อความ hud() แบบอิง .next_to(world_object) ในซีนที่มี zoom_to()
+        # ให้ใช้พิกัดคงที่ (แบบ caption_top/page_ref) แทนเสมอ ดู skill §19
         coil_link = DashedLine(p_bb_in, p_bb_out, color=WARN, stroke_width=2,
                                dash_length=0.10, stroke_opacity=0.55)
-        coil_lbl = self.hud(Text("ขดเดียวกัน — 2 ปลายผ่านเพลาไปคนละฝั่ง",
-                                 font_size=17, color=WARN))
-        coil_lbl.next_to(front, DOWN, buff=0.40)
 
         self.play(FadeIn(bb1, scale=1.4), FadeIn(bb2, scale=1.4), run_time=0.7)
-        self.play(Create(coil_link), FadeIn(coil_lbl), run_time=0.8)
+        self.play(Create(coil_link), run_time=0.6)
         self.wait(0.7)
 
         circ_bb1 = rhr_circle(p_bb_in, 0.42, ccw=False)
@@ -1640,7 +1644,7 @@ class S4B_BB_AA_ConductorProof(SafeThreeDScene):
         self.wait(1.4)
 
         self.zoom_to(STAGE, zoom=1.0, run_time=1.1)
-        self.play(*[FadeOut(m) for m in (bb1, bb2, coil_link, coil_lbl, circ_bb1,
+        self.play(*[FadeOut(m) for m in (bb1, bb2, coil_link, circ_bb1,
                                          circ_bb2, arr_bb, cap5)],
                   bb_marks.animate.set_opacity(1.0), run_time=0.8)
 
@@ -1661,12 +1665,9 @@ class S4B_BB_AA_ConductorProof(SafeThreeDScene):
         aa2 = conductor_mark(p_aa_in, False, r=0.145, color=OK)     # ⊗
         coil_link2 = DashedLine(p_aa_out, p_aa_in, color=OK, stroke_width=2,
                                 dash_length=0.10, stroke_opacity=0.55)
-        coil_lbl2 = self.hud(Text("ขดเดียวกัน — ด้านหนึ่งใต้ขั้ว S อีกด้านใต้ขั้ว N",
-                                  font_size=17, color=OK))
-        coil_lbl2.next_to(front, DOWN, buff=0.40)
 
         self.play(FadeIn(aa1, scale=1.4), FadeIn(aa2, scale=1.4), run_time=0.7)
-        self.play(Create(coil_link2), FadeIn(coil_lbl2), run_time=0.8)
+        self.play(Create(coil_link2), run_time=0.6)
         self.wait(0.7)
 
         circ_aa1 = rhr_circle(p_aa_out, 0.42, ccw=True)
@@ -1693,7 +1694,7 @@ class S4B_BB_AA_ConductorProof(SafeThreeDScene):
         self.wait(1.4)
 
         self.zoom_to(STAGE, zoom=1.0, run_time=1.1)
-        self.play(*[FadeOut(m) for m in (aa1, aa2, coil_link2, coil_lbl2, circ_aa1,
+        self.play(*[FadeOut(m) for m in (aa1, aa2, coil_link2, circ_aa1,
                                          circ_aa2, arr_aa, cap9)],
                   aa_marks.animate.set_opacity(1.0), run_time=0.8)
 
