@@ -37,6 +37,7 @@ STAGE = np.array([0.0, 0.15, 0.0])
 class EP11_LossOverview(SafeScene):
     def construct(self):
         self.add(title("การสูญเสีย 2 ชนิด — คนละลักษณะ คนละตำแหน่ง"))
+        self.add(page_ref("หน้า 1 · 7-1 ถึง 7-3"))
 
         # -- ต้นไม้การสูญเสีย (ซ้าย)
         cu_head = Text("Copper loss", font_size=26, color=CURRENT).move_to([-4.3, 2.35, 0])
@@ -90,13 +91,21 @@ class EP11_LossOverview(SafeScene):
         self.play(FadeOut(cap))
         cap2 = caption("เช็คคำตอบทุกข้อ: E x Ia = P_out + P_cu ต้องตรงกันเป๊ะ")
         self.play(FadeIn(cap2))
-        self.wait(1.4)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "จุดออกสอบ 7-7: rotational loss ประกอบด้วยอะไรบ้าง",
+            "(1) การสูญเสียในแกนเหล็ก (iron/core loss)  (2) การสูญเสียทางกล (mechanical loss)")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
 
 
 # ------------------------------------------------------------------ EP12
 class EP12_CopperLoss(SafeScene):
     def construct(self):
         self.add(title("Copper loss — ทำไมสายเล็กระบายความร้อนดีกว่า"))
+        self.add(page_ref("หน้า 2-3 · 7-3"))
 
         formula = MathTex(r"P_{cu} = I^2 R", font_size=52, color=CURRENT).move_to([-3.4, 1.9, 0])
         self.play(Write(formula))
@@ -135,13 +144,21 @@ class EP12_CopperLoss(SafeScene):
 
         concl = Text("สาย 0.1 cm ระบายความร้อนได้ 10 เท่าของสาย 1 cm", font_size=21, color=OK).move_to([0, -1.9, 0])
         self.play(FadeIn(concl))
-        self.wait(1.4)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "จุดออกสอบ 7-4: ทำไมเครื่องความเร็วรอบสูงใช้ cmil/A ต่ำกว่า",
+            "หมุนเร็ว → ลมพัดผ่านมาก → ระบายความร้อนดีกว่า → ยอมให้ความหนาแน่นกระแสสูงขึ้นได้")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
 
 
 # ------------------------------------------------------------------ EP13
 class EP13_EddyHysteresis(SafeScene):
     def construct(self):
         self.add(title("Eddy current vs Hysteresis — คนละสาเหตุ คนละวิธีแก้"))
+        self.add(page_ref("หน้า 4-6 · รูปที่ 7-1"))
 
         pole_n = pole_box("N", -3.2)
         pole_s = pole_box("S", 3.2)
@@ -208,7 +225,14 @@ class EP13_EddyHysteresis(SafeScene):
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.2).move_to([0, -1.5, 0])
         self.play(FadeOut(VGroup(title2, dots, arrows_up, cap4)))
         self.play(FadeIn(table))
-        self.wait(1.4)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "จุดออกสอบ 7-8: การสูญเสียในแกนเหล็กมีกี่ชนิด",
+            "2 ชนิด — eddy current loss (แก้ด้วยรูปทรง) และ hysteresis loss (แก้ด้วยวัสดุ)")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
 
 
 def exam_card(q, a, y=0.0):
@@ -236,6 +260,7 @@ def pole_box(sign, x):
 class EP14_Efficiency(SafeScene):
     def construct(self):
         self.add(title("ประสิทธิภาพสูงสุดเมื่อ variable loss = fixed loss"))
+        self.add(page_ref("หน้า 7, 11 · 7-5 · ตัวอย่างที่ 7-4"))
 
         formula = MathTex(r"\eta = \frac{P_{out}}{P_{out}+P_{loss}}", font_size=46, color=OK).move_to([0, 2.0, 0])
         self.play(Write(formula))
@@ -286,7 +311,14 @@ class EP14_Efficiency(SafeScene):
         self.play(FadeOut(cap))
         cap2 = caption("โหลดลด แต่ fixed loss ไม่ลด -> สัดส่วน loss ต่อเอาต์พุตสูงขึ้น -> eta ลดลง")
         self.play(FadeIn(cap2))
-        self.wait(1.6)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "หลักการที่ต้องจำ",
+            "ประสิทธิภาพสูงสุดเกิดเมื่อ variable loss = fixed loss — ไม่ใช่ที่โหลดเต็มที่เสมอไป")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
 
 
 # ------------------------------------------------------------------ EP15
@@ -564,31 +596,42 @@ class EP18_ChapterSummary(SafeScene):
 
     def construct(self):
         ttl = title("สรุปบทที่ 7 — การสูญเสียและประสิทธิภาพ", size=27)
+        self.add(page_ref("หน้า 17 · คำถามท้ายบท"))
         self.play(FadeIn(ttl), run_time=0.8)
         self.wait(0.6)
 
         pts = [
             ("การสูญเสีย 2 ชนิด", "Copper loss (ขึ้นกับโหลด) + Rotational loss (คงที่)", CURRENT),
+            ("ความต้านทาน", "เพิ่ม 1% ทุกๆ 2.5°C ที่ร้อนขึ้น — ห้ามใช้ค่าเย็นตรงๆ ถ้าโจทย์ให้อุณหภูมิ", METAL),
+            ("Eddy current loss", "∝ (ความหนาแผ่น)² × (ความเร็ว)² × (ฟลักซ์)² — แก้ด้วยแผ่นบาง", "#546E7A"),
             ("ตรวจคำตอบทุกข้อ", "E·Ia = Pout + Pcu ต้องตรงกันเป๊ะ", OK),
             ("ประสิทธิภาพสูงสุด", "เกิดเมื่อ variable loss = fixed loss", WARN),
             ("Long vs Short-shunt", "Is=Ia (long) ต่างจาก Is=IL (short)", EMF),
         ]
         rows = VGroup()
         for head, body, c in pts:
-            h = Text(head, font_size=24, color=c)
-            b = Text(body, font_size=19, color=GRAYTXT)
+            h = Text(head, font_size=22, color=c)
+            b = Text(body, font_size=17, color=GRAYTXT)
             fit_width(b, 10.5)
-            row = VGroup(h, b).arrange(DOWN, aligned_edge=LEFT, buff=0.10)
+            row = VGroup(h, b).arrange(DOWN, aligned_edge=LEFT, buff=0.08)
             rows.add(row)
-        rows.arrange(DOWN, aligned_edge=LEFT, buff=0.45)
+        rows.arrange(DOWN, aligned_edge=LEFT, buff=0.28)
         fit_width(rows, 11.0)
-        rows.move_to([0, -0.1, 0])
+        rows.move_to([0, -0.15, 0])
 
-        self.play(LaggedStart(*[FadeIn(r, shift=RIGHT * 0.25) for r in rows],
-                              lag_ratio=0.25), run_time=2.2)
-        self.wait(2.0)
+        for r in rows:
+            self.play(FadeIn(r, shift=RIGHT * 0.25), run_time=0.55)
+            self.wait(0.35)
+        self.wait(1.4)
 
-        self.play(FadeOut(rows), FadeOut(ttl), run_time=0.7)
+        self.play(FadeOut(rows), run_time=0.6)
+        card = exam_card(
+            "จุดออกสอบ 7-10: ประสิทธิภาพคืออะไร",
+            "อัตราส่วนกำลังเอาท์พุทต่อกำลังอินพุท  η = Pout/Pin = Pout/(Pout+Ploss)", y=-0.1)
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
+
+        self.play(FadeOut(card), FadeOut(ttl), run_time=0.7)
         closer = Text("ครบทั้งบทที่ 7 แล้ว — ไปต่อบทถัดไปได้เลย", font_size=26, color=OK)
         self.play(FadeIn(closer, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
