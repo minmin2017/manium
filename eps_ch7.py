@@ -157,7 +157,9 @@ class EP12_CopperLoss(SafeScene):
 # ------------------------------------------------------------------ EP13
 class EP13_EddyHysteresis(SafeScene):
     def construct(self):
-        self.add(title("Eddy current vs Hysteresis — คนละสาเหตุ คนละวิธีแก้"))
+        # หัวเรื่องยาวเกินไปชนป้าย page_ref มุมขวาบน (เจอจริงจากเรนเดอร์คลาวด์
+        # 2026-08-31 — รูปแบบเดียวกับที่เจอใน EP17 มาก่อน) ตัดให้สั้นลง
+        self.add(title("Eddy current vs Hysteresis"))
         self.add(page_ref("หน้า 4-6 · รูปที่ 7-1"))
 
         pole_n = pole_box("N", -3.2)
@@ -259,7 +261,8 @@ def pole_box(sign, x):
 # ------------------------------------------------------------------ EP14
 class EP14_Efficiency(SafeScene):
     def construct(self):
-        self.add(title("ประสิทธิภาพสูงสุดเมื่อ variable loss = fixed loss"))
+        # เหตุผลเดียวกับ EP13 — ตัดหัวเรื่องให้สั้นลงไม่ให้ชนป้าย page_ref
+        self.add(title("ประสิทธิภาพสูงสุด — variable = fixed loss", size=26))
         self.add(page_ref("หน้า 7, 11 · 7-5 · ตัวอย่างที่ 7-4"))
 
         formula = MathTex(r"\eta = \frac{P_{out}}{P_{out}+P_{loss}}", font_size=46, color=OK).move_to([0, 2.0, 0])
