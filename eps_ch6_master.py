@@ -1591,8 +1591,12 @@ class S4B_BB_AA_ConductorProof(SafeThreeDScene):
 
         cap2 = self.hud(caption_top(
             "หยิบขดจริง 1 ขด จากกลุ่ม BB — ปลาย 2 ข้างห่างกัน 180° ผ่านเพลา", color=WARN))
-        self.play(FadeIn(cap2), bb_marks.animate.set_opacity(0.16),
-                  aa_marks.animate.set_opacity(0.10), run_time=0.6)
+        self.play(FadeIn(cap2), bb_marks.animate.set_opacity(0.35),
+                  aa_marks.animate.set_opacity(0.12), run_time=0.5)
+        # ซูมกล้อง 3D จริงเข้าไปที่คู่ตัวนำ (แทนการหรี่แสงอย่างเดียวแบบเดิม —
+        # เทคนิคจากคอมมูนิตี้ ยืนยันแล้วว่า move_camera(zoom=) เป็น API จริงของ
+        # Manim Community, ดู skill §19) ให้เห็นรายละเอียดขดลวด+วง RHR ชัดขึ้น
+        self.zoom_to(STAGE, zoom=2.4, run_time=1.2)
 
         bb1 = conductor_mark(p_bb_in, False, r=0.145, color=WARN)    # ⊗
         bb2 = conductor_mark(p_bb_out, True, r=0.145, color=WARN)    # ⊙
@@ -1631,6 +1635,7 @@ class S4B_BB_AA_ConductorProof(SafeThreeDScene):
         self.play(FadeIn(cap5), Indicate(fld, color=WARN, scale_factor=1.05), run_time=0.9)
         self.wait(1.4)
 
+        self.zoom_to(STAGE, zoom=1.0, run_time=1.1)
         self.play(*[FadeOut(m) for m in (bb1, bb2, coil_link, coil_lbl, circ_bb1,
                                          circ_bb2, arr_bb, cap5)],
                   bb_marks.animate.set_opacity(1.0), run_time=0.8)
@@ -1644,8 +1649,9 @@ class S4B_BB_AA_ConductorProof(SafeThreeDScene):
         cap6 = self.hud(caption_top(
             "ทีนี้หยิบขดจริง 1 ขด จากกลุ่ม AA — ปลาย 2 ข้างก็ห่างกัน 180° เหมือนกัน",
             color=OK))
-        self.play(bb_marks.animate.set_opacity(0.10), aa_marks.animate.set_opacity(0.16),
-                  FadeIn(cap6), run_time=0.6)
+        self.play(bb_marks.animate.set_opacity(0.12), aa_marks.animate.set_opacity(0.35),
+                  FadeIn(cap6), run_time=0.5)
+        self.zoom_to(STAGE, zoom=2.4, run_time=1.2)
 
         aa1 = conductor_mark(p_aa_out, True, r=0.145, color=OK)     # ⊙
         aa2 = conductor_mark(p_aa_in, False, r=0.145, color=OK)     # ⊗
@@ -1682,6 +1688,7 @@ class S4B_BB_AA_ConductorProof(SafeThreeDScene):
         self.play(FadeIn(cap9), run_time=0.6)
         self.wait(1.4)
 
+        self.zoom_to(STAGE, zoom=1.0, run_time=1.1)
         self.play(*[FadeOut(m) for m in (aa1, aa2, coil_link2, coil_lbl2, circ_aa1,
                                          circ_aa2, arr_aa, cap9)],
                   aa_marks.animate.set_opacity(1.0), run_time=0.8)
@@ -1693,9 +1700,7 @@ class S4B_BB_AA_ConductorProof(SafeThreeDScene):
         self.play(FadeIn(cap10), run_time=0.6)
         self.wait(1.8)
 
-        self.play(*[FadeOut(m) for m in (n_pole, s_pole, n_lab, s_lab, front, fld,
-                                         bb_marks, aa_marks, cap10, ttl, ref)],
-                  run_time=0.9)
+        self.fade_out_all(run_time=0.9)
 
         s1 = Text("BB → หักล้างสนามหลัก (แนวนอน)", font_size=27, color=WARN)
         s2 = Text("AA → ตั้งฉากสนามหลัก (แนวตั้ง)", font_size=27, color=OK)
