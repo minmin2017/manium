@@ -485,7 +485,11 @@ class EP17_LongVsShortShunt(SafeScene):
         l_sub.next_to(l_head, DOWN, buff=0.15)
         l_diag = Text("Rf ---(คร่อม Vt)\nRa+Rs อนุกรมกัน\nIs = Ia", font_size=17,
                      color=WHITE, line_spacing=1.0).next_to(l_sub, DOWN, buff=0.30)
-        l_form = MathTex(r"I_f=\frac{V_t}{R_f}\ \text{(ตรงๆ)}", font_size=24, color=CURRENT)
+        # หมายเหตุ: ห้ามใส่ข้อความไทยใน \text{} ของ MathTex (ทำให้ latex build พัง —
+        # ดู memory feedback-manim-verify-frames.md) แยกเป็น MathTex + Text คนละก้อน
+        l_form_eq = MathTex(r"I_f=\frac{V_t}{R_f}", font_size=24, color=CURRENT)
+        l_form_note = Text("(ตรงๆ)", font_size=18, color=CURRENT)
+        l_form = VGroup(l_form_eq, l_form_note).arrange(RIGHT, buff=0.18)
         l_form.next_to(l_diag, DOWN, buff=0.30)
 
         # ---------- ขวา: short-shunt ----------
@@ -495,8 +499,9 @@ class EP17_LongVsShortShunt(SafeScene):
         r_sub.next_to(r_head, DOWN, buff=0.15)
         r_diag = Text("Rf ---(คร่อมอาร์เมเจอร์)\nRs อยู่ในสายจ่ายไฟ\nIs = IL", font_size=17,
                      color=WHITE, line_spacing=1.0).next_to(r_sub, DOWN, buff=0.30)
-        r_form = MathTex(r"I_f=\frac{V_t+I_LR_s}{R_f}\ \text{(ต้องหา }I_L\text{ ก่อน)}",
-                        font_size=22, color=WARN)
+        r_form_eq = MathTex(r"I_f=\frac{V_t+I_LR_s}{R_f}", font_size=22, color=WARN)
+        r_form_note = Text("(ต้องหา IL ก่อน)", font_size=17, color=WARN)
+        r_form = VGroup(r_form_eq, r_form_note).arrange(DOWN, buff=0.12)
         fit_width(r_form, 3.6)
         r_form.next_to(r_diag, DOWN, buff=0.30)
 
