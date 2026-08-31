@@ -387,6 +387,12 @@ class SafeThreeDScene(LayoutGuard, ThreeDScene):
                 self._world_ok.add(id(d))
         return mobs[0] if len(mobs) == 1 else mobs
 
+    def fade_out_all(self, run_time=0.9):
+        """เก็บฉากทั้งหมดในคำสั่งเดียว — เวอร์ชัน 3D ของเมธอดเดียวกันใน SafeScene
+        (ดูคำอธิบายเต็มที่นั่น) ครอบคลุมทั้งของที่อยู่ในโลก 3D และของที่ hud()
+        ไว้แล้วโชว์อยู่ (self.mobjects มีทั้งคู่หลังจาก FadeIn เข้าฉากจริง)"""
+        self.play(FadeOut(Group(*self.mobjects)), run_time=run_time)
+
     def tear_down(self):
         n = getattr(self, "_n_issues", 0)
         print(f"[LAYOUT] ===== สรุป {type(self).__name__}: "
@@ -464,6 +470,43 @@ def live_row(label_txt, unit_txt, get_value, anchor, decimals=1,
     _place(num)
     num.add_updater(_place)
     return VGroup(lbl, num, unit)
+
+
+def wave_field_dots(x_range, y_range, wave_func, get_time, density=8,
+                    dot_radius=0.035, color=FIELD, z=0.0):
+    """สนามคลื่นต่อเนื่อง แสดงด้วยจุดเล็กๆ หลายร้อยจุด ปรับความโปร่งใสสดทุกเฟรม
+    ตามสูตรคลื่น — ให้ภาพคลื่นเนียนต่อเนื่องเหมือนพื้นผิวจริง ต่างจากลูกศร/เส้นแยกชิ้น
+    ที่ใช้ทั่วไปในไฟล์นี้ (ดู arrow3/b_field)
+
+    ที่มา: ศึกษาจากซีน 3Blue1Brown เรื่อง "Barber Pole 2" (github.com/3b1b/videos
+    _2023/optics_puzzles/bending_waves.py) ซึ่งใช้ TimeVaryingVectorField +
+    DotCloud — สองคลาสนี้เป็นของ ManimGL เท่านั้น ไม่มีใน Manim Community
+    (เช็คแล้วกับ docs.manim.community, 2026-08-31 — ดู skill §19) ฟังก์ชันนี้คือ
+    การเขียนแนวคิดเดียวกันใหม่ด้วย Dot ธรรมดาของ Manim Community แทน
+
+    x_range/y_range: (min, max) พิกัดที่จะปูตาราง | density: จุดต่อหน่วยความยาว
+    wave_func(x, y, t) -> ค่า 0.0-1.0 (ความโปร่งใส ณ จุดนั้นเวลานั้น)
+    get_time: callable คืนเวลาปัจจุบัน เช่น lambda: tracker.get_value()
+
+    ⚠️ ยังไม่เคยใช้ในซีนจริง ไม่เคยเรนเดอร์/เบนช์มาร์ก — ก่อนใช้กับซีนจริง ให้
+    เช็คความเร็วก่อน (จำนวนจุด vs. เวลาเรนเดอร์ต่อวินาที ตามหลัก §2/§13 ของ
+    skill: อาจต้องลด density ถ้าจุดเยอะเกินไปทำให้ช้า — ห้ามสมมติว่าเร็วพอโดยไม่วัด)
+    """
+    dots = VGroup()
+    xs = np.arange(x_range[0], x_range[1], 1.0 / density)
+    ys = np.arange(y_range[0], y_range[1], 1.0 / density)
+    for x in xs:
+        for y in ys:
+            dots.add(Dot([x, y, z], radius=dot_radius, color=color))
+
+    def _update(group):
+        t = get_time()
+        for d in group:
+            c = d.get_center()
+            d.set_opacity(float(np.clip(wave_func(c[0], c[1], t), 0.0, 1.0)))
+
+    dots.add_updater(_update)
+    return dots
 
 
 def rhr_note(size=19):
