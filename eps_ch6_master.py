@@ -72,13 +72,18 @@ def slot_angles(n=N_SLOT):
 
 
 def face_marks(n=N_SLOT, z=L_HALF, brush_angle=0.0, center=STAGE):
-    """⊙/⊗ บนหน้าตัดด้านหน้า — แบ่งซีกด้วย 'แนวแปรงถ่าน' ไม่ใช่แบ่งซ้าย/ขวาตายตัว
+    """⊙/⊗ บนหน้าตัดด้านหน้า — แบ่งซีกซ้าย/ขวาของ 'แนวแปรงถ่าน' (ไม่ใช่บน/ล่าง)
 
     brush_angle = มุมเอียงของแนวแปรงถ่าน (0 = แนวตั้ง) กระแสกลับทิศตรงแนวนี้
     เพราะคอมมิวเตเตอร์สลับซี่ตรงนั้นพอดี (โยงกับ S1)
+
+    เดิม axis ใช้ทิศ "ตามแนวแปรงถ่าน" เอง (แบ่งบน/ล่าง) — เทียบกับรูปที่ 6-2(ข)
+    ในหนังสือแล้วผิด หนังสือแบ่งซ้าย/ขวาของเส้นแปรงถ่าน (⊗ ทั้งซีกซ้าย ⊙ ทั้งซีกขวา
+    ตอนแปรงถ่านแนวตั้ง) ต้องใช้ axis ที่ตั้งฉากกับแนวแปรงถ่านแทน (พบ 2026-08-31
+    ตอน Min ถามเรื่องสนามแต่ละขดลวดตอนหมุน — S9 ใช้สูตรถูกอยู่แล้ว จุดนี้ผิดจุดเดียว)
     """
     g = VGroup()
-    axis = np.array([-np.sin(brush_angle), np.cos(brush_angle), 0.0])
+    axis = np.array([np.cos(brush_angle), np.sin(brush_angle), 0.0])
     for a in slot_angles(n):
         p = center + R_ARM * np.array([np.cos(a), np.sin(a), 0]) + np.array([0, 0, z])
         out = float(np.dot(np.array([np.cos(a), np.sin(a), 0.0]), axis)) > 0
@@ -726,7 +731,10 @@ class S4_BB_AA(SafeThreeDScene):
         for a in slot_angles():
             u = np.array([np.cos(a), np.sin(a), 0.0])
             p = STAGE + R_ARM * u
-            out = np.dot(u, np.array([0.0, 1.0, 0.0])) > 0
+            # ทิศ ⊙/⊗ แบ่งซ้าย/ขวาของแนวแปรงถ่าน (แก้ตาม face_marks() — เดิมใช้แกน
+            # ผิดเป็นบน/ล่าง) ส่วนเกณฑ์ BB/AA (|sin(a)|>0.55) ยังคงเดิม เพราะยึดตาม
+            # คำบรรยายในหนังสือ (BB=ตัวนำบน-ล่าง, AA=ตัวนำซ้าย-ขวา) ซึ่งถูกอยู่แล้ว
+            out = np.dot(u, np.array([1.0, 0.0, 0.0])) > 0
             m = conductor_mark(p, out)
             (bb_marks if abs(np.sin(a)) > 0.55 else aa_marks).add(m)
 
@@ -1210,7 +1218,8 @@ class S8_Compensating(SafeScene):
         for i in range(10):
             a = PI / 2 + (i + 0.5) * TAU / 10
             p = sc + 1.35 * np.array([np.cos(a), np.sin(a), 0])
-            arm_marks.add(conductor_mark(p, np.sin(a) > 0, r=0.10))
+            # ⊙ ใกล้ขั้ว S (ขวา, cos a > 0), ⊗ ใกล้ขั้ว N (ซ้าย) — แก้จากบั๊กบน/ล่างเดิม
+            arm_marks.add(conductor_mark(p, np.cos(a) > 0, r=0.10))
 
         cap1 = caption_top("ขดลวดชดเชย = ขดเล็กๆ ฝังใน \"ผิวหน้า\" ของแท่งขั้วหลัก")
         self.play(FadeOut(cap0), run_time=0.3)
@@ -1410,6 +1419,93 @@ class S9_Bonus_RotatingConductorEMF(SafeScene):
                   font_size=25, color=WHITE)
         s2 = Text("คอมมิวเตเตอร์คือตัวที่แปลงมันให้เป็นไฟตรงที่ใช้ได้จริง",
                   font_size=23, color=OK)
+        card = VGroup(s1, s2).arrange(DOWN, buff=0.40).move_to([0, 0.3, 0])
+        fit_width(card, 12.0)
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(2.0)
+
+
+# ================================================================ S10 (bonus)
+class S10_Bonus_SpinningArmatureFixedNeutral(SafeScene):
+    """โบนัส 2 — สนามหลัก + อาร์เมเจอร์หมุนจริง: ระนาบเป็นกลางไม่หมุนตามล้อ
+
+    Min ขอ (2026-08-31): อยากเห็นสนามหลัก+สนามอาร์เมเจอร์หมุนไปด้วยกัน จะได้รู้ว่า
+    ต้องคิดสรุปภาพรวมยังไง โดยเฉพาะ "ระนาบเป็นกลางเป็นยังไงตอนอาร์เมเจอร์หมุน"
+
+    คำตอบที่ซีนนี้แสดง: ⊙/⊗ ของตัวนำแต่ละเส้น "สลับ" ตอนมันหมุนผ่านแนวแปรงถ่าน
+    (คอมมิวเตชั่นเกิดสดๆ ให้เห็น) แต่ตัวแนวแปรงถ่าน/ทิศของ Bₐ เอง**ไม่หมุนตามล้อ**
+    — มันค้างอยู่กับที่ตลอด เพราะคอมมิวเตเตอร์คอยจัดกระแสให้คงที่ตามตำแหน่ง
+
+    ใช้ face_marks()/main_field() ที่แก้แล้ว (แบ่งซ้าย-ขวา ตรงกับหนังสือ+แหล่งอ้างอิง
+    มาตรฐาน: ตัวนำใกล้ N=⊗, ใกล้ S=⊙)
+    """
+
+    N_C = 12
+
+    def construct(self):
+        ttl = title("โบนัส 2 — หมุนทั้งระบบ: ระนาบเป็นกลางหมุนตามไหม?", size=25)
+        self.play(FadeIn(ttl, shift=DOWN * 0.15), run_time=0.8)
+
+        cap0 = caption_top("สนามหลัก (นิ่ง) + อาร์เมเจอร์ (หมุนจริง) — จับตาแนวแปรงถ่าน")
+        self.play(FadeIn(cap0), run_time=0.7)
+
+        n_pole, s_pole = pole_piece(-1, "N"), pole_piece(+1, "S")
+        n_lab = Text("N", font_size=32, color=WHITE).move_to(
+            [STAGE[0] - (POLE_X - POLE_W / 2), STAGE[1], 0])
+        s_lab = Text("S", font_size=32, color=WHITE).move_to(
+            [STAGE[0] + (POLE_X - POLE_W / 2), STAGE[1], 0])
+        ring = Circle(radius=R_ARM, color=METAL, stroke_width=3).move_to(STAGE)
+        fld = main_field(0.0, n=3, opacity=0.5)
+
+        brush_axis = plane_line(0.0, WARN, length=R_ARM + 0.35, width=4)
+        axis_lbl = Text("แนวแปรงถ่าน (นิ่งเสมอ)", font_size=18, color=WARN)
+        axis_lbl.next_to(brush_axis, UP, buff=0.15)
+
+        self.play(FadeOut(cap0), run_time=0.3)
+        self.play(FadeIn(n_pole), FadeIn(s_pole), FadeIn(n_lab), FadeIn(s_lab),
+                  FadeIn(fld), Create(ring), run_time=1.0)
+        self.play(Create(brush_axis), FadeIn(axis_lbl), run_time=0.8)
+        self.wait(0.6)
+
+        theta = ValueTracker(0.0)
+        base_angles = slot_angles(self.N_C)
+
+        def build_marks():
+            g = VGroup()
+            for a0 in base_angles:
+                a = a0 + theta.get_value()
+                u = np.array([np.cos(a), np.sin(a), 0.0])
+                p = STAGE + R_ARM * u
+                out = np.cos(a) > 0  # ⊙ ใกล้ S(ขวา), ⊗ ใกล้ N(ซ้าย) — แนวแปรงถ่าน "นิ่ง"
+                g.add(conductor_mark(p, out))
+            return g
+
+        marks = always_redraw(build_marks)
+
+        ba = Arrow(STAGE + [0, R_ARM - 0.15, 0], STAGE + [0, -(R_ARM - 0.15), 0],
+                  buff=0, color=OK, stroke_width=7, tip_length=0.26)
+        ba_lbl = Text("Bₐ (ทิศคงที่)", font_size=19, color=OK)
+        ba_lbl.next_to(ba, LEFT, buff=0.2)
+
+        cap1 = caption_top("ตัวนำแต่ละเส้นสลับ ⊙⇄⊗ ตอนหมุนผ่านแนวแปรงถ่าน — นี่คือคอมมิวเตชั่น")
+        self.play(FadeIn(marks), FadeIn(ba), FadeIn(ba_lbl), FadeIn(cap1), run_time=1.0)
+        self.play(theta.animate.set_value(2 * TAU), run_time=9.0, rate_func=linear)
+        self.wait(0.5)
+
+        marks.clear_updaters()
+        cap2 = caption_top(
+            "แต่แนวแปรงถ่านกับทิศ Bₐ ไม่หมุนตามล้อเลย — อยู่นิ่งตลอดเวลา", color=OK)
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), run_time=0.6)
+        self.wait(1.8)
+
+        self.play(*[FadeOut(m) for m in (n_pole, s_pole, n_lab, s_lab, ring, fld,
+                                         brush_axis, axis_lbl, marks, ba, ba_lbl,
+                                         cap2, ttl)], run_time=0.9)
+
+        s1 = Text("ตัวนำหมุนไปเรื่อยๆ สลับ ⊙⇄⊗ ตลอด", font_size=25, color=CURRENT)
+        s2 = Text("แต่ระนาบเป็นกลาง + ทิศ Bₐ คงที่ — คอมมิวเตเตอร์คอยจัดให้", font_size=23,
+                  color=OK)
         card = VGroup(s1, s2).arrange(DOWN, buff=0.40).move_to([0, 0.3, 0])
         fit_width(card, 12.0)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)

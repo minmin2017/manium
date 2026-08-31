@@ -63,54 +63,60 @@ class EP08B_ConductorRHRToFlux(SafeScene):
         self.play(FadeOut(c0), run_time=0.3)
 
         # ---------- ฉาก 1: ซูมดูตัวนำ 2 เส้นตัวแทน ----------
-        top_c = STAGE + np.array([0, 1.55, 0])
-        bot_c = STAGE + np.array([0, -1.55, 0])
+        # แก้ 2026-08-31: เดิมวางตัวนำบน/ล่าง ซึ่งไม่ตรงกับกฎจริงของเครื่อง DC
+        # (ตรวจแล้วทั้งหนังสือ Min และแหล่งอ้างอิงมาตรฐานภายนอกยืนยันตรงกัน:
+        # ตัวนำใต้ขั้ว N กระแสเข้าจอ ใต้ขั้ว S กระแสออกจอ — แบ่งซ้าย/ขวา ไม่ใช่บน/ล่าง)
+        left_c = STAGE + np.array([-1.55, 0, 0])
+        right_c = STAGE + np.array([1.55, 0, 0])
         mid_c = STAGE
 
-        top_cond = conductor(top_c, True)
-        top_lbl = Text("ตัวนำซีกบน (⊙ พุ่งออก)", font_size=21, color=CURRENT)
-        top_lbl.next_to(top_cond, UP, buff=0.85)  # clear of the 0.62-radius RHR circle
+        left_cond = conductor(left_c, False)
+        left_lbl = Text("ตัวนำใกล้ขั้ว N (⊗ พุ่งเข้า)", font_size=21, color=CURRENT)
+        left_lbl.next_to(left_cond, LEFT, buff=0.85)
 
         c1 = caption("ตัวนำ 1 เส้น มีกระแสไหล → สร้างสนามวงกลมรอบตัวเอง (กฎมือขวา)")
-        self.play(FadeIn(c1), FadeIn(top_cond), FadeIn(top_lbl), run_time=0.9)
+        self.play(FadeIn(c1), FadeIn(left_cond), FadeIn(left_lbl), run_time=0.9)
         self.wait(0.6)
 
-        top_circ = rhr_circle(top_c, 0.62, ccw=True)
-        rule1 = Text("นิ้วโป้งชี้ออกจากจอ → 4 นิ้วกำวนทวนเข็มนาฬิกา", font_size=19,
+        left_circ = rhr_circle(left_c, 0.62, ccw=False)
+        rule1 = Text("นิ้วโป้งชี้เข้าหาจอ → 4 นิ้วกำวนตามเข็มนาฬิกา", font_size=19,
                      color=GRAYTXT)
-        rule1.next_to(top_cond, RIGHT, buff=0.9)
+        rule1.next_to(left_cond, DOWN, buff=0.85)
         fit_width(rule1, 4.6)
         self.play(FadeOut(c1), run_time=0.3)
-        self.play(Create(top_circ), FadeIn(rule1), run_time=1.0)
+        self.play(Create(left_circ), FadeIn(rule1), run_time=1.0)
         self.wait(0.9)
         self.play(FadeOut(rule1), run_time=0.3)
 
         # ---------- ตัวนำที่ 2 ----------
-        bot_cond = conductor(bot_c, False)
-        bot_lbl = Text("ตัวนำซีกล่าง (⊗ พุ่งเข้า)", font_size=21, color=CURRENT)
-        bot_lbl.next_to(bot_cond, DOWN, buff=0.85)  # clear of the 0.62-radius RHR circle
+        right_cond = conductor(right_c, True)
+        right_lbl = Text("ตัวนำใกล้ขั้ว S (⊙ พุ่งออก)", font_size=21, color=CURRENT)
+        right_lbl.next_to(right_cond, RIGHT, buff=0.85)
 
-        c2 = caption("อีกฝั่งของขดเดียวกัน กระแสไหลกลับทิศ (⊗)")
-        self.play(FadeIn(c2), FadeIn(bot_cond), FadeIn(bot_lbl), run_time=0.9)
+        c2 = caption("อีกฝั่งของขดเดียวกัน กระแสไหลกลับทิศ (⊙)")
+        self.play(FadeIn(c2), FadeIn(right_cond), FadeIn(right_lbl), run_time=0.9)
         self.wait(0.6)
 
-        bot_circ = rhr_circle(bot_c, 0.62, ccw=False)
-        rule2 = Text("นิ้วโป้งชี้เข้าหาจอ → 4 นิ้วกำวนตามเข็มนาฬิกา", font_size=19,
+        right_circ = rhr_circle(right_c, 0.62, ccw=True)
+        rule2 = Text("นิ้วโป้งชี้ออกจากจอ → 4 นิ้วกำวนทวนเข็มนาฬิกา", font_size=19,
                      color=GRAYTXT)
-        rule2.next_to(bot_cond, RIGHT, buff=0.9)
+        rule2.next_to(right_cond, DOWN, buff=0.85)
         fit_width(rule2, 4.6)
         self.play(FadeOut(c2), run_time=0.3)
-        self.play(Create(bot_circ), FadeIn(rule2), run_time=1.0)
+        self.play(Create(right_circ), FadeIn(rule2), run_time=1.0)
         self.wait(0.9)
         self.play(FadeOut(rule2), run_time=0.3)
 
         # ---------- ฉาก 2: ตรงกึ่งกลาง สองสนามชี้ทางเดียวกัน (จังหวะ "อ๋อ") ----------
-        a1 = Arrow(mid_c + [0, 0.55, 0], mid_c + [0, -0.35, 0], buff=0,
+        # ทั้งสองเส้น: ตรงจุดกึ่งกลาง สนามจาก RHR ชี้ "ลง" เหมือนกัน (ตัวนำซ้าย/⊗ อยู่
+        # ทางซ้ายของจุดกึ่งกลาง วงหมุนตามเข็ม -> ที่ตำแหน่งขวาของมันชี้ลง;
+        # ตัวนำขวา/⊙ อยู่ทางขวาของจุดกึ่งกลาง วงหมุนทวนเข็ม -> ที่ตำแหน่งซ้ายของมันชี้ลงเช่นกัน)
+        a1 = Arrow(mid_c + [-0.20, 0.55, 0], mid_c + [-0.20, -0.35, 0], buff=0,
                   color=OK, stroke_width=6, tip_length=0.20)
-        a2 = Arrow(mid_c + [0, 0.35, 0], mid_c + [0, -0.55, 0], buff=0,
+        a2 = Arrow(mid_c + [0.20, 0.55, 0], mid_c + [0.20, -0.35, 0], buff=0,
                   color=OK, stroke_width=6, tip_length=0.20)
 
-        c3 = caption("ตรงกึ่งกลาง — สนามจากตัวนำบนกับล่าง ชี้ทางเดียวกันพอดี (ลง)",
+        c3 = caption("ตรงกึ่งกลาง — สนามจากตัวนำซ้ายกับขวา ชี้ทางเดียวกันพอดี (ลง)",
                      color=OK)
         fit_width(c3, 12.8)
         self.play(FadeIn(c3), run_time=0.5)
@@ -125,7 +131,7 @@ class EP08B_ConductorRHRToFlux(SafeScene):
 
         # ---------- เก็บฉากซูม ----------
         self.play(*[FadeOut(m) for m in
-                    (top_cond, top_lbl, top_circ, bot_cond, bot_lbl, bot_circ,
+                    (left_cond, left_lbl, left_circ, right_cond, right_lbl, right_circ,
                      a1, a2, sum_lbl, c3)], run_time=0.7)
 
         # ---------- ฉาก 3: ขยายเป็นวงจริง — ไม่ใช่แค่ 2 เส้น มีหลายสิบเส้น ----------
@@ -141,7 +147,7 @@ class EP08B_ConductorRHRToFlux(SafeScene):
         for i in range(n_cond):
             a = PI / 2 + (i + 0.5) * TAU / n_cond
             pos = STAGE + RING_R * np.array([np.cos(a), np.sin(a), 0])
-            out = np.sin(a) > 0  # ซีกบน = ออก (⊙), ซีกล่าง = เข้า (⊗)
+            out = np.cos(a) > 0  # ใกล้ขั้ว S (ขวา) = ออก (⊙), ใกล้ขั้ว N (ซ้าย) = เข้า (⊗)
             cd = conductor(pos, out, color=CURRENT)
             conductors.add(cd)
             mini_circles.add(rhr_circle(pos, 0.30, ccw=out, sw=2.2))
