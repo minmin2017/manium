@@ -657,8 +657,52 @@ class S4_BB_AA(SafeThreeDScene):
         self.set_camera_orientation(phi=0, theta=-90 * DEGREES)
         ttl = self.hud(title("ผลเสีย 2 อย่าง — คนละกลุ่มตัวนำ คนละปัญหา", size=28))
         ref = self.hud(page_ref("หน้า 5-7 · รูปที่ 6-3"))
-        cap0 = self.hud(caption_top("สนามอาร์เมเจอร์ก้อนเดียว แต่แยกดูผลได้ 2 แง่"))
-        self.play(FadeIn(ttl), FadeIn(ref), FadeIn(cap0), run_time=0.9)
+        self.play(FadeIn(ttl), FadeIn(ref), run_time=0.6)
+
+        # ---------- สะพานเชื่อมจาก S3: ต้อง "เอียงก่อน" ถึงจะแยกได้ ----------
+        # หนังสือหน้า 5 เขียนลำดับชัดเจน: ระนาบเลื่อน -> สนามอาร์เมเจอร์เอียงตามทิศหมุน
+        # -> "แล้วสนามนี้ถูกแยกออกเป็น 2 ส่วน" การเอียงคือสาเหตุที่ทำให้แยกได้ ไม่ใช่ว่า
+        # BB/AA มีอยู่แยกกันเองตั้งแต่ต้น
+        capA = self.hud(caption_top("ทวนจาก S3: สนามหลัก + สนามอาร์เมเจอร์ (90°) → สนามรวมเอียง"))
+        self.play(FadeIn(capA), run_time=0.6)
+
+        bo = STAGE + np.array([0, 0.15, 0])
+        bf = Arrow(bo, bo + np.array([1.85, 0, 0]), buff=0, color=FIELD,
+                  stroke_width=7, tip_length=0.24)
+        ba = Arrow(bo, bo + np.array([0, -1.15, 0]), buff=0, color=CURRENT,
+                  stroke_width=7, tip_length=0.24)
+        bres = Arrow(bo, bo + np.array([1.85, -1.15, 0]), buff=0, color=WARN,
+                    stroke_width=8, tip_length=0.26)
+        bdash = DashedLine(bo + np.array([1.85, 0, 0]), bo + np.array([1.85, -1.15, 0]),
+                           color=CURRENT, stroke_width=2, dash_length=0.09)
+        self.play(GrowArrow(bf), run_time=0.5)
+        self.play(GrowArrow(ba), run_time=0.5)
+        self.play(Create(bdash), GrowArrow(bres), run_time=0.8)
+        self.wait(0.7)
+
+        capB = self.hud(caption_top(
+            "เอียงแล้วนี่แหละ — ถึงค่อยแยกวิเคราะห์ผลได้เป็น 2 องค์ประกอบ", color=EXAMC))
+        self.play(FadeOut(capA), run_time=0.3)
+        self.play(FadeIn(capB), run_time=0.5)
+
+        bb_arrow = Arrow(bo, bo + np.array([1.85, 0, 0]), buff=0, color=WARN,
+                         stroke_width=5, tip_length=0.20).shift(DOWN * 1.55)
+        bb_tag = Text("BB (ขนานสนามหลัก)", font_size=17, color=WARN)
+        bb_tag.next_to(bb_arrow, DOWN, buff=0.12)
+        aa_arrow = Arrow(bo, bo + np.array([0, -1.15, 0]), buff=0, color=WARN,
+                         stroke_width=5, tip_length=0.20).shift(RIGHT * 2.55)
+        aa_tag = Text("AA (ตั้งฉากสนามหลัก)", font_size=17, color=WARN)
+        aa_tag.next_to(aa_arrow, RIGHT, buff=0.18)
+        self.hud(bb_tag, aa_tag)
+        self.play(TransformFromCopy(bres, bb_arrow), FadeIn(bb_tag), run_time=0.8)
+        self.play(TransformFromCopy(bres, aa_arrow), FadeIn(aa_tag), run_time=0.8)
+        self.wait(1.1)
+
+        self.play(*[FadeOut(m) for m in (bf, ba, bres, bdash, bb_arrow, bb_tag,
+                                         aa_arrow, aa_tag, capB)], run_time=0.7)
+
+        cap0 = self.hud(caption_top("มาดูว่ากลุ่มตัวนำไหนสร้างแต่ละองค์ประกอบ"))
+        self.play(FadeIn(cap0), run_time=0.5)
 
         n_pole, s_pole = pole_piece(-1, "N"), pole_piece(+1, "S")
         n_lab = self.hud(Text("N", font_size=34, color=WHITE).move_to(
@@ -1271,3 +1315,98 @@ class S8_Compensating(SafeScene):
         fit_width(last, 11.8)
         self.play(FadeIn(last, scale=1.04), run_time=0.9)
         self.wait(2.2)
+
+
+# ================================================================ S9 (bonus)
+class S9_Bonus_RotatingConductorEMF(SafeScene):
+    """โบนัส (นอกลำดับหน้าหนังสือ) — อาร์เมเจอร์หมุนจริง แต่ละตัวนำ emf เปลี่ยนต่อเนื่อง
+
+    Min ขอ (2026-08-31): "อยากเห็นวิดีโอของอาร์เมเจอร์มันหมุน แบบพอมันหมุนแล้วสนามแต่ละจุด
+    เปลี่ยนแปลงยังไง ทำลูกศรเป็นเวกเตอร์ให้ดูหน่อย"
+
+    ระวัง — คนละปริมาณกับ ⊙/⊗ คงที่ที่เห็นใน S1/S4/S8:
+    ที่นี่คือ "แรงเคลื่อนเหนี่ยวนำดิบ" ในตัวนำแต่ละเส้น ณ ขณะที่ยังไม่ผ่านคอมมิวเตเตอร์
+    (เหมือนต่อขดลวดเดี่ยวเข้าสลิปริง) มันแกว่งขึ้นลงต่อเนื่องเป็น cos(มุม) ตามตำแหน่ง
+    ส่วน ⊙/⊗ ในคลิปอื่นคือกระแส "หลัง" คอมมิวเตเตอร์จัดให้เป็น DC แล้ว (คงที่ตามตำแหน่ง
+    ซ้าย-ขวาของแนวแปรงถ่าน ไม่ใช่แกว่งตามมุม) — สองอย่างนี้ไม่ขัดแย้งกัน แค่คนละขั้นตอน
+
+    ฟิสิกส์: แกนขั้ว = แนวนอน (N ซ้าย/S ขวา), แกนแปรงถ่าน = แนวตั้ง
+    ตัวนำที่มุม a มีความเร็วเชิงสัมผัส ทิศ (a+90°); สนาม B ทิศ 0° (จาก N ไป S)
+    e(a) ∝ sin(มุมระหว่าง v กับ B) = sin(a+90°) = cos(a)
+    -> สูงสุดตรงหน้าขั้ว (a=0°,180°), ศูนย์ตรงระนาบเป็นกลาง (a=90°,270°)
+    ตรงกับสูตรเดียวกับที่ EP07/S2 ใช้ติดตามขดเดียว แค่ขยายมาดูทั้งวงพร้อมกัน
+    """
+
+    N_C = 12
+
+    def construct(self):
+        ttl = title("โบนัส — อาร์เมเจอร์หมุน แต่ละจุด emf เปลี่ยนยังไง", size=26)
+        self.play(FadeIn(ttl, shift=DOWN * 0.15), run_time=0.8)
+
+        cap0 = caption_top(
+            "emf ดิบในตัวนำแต่ละเส้น ก่อนผ่านคอมมิวเตเตอร์ — คนละเรื่องกับ ⊙/⊗ คงที่ก่อนหน้า",
+            color=EXAMC)
+        self.play(FadeIn(cap0), run_time=0.7)
+        self.wait(1.4)
+
+        n_pole, s_pole = pole_piece(-1, "N"), pole_piece(+1, "S")
+        n_lab = Text("N", font_size=32, color=WHITE).move_to(
+            [STAGE[0] - (POLE_X - POLE_W / 2), STAGE[1], 0])
+        s_lab = Text("S", font_size=32, color=WHITE).move_to(
+            [STAGE[0] + (POLE_X - POLE_W / 2), STAGE[1], 0])
+        ring = Circle(radius=R_ARM, color=METAL, stroke_width=3).move_to(STAGE)
+        fld = main_field(0.0, n=3, opacity=0.55)
+
+        cap1 = caption_top("ลูกศร: ยาว = emf มากตอนนั้น · แดง = ออกจากจอ · ฟ้า = เข้าจอ")
+        self.play(FadeOut(cap0), run_time=0.3)
+        self.play(FadeIn(n_pole), FadeIn(s_pole), FadeIn(n_lab), FadeIn(s_lab),
+                  FadeIn(fld), Create(ring), FadeIn(cap1), run_time=1.2)
+
+        theta = ValueTracker(0.0)
+        base_angles = slot_angles(self.N_C)
+
+        def build_vectors():
+            g = VGroup()
+            for a0 in base_angles:
+                a = a0 + theta.get_value()
+                u = np.array([np.cos(a), np.sin(a), 0.0])
+                e = np.cos(a)
+                length = 0.16 + 0.62 * abs(e)
+                start = STAGE + R_ARM * u
+                end = start + length * u
+                color = EMF if e > 0 else FIELD
+                g.add(Arrow(start, end, buff=0, color=color, stroke_width=5,
+                           tip_length=0.13, max_tip_length_to_length_ratio=0.5))
+            return g
+
+        vecs = always_redraw(build_vectors)
+        self.add(vecs)
+        self.wait(0.3)
+
+        cap2 = caption_top(
+            "หมุนดูสด — ตรงหน้าขั้ว emf สูงสุด · ตรงระนาบเป็นกลาง (บน-ล่าง) emf = 0")
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), run_time=0.5)
+        self.play(theta.animate.set_value(2 * TAU), run_time=8.0, rate_func=linear)
+        self.wait(0.5)
+
+        vecs.clear_updaters()
+        self.play(FadeOut(vecs), FadeOut(cap2), run_time=0.6)
+
+        cap3 = caption_top(
+            "พอผ่านคอมมิวเตเตอร์ มันถูกจัดใหม่เป็นกระแส DC คงที่ตามตำแหน่ง — แบบที่เห็นใน S1/S4/S8",
+            color=OK)
+        self.play(FadeIn(cap3), run_time=0.6)
+        self.wait(1.8)
+
+        self.play(*[FadeOut(m) for m in (n_pole, s_pole, n_lab, s_lab, ring, fld,
+                                         cap3, ttl)], run_time=0.9)
+
+        s1 = Text("emf ในตัวนำ = cos(มุมจากขั้ว) เสมอ ไม่ว่าจะหมุนไปกี่รอบ",
+                  font_size=25, color=WHITE)
+        s2 = Text("คอมมิวเตเตอร์คือตัวที่แปลงมันให้เป็นไฟตรงที่ใช้ได้จริง",
+                  font_size=23, color=OK)
+        card = VGroup(s1, s2).arrange(DOWN, buff=0.40).move_to([0, 0.3, 0])
+        fit_width(card, 12.0)
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(2.0)
