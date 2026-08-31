@@ -484,14 +484,41 @@ class EP16_NoLoadComparison_Example75(SafeScene):
         self.play(FadeIn(b3, shift=UP * 0.2), run_time=0.9)
         self.wait(1.4)
 
-        self.play(FadeOut(cap3), run_time=0.3)
+        self.play(*[FadeOut(m) for m in (b1, b2, b3, base_line, cap3)], run_time=0.6)
+
+        cap3b = caption_top("แต่ละกรณีมี loss ครบทุกชนิดไหม — เช็คทีละก้อน", color=GRAYTXT)
+        self.play(FadeIn(cap3b), run_time=0.6)
+
+        head_row = ["กรณี", "mech", "core", "armature I²R", "field"]
+        data_rows = [
+            ["(ก) กระตุ้นตามปกติ", "✓", "✓", "✓ (Ia=If)", "✓"],
+            ["(ข) กระตุ้นแยกต่างหาก", "✓", "✓", "✗ (Ia=0)", "✗ (จากนอก)"],
+            ["(ค) ไม่มีการกระตุ้น", "✓", "✗ (ไม่มีฟลักซ์)", "✗", "✗"],
+        ]
+        colors = [CURRENT, OK, WARN]
+        tbl = VGroup()
+        for cell in head_row:
+            tbl.add(Text(cell, font_size=15, color=GRAYTXT))
+        for row, c in zip(data_rows, colors):
+            for j, cell in enumerate(row):
+                tcolor = c if j == 0 else WHITE
+                t = Text(cell, font_size=14, color=tcolor)
+                fit_width(t, 2.5)
+                tbl.add(t)
+        grid = tbl.arrange_in_grid(rows=4, cols=5, buff=(0.35, 0.18))
+        fit_width(grid, 12.0)
+        grid.move_to([0, -0.4, 0])
+        self.play(FadeIn(grid), run_time=1.0)
+        self.wait(1.8)
+
+        self.play(FadeOut(grid), FadeOut(cap3b), run_time=0.5)
+
         cap4 = caption_top(
             "(ก)−(ข)=452.46≈field+armature loss · (ข)−(ค)=300=core loss พอดี", color=GRAYTXT)
         self.play(FadeIn(cap4), run_time=0.6)
         self.wait(1.6)
 
-        self.play(*[FadeOut(m) for m in (b1, b2, b3, base_line, cap4, ttl, ref)],
-                  run_time=0.7)
+        self.play(*[FadeOut(m) for m in (cap4, ttl, ref)], run_time=0.7)
         card = exam_card(
             "ทำไมไม่มีการกระตุ้นแล้ว core loss หายไป",
             "eddy + hysteresis ต้องอาศัยฟลักซ์แม่เหล็กทั้งคู่ — ไม่กระตุ้น = ไม่มีฟลักซ์")
