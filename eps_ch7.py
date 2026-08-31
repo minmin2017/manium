@@ -470,7 +470,9 @@ class EP17_LongVsShortShunt(SafeScene):
     ลำดับคำนวณคนละแบบ — จุดที่ผิดกันบ่อยที่สุดของบท"""
 
     def construct(self):
-        ttl = title("Long-shunt vs Short-shunt — ลำดับคำนวณคนละแบบ", size=25)
+        # หัวเรื่องยาวเกินไปตอน size=25 ชนกับป้าย page_ref มุมขวาบน (เจอจริงจาก
+        # เรนเดอร์คลาวด์ 2026-08-31, layout linter จับได้ 21% overlap) ตัดให้สั้นลง
+        ttl = title("Long-shunt vs Short-shunt", size=25)
         ref = page_ref("หน้า 13-16 · ตัวอย่างที่ 7-6, 7-7")
         self.play(FadeIn(ttl), FadeIn(ref), run_time=0.7)
 
