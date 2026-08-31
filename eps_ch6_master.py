@@ -685,20 +685,21 @@ class S4_BB_AA(SafeThreeDScene):
         self.play(FadeOut(capA), run_time=0.3)
         self.play(FadeIn(capB), run_time=0.5)
 
+        # หมายเหตุ: เคยใช้ TransformFromCopy(bres, ...) ตรงนี้ แล้วเจอบั๊กจริงที่ป้าย
+        # aa_tag โผล่จางๆ ก่อนถึงคิว (สลับลำดับ hud() แล้วก็ยังเป็น แปลว่าไม่ใช่ปัญหา
+        # จังหวะ hud() แต่เป็นปฏิสัมพันธ์กับ TransformFromCopy เอง) เปลี่ยนมาใช้
+        # GrowArrow + FadeIn ธรรมดาแทน — แพทเทิร์นเดียวกับที่พิสูจน์แล้วว่าปลอดภัยทั่ว
+        # ทั้งไฟล์นี้ (เช่นบล็อก BB/AA ด้านล่าง)
         bb_arrow = Arrow(bo, bo + np.array([1.85, 0, 0]), buff=0, color=WARN,
                          stroke_width=5, tip_length=0.20).shift(DOWN * 1.55)
-        bb_tag = Text("BB (ขนานสนามหลัก)", font_size=17, color=WARN)
-        bb_tag.next_to(bb_arrow, DOWN, buff=0.12)
+        bb_tag = self.hud(Text("BB (ขนานสนามหลัก)", font_size=17, color=WARN)
+                          .next_to(bb_arrow, DOWN, buff=0.12))
         aa_arrow = Arrow(bo, bo + np.array([0, -1.15, 0]), buff=0, color=WARN,
                          stroke_width=5, tip_length=0.20).shift(RIGHT * 2.55)
-        aa_tag = Text("AA (ตั้งฉากสนามหลัก)", font_size=17, color=WARN)
-        aa_tag.next_to(aa_arrow, RIGHT, buff=0.18)
-        # ลงทะเบียน hud() แยกทีละตัว ติดกับ FadeIn ของมันเอง — เคยลงทะเบียนคู่กันไว้
-        # ล่วงหน้าแล้วมา FadeIn ห่างกันคนละจังหวะ ทำให้ aa_tag โผล่จางๆ ก่อนถึงคิวจริง
-        self.hud(bb_tag)
-        self.play(TransformFromCopy(bres, bb_arrow), FadeIn(bb_tag), run_time=0.8)
-        self.hud(aa_tag)
-        self.play(TransformFromCopy(bres, aa_arrow), FadeIn(aa_tag), run_time=0.8)
+        aa_tag = self.hud(Text("AA (ตั้งฉากสนามหลัก)", font_size=17, color=WARN)
+                          .next_to(aa_arrow, RIGHT, buff=0.18))
+        self.play(GrowArrow(bb_arrow), FadeIn(bb_tag), run_time=0.8)
+        self.play(GrowArrow(aa_arrow), FadeIn(aa_tag), run_time=0.8)
         self.wait(1.1)
 
         self.play(*[FadeOut(m) for m in (bf, ba, bres, bdash, bb_arrow, bb_tag,
