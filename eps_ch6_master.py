@@ -693,8 +693,11 @@ class S4_BB_AA(SafeThreeDScene):
                          stroke_width=5, tip_length=0.20).shift(RIGHT * 2.55)
         aa_tag = Text("AA (ตั้งฉากสนามหลัก)", font_size=17, color=WARN)
         aa_tag.next_to(aa_arrow, RIGHT, buff=0.18)
-        self.hud(bb_tag, aa_tag)
+        # ลงทะเบียน hud() แยกทีละตัว ติดกับ FadeIn ของมันเอง — เคยลงทะเบียนคู่กันไว้
+        # ล่วงหน้าแล้วมา FadeIn ห่างกันคนละจังหวะ ทำให้ aa_tag โผล่จางๆ ก่อนถึงคิวจริง
+        self.hud(bb_tag)
         self.play(TransformFromCopy(bres, bb_arrow), FadeIn(bb_tag), run_time=0.8)
+        self.hud(aa_tag)
         self.play(TransformFromCopy(bres, aa_arrow), FadeIn(aa_tag), run_time=0.8)
         self.wait(1.1)
 
