@@ -1596,7 +1596,11 @@ class S4B_BB_AA_ConductorProof(SafeThreeDScene):
         # ซูมกล้อง 3D จริงเข้าไปที่คู่ตัวนำ (แทนการหรี่แสงอย่างเดียวแบบเดิม —
         # เทคนิคจากคอมมูนิตี้ ยืนยันแล้วว่า move_camera(zoom=) เป็น API จริงของ
         # Manim Community, ดู skill §19) ให้เห็นรายละเอียดขดลวด+วง RHR ชัดขึ้น
-        self.zoom_to(STAGE, zoom=2.4, run_time=1.2)
+        # zoom จำกัดที่ 1.6 (ไม่ใช่ 2.4 แบบ AA ด้านล่าง) — คู่ตัวนำ BB อยู่บน-ล่าง
+        # ของวง ห่างจากศูนย์กลางแนวตั้งมาก (~1.4 หน่วย) ถ้าซูม 2.4 เท่า จุดบนสุด
+        # จะทะลุขึ้นไปทับหัวเรื่อง/คำบรรยาย (เจอจริงจากเช็คเฟรม 2026-08-31 — ตัว
+        # layout linter ไม่จับปัญหานี้ เพราะไม่ได้คิดผลจากการซูมกล้อง 3D)
+        self.zoom_to(STAGE, zoom=1.6, run_time=1.2)
 
         bb1 = conductor_mark(p_bb_in, False, r=0.145, color=WARN)    # ⊗
         bb2 = conductor_mark(p_bb_out, True, r=0.145, color=WARN)    # ⊙
