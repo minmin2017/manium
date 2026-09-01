@@ -7,8 +7,20 @@ from manim import *
 import numpy as np
 from mlib import (
     SafeScene, SafeThreeDScene, fit_width, title, caption_top, page_ref,
-    exam_card, BG, METAL, CURRENT, FIELD, WARN, OK, ACCENT
+    BG, METAL, CURRENT, FIELD, WARN, OK, ACCENT
 )
+
+def pitch_card(title_txt, q_txt, a_txt, width=11.5, height=2.8):
+    box = RoundedRectangle(width=width, height=height, corner_radius=0.15,
+                           fill_color=BG, fill_opacity=0.92,
+                           stroke_color=OK, stroke_width=2.5)
+    title_mob = Text(title_txt, font_size=20, color=OK)
+    q_mob = Text(q_txt, font_size=18, color=WHITE)
+    a_mob = Text(a_txt, font_size=16, color=CURRENT)
+    txt = VGroup(title_mob, q_mob, a_mob).arrange(DOWN, buff=0.25)
+    fit_width(txt, width - 0.6)
+    txt.move_to(box.get_center())
+    return VGroup(box, txt)
 
 class Delta_Circular_Harvesting_Pitch(SafeThreeDScene):
     """Lean Canvas Investor Pitch Video for Delta Academy KMITL 2026"""
@@ -156,9 +168,10 @@ class Delta_Circular_Harvesting_Pitch(SafeThreeDScene):
 
         # Final pitch card
         self.fade_out_all(run_time=0.7)
-        card = exam_card(
+        card = pitch_card(
             "Delta Academy 2026: Closed-Loop Harvesting Ecosystem",
-            "เปลี่ยน 90% Waste ให้เป็น 3 New Revenue Streams ตอบโจทย์ Net Zero และคืนทุนใน 0.96 ปี!")
+            "เปลี่ยน 90% Waste ให้เป็น 3 New Revenue Streams ตอบโจทย์ Net Zero",
+            "คืนทุนเร็วภายใน 0.96 ปี (ROI 125%) พร้อมผลักดันอุตสาหกรรมสู่อนาคต")
         self.hud(card)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(2.2)
