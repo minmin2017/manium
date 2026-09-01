@@ -56,9 +56,16 @@ def armature_core(n_slot, center=STAGE, r_arm=R_ARM, l_half=L_HALF):
 
 def pole_pieces(n_poles, center=STAGE, r_arm=R_ARM, pole_x=POLE_X,
                 pole_w=POLE_W, pole_h=POLE_H):
-    """คืน (แท่งขั้ว [กราฟิก], ป้าย N/S [ข้อความ — ผู้เรียกต้อง self.hud() เอง])"""
+    """คืน (แท่งขั้ว [กราฟิก], ป้าย N/S [ข้อความ — ผู้เรียกต้อง self.hud() เอง], ตำแหน่งโลก 3D จริงของแต่ละขั้ว)
+
+    เหตุที่คืนตำแหน่งโลกแยกมาด้วย: ห้ามอ่าน .get_center() จากป้ายหลัง hud() แล้ว —
+    fixed-in-frame mobject จะไม่ใช่พิกัดโลก 3D อีกต่อไป (เจอบั๊กจริง: ตอนเอา
+    pole_labels[0].get_center() ไปเป็นจุดเริ่มลูกศรชี้ป้ายใน name_pointer หลัง hud()
+    ไปแล้ว ทำให้ป้ายไปทับกับ 'N' เกือบสนิท 94% — ต้องอ่านตำแหน่งโลกจากตรงนี้เท่านั้น)
+    """
     g = VGroup()
     labels = VGroup()
+    positions = []
     offset = r_arm + pole_x * 0.55
     for i in range(n_poles):
         a = TAU * i / n_poles
@@ -72,7 +79,8 @@ def pole_pieces(n_poles, center=STAGE, r_arm=R_ARM, pole_x=POLE_X,
         lab = Text("N" if is_n else "S", font_size=24, color=WHITE).move_to(pos)
         g.add(rect)
         labels.add(lab)
-    return g, labels
+        positions.append(pos)
+    return g, labels, positions
 
 
 def slot_angles(n, start=PI / 2):
@@ -145,7 +153,7 @@ class W01_WhyManyCoils_PolePitchVsCommPitch(SafeThreeDScene):
         self.wait(1.2)
 
         core = armature_core(8)
-        poles, pole_labels = pole_pieces(4)
+        poles, pole_labels, pole_pos = pole_pieces(4)
         pole_labels = self.hud(pole_labels)
         self.play(FadeIn(core), FadeIn(poles), FadeIn(pole_labels), run_time=1.4)
         self.begin_ambient_camera_rotation(rate=0.12)
@@ -153,7 +161,7 @@ class W01_WhyManyCoils_PolePitchVsCommPitch(SafeThreeDScene):
 
         # -------- naming pass (ครั้งแรกในซีรีส์นี้ — ชี้บอกชื่อทุกชิ้น) --------
         n1 = name_pointer(self, STAGE + [0, 0, L_HALF], [0, 0, 1], "แกนอาร์เมเจอร์ (หมุน)", OK)
-        n2 = name_pointer(self, pole_labels[0].get_center(), [1, 0, 0],
+        n2 = name_pointer(self, pole_pos[0], [1, 0, 0],
                           "ขั้วแม่เหล็กหลัก (อยู่กับที่)", METAL, dist=0.9)
         n3 = name_pointer(self, STAGE + [0, 0, L_HALF + 0.85], [0.6, 0.3, 0.3],
                           "เพลา", GRAYTXT, dist=0.7)
@@ -226,7 +234,7 @@ class W02_LapWinding(SafeThreeDScene):
         self.wait(1.4)
 
         core = armature_core(n_bars)
-        poles, pole_labels = pole_pieces(n_poles)
+        poles, pole_labels, pole_pos = pole_pieces(n_poles)
         pole_labels = self.hud(pole_labels)
         core.set_opacity(0.35)
         poles.set_opacity(0.22)
@@ -268,7 +276,8 @@ class W02_LapWinding(SafeThreeDScene):
             self.play(grp.animate.set_color(col), run_time=0.5)
         self.wait(1.6)
 
-        self.play(FadeOut(note), run_time=0.4)
+        self.play(FadeOut(VGroup(note, core, poles, pole_labels, bars, nums, chords)),
+                  run_time=0.6)
         summary = overlay_card(self, [
             Text("เส้นทางขนาน a = P (จำนวนขั้ว)", font_size=26, color=OK),
             Text("กระแสรวมแบ่งไหลหลายทาง → เหมาะไฟต่ำ กระแสสูง", font_size=21, color=GRAYTXT),
@@ -294,7 +303,7 @@ class W03_WaveWinding(SafeThreeDScene):
         self.wait(1.4)
 
         core = armature_core(n_bars)
-        poles, pole_labels = pole_pieces(n_poles)
+        poles, pole_labels, pole_pos = pole_pieces(n_poles)
         pole_labels = self.hud(pole_labels)
         core.set_opacity(0.35)
         poles.set_opacity(0.22)
@@ -336,7 +345,8 @@ class W03_WaveWinding(SafeThreeDScene):
             self.play(c.animate.set_color(col), run_time=0.18)
         self.wait(1.4)
 
-        self.play(FadeOut(note), run_time=0.4)
+        self.play(FadeOut(VGroup(note, core, poles, pole_labels, bars, nums, chords)),
+                  run_time=0.6)
         summary = overlay_card(self, [
             Text("เส้นทางขนาน a = 2 เสมอ (ไม่ขึ้นกับจำนวนขั้ว)", font_size=25, color=OK),
             Text("กระแสรวมไหลผ่านขดจำนวนมากต่ออนุกรมกัน → เหมาะไฟสูง กระแสต่ำ",
@@ -526,7 +536,7 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         self.play(FadeOut(step_hdr3), run_time=0.4)
 
         # ------------------------------------------------- ประกอบ + ทดสอบ
-        poles, pole_labels = pole_pieces(2, pole_x=1.6)
+        poles, pole_labels, pole_pos = pole_pieces(2, pole_x=1.6)
         pole_labels = self.hud(pole_labels)
         cap4 = self.hud(caption_top(
             "ประกอบแม่เหล็กประกบ 2 ข้าง — อย่าลืมปลอกเหล็กอ่อนรอบนอก (โยคนำฟลักซ์กลับ)"))
@@ -552,6 +562,10 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         self.play(Rotating(rotor_group, angle=TAU * 3, axis=[0, 0, 1], about_point=STAGE,
                            run_time=3.0, rate_func=linear))
         self.wait(0.6)
+
+        # เก็บโมเดลทั้งหมดก่อนขึ้นการ์ดสรุป — กันไม่ให้ N/S ของแม่เหล็ก (อยู่ใกล้กึ่งกลางจอ
+        # พอดีสำหรับ config 2 ขั้ว) ไปทับข้อความการ์ด (เจอจริงตอนเรนเดอร์รอบ 2)
+        self.play(FadeOut(VGroup(rotor_group, poles, pole_labels)), run_time=0.6)
 
         summary = overlay_card(self, [
             Text("เสร็จแล้ว — มอเตอร์ 3 ขั้วของ Min", font_size=26, color=OK),
