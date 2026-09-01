@@ -964,6 +964,38 @@ def coil_wrap(center, w, h, color):
     return Rectangle(width=w, height=h, color=color, stroke_width=4).move_to(center)
 
 
+# ---- กราฟตามกฎ Min §21.7 (2026-09-01): ตัวเลข/ตัวแปรเปรียบเทียบ -> กราฟจริง ----
+def stacked_bar(segments, x, y_bottom, total_h, width=0.9):
+    """แท่งเดียวแบ่งเป็นหลายส่วนจากล่างขึ้นบน (part-to-whole) — segments คือ
+    list ของ (label, fraction, color) เรียงจากล่างขึ้นบน ผลรวม fraction ควรเป็น 1.0
+    ป้ายกำกับติดข้างแต่ละส่วนตรงๆ ไม่ใช้ legend แยก (ตาม dataviz: direct-label
+    เมื่อมี <=3 ส่วน) สีตามธรรมเนียม CURRENT/WARN/OK ต่อปริมาณเดิม (§14) เสมอ"""
+    group = VGroup()
+    y = y_bottom
+    for label, frac, color in segments:
+        h = max(total_h * frac, 0.05)
+        seg = Rectangle(width=width, height=h, color=color, fill_color=color,
+                        fill_opacity=0.85, stroke_width=1.5)
+        seg.move_to([x, y + h / 2, 0])
+        lab = Text(label, font_size=16, color=color).next_to(seg, RIGHT, buff=0.15)
+        group.add(seg, lab)
+        y += h
+    return group
+
+
+def bar_h_updater(x, y_bottom, width, color, get_h):
+    """ตัวอัปเดตความสูงแท่งแบบสด สร้าง Rectangle ใหม่ทุกเฟรมด้วย become()
+    (แพทเทิร์นเดียวกับ always_redraw ที่ปลอดภัยใน §16 — Rectangle ไม่มีปัญหาจำ
+    ตำแหน่งตัวเองหลุดแบบที่ DecimalNumber เจอตอนทำ P03 เวอร์ชันแรก)"""
+    def updater(m):
+        h = max(get_h(), 0.03)
+        new_rect = Rectangle(width=width, height=h, color=color, fill_color=color,
+                             fill_opacity=0.85, stroke_width=1.5)
+        new_rect.move_to([x, y_bottom + h / 2, 0])
+        m.become(new_rect)
+    return updater
+
+
 class EP18B_ChapterSummary3D(SafeThreeDScene):
     """สรุปทั้งบท 7 — โมเดล 3D เครื่องกำเนิดตัวเดียว เดินกล้องต่อเนื่องแทนการ์ด
     ข้อความแยกๆ แบบ EP18 เดิม สร้างตามกฎ Min §21 (2026-09-01):
@@ -1209,6 +1241,18 @@ class P01_TwoLossTypes(SafeThreeDScene):
         self.play(FadeIn(eq), run_time=0.7)
         self.wait(1.3)
 
+        # ========== stacked bar: Pin แตกเป็น 3 ก้อน — กฎ 21.7 (part-to-whole) ==========
+        self.play(FadeOut(cap3), FadeOut(eq), run_time=0.4)
+        cap4 = self.hud(caption_top(
+            "กำลังอินพุททั้งหมดแตกเป็น 3 ก้อน — สัดส่วนตัวอย่าง ไม่ใช่ตัวเลขจริงจากโจทย์"))
+        self.play(FadeIn(cap4), run_time=0.7)
+        stack = stacked_bar(
+            [("P_rot", 0.06, WARN), ("P_cu", 0.10, CURRENT), ("P_out", 0.84, OK)],
+            x=-5.4, y_bottom=-2.6, total_h=2.3, width=0.9)
+        self.hud(stack)
+        self.play(FadeIn(stack), run_time=1.0)
+        self.wait(1.6)
+
         self.fade_out_all(run_time=0.7)
         card = exam_card(
             "จุดออกสอบ 7-2: การสูญเสียแบ่งกี่ชนิด",
@@ -1320,8 +1364,33 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
             frac = (t.get_value() - 20) / 50.0
             mob.set_color(interpolate_color(cold_c, hot_c, frac))
         field_coil_n.add_updater(color_by_temp)
+
+        # ========== แท่งคู่ T<->R — กฎ 21.7 (อัตราต่อขั้น) ผูกกับ t ตัวเดียวกับสี ==========
+        # สเกลอ้างอิงสำหรับกราฟเท่านั้น (0-100C, 0-0.10 โอห์ม) ไม่ใช่ค่าตามจริงทางฟิสิกส์
+        # x ใกล้กลาง-ล่าง ไม่ใช่ขวาสุด — ตอนซูมเข้าขดลวดซ้าย เสา S (ขวา) จะพองใหญ่ขึ้น
+        # ผลักไปทางขวามากกว่าปกติ (จุดบอดเดียวกับ EP18B §19) วางแท่งใกล้กลางจึงชัวร์กว่า
+        BAR_X_T, BAR_X_R, BAR_Y0, BAR_MAXH = -1.0, -0.2, -2.7, 1.6
+        def temp_h(): return (t.get_value() / 100.0) * BAR_MAXH
+        def r_h(): return ((0.05 * (1 + 0.01 * (t.get_value() - 20) / 2.5)) / 0.10) * BAR_MAXH
+        # แท่งเป็น HUD ด้วย (ไม่ใช่วัตถุในโลก 3D) — ฉากนี้กำลังซูมค้างไว้ที่ขดลวด
+        # (zoom_to ด้านบน) ถ้าแท่งเป็นวัตถุโลกจริงจะถูกภาพซูม/แพนลากตำแหน่งเพี้ยนไปด้วย
+        # (จุดบอดเดียวกับที่เจอใน EP18B §19) แท่งข้อมูลควรลอยทับภาพเสมอ ไม่ใช่ส่วนหนึ่ง
+        # ของโมเดล 3D ที่กำลังเคลื่อนกล้องอยู่
+        t_bar = Rectangle(width=0.5, height=0.02).move_to([BAR_X_T, BAR_Y0, 0])
+        r_bar = Rectangle(width=0.5, height=0.02).move_to([BAR_X_R, BAR_Y0, 0])
+        t_bar.add_updater(bar_h_updater(BAR_X_T, BAR_Y0, 0.5, FIELD, temp_h))
+        r_bar.add_updater(bar_h_updater(BAR_X_R, BAR_Y0, 0.5, WARN, r_h))
+        t_label = Text("T", font_size=18, color=FIELD).move_to([BAR_X_T, BAR_Y0 - 0.3, 0])
+        r_label = Text("R", font_size=18, color=WARN).move_to([BAR_X_R, BAR_Y0 - 0.3, 0])
+        self.hud(t_bar, r_bar, t_label, r_label)
+        self.play(FadeIn(t_bar), FadeIn(r_bar), FadeIn(t_label), FadeIn(r_label), run_time=0.5)
+
         self.play(t.animate.set_value(70), run_time=1.8, rate_func=linear)
         field_coil_n.clear_updaters()
+        t_bar.clear_updaters()
+        r_bar.clear_updaters()
+        self.play(FadeOut(t_bar), FadeOut(r_bar), FadeOut(t_label), FadeOut(r_label),
+                  run_time=0.4)
 
         # ไม่ wait() ก่อนสลับป้าย — สีคอยล์ถึงแดง(ร้อน)เต็มที่ตอนจบแอนิเมชันข้างบน
         # พอดีแล้ว เว้นจังหวะเพิ่มจะทำให้ป้าย "T=20°C" ค้างอยู่ทั้งที่สีเปลี่ยนไปแล้ว
