@@ -943,3 +943,188 @@ class EP21_Example71_Walkthrough(SafeScene):
             "เครื่องเล็ก (3.6kW) → η ต่ำสุดในบท (78.27%) — ยิ่งเครื่องใหญ่ ยิ่งมีประสิทธิภาพสูง")
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
+
+
+# ------------------------------------------------------------------ EP18B
+def pole_box3(sign, x, color):
+    """เสาแม่เหล็ก N/S ในโมเดล 3D — ป้ายชื่อเป็น world_text (ติดกับตัวเสาจริง
+    ไม่ใช่ HUD) ต้องเรียก scene.world_text(label) เองหลังสร้าง"""
+    body = RoundedRectangle(width=1.1, height=2.0, corner_radius=0.08,
+                             fill_color=METAL, fill_opacity=0.55,
+                             stroke_color=METAL, stroke_width=2)
+    body.move_to(STAGE + np.array([x, 0, 0]))
+    label = Text(sign, font_size=30, color=color).move_to(body.get_center())
+    return VGroup(body, label), label
+
+
+def coil_wrap(center, w, h, color):
+    """ขดลวดพันรอบชิ้นส่วน — สี่เหลี่ยมเส้นขอบใหญ่กว่าตัวชิ้นส่วนเล็กน้อย
+    แทนขดลวดทองแดง (ไม่วาดเป็นวงจริงเพื่อความเร็วเรนเดอร์ — แนวคิดเดียวกับ
+    ลูกศรแบนแทนลูกศร 3D ใน [[project-manim-video-pipeline]] §2)"""
+    return Rectangle(width=w, height=h, color=color, stroke_width=4).move_to(center)
+
+
+class EP18B_ChapterSummary3D(SafeThreeDScene):
+    """สรุปทั้งบท 7 — โมเดล 3D เครื่องกำเนิดตัวเดียว เดินกล้องต่อเนื่องแทนการ์ด
+    ข้อความแยกๆ แบบ EP18 เดิม สร้างตามกฎ Min §21 (2026-09-01):
+      1) โมเดล 3D มีชิ้นส่วนจริงที่เกี่ยวข้องครบ (เสา N/S, แกนอาร์เมเจอร์, ขดลวด
+         สนาม, ตัวนำอาร์เมเจอร์, เพลา, สายเซรี่ฟิลด์) ไม่ใช่แค่ลูกศร/ข้อความลอย
+      2) แต่ละจุดสรุปต่อเนื่องจากจุดก่อนหน้า — ซูมจากขดลวดที่เพิ่งไฮไลต์ไปแกนที่
+         อยู่ติดกัน ไม่ตัดฉากไปเรื่องใหม่ที่ไม่เกี่ยวกัน
+      3) ข้อความทั้งหมดอยู่โซนบน (caption_top/title) ปล่อยครึ่งล่างให้โมเดล 3D
+      4) เนื้อหาเช็คกับเว็บแล้ว (2026-09-01): eddy loss ∝ thickness²×speed²×flux²
+         (allaboutcircuits.com, sciencedirect.com) และ long-shunt Is=Ia /
+         short-shunt Is=IL (electrical4u.com, testbook.com) — ตรงกับที่โน้ต
+         W06-07 บทที่7 เขียนไว้แล้วทุกจุด ไม่มีจุดไหนขัดกัน
+      5) กล้อง zoom_to()/move_camera ใช้ API จริงของ ThreeDScene ใน Manim
+         Community ตาม docs.manim.community (ยืนยันแล้วใน §19 ของสกิล ไม่ใช่
+         ManimGL) — ไม่ใช่กล้องที่ประดิษฐ์เอง
+      ซูมทุกจุดจำกัดไว้ที่ ≤1.8 เท่า และจุดซูมอยู่ใกล้ระดับ y=0 เพื่อไม่ให้เนื้อหา
+      ที่ขยายแล้วไปชนโซนข้อความบน (บทเรียน §19 — linter ตรวจไม่เจอเรื่องนี้)
+    """
+
+    def construct(self):
+        self.set_camera_orientation(phi=58 * DEGREES, theta=-52 * DEGREES, distance=8.5)
+
+        ttl = self.hud(title("สรุปบทที่ 7 (3D)", size=25))
+        pref = self.hud(page_ref("หน้า 17 · คำถามท้ายบท"))
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.8)
+
+        # ---------- โมเดลเครื่องกำเนิด DC ตัวเดียวที่ใช้ตลอดทั้งคลิป ----------
+        pole_n, label_n = pole_box3("N", -2.5, EMF)
+        pole_s, label_s = pole_box3("S", 2.5, FIELD)
+        self.world_text(label_n, label_s)
+
+        core = Circle(radius=0.95, color=METAL, fill_color="#546E7A",
+                      fill_opacity=0.75).move_to(STAGE)
+        conductors = VGroup(*[
+            Text("x" if i % 2 == 0 else "o", font_size=15, color=WHITE)
+            .move_to(STAGE + np.array([0.95 * np.cos(a), 0.95 * np.sin(a), 0]))
+            for i, a in enumerate(np.linspace(0, 2 * np.pi, 8, endpoint=False))
+        ])
+        self.world_text(conductors)
+
+        field_coil_n = coil_wrap(pole_n[0].get_center(), 1.3, 2.25, CURRENT)
+        field_coil_s = coil_wrap(pole_s[0].get_center(), 1.3, 2.25, CURRENT)
+
+        shaft = line3(STAGE + RIGHT * 0.95, STAGE + RIGHT * 3.6, METAL, thickness=0.05)
+        brush_pt = STAGE + RIGHT * 1.35
+        load_pt = STAGE + RIGHT * 3.4
+
+        self.play(FadeIn(pole_n), FadeIn(pole_s), FadeIn(core),
+                  FadeIn(conductors), FadeIn(shaft), run_time=1.2)
+        self.wait(0.4)
+
+        # ========== จุดที่ 1: การสูญเสีย 2 ชนิด ==========
+        cap1 = self.hud(caption_top(
+            "จุดที่ 1 — การสูญเสีย 2 ชนิด: ทองแดง (เหลือง, ขึ้นกับโหลด)"
+            " vs แกนเหล็ก+กล (ส้ม, คงที่)"))
+        self.play(FadeIn(cap1), run_time=0.8)
+        self.play(FadeIn(field_coil_n), FadeIn(field_coil_s), run_time=0.9)
+        self.play(core.animate.set_fill(WARN, opacity=0.8), run_time=0.8)
+        self.wait(1.0)
+
+        # ========== จุดที่ 2: ความต้านทาน/อุณหภูมิ — ต่อจากขดลวดที่เพิ่งเห็น ==========
+        self.play(FadeOut(cap1), run_time=0.4)
+        cap2 = self.hud(caption_top(
+            "จากขดลวดทองแดงที่เพิ่งไฮไลต์ — R เพิ่ม 1% ทุก 2.5°C ที่ร้อนขึ้น"))
+        self.play(FadeIn(cap2), run_time=0.6)
+        self.zoom_to(field_coil_n.get_center(), zoom=1.7, run_time=1.4)
+        temp_eq = MathTex(r"20^\circ\text{C}\to70^\circ\text{C}:\ \ R\times1.2",
+                           font_size=28, color=CURRENT).move_to([0, 1.7, 0])
+        self.hud(temp_eq)
+        self.play(FadeIn(temp_eq), run_time=0.7)
+        self.wait(1.3)
+        self.play(FadeOut(temp_eq), run_time=0.4)
+
+        # ========== จุดที่ 3: eddy current — ซูมต่อไปแกนที่ติดกัน ==========
+        self.play(FadeOut(cap2), run_time=0.3)
+        cap3 = self.hud(caption_top(
+            "ติดกับขดลวดคือแกนเหล็กสีส้มเดียวกัน — หมุนตัดสนาม เกิด eddy current"))
+        self.play(FadeIn(cap3), run_time=0.6)
+        self.zoom_to(STAGE, zoom=1.6, run_time=1.3)
+        p_solid = Text("P = 100 W", font_size=24, color=WARN).move_to([0, 1.7, 0])
+        self.hud(p_solid)
+        self.play(FadeOut(conductors), FadeIn(p_solid), run_time=0.7)
+        self.wait(0.8)
+
+        lam = VGroup(*[
+            Rectangle(width=1.75, height=0.075, color=METAL,
+                      fill_color="#546E7A", fill_opacity=0.8, stroke_width=1)
+            .move_to(STAGE + np.array([0, y, 0]))
+            for y in np.linspace(-0.9, 0.9, 12)
+        ])
+        cap3b = self.hud(caption_top(
+            "แบ่งเป็นแผ่นบาง (lamination) — P ∝ ความหนา² -> เหลือ 1/4 เมื่อหั่นครึ่ง",
+            color=OK))
+        self.play(FadeOut(core), FadeIn(lam), run_time=0.7)
+        self.play(FadeOut(cap3), FadeIn(cap3b), run_time=0.5)
+        p_lam = Text("P = 25 W  (เหลือ 1/4)", font_size=22, color=OK).move_to([0, 1.7, 0])
+        self.hud(p_lam)
+        self.play(FadeOut(p_solid), FadeIn(p_lam), run_time=0.6)
+        self.wait(1.2)
+
+        # ========== กลับสู่ภาพรวม — จุดที่ 4: ตรวจคำตอบด้วยสมการไหลกำลัง ==========
+        self.play(FadeOut(cap3b), FadeOut(p_lam), run_time=0.4)
+        self.zoom_to(ORIGIN, zoom=1.0, run_time=1.3)
+        self.play(FadeOut(lam), FadeIn(core), FadeIn(conductors), run_time=0.5)
+        cap4 = self.hud(caption_top(
+            "จุดที่ 4 — ทุกก้อนที่เพิ่งเห็นรวมกันในสมการตรวจคำตอบทุกข้อ"))
+        self.play(FadeIn(cap4), run_time=0.7)
+
+        p_in = arrow3(STAGE + LEFT * 3.6, STAGE + LEFT * 0.95, WARN, thickness=0.05)
+        p_out = arrow3(load_pt, load_pt + RIGHT * 0.9, OK, thickness=0.05)
+        eq = MathTex(r"E\,I_a=P_{out}+P_{cu}", font_size=30, color=WHITE).move_to([0, 1.6, 0])
+        self.hud(eq)
+        self.play(FadeIn(p_in), FadeIn(p_out), run_time=0.8)
+        self.play(FadeIn(eq), run_time=0.7)
+        self.wait(1.3)
+
+        # ========== จุดที่ 5: ประสิทธิภาพสูงสุด — เฟรมเดิม ไม่ตัดฉาก ==========
+        self.play(FadeOut(cap4), run_time=0.3)
+        cap5 = self.hud(caption_top(
+            "จุดที่ 5 — โหลดลดครึ่ง: ตัวนำอาร์เมเจอร์ (เหลือง) หรี่ลง"
+            " แต่ขดลวด+แกน (คงที่) ไม่หรี่"))
+        self.play(FadeIn(cap5), run_time=0.7)
+        self.play(conductors.animate.set_opacity(0.35), run_time=1.0)
+        eta_row = VGroup(
+            Text("η เต็มโหลด 87.02%", font_size=22, color=WHITE),
+            Text("η ครึ่งโหลด 81.08%", font_size=22, color=WARN),
+        ).arrange(RIGHT, buff=0.6).move_to([0, 1.6, 0])
+        self.hud(eta_row)
+        self.play(FadeIn(eta_row), run_time=0.7)
+        self.wait(1.4)
+        self.play(FadeOut(eta_row), FadeOut(cap5),
+                  conductors.animate.set_opacity(1.0), run_time=0.5)
+
+        # ========== จุดที่ 6: long-shunt vs short-shunt — ซูมไปจุดต่อเซรี่ฟิลด์ ==========
+        cap6 = self.hud(caption_top(
+            "จุดที่ 6 — เซรี่ฟิลด์ตัวเดียวกัน ต่อคนละจุดบนสายเส้นเดียวกันนี้"))
+        self.play(FadeIn(cap6), run_time=0.7)
+        self.zoom_to((brush_pt + load_pt) / 2, zoom=1.7, run_time=1.4)
+
+        series_coil = Circle(radius=0.28, color=CURRENT, stroke_width=5).move_to(brush_pt)
+        tag_long = Text("long-shunt: Is = Ia", font_size=22, color=CURRENT).move_to([0, 1.7, 0])
+        self.hud(tag_long)
+        self.play(Create(series_coil), FadeIn(tag_long), run_time=0.9)
+        self.wait(1.0)
+
+        tag_short = Text("short-shunt: Is = IL", font_size=22, color=OK).move_to([0, 1.7, 0])
+        self.hud(tag_short)
+        self.play(series_coil.animate.move_to(load_pt), run_time=1.0)
+        self.play(FadeOut(tag_long), FadeIn(tag_short), run_time=0.5)
+        self.wait(1.1)
+
+        # ---------- ปิดคลิป ----------
+        self.play(FadeOut(cap6), FadeOut(tag_short), run_time=0.4)
+        self.zoom_to(ORIGIN, zoom=1.0, run_time=1.2)
+        self.fade_out_all(run_time=0.7)
+
+        closer = Text(
+            "ครบทั้งบทที่ 7 แล้ว — เครื่องเดียวกันตลอดคลิป ไปต่อบทถัดไปได้เลย",
+            font_size=24, color=OK)
+        fit_width(closer, 11.5)
+        closer.move_to([0, 1.6, 0])
+        self.hud(closer)
+        self.play(FadeIn(closer, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
