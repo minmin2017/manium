@@ -1721,10 +1721,13 @@ class P09_Example72(SafeThreeDScene):
         self.play(FadeIn(cap0), run_time=0.6)
 
         # Orientation callout labels with pointer arrows (held ~1.2s then fade out)
+        # แก้บั๊กจริงที่เจอจากเฟรมที่แตกออกมาตรวจ (Claude, 2026-09-01): เดิม lbl_field
+        # กับ lbl_core อยู่ระดับ y เดียวกัน (UP*1.5 ทั้งคู่) ห่างกันแค่ 2.5 หน่วยในแกน x
+        # แต่ป้ายยาว ~20 ตัวอักษรไทย เลยทับกันกลางจอ — ต้องแยกระดับความสูงให้ชัดเจน
         lbl_field = Text("ขดลวดชันท์ฟิลด์ (Rf = 25 Ω)", font_size=18, color=CURRENT).move_to(m["field_coil_n"].get_center() + UP * 1.5)
         arrow_field = arrow3(lbl_field.get_center() + DOWN * 0.25, m["field_coil_n"].get_center() + UP * 0.8, CURRENT)
 
-        lbl_core = Text("อาร์เมเจอร์ (Ra = 0.08 Ω)", font_size=18, color=METAL).move_to(STAGE + UP * 1.5)
+        lbl_core = Text("อาร์เมเจอร์ (Ra = 0.08 Ω)", font_size=18, color=METAL).move_to(STAGE + UP * 2.6)
         arrow_core = arrow3(lbl_core.get_center() + DOWN * 0.25, STAGE + UP * 0.8, METAL)
 
         lbl_shaft = Text("เพลาหมุน (P_rot = 750 W)", font_size=18, color=WARN).move_to(m["load_pt"] + DOWN * 1.2)
