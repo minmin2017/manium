@@ -1716,89 +1716,86 @@ class P09_Example72(SafeThreeDScene):
                   FadeIn(m["conductors"]), FadeIn(m["field_coil_n"]),
                   FadeIn(m["field_coil_s"]), FadeIn(m["shaft"]), run_time=1.1)
 
+        cap0 = self.hud(caption_top(
+            "เครื่องกำเนิดแบบขนาน 125V, 25kW — Ra=0.08 Ω, Rf=25 Ω, P_rot=750 W"))
+        self.play(FadeIn(cap0), run_time=0.6)
+
         # Orientation callout labels with pointer arrows (held ~1.2s then fade out)
-        arrow_field = arrow3(m["field_coil_n"].get_center() + UP * 1.5 + LEFT * 0.5,
-                             m["field_coil_n"].get_center() + UP * 0.8, CURRENT)
-        lbl_field = Text("ขดลวดชันท์ฟิลด์ (Rf = 25 Ω)", font_size=17, color=CURRENT)
-        lbl_field.next_to(m["field_coil_n"].get_center() + UP * 1.5 + LEFT * 0.5, UP, buff=0.1)
+        lbl_field = Text("ขดลวดชันท์ฟิลด์ (Rf = 25 Ω)", font_size=18, color=CURRENT).move_to(m["field_coil_n"].get_center() + UP * 1.5)
+        arrow_field = arrow3(lbl_field.get_center() + DOWN * 0.25, m["field_coil_n"].get_center() + UP * 0.8, CURRENT)
 
-        arrow_core = arrow3(STAGE + UP * 1.6 + RIGHT * 0.8, STAGE + UP * 0.95, METAL)
-        lbl_core = Text("อาร์เมเจอร์ (Ra = 0.08 Ω)", font_size=17, color=METAL)
-        lbl_core.next_to(STAGE + UP * 1.6 + RIGHT * 0.8, UP, buff=0.1)
+        lbl_core = Text("อาร์เมเจอร์ (Ra = 0.08 Ω)", font_size=18, color=METAL).move_to(STAGE + UP * 1.5)
+        arrow_core = arrow3(lbl_core.get_center() + DOWN * 0.25, STAGE + UP * 0.8, METAL)
 
-        arrow_shaft = arrow3(m["load_pt"] + DOWN * 1.0, m["load_pt"] + UP * 0.1, WARN)
-        lbl_shaft = Text("เพลาหมุน (P_rot = 750 W)", font_size=17, color=WARN)
-        lbl_shaft.next_to(m["load_pt"] + DOWN * 1.0, DOWN, buff=0.1)
+        lbl_shaft = Text("เพลาหมุน (P_rot = 750 W)", font_size=18, color=WARN).move_to(m["load_pt"] + DOWN * 1.2)
+        arrow_shaft = arrow3(lbl_shaft.get_center() + UP * 0.25, m["load_pt"] + DOWN * 0.2, WARN)
 
         self.world_text(lbl_field, lbl_core, lbl_shaft)
         self.play(Create(arrow_field), FadeIn(lbl_field),
                   Create(arrow_core), FadeIn(lbl_core),
                   Create(arrow_shaft), FadeIn(lbl_shaft), run_time=0.9)
-        self.wait(1.2)
-        self.play(FadeOut(arrow_field), FadeOut(lbl_field),
-                  FadeOut(arrow_core), FadeOut(lbl_core),
-                  FadeOut(arrow_shaft), FadeOut(lbl_shaft), run_time=0.5)
+        self.wait(1.3)
 
-        cap0 = self.hud(caption_top(
-            "เครื่องกำเนิดแบบขนาน 125V, 25kW — Ra=0.08 Ω, Rf=25 Ω, P_rot=750 W"))
-        self.play(FadeIn(cap0), run_time=0.6)
-        self.wait(1.0)
+        # เคลียร์โมเดล 3D และป้ายชี้ เพื่อเปิดพื้นที่เต็มให้การเดินสมการและกราฟแท่ง
+        self.play(*[FadeOut(m[k]) for k in ("pole_n", "pole_s", "core", "conductors",
+                                             "field_coil_n", "field_coil_s", "shaft")],
+                  FadeOut(arrow_field), FadeOut(lbl_field),
+                  FadeOut(arrow_core), FadeOut(lbl_core),
+                  FadeOut(arrow_shaft), FadeOut(lbl_shaft),
+                  FadeOut(cap0), run_time=0.8)
 
         # ---------- 2. ขั้น 1: ลำดับกระแส IL -> If -> Ia ----------
-        self.play(FadeOut(cap0), run_time=0.3)
         cap1 = self.hud(caption_top(
             "ขั้น 1 — ลำดับกระแส: หา IL กับ If ก่อน แล้วรวมเป็น Ia", color=CURRENT))
         self.play(FadeIn(cap1), run_time=0.6)
 
-        rows1 = VGroup(
-            MathTex(r"I_L=\frac{P_{out}}{V_t}=\frac{25{,}000}{125}=200\ \text{A}",
-                    font_size=28, color=WHITE),
-            MathTex(r"I_f=\frac{V_t}{R_f}=\frac{125}{25}=5\ \text{A}",
-                    font_size=28, color=WHITE),
-            MathTex(r"I_a=I_L+I_f=200+5=205\ \text{A}",
-                    font_size=28, color=OK),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.26).move_to([0, 1.45, 0])
+        r1 = MathTex(r"I_L=\frac{P_{out}}{V_t}=\frac{25{,}000}{125}=200\ \text{A}",
+                     font_size=30, color=WHITE)
+        r2 = MathTex(r"I_f=\frac{V_t}{R_f}=\frac{125}{25}=5\ \text{A}",
+                     font_size=30, color=WHITE)
+        r3 = MathTex(r"I_a=I_L+I_f=200+5=205\ \text{A}",
+                     font_size=30, color=OK)
+        rows1 = VGroup(r1, r2, r3).arrange(DOWN, aligned_edge=LEFT, buff=0.32).move_to([0, 0.6, 0])
         fit_width(rows1, 10.0)
-        self.hud(rows1)
+        self.hud(r1, r2, r3)
 
-        for r in rows1:
+        for r in (r1, r2, r3):
             self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.6)
         self.wait(1.2)
 
         # ---------- 3. ขั้น 2: Copper loss + E + Pdev ----------
-        self.play(FadeOut(cap1), FadeOut(rows1), run_time=0.3)
+        self.play(FadeOut(cap1), FadeOut(r1), FadeOut(r2), FadeOut(r3), run_time=0.3)
         cap2 = self.hud(caption_top(
             "ขั้น 2 — copper loss (Pa, Pf) และแรงเคลื่อนที่เหนี่ยวนำในอาร์เมเจอร์ E",
             color=CURRENT))
         self.play(FadeIn(cap2), run_time=0.6)
 
-        rows2 = VGroup(
-            MathTex(r"P_a=I_a^2R_a=205^2(0.08)=3{,}362\ \text{W}",
-                    font_size=26, color=CURRENT),
-            MathTex(r"P_f=V_tI_f=125\times5=625\ \text{W}",
-                    font_size=26, color=FIELD),
-            MathTex(r"E=V_t+I_aR_a=125+205(0.08)=141.4\ \text{V}",
-                    font_size=26, color=OK),
-            MathTex(r"P_{dev}=E\,I_a=141.4\times205=28{,}987\ \text{W}",
-                    font_size=26, color=OK),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).move_to([0, 1.35, 0])
+        r2_1 = MathTex(r"P_a=I_a^2R_a=205^2(0.08)=3{,}362\ \text{W}",
+                       font_size=28, color=CURRENT)
+        r2_2 = MathTex(r"P_f=V_tI_f=125\times5=625\ \text{W}",
+                       font_size=28, color=FIELD)
+        r2_3 = MathTex(r"E=V_t+I_aR_a=125+205(0.08)=141.4\ \text{V}",
+                       font_size=28, color=OK)
+        r2_4 = MathTex(r"P_{dev}=E\,I_a=141.4\times205=28{,}987\ \text{W}",
+                       font_size=28, color=OK)
+        rows2 = VGroup(r2_1, r2_2, r2_3, r2_4).arrange(DOWN, aligned_edge=LEFT, buff=0.26).move_to([0, 0.45, 0])
         fit_width(rows2, 10.5)
-        self.hud(rows2)
+        self.hud(r2_1, r2_2, r2_3, r2_4)
 
-        for r in rows2:
+        for r in (r2_1, r2_2, r2_3, r2_4):
             self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.55)
         self.wait(1.3)
 
         # ---------- 4. ขั้น 3: Stacked Bar แสดงสัดส่วนกำลัง Pin ทั้งหมด (กฎ §21.7) ----------
-        self.play(FadeOut(cap2), FadeOut(rows2), run_time=0.3)
+        self.play(FadeOut(cap2), FadeOut(r2_1), FadeOut(r2_2), FadeOut(r2_3), FadeOut(r2_4), run_time=0.3)
         cap3 = self.hud(caption_top(
             "กำลังอินพุท Pin = 29,737 W แตกเป็น 4 ส่วน: ส่งออกจริง 84.07% + สูญเสีย 15.93%"))
         self.play(FadeIn(cap3), run_time=0.6)
 
-        bar_x = -4.8
-        bar_y0 = -2.6
-        tot_h = 3.2
-        bar_w = 1.1
+        bar_x = -4.2
+        bar_y0 = -2.4
+        tot_h = 3.6
+        bar_w = 1.2
 
         f_out = 25000.0 / 29737.0
         f_pa = 3362.0 / 29737.0
@@ -1830,35 +1827,33 @@ class P09_Example72(SafeThreeDScene):
                    Text("P_rot = 750 W (สูญเสียจากการหมุน+แกน 2.52%)", font_size=18, color=WHITE)).arrange(RIGHT, buff=0.2),
             VGroup(Square(0.22, fill_color=FIELD, fill_opacity=0.85, stroke_width=0),
                    Text("P_f = 625 W (สูญเสียขดลวดชันท์ฟิลด์ 2.10%)", font_size=18, color=WHITE)).arrange(RIGHT, buff=0.2),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.25).move_to([1.2, -1.0, 0])
-        fit_width(leg_items, 7.8)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.28).move_to([1.0, -0.6, 0])
+        fit_width(leg_items, 8.0)
 
         total_tag = Text("P_in รวม = 29,737 W", font_size=20, color=OK).next_to(bar_group, UP, buff=0.2)
 
-        stack_card = VGroup(bar_group, total_tag, leg_items)
-        self.hud(stack_card)
+        self.hud(seg_out, seg_pa, seg_rot, seg_pf, total_tag, leg_items)
         self.play(FadeIn(bar_group), FadeIn(total_tag), FadeIn(leg_items), run_time=1.1)
         self.wait(1.8)
 
         # ---------- 5. ขั้น 4: สรุปประสิทธิภาพ η ----------
-        self.play(FadeOut(stack_card), FadeOut(cap3), run_time=0.4)
+        self.play(FadeOut(bar_group), FadeOut(total_tag), FadeOut(leg_items), FadeOut(cap3), run_time=0.4)
         cap4 = self.hud(caption_top(
             "ขั้น 4 — รวม loss ทั้งหมด แล้วหาประสิทธิภาพรวมของเครื่องกำเนิด", color=OK))
         self.play(FadeIn(cap4), run_time=0.6)
 
-        eta_calc = VGroup(
-            MathTex(r"P_{loss}=P_a+P_f+P_{rot}=3{,}362+625+750=4{,}737\ \text{W}",
-                    font_size=28, color=WHITE),
-            MathTex(r"\eta=\frac{P_{out}}{P_{out}+P_{loss}}\times100="
-                    r"\frac{25{,}000}{25{,}000+4{,}737}\times100=\mathbf{84.07\%}",
-                    font_size=32, color=OK),
-        ).arrange(DOWN, buff=0.38).move_to([0, 1.35, 0])
+        e1 = MathTex(r"P_{loss}=P_a+P_f+P_{rot}=3{,}362+625+750=4{,}737\ \text{W}",
+                     font_size=30, color=WHITE)
+        e2 = MathTex(r"\eta=\frac{P_{out}}{P_{out}+P_{loss}}\times100="
+                     r"\frac{25{,}000}{25{,}000+4{,}737}\times100=\mathbf{84.07\%}",
+                     font_size=34, color=OK)
+        eta_calc = VGroup(e1, e2).arrange(DOWN, buff=0.45).move_to([0, 0.45, 0])
         fit_width(eta_calc, 11.0)
-        self.hud(eta_calc)
+        self.hud(e1, e2)
 
-        self.play(FadeIn(eta_calc[0]), run_time=0.7)
+        self.play(FadeIn(e1), run_time=0.7)
         self.wait(0.5)
-        self.play(FadeIn(eta_calc[1], scale=1.1), run_time=0.9)
+        self.play(FadeIn(e2, scale=1.1), run_time=0.9)
         self.wait(1.5)
 
         # ---------- 6. การ์ดจุดออกสอบปิดท้าย ----------
