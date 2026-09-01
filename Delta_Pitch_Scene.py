@@ -7,8 +7,11 @@ from manim import *
 import numpy as np
 from mlib import (
     SafeScene, SafeThreeDScene, fit_width, title, caption_top, page_ref,
-    BG, METAL, CURRENT, FIELD, WARN, OK, ACCENT
+    METAL, CURRENT, FIELD, WARN, OK
 )
+
+BG = "#1A1A24"
+ACCENT = "#80CBC4"
 
 def pitch_card(title_txt, q_txt, a_txt, width=11.5, height=2.8):
     box = RoundedRectangle(width=width, height=height, corner_radius=0.15,
