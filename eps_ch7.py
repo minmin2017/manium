@@ -1330,7 +1330,7 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
         self.play(FadeIn(cap2), run_time=0.7)
         rows = VGroup(
             MathTex(r"\%\Delta R=\frac{70-20}{2.5}=20\%", font_size=26, color=WHITE),
-            MathTex(r"R_{ร้อน}=1.2(0.05)=0.06\ \Omega", font_size=26, color=WHITE),
+            MathTex(r"R_{hot}=1.2(0.05)=0.06\ \Omega", font_size=26, color=WHITE),
             MathTex(r"P_a=100^2(0.06)=600\ \text{W}", font_size=26, color=OK),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).move_to([0, 1.4, 0])
         fit_width(rows, 9.5)
@@ -1438,8 +1438,8 @@ class P05_EddySplit(SafeThreeDScene):
             "แต่ละส่วน: E เหลือครึ่ง (5V), R เพิ่ม 2 เท่า (2Ω) — พื้นที่หน้าตัดครึ่งเดียว"))
         self.play(FadeIn(cap2), run_time=0.7)
         eq = VGroup(
-            MathTex(r"P_{ต่อส่วน}=\frac{5^2}{2}=12.5\ \text{W}", font_size=26, color=WHITE),
-            MathTex(r"P_{รวม}=12.5\times2=25\ \text{W}", font_size=28, color=OK),
+            MathTex(r"P_{half}=\frac{5^2}{2}=12.5\ \text{W}", font_size=26, color=WHITE),
+            MathTex(r"P_{total}=12.5\times2=25\ \text{W}", font_size=28, color=OK),
         ).arrange(DOWN, buff=0.25).move_to([0, 1.5, 0])
         fit_width(eq, 9.5)
         self.hud(eq)
@@ -1451,7 +1451,7 @@ class P05_EddySplit(SafeThreeDScene):
         self.play(FadeOut(cap2), run_time=0.3)
         cap3 = self.hud(caption_top("ตรวจ: 25/100 = 1/4 ตรงกับที่คาดไว้", color=OK))
         self.play(FadeIn(cap3), run_time=0.6)
-        eq2 = MathTex(r"P_{eddy}\propto(\text{ความหนา})^2", font_size=28,
+        eq2 = MathTex(r"P_{eddy}\propto(\text{thickness})^2", font_size=28,
                      color=OK).move_to([0, 1.5, 0])
         self.hud(eq2)
         self.play(FadeOut(eq), run_time=0.3)
