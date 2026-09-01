@@ -117,16 +117,19 @@ def chord(center, r, a1, a2, color, sw=3.5):
     return Line(p1, p2, color=color, stroke_width=sw)
 
 
-def coil_lead(wind_center, seg_point, color, thickness=0.018, dot_r=0.055):
-    """จุดต่อจุด แทนเส้นลวดโค้งอ้อมสมจริง — Min บอกว่าเส้น 2 ช่วงเดิมยังดูปลอมอยู่ดี
-    ("เอาจุดต่อจุดจะง่ายกว่าไหม") จุดเด่นสีเดียวกันที่ปลายขดกับที่ซี่คอมมิวเตเตอร์
-    ต่อด้วยเส้นตรงเส้นเดียวบางๆ — ไม่พยายามเลียนแบบเส้นทางจริงของลวด แค่บอกว่า "จุดนี้ต่อกับจุดนี้" """
-    # Dot ธรรมดา (แบน) ไม่ใช่ Dot3D (ทรงกลม mesh จริง) — วงกลมแบนมองจากมุมไหนก็ยังอ่านง่าย
-    # เหมือนกัน ไม่ต้องแบกต้นทุนเรนเดอร์ตาข่าย 3D แบบเดียวกับที่ Arrow3D ช้ากว่า Arrow แบน 62 เท่า
+def coil_lead(wind_center, seg_point, color, thickness=0.03, dot_r=0.06):
+    """จุดต่อจุด ผ่านด้านหลังอาร์เมเจอร์ — Min ปรับจากรอบก่อน (เส้นตรงเดียวยังดูปลอม):
+    "เอาจุดเริ่มจาก commutator แล้วปลายที่หลังอาร์เมเจอร์ แล้วลาก...มาที่ปลายไหนซักที่ของคอมมู"
+    เส้นทาง: ซี่คอมมิวเตเตอร์ (จุดเริ่ม) -> ด้านหลังอาร์เมเจอร์ตรงตำแหน่งขด (จุดปลาย) -> ขด
+    หนาขึ้นกว่ารอบก่อน (0.018 -> 0.03) ตามที่ขอ "ความหนานิดหน่อย"
+    Dot ธรรมดา (แบน) ไม่ใช่ Dot3D (ทรงกลม mesh จริง) — วงกลมแบนมองจากมุมไหนก็ยังอ่านง่าย
+    เหมือนกัน ไม่ต้องแบกต้นทุนเรนเดอร์ตาข่าย 3D แบบเดียวกับที่ Arrow3D ช้ากว่า Arrow แบน 62 เท่า"""
+    back_pt = np.array([wind_center[0], wind_center[1], -L_HALF], dtype=float)
     return VGroup(
-        Dot(np.asarray(wind_center, dtype=float), radius=dot_r, color=color),
         Dot(np.asarray(seg_point, dtype=float), radius=dot_r, color=color),
-        line3(wind_center, seg_point, color, thickness),
+        Dot(back_pt, radius=dot_r, color=color),
+        line3(seg_point, back_pt, color, thickness),
+        line3(back_pt, wind_center, color, thickness),
     )
 
 
