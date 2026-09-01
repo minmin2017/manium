@@ -1250,10 +1250,12 @@ class P02_WireSizing(SafeThreeDScene):
         self.play(FadeIn(cap2), run_time=0.7)
 
         # เทียบสายหนา vs สายบาง — ผิว/ปริมาตรสูงกว่า ระบายความร้อนดีกว่า
+        # วางไว้ใต้แกนตรงกลาง ไม่ใช่ใกล้เสา N — ตำแหน่งเดิมซ้อนทับเสาบนจอ
+        # (มุมกล้อง 3D เฉียง ทำให้จุดที่ห่างกันในโลกจริงมาเหลื่อมกันบนจอได้)
         thick = Circle(radius=0.5, color=CURRENT, fill_color=CURRENT,
-                       fill_opacity=0.85).move_to(STAGE + np.array([-2.7, -1.4, 0]))
+                       fill_opacity=0.85).move_to(STAGE + np.array([-0.7, -2.1, 0]))
         thin = Circle(radius=0.16, color=CURRENT, fill_color=CURRENT,
-                      fill_opacity=0.85).move_to(STAGE + np.array([-1.1, -1.4, 0]))
+                      fill_opacity=0.85).move_to(STAGE + np.array([0.7, -2.1, 0]))
         lab_thick = Text("D=1cm : 4", font_size=17, color=GRAYTXT).next_to(thick, DOWN, buff=0.15)
         lab_thin = Text("D=0.1cm : 40", font_size=17, color=OK).next_to(thin, DOWN, buff=0.15)
         self.world_text(lab_thick, lab_thin)
@@ -1302,16 +1304,15 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
         field_coil_n = m["field_coil_n"]
         self.zoom_to(field_coil_n.get_center(), zoom=1.6, run_time=1.3)
 
-        # สีขดลวดไล่ฟ้า(เย็น)->แดง(ร้อน) ผูกกับ ValueTracker เดียวกับตัวเลขอุณหภูมิ
+        # สีขดลวดไล่ฟ้า(เย็น)->แดง(ร้อน) ผูกกับ ValueTracker เดียวกัน (กฎ 21.6)
+        # ป้ายอุณหภูมิใช้ข้อความนิ่งคู่ก่อน/หลัง ไม่ใช้ DecimalNumber ที่อัปเดตสด —
+        # DecimalNumber.set_value() ขยับตำแหน่งตัวเองหลุดจาก VGroup.arrange() เดิม
+        # ทันทีที่มันสร้างกลีฟใหม่ (เจอจริงจากเฟรมที่แตกออกมาตรวจ: เลข "23" ลอยผิดที่
+        # แยกจากป้าย "T = °C") — สีของขดลวดยังคงผูกกับตัวแปรจริงต่อเนื่องเหมือนเดิม
         t = ValueTracker(20)
-        temp_num = DecimalNumber(20, num_decimal_places=0, font_size=26, color=WHITE)
-        temp_label = VGroup(Text("T = ", font_size=22, color=GRAYTXT), temp_num,
-                            Text(" °C", font_size=22, color=GRAYTXT)).arrange(RIGHT, buff=0.05)
-        temp_label.move_to([0, 1.6, 0])
-        temp_num.add_updater(lambda d: d.set_value(t.get_value()))
-        self.hud(temp_label)
-
-        self.play(field_coil_n.animate.set_color(FIELD), FadeIn(temp_label), run_time=0.5)
+        temp_before = Text("T = 20°C", font_size=24, color=FIELD).move_to([0, 1.6, 0])
+        self.hud(temp_before)
+        self.play(field_coil_n.animate.set_color(FIELD), FadeIn(temp_before), run_time=0.5)
 
         cold_c, hot_c = ManimColor(FIELD), ManimColor(EMF)
 
@@ -1321,10 +1322,15 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
         field_coil_n.add_updater(color_by_temp)
         self.play(t.animate.set_value(70), run_time=1.8, rate_func=linear)
         field_coil_n.clear_updaters()
-        temp_num.clear_updaters()
-        self.wait(0.6)
+        self.wait(0.3)
 
-        self.play(FadeOut(cap1), FadeOut(temp_label), run_time=0.4)
+        self.play(FadeOut(temp_before), run_time=0.3)
+        temp_after = Text("T = 70°C", font_size=24, color=EMF).move_to([0, 1.6, 0])
+        self.hud(temp_after)
+        self.play(FadeIn(temp_after), run_time=0.4)
+        self.wait(0.5)
+
+        self.play(FadeOut(cap1), FadeOut(temp_after), run_time=0.4)
         cap2 = self.hud(caption_top(
             "R เพิ่ม 1% ทุก 2.5°C ที่ร้อนขึ้น — ห้ามใช้ค่าเย็นตรงๆ ถ้าโจทย์ให้อุณหภูมิ"))
         self.play(FadeIn(cap2), run_time=0.7)
@@ -1437,10 +1443,12 @@ class P05_EddySplit(SafeThreeDScene):
         cap2 = self.hud(caption_top(
             "แต่ละส่วน: E เหลือครึ่ง (5V), R เพิ่ม 2 เท่า (2Ω) — พื้นที่หน้าตัดครึ่งเดียว"))
         self.play(FadeIn(cap2), run_time=0.7)
+        # y=2.0 ไม่ใช่ 1.5 — ที่ 1.5 แถวที่สองหล่นลงไปทับเสา N บนจอ (เจอจริงจากเฟรม
+        # ที่แตกออกมาตรวจ) กลุ่ม 2 แถวต้องขยับสูงขึ้นทั้งก้อนให้พ้นเสา ไม่ใช่แค่แถวเดียว
         eq = VGroup(
             MathTex(r"P_{half}=\frac{5^2}{2}=12.5\ \text{W}", font_size=26, color=WHITE),
             MathTex(r"P_{total}=12.5\times2=25\ \text{W}", font_size=28, color=OK),
-        ).arrange(DOWN, buff=0.25).move_to([0, 1.5, 0])
+        ).arrange(DOWN, buff=0.2).move_to([0, 2.0, 0])
         fit_width(eq, 9.5)
         self.hud(eq)
         self.play(FadeIn(eq[0]), run_time=0.6)
@@ -1452,7 +1460,7 @@ class P05_EddySplit(SafeThreeDScene):
         cap3 = self.hud(caption_top("ตรวจ: 25/100 = 1/4 ตรงกับที่คาดไว้", color=OK))
         self.play(FadeIn(cap3), run_time=0.6)
         eq2 = MathTex(r"P_{eddy}\propto(\text{thickness})^2", font_size=28,
-                     color=OK).move_to([0, 1.5, 0])
+                     color=OK).move_to([0, 1.7, 0])
         self.hud(eq2)
         self.play(FadeOut(eq), run_time=0.3)
         self.play(FadeIn(eq2), run_time=0.6)
@@ -1564,16 +1572,23 @@ class P07_MechLossEfficiency(SafeThreeDScene):
         self.play(FadeOut(cap2), run_time=0.3)
         cap3 = self.hud(caption_top("ประสิทธิภาพ — เลือกสูตรที่ข้อมูลครบที่สุด"))
         self.play(FadeIn(cap3), run_time=0.6)
-        eqs = VGroup(
-            MathTex(r"\eta=\frac{P_{out}}{P_{in}}", font_size=26, color=WHITE),
-            MathTex(r"\eta=\frac{P_{in}-P_{loss}}{P_{in}}", font_size=26, color=WHITE),
-            MathTex(r"\eta=\frac{P_{out}}{P_{out}+P_{loss}}", font_size=28, color=OK),
-        ).arrange(DOWN, buff=0.25).move_to([0, 1.4, 0])
-        fit_width(eqs, 9.5)
-        self.hud(eqs)
-        for e in eqs:
+        # โชว์ทีละสูตร ไม่ซ้อน 3 แถวพร้อมกัน — 3 แถว (มี \frac ทุกแถว) สูงเกินพื้นที่
+        # ระหว่างแถบคำบรรยายกับยอดเสา หล่นไปทับโมเดลจริง (เจอจากเฟรมที่แตกตรวจ)
+        eq_forms = [
+            MathTex(r"\eta=\frac{P_{out}}{P_{in}}", font_size=30, color=WHITE),
+            MathTex(r"\eta=\frac{P_{in}-P_{loss}}{P_{in}}", font_size=30, color=WHITE),
+            MathTex(r"\eta=\frac{P_{out}}{P_{out}+P_{loss}}", font_size=32, color=OK),
+        ]
+        prev = None
+        for e in eq_forms:
+            e.move_to([0, 1.6, 0])
+            self.hud(e)
+            if prev is not None:
+                self.play(FadeOut(prev), run_time=0.3)
             self.play(FadeIn(e, shift=RIGHT * 0.2), run_time=0.6)
-        self.wait(1.4)
+            self.wait(0.5)
+            prev = e
+        self.wait(0.9)
 
         self.fade_out_all(run_time=0.7)
         card = exam_card(
