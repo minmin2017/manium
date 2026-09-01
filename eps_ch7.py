@@ -1138,3 +1138,498 @@ class EP18B_ChapterSummary3D(SafeThreeDScene):
         self.hud(closer)
         self.play(FadeIn(closer, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
+
+
+# ==================================================================
+# หน้าต่อหน้า P01-P07, P10 (2026-09-01) — กฎ Min §21a: 1 คลิปต่อ 1 หน้า
+# ใช้โมเดลเครื่องกำเนิดเดียวกับ EP18B ตลอดซีรีส์ (build_generator_model)
+# วางในโน้ต "หลัง" เนื้อหาหน้านั้น (ไม่ใช่ก่อนอ่านแบบ EP11 เดิม)
+# ==================================================================
+def build_generator_model(scene):
+    """สร้างโมเดลเครื่องกำเนิด DC ชุดเดียวกับ EP18B ให้ scene 3D อื่นในซีรีส์นี้
+    เรียกซ้ำได้ — ทุกคลิปหน้าต่อหน้าใช้ "เครื่องเดียวกัน" จริงๆ ต่อเนื่องข้ามคลิป
+    (กฎ Min §21.2) คืน dict ของชิ้นส่วนหลัก"""
+    pole_n, label_n = pole_box3("N", -2.5, EMF)
+    pole_s, label_s = pole_box3("S", 2.5, FIELD)
+    scene.world_text(label_n, label_s)
+    core = Circle(radius=0.95, color=METAL, fill_color="#546E7A",
+                  fill_opacity=0.75).move_to(STAGE)
+    conductors = VGroup(*[
+        Text("x" if i % 2 == 0 else "o", font_size=15, color=WHITE)
+        .move_to(STAGE + np.array([0.95 * np.cos(a), 0.95 * np.sin(a), 0]))
+        for i, a in enumerate(np.linspace(0, 2 * np.pi, 8, endpoint=False))
+    ])
+    scene.world_text(conductors)
+    field_coil_n = coil_wrap(pole_n[0].get_center(), 1.3, 2.25, CURRENT)
+    field_coil_s = coil_wrap(pole_s[0].get_center(), 1.3, 2.25, CURRENT)
+    shaft = line3(STAGE + RIGHT * 0.95, STAGE + RIGHT * 3.6, METAL, thickness=0.05)
+    return dict(pole_n=pole_n, pole_s=pole_s, core=core, conductors=conductors,
+                field_coil_n=field_coil_n, field_coil_s=field_coil_s, shaft=shaft,
+                brush_pt=STAGE + RIGHT * 1.35, load_pt=STAGE + RIGHT * 3.4)
+
+
+# ------------------------------------------------------------------ P01
+class P01_TwoLossTypes(SafeThreeDScene):
+    """หน้า 1 — 7-1 บทนำ / 7-2 การสูญเสีย 2 ชนิด / 7-3 Copper loss"""
+
+    def construct(self):
+        self.set_camera_orientation(phi=58 * DEGREES, theta=-52 * DEGREES, distance=8.5)
+        ttl = self.hud(title("หน้า 1 — การสูญเสีย 2 ชนิด", size=25))
+        pref = self.hud(page_ref("หน้า 1 · 7-1 ถึง 7-3"))
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.8)
+
+        m = build_generator_model(self)
+        self.play(FadeIn(m["pole_n"]), FadeIn(m["pole_s"]), FadeIn(m["core"]),
+                  FadeIn(m["conductors"]), FadeIn(m["shaft"]), run_time=1.1)
+
+        cap1 = self.hud(caption_top(
+            "เครื่องกำเนิดเปลี่ยนพลังงานกล -> ไฟฟ้า แต่มีส่วนที่สูญเสียไประหว่างทาง"))
+        self.play(FadeIn(cap1), run_time=0.7)
+
+        # สนามแม่เหล็กระหว่างขั้ว — ครั้งแรกในซีรีส์หน้านี้ (กฎ 21.6: มีสนามต้องวาด)
+        field_l = b_field((-1.85, -1.0), (-0.55, 0.55), n=3, color=FIELD)
+        field_r = b_field((1.0, 1.85), (-0.55, 0.55), n=3, color=FIELD)
+        self.play(FadeIn(field_l), FadeIn(field_r), run_time=0.8)
+        self.wait(0.6)
+
+        self.play(FadeOut(cap1), run_time=0.3)
+        cap2 = self.hud(caption_top(
+            "การสูญเสีย 2 ชนิด: ทองแดง (ขดลวด, เหลือง) กับ แกนเหล็ก+กล (ส้ม, คงที่)"))
+        self.play(FadeIn(cap2), run_time=0.7)
+        self.play(FadeIn(m["field_coil_n"]), FadeIn(m["field_coil_s"]), run_time=0.9)
+        self.play(m["core"].animate.set_fill(WARN, opacity=0.8), run_time=0.8)
+        self.wait(1.0)
+
+        self.play(FadeOut(cap2), run_time=0.3)
+        cap3 = self.hud(caption_top("Copper loss = ความร้อนในขดลวด", color=CURRENT))
+        self.play(FadeIn(cap3), run_time=0.6)
+        eq = MathTex(r"P_{cu}\propto R\ ,\quad P_{cu}\propto I^2", font_size=30,
+                     color=CURRENT).move_to([0, 1.6, 0])
+        self.hud(eq)
+        self.play(FadeIn(eq), run_time=0.7)
+        self.wait(1.3)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "จุดออกสอบ 7-2: การสูญเสียแบ่งกี่ชนิด",
+            "2 ชนิด — Copper loss (ขึ้นกับโหลด) และ Rotational loss (คงที่)")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
+
+
+# ------------------------------------------------------------------ P02
+class P02_WireSizing(SafeThreeDScene):
+    """หน้า 2 — สูตร Ia^2 Ra + circular mils per ampere"""
+
+    def construct(self):
+        self.set_camera_orientation(phi=58 * DEGREES, theta=-52 * DEGREES, distance=8.5)
+        ttl = self.hud(title("หน้า 2 — สายอาร์เมเจอร์ + cmil/A", size=24))
+        pref = self.hud(page_ref("หน้า 2"))
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.8)
+
+        m = build_generator_model(self)
+        self.play(FadeIn(m["pole_n"]), FadeIn(m["pole_s"]), FadeIn(m["core"]),
+                  FadeIn(m["conductors"]), FadeIn(m["shaft"]), run_time=1.0)
+
+        cap1 = self.hud(caption_top(
+            "ต่อจากหน้าที่แล้ว — ซูมเข้าตัวนำอาร์เมเจอร์ (จุด x/o รอบแกน)"))
+        self.play(FadeIn(cap1), run_time=0.7)
+        self.zoom_to(STAGE + RIGHT * 0.5, zoom=1.5, run_time=1.3)
+        eq1 = MathTex(r"\text{copper loss} = I_a^2 R_a", font_size=28,
+                      color=CURRENT).move_to([0, 1.6, 0])
+        self.hud(eq1)
+        self.play(FadeIn(eq1), run_time=0.7)
+        self.wait(1.1)
+
+        self.play(FadeOut(cap1), FadeOut(eq1), run_time=0.4)
+        self.zoom_to(ORIGIN, zoom=1.0, run_time=1.0)
+
+        cap2 = self.hud(caption_top(
+            "เลือกขนาดสาย: 300-1200 circular mils ต่อแอมป์ (cmil/A)"))
+        self.play(FadeIn(cap2), run_time=0.7)
+
+        # เทียบสายหนา vs สายบาง — ผิว/ปริมาตรสูงกว่า ระบายความร้อนดีกว่า
+        thick = Circle(radius=0.5, color=CURRENT, fill_color=CURRENT,
+                       fill_opacity=0.85).move_to(STAGE + np.array([-2.7, -1.4, 0]))
+        thin = Circle(radius=0.16, color=CURRENT, fill_color=CURRENT,
+                      fill_opacity=0.85).move_to(STAGE + np.array([-1.1, -1.4, 0]))
+        lab_thick = Text("D=1cm : 4", font_size=17, color=GRAYTXT).next_to(thick, DOWN, buff=0.15)
+        lab_thin = Text("D=0.1cm : 40", font_size=17, color=OK).next_to(thin, DOWN, buff=0.15)
+        self.world_text(lab_thick, lab_thin)
+        self.play(FadeIn(thick), FadeIn(lab_thick), run_time=0.6)
+        self.play(FadeIn(thin), FadeIn(lab_thin), run_time=0.6)
+        self.wait(0.5)
+
+        self.play(FadeOut(cap2), run_time=0.3)
+        cap3 = self.hud(caption_top(
+            "สายเล็กกว่า -> พื้นที่ผิวต่อปริมาตรสูงกว่า -> ระบายความร้อนดีกว่า"))
+        self.play(FadeIn(cap3), run_time=0.7)
+        ex = MathTex(r"\frac{100}{2}\times800=40{,}000\ \text{cmil}", font_size=26,
+                     color=OK).move_to([0, 1.6, 0])
+        self.hud(ex)
+        self.play(FadeIn(ex), run_time=0.7)
+        self.wait(1.3)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "จุดออกสอบ 7-4: เครื่องความเร็วรอบสูงใช้ cmil/A ต่ำกว่าเพราะอะไร",
+            "หมุนเร็ว -> ลมพัดผ่านมาก -> ระบายความร้อนดีกว่า -> ยอมให้กระแสหนาแน่นขึ้นได้")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
+
+
+# ------------------------------------------------------------------ P03
+class P03_TemperatureFieldLoss(SafeThreeDScene):
+    """หน้า 3 — ผลของอุณหภูมิต่อ Ra + copper loss ที่ชันท์/เซรี่ฟิลด์
+    ตัวอย่างการใช้กฎ Min §21.6: ตัวแปร (อุณหภูมิ) ต้องแสดงเป็นสีบนโมเดลจริง"""
+
+    def construct(self):
+        self.set_camera_orientation(phi=58 * DEGREES, theta=-52 * DEGREES, distance=8.5)
+        ttl = self.hud(title("หน้า 3 — ผลของอุณหภูมิ", size=25))
+        pref = self.hud(page_ref("หน้า 3"))
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.8)
+
+        m = build_generator_model(self)
+        self.play(FadeIn(m["pole_n"]), FadeIn(m["pole_s"]), FadeIn(m["core"]),
+                  FadeIn(m["conductors"]), FadeIn(m["shaft"]),
+                  FadeIn(m["field_coil_n"]), FadeIn(m["field_coil_s"]), run_time=1.2)
+
+        cap1 = self.hud(caption_top(
+            "ซูมเข้าขดลวดสนาม — ความต้านทานเปลี่ยนตามอุณหภูมิจริง"))
+        self.play(FadeIn(cap1), run_time=0.7)
+        field_coil_n = m["field_coil_n"]
+        self.zoom_to(field_coil_n.get_center(), zoom=1.6, run_time=1.3)
+
+        # สีขดลวดไล่ฟ้า(เย็น)->แดง(ร้อน) ผูกกับ ValueTracker เดียวกับตัวเลขอุณหภูมิ
+        t = ValueTracker(20)
+        temp_num = DecimalNumber(20, num_decimal_places=0, font_size=26, color=WHITE)
+        temp_label = VGroup(Text("T = ", font_size=22, color=GRAYTXT), temp_num,
+                            Text(" °C", font_size=22, color=GRAYTXT)).arrange(RIGHT, buff=0.05)
+        temp_label.move_to([0, 1.6, 0])
+        temp_num.add_updater(lambda d: d.set_value(t.get_value()))
+        self.hud(temp_label)
+
+        self.play(field_coil_n.animate.set_color(FIELD), FadeIn(temp_label), run_time=0.5)
+
+        def color_by_temp(mob):
+            frac = (t.get_value() - 20) / 50.0
+            mob.set_color(interpolate_color(FIELD, EMF, frac))
+        field_coil_n.add_updater(color_by_temp)
+        self.play(t.animate.set_value(70), run_time=1.8, rate_func=linear)
+        field_coil_n.clear_updaters()
+        temp_num.clear_updaters()
+        self.wait(0.6)
+
+        self.play(FadeOut(cap1), FadeOut(temp_label), run_time=0.4)
+        cap2 = self.hud(caption_top(
+            "R เพิ่ม 1% ทุก 2.5°C ที่ร้อนขึ้น — ห้ามใช้ค่าเย็นตรงๆ ถ้าโจทย์ให้อุณหภูมิ"))
+        self.play(FadeIn(cap2), run_time=0.7)
+        rows = VGroup(
+            MathTex(r"\%\Delta R=\frac{70-20}{2.5}=20\%", font_size=26, color=WHITE),
+            MathTex(r"R_{ร้อน}=1.2(0.05)=0.06\ \Omega", font_size=26, color=WHITE),
+            MathTex(r"P_a=100^2(0.06)=600\ \text{W}", font_size=26, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).move_to([0, 1.4, 0])
+        fit_width(rows, 9.5)
+        self.hud(rows)
+        for r in rows:
+            self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.6)
+        self.wait(1.2)
+
+        self.play(FadeOut(cap2), FadeOut(rows), run_time=0.4)
+        self.zoom_to(ORIGIN, zoom=1.0, run_time=1.0)
+        cap3 = self.hud(caption_top(
+            "copper loss ที่ขดลวดสนาม: ชันท์ฟิลด์ (ก) และเซรี่ฟิลด์ (ข)"))
+        self.play(FadeIn(cap3), run_time=0.7)
+        eq2 = MathTex(r"P_f=I_f^2R_f=V_tI_f\ ,\quad P_s=I_s^2R_s", font_size=26,
+                     color=CURRENT).move_to([0, 1.6, 0])
+        self.hud(eq2)
+        self.play(FadeIn(eq2), run_time=0.7)
+        self.wait(1.2)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "จุดออกสอบ 7-5: ความต้านทานตอนร้อนสูงกว่าตอนเย็นจริงหรือไม่",
+            "จริง — ทองแดงมีสัมประสิทธิ์อุณหภูมิเป็นบวก (~1% ต่อ 2.5°C)")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
+
+
+# ------------------------------------------------------------------ P04
+class P04_EddyCurrentOrigin(SafeThreeDScene):
+    """หน้า 4 — 7-4 Rotational loss: ที่มาของ eddy current (ตัวอย่าง 100W)"""
+
+    def construct(self):
+        self.set_camera_orientation(phi=58 * DEGREES, theta=-52 * DEGREES, distance=8.5)
+        ttl = self.hud(title("หน้า 4 — ที่มาของ Eddy Current", size=24))
+        pref = self.hud(page_ref("หน้า 4 · รูปที่ 7-1"))
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.8)
+
+        m = build_generator_model(self)
+        # ใส่ conductors (จุด x/o) ด้วย — วงกลมเปล่าล้วนหมุนแล้วไม่เห็นความเคลื่อนไหวเลย
+        # (แกนสมมาตรตามแนวแกนหมุน) ต้องมีเครื่องหมายบนผิวถึงจะเห็นว่าหมุนจริง
+        self.play(FadeIn(m["pole_n"]), FadeIn(m["pole_s"]), FadeIn(m["core"]),
+                  FadeIn(m["conductors"]), FadeIn(m["shaft"]), run_time=1.0)
+        field_l = b_field((-1.85, -1.0), (-0.55, 0.55), n=3, color=FIELD)
+        field_r = b_field((1.0, 1.85), (-0.55, 0.55), n=3, color=FIELD)
+        self.play(FadeIn(field_l), FadeIn(field_r), run_time=0.6)
+
+        cap1 = self.hud(caption_top(
+            "แกนอาร์เมเจอร์เป็นเหล็กตัน หมุนตัดเส้นแรงสนามแม่เหล็กที่วาดไว้"))
+        self.play(FadeIn(cap1), run_time=0.7)
+
+        # แกนหมุนจริง (กฎ 21.6: ความเร็ว -> อัตราแอนิเมชันจริง ไม่ใช่แค่เลขลอย)
+        spinning = VGroup(m["core"], m["conductors"])
+        self.play(Rotating(spinning, angle=2 * PI, axis=OUT, run_time=1.6,
+                           rate_func=linear))
+        self.wait(0.2)
+
+        self.play(FadeOut(cap1), run_time=0.3)
+        cap2 = self.hud(caption_top(
+            "แกนเองก็ตัดเส้นแรง -> เกิด emf ในเนื้อแกน -> กระแสไหลวน (eddy current)"))
+        self.play(FadeIn(cap2), run_time=0.6)
+        loop = Circle(radius=0.5, color=CURRENT, stroke_width=4).move_to(STAGE)
+        self.play(Create(loop), Rotating(spinning, angle=PI, axis=OUT, run_time=1.2,
+                                         rate_func=linear))
+        eq = MathTex(r"E=10\ \text{V},\ R=1\ \Omega\ \Rightarrow\ "
+                    r"P=\frac{E^2}{R}=100\ \text{W}", font_size=26,
+                    color=WARN).move_to([0, 1.6, 0])
+        self.hud(eq)
+        self.play(FadeIn(eq), run_time=0.7)
+        self.wait(1.3)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "สังเกต",
+            "แม้ยังไม่มีกระแสในขดลวดเลย แกนเหล็กที่หมุนก็ร้อนได้จาก eddy current")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
+
+
+# ------------------------------------------------------------------ P05
+class P05_EddySplit(SafeThreeDScene):
+    """หน้า 5 — แบ่งแกนเป็น 2 ส่วน: E เหลือครึ่ง, R เพิ่ม 2 เท่า -> P เหลือ 1/4"""
+
+    def construct(self):
+        self.set_camera_orientation(phi=58 * DEGREES, theta=-52 * DEGREES, distance=8.5)
+        ttl = self.hud(title("หน้า 5 — แบ่งแกนเป็น 2 ส่วน", size=24))
+        pref = self.hud(page_ref("หน้า 5 · รูปที่ 7-1(ก)"))
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.8)
+
+        m = build_generator_model(self)
+        self.play(FadeIn(m["pole_n"]), FadeIn(m["pole_s"]), FadeIn(m["core"]),
+                  FadeIn(m["shaft"]), run_time=1.0)
+
+        cap1 = self.hud(caption_top(
+            "ต่อจากแกนตันหน้าที่แล้ว (P=100W) — ลองแบ่งครึ่งด้วยฉนวนกั้น"))
+        self.play(FadeIn(cap1), run_time=0.7)
+        gap_line = Line(STAGE + LEFT * 0.95, STAGE + RIGHT * 0.95, color=BLACK,
+                        stroke_width=6).move_to(STAGE)
+        self.play(Create(gap_line), run_time=0.6)
+        self.wait(0.5)
+
+        self.play(FadeOut(cap1), run_time=0.3)
+        cap2 = self.hud(caption_top(
+            "แต่ละส่วน: E เหลือครึ่ง (5V), R เพิ่ม 2 เท่า (2Ω) — พื้นที่หน้าตัดครึ่งเดียว"))
+        self.play(FadeIn(cap2), run_time=0.7)
+        eq = VGroup(
+            MathTex(r"P_{ต่อส่วน}=\frac{5^2}{2}=12.5\ \text{W}", font_size=26, color=WHITE),
+            MathTex(r"P_{รวม}=12.5\times2=25\ \text{W}", font_size=28, color=OK),
+        ).arrange(DOWN, buff=0.25).move_to([0, 1.5, 0])
+        fit_width(eq, 9.5)
+        self.hud(eq)
+        self.play(FadeIn(eq[0]), run_time=0.6)
+        self.wait(0.4)
+        self.play(FadeIn(eq[1], scale=1.15), run_time=0.7)
+        self.wait(1.3)
+
+        self.play(FadeOut(cap2), run_time=0.3)
+        cap3 = self.hud(caption_top("ตรวจ: 25/100 = 1/4 ตรงกับที่คาดไว้", color=OK))
+        self.play(FadeIn(cap3), run_time=0.6)
+        eq2 = MathTex(r"P_{eddy}\propto(\text{ความหนา})^2", font_size=28,
+                     color=OK).move_to([0, 1.5, 0])
+        self.hud(eq2)
+        self.play(FadeOut(eq), run_time=0.3)
+        self.play(FadeIn(eq2), run_time=0.6)
+        self.wait(1.3)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "สังเกต",
+            "แบ่งความหนาลงครึ่งหนึ่ง -> ค่าสูญเสียเหลือ 1/4 — ที่มาของ lamination")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
+
+
+# ------------------------------------------------------------------ P06
+class P06_LaminationHysteresis(SafeThreeDScene):
+    """หน้า 6 — รูปที่ 7-1(ข)(ค) แบ่งหลายแผ่น + Hysteresis loss"""
+
+    def construct(self):
+        self.set_camera_orientation(phi=58 * DEGREES, theta=-52 * DEGREES, distance=8.5)
+        ttl = self.hud(title("หน้า 6 — Lamination + Hysteresis", size=23))
+        pref = self.hud(page_ref("หน้า 6 · รูปที่ 7-1(ข)(ค)"))
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.8)
+
+        cap1 = self.hud(caption_top(
+            "ต่อจากการแบ่งครึ่งหน้าที่แล้ว — แบ่งต่อเป็นแผ่นบางหลายแผ่น (lamination)"))
+        self.play(FadeIn(cap1), run_time=0.7)
+        lam = VGroup(*[
+            Rectangle(width=1.75, height=0.075, color=METAL,
+                      fill_color="#546E7A", fill_opacity=0.8, stroke_width=1)
+            .move_to(STAGE + np.array([0, y, 0]))
+            for y in np.linspace(-0.9, 0.9, 12)
+        ])
+        self.play(FadeIn(lam), run_time=0.8)
+        p_txt = Text("eddy loss ลดจนตัดทิ้งได้", font_size=24, color=OK).move_to([0, 1.6, 0])
+        self.hud(p_txt)
+        self.play(FadeIn(p_txt), run_time=0.6)
+        self.wait(1.1)
+
+        self.play(FadeOut(cap1), FadeOut(p_txt), run_time=0.4)
+        cap2 = self.hud(caption_top(
+            "Hysteresis: โมเลกุลแม่เหล็กในเนื้อแกนพลิกทิศ 1 รอบ ต่อการหมุน 1 รอบ"))
+        self.play(FadeIn(cap2), run_time=0.7)
+
+        # โมเลกุลแม่เหล็ก (ลูกศรเล็กบนผิวแผ่นเหล็ก) พลิกทิศจริงตามจังหวะ — กฎ 21.6
+        dots = VGroup(*[Dot(STAGE + np.array([x, 0, 0]), radius=0.07, color=CURRENT)
+                        for x in np.linspace(-1.5, 1.5, 6)])
+        arrows_up = VGroup(*[arrow3(d.get_center(), d.get_center() + UP * 0.35, FIELD)
+                             for d in dots])
+        self.play(FadeOut(lam), FadeIn(dots), FadeIn(arrows_up), run_time=0.7)
+        self.wait(0.3)
+        arrows_down = VGroup(*[arrow3(d.get_center(), d.get_center() + DOWN * 0.35, EMF)
+                               for d in dots])
+        self.play(Transform(arrows_up, arrows_down), run_time=0.8)
+        self.wait(0.3)
+        self.play(Transform(arrows_up, VGroup(*[
+            arrow3(d.get_center(), d.get_center() + UP * 0.35, FIELD) for d in dots])),
+            run_time=0.8)
+        self.wait(0.7)
+
+        self.play(FadeOut(cap2), run_time=0.3)
+        cap3 = self.hud(caption_top(
+            "การพลิกทิศต่อเนื่องนี้ทำให้เกิดความฝืดในเนื้อเหล็ก -> ร้อน", color=WARN))
+        self.play(FadeIn(cap3), run_time=0.6)
+        self.wait(1.0)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "จุดออกสอบ 7-8/7-9: การสูญเสียในแกนเหล็กมีกี่ชนิด แก้อย่างไร",
+            "2 ชนิด — eddy (แก้ด้วยรูปทรง: แบ่งแผ่นบาง) และ hysteresis (แก้ด้วยวัสดุ: เหล็กซิลิกอน)")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
+
+
+# ------------------------------------------------------------------ P07
+class P07_MechLossEfficiency(SafeThreeDScene):
+    """หน้า 7 — Mechanical loss (windage+friction) + สูตรประสิทธิภาพ 3 รูปแบบ"""
+
+    def construct(self):
+        self.set_camera_orientation(phi=58 * DEGREES, theta=-52 * DEGREES, distance=8.5)
+        ttl = self.hud(title("หน้า 7 — Mechanical loss + η", size=24))
+        pref = self.hud(page_ref("หน้า 7"))
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.8)
+
+        m = build_generator_model(self)
+        # conductors ต้องอยู่ด้วยตอนหมุน — วงกลมเปล่าล้วนสมมาตร หมุนแล้วไม่เห็นอะไรเลย
+        self.play(FadeIn(m["pole_n"]), FadeIn(m["pole_s"]), FadeIn(m["core"]),
+                  FadeIn(m["conductors"]), FadeIn(m["shaft"]), run_time=1.0)
+
+        cap1 = self.hud(caption_top(
+            "การสูญเสียทางกล: windage (แรงลมต้าน) + friction (แบริ่ง/แปรงถ่าน)"))
+        self.play(FadeIn(cap1), run_time=0.7)
+
+        brush = Dot(m["brush_pt"], radius=0.09, color=WARN)
+        spinning = VGroup(m["core"], m["conductors"])
+        self.play(FadeIn(brush), run_time=0.4)
+        self.play(Rotating(spinning, angle=2 * PI, axis=OUT, run_time=1.4,
+                           rate_func=linear),
+                  Indicate(brush, color=WARN, scale_factor=1.6))
+        self.wait(0.4)
+
+        self.play(FadeOut(cap1), FadeOut(brush), run_time=0.4)
+        cap2 = self.hud(caption_top(
+            "ขึ้นกับความเร็วรอบ แต่ไม่ขึ้นกับกระแสโหลด -> ถือเป็นค่าคงที่", color=WARN))
+        self.play(FadeIn(cap2), run_time=0.7)
+        self.wait(1.0)
+
+        self.play(FadeOut(cap2), run_time=0.3)
+        cap3 = self.hud(caption_top("ประสิทธิภาพ — เลือกสูตรที่ข้อมูลครบที่สุด"))
+        self.play(FadeIn(cap3), run_time=0.6)
+        eqs = VGroup(
+            MathTex(r"\eta=\frac{P_{out}}{P_{in}}", font_size=26, color=WHITE),
+            MathTex(r"\eta=\frac{P_{in}-P_{loss}}{P_{in}}", font_size=26, color=WHITE),
+            MathTex(r"\eta=\frac{P_{out}}{P_{out}+P_{loss}}", font_size=28, color=OK),
+        ).arrange(DOWN, buff=0.25).move_to([0, 1.4, 0])
+        fit_width(eqs, 9.5)
+        self.hud(eqs)
+        for e in eqs:
+            self.play(FadeIn(e, shift=RIGHT * 0.2), run_time=0.6)
+        self.wait(1.4)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "ในทางปฏิบัติใช้สูตรไหน",
+            "η = Pout/(Pout+Ploss) แทบทุกข้อ — โจทย์มักให้ Pout และค่าสูญเสียมา ไม่ให้ Pin ตรงๆ")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
+
+
+# ------------------------------------------------------------------ P10
+class P10_Example73(SafeScene):
+    """หน้า 10 — ตัวอย่างที่ 7-3: ประสิทธิภาพทางไฟฟ้า (ไม่มี rotational loss ให้)
+    เดินเลขสไตล์เดียวกับ EP21/EP15 (2D) — วงจรเดียวกับที่โมเดล 3D ทำไปแล้วในหน้าอื่น
+    ไม่จำเป็นต้องสร้างโมเดลใหม่สำหรับคลิปคำนวณล้วน"""
+
+    def construct(self):
+        ttl = title("ตัวอย่างที่ 7-3", size=27)
+        ref = page_ref("หน้า 10 · รูปที่ 7-4")
+        self.play(FadeIn(ttl), FadeIn(ref), run_time=0.7)
+
+        cap0 = caption_top("เครื่องกำเนิดแบบขนาน 230V — Ra=0.6Ω, Rf=182Ω, Pout=10kW")
+        self.play(FadeIn(cap0), run_time=0.6)
+        self.wait(1.0)
+
+        cap1 = caption_top(
+            "ไม่มี rotational loss ให้ -> คิดเฉพาะ copper loss (ประสิทธิภาพทางไฟฟ้า)",
+            color=WARN)
+        self.play(FadeOut(cap0), run_time=0.3)
+        self.play(FadeIn(cap1), run_time=0.5)
+        self.wait(1.0)
+
+        rows = VGroup(
+            MathTex(r"I_L=\frac{10{,}000}{230}=43.478\ \text{A}", font_size=27, color=WHITE),
+            MathTex(r"I_f=\frac{230}{182}=1.264\ \text{A}", font_size=27, color=WHITE),
+            MathTex(r"I_a=43.478+1.264=44.742\ \text{A}", font_size=27, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.3).move_to([0, 0.6, 0])
+        fit_width(rows, 9.5)
+        self.play(FadeOut(cap1), run_time=0.3)
+        cap2 = caption_top("ขั้น 1-2 — หากระแสทั้งสามตัวก่อน (เหมือนทุกข้อของบทนี้)")
+        self.play(FadeIn(cap2), run_time=0.5)
+        for r in rows:
+            self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.6)
+        self.wait(1.0)
+        self.play(rows.animate.scale(0.5).to_edge(LEFT, buff=0.6).shift(UP * 0.6),
+                  run_time=0.8)
+
+        cap3 = caption_top("ขั้น 3 — copper loss แล้วหาประสิทธิภาพ", color=CURRENT)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.5)
+        rows2 = VGroup(
+            MathTex(r"P_a=44.742^2(0.6)=1{,}201.1\ \text{W}", font_size=25, color=CURRENT),
+            MathTex(r"P_f=230(1.264)=290.7\ \text{W}", font_size=25, color=CURRENT),
+            MathTex(r"P_{cu}=1{,}491.8\ \text{W}", font_size=25, color=WHITE),
+            MathTex(r"\eta=\frac{10{,}000}{11{,}491.8}\times100=\mathbf{87.02\%}",
+                   font_size=30, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.28).move_to([1.6, 0.3, 0])
+        fit_width(rows2, 8.5)
+        for r in rows2:
+            self.play(FadeIn(r, shift=RIGHT * 0.2), run_time=0.6)
+        self.wait(1.6)
+
+        self.fade_out_all(run_time=0.7)
+        card = exam_card(
+            "กับดักของข้อนี้",
+            "โจทย์ไม่ให้ rotational loss มา -> ถ้าข้อสอบให้ core/mechanical loss มาด้วยต้องบวกเพิ่ม")
+        self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
+        self.wait(1.8)
