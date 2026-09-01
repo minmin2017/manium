@@ -1242,16 +1242,21 @@ class P01_TwoLossTypes(SafeThreeDScene):
         self.wait(1.3)
 
         # ========== stacked bar: Pin แตกเป็น 3 ก้อน — กฎ 21.7 (part-to-whole) ==========
+        # ป้ายกำกับต้องมีความหมายอ่านเข้าใจได้เลย ไม่ใช่แค่ตัวย่อ "P_rot"/"P_cu" ลอยๆ
+        # (บทเรียน 2026-09-01: Min ชี้ว่าคนดูพื้นฐาน=0 กราฟไม่มีตัวอักษรอธิบายไม่พอ)
         self.play(FadeOut(cap3), FadeOut(eq), run_time=0.4)
         cap4 = self.hud(caption_top(
-            "กำลังอินพุททั้งหมดแตกเป็น 3 ก้อน — สัดส่วนตัวอย่าง ไม่ใช่ตัวเลขจริงจากโจทย์"))
+            "กำลังอินพุททั้งหมด (Pin) แตกเป็น 3 ก้อน — แท่งเดียวแสดงสัดส่วน"
+            " (ตัวอย่าง ไม่ใช่ตัวเลขจริงจากโจทย์)"))
         self.play(FadeIn(cap4), run_time=0.7)
         stack = stacked_bar(
-            [("P_rot", 0.06, WARN), ("P_cu", 0.10, CURRENT), ("P_out", 0.84, OK)],
+            [("P_rot 6% (สูญเสียหมุน)", 0.06, WARN),
+             ("P_cu 10% (สูญเสียทองแดง)", 0.10, CURRENT),
+             ("P_out 84% (ส่งออกจริง)", 0.84, OK)],
             x=-5.4, y_bottom=-2.6, total_h=2.3, width=0.9)
         self.hud(stack)
         self.play(FadeIn(stack), run_time=1.0)
-        self.wait(1.6)
+        self.wait(1.9)
 
         self.fade_out_all(run_time=0.7)
         card = exam_card(
@@ -1366,10 +1371,17 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
         field_coil_n.add_updater(color_by_temp)
 
         # ========== แท่งคู่ T<->R — กฎ 21.7 (อัตราต่อขั้น) ผูกกับ t ตัวเดียวกับสี ==========
+        # ต้องมีข้อความอธิบายคู่กราฟเสมอ (บทเรียน 2026-09-01: Min ชี้ว่าคนดูพื้นฐาน=0
+        # ป้าย "T"/"R" เฉยๆ ไม่พอ ต้องมีทั้งคำอธิบายและกราฟ ขาดอย่างใดอย่างหนึ่งไม่ได้)
+        self.play(FadeOut(cap1), run_time=0.3)
+        cap_bar = self.hud(caption_top(
+            "แท่งซ้าย = อุณหภูมิ (T), แท่งขวา = ความต้านทาน (R)"
+            " — โตพร้อมกันแสดงว่า R เพิ่มตาม T จริง"))
+        self.play(FadeIn(cap_bar), run_time=0.6)
         # สเกลอ้างอิงสำหรับกราฟเท่านั้น (0-100C, 0-0.10 โอห์ม) ไม่ใช่ค่าตามจริงทางฟิสิกส์
         # x ใกล้กลาง-ล่าง ไม่ใช่ขวาสุด — ตอนซูมเข้าขดลวดซ้าย เสา S (ขวา) จะพองใหญ่ขึ้น
         # ผลักไปทางขวามากกว่าปกติ (จุดบอดเดียวกับ EP18B §19) วางแท่งใกล้กลางจึงชัวร์กว่า
-        BAR_X_T, BAR_X_R, BAR_Y0, BAR_MAXH = -1.0, -0.2, -2.7, 1.6
+        BAR_X_T, BAR_X_R, BAR_Y0, BAR_MAXH = -1.3, -0.3, -2.7, 1.6
         def temp_h(): return (t.get_value() / 100.0) * BAR_MAXH
         def r_h(): return ((0.05 * (1 + 0.01 * (t.get_value() - 20) / 2.5)) / 0.10) * BAR_MAXH
         # แท่งเป็น HUD ด้วย (ไม่ใช่วัตถุในโลก 3D) — ฉากนี้กำลังซูมค้างไว้ที่ขดลวด
@@ -1380,8 +1392,12 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
         r_bar = Rectangle(width=0.5, height=0.02).move_to([BAR_X_R, BAR_Y0, 0])
         t_bar.add_updater(bar_h_updater(BAR_X_T, BAR_Y0, 0.5, FIELD, temp_h))
         r_bar.add_updater(bar_h_updater(BAR_X_R, BAR_Y0, 0.5, WARN, r_h))
-        t_label = Text("T", font_size=18, color=FIELD).move_to([BAR_X_T, BAR_Y0 - 0.3, 0])
-        r_label = Text("R", font_size=18, color=WARN).move_to([BAR_X_R, BAR_Y0 - 0.3, 0])
+        # ป้ายต้องมีความหมายอ่านเข้าใจได้เอง ไม่ใช่แค่ตัวอักษรเดี่ยว "T"/"R" ลอยๆ —
+        # ใส่หน่วยกับช่วงค่าก่อน/หลังไว้ในป้ายเลย (2 บรรทัด) ไม่ต้องพึ่งแค่คำบรรยายด้านบน
+        t_label = Text("T (°C)\n20 -> 70", font_size=16, color=FIELD,
+                       line_spacing=0.9).move_to([BAR_X_T, BAR_Y0 - 0.45, 0])
+        r_label = Text("R (Ohm)\n0.05 -> 0.06", font_size=16, color=WARN,
+                       line_spacing=0.9).move_to([BAR_X_R, BAR_Y0 - 0.45, 0])
         self.hud(t_bar, r_bar, t_label, r_label)
         self.play(FadeIn(t_bar), FadeIn(r_bar), FadeIn(t_label), FadeIn(r_label), run_time=0.5)
 
@@ -1390,7 +1406,7 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
         t_bar.clear_updaters()
         r_bar.clear_updaters()
         self.play(FadeOut(t_bar), FadeOut(r_bar), FadeOut(t_label), FadeOut(r_label),
-                  run_time=0.4)
+                  FadeOut(cap_bar), run_time=0.4)
 
         # ไม่ wait() ก่อนสลับป้าย — สีคอยล์ถึงแดง(ร้อน)เต็มที่ตอนจบแอนิเมชันข้างบน
         # พอดีแล้ว เว้นจังหวะเพิ่มจะทำให้ป้าย "T=20°C" ค้างอยู่ทั้งที่สีเปลี่ยนไปแล้ว
@@ -1401,7 +1417,8 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
         self.play(FadeIn(temp_after), run_time=0.4)
         self.wait(0.5)
 
-        self.play(FadeOut(cap1), FadeOut(temp_after), run_time=0.4)
+        # cap1 หายไปแล้วตั้งแต่ตอน cap_bar ขึ้น (ก่อนหน้านี้) ไม่ต้อง FadeOut ซ้ำ
+        self.play(FadeOut(temp_after), run_time=0.4)
         cap2 = self.hud(caption_top(
             "R เพิ่ม 1% ทุก 2.5°C ที่ร้อนขึ้น — ห้ามใช้ค่าเย็นตรงๆ ถ้าโจทย์ให้อุณหภูมิ"))
         self.play(FadeIn(cap2), run_time=0.7)
