@@ -117,12 +117,17 @@ def chord(center, r, a1, a2, color, sw=3.5):
     return Line(p1, p2, color=color, stroke_width=sw)
 
 
-def coil_lead(wind_center, seg_point, color, thickness=0.02):
-    """เส้นลวดจากขด → ซี่คอมมิวเตเตอร์ วิ่งผ่าน 2 ช่วง (ยกระดับไปหน้าอาร์เมเจอร์ก่อน ค่อยเข้าซี่)
-    แทนเส้นตรงเส้นเดียวที่ตัดทะลุแกนตรงๆ — สมจริงกว่า เพราะคอมมิวเตเตอร์อยู่คนละ z กับขด"""
-    mid = np.array([wind_center[0], wind_center[1], L_HALF], dtype=float)
-    return VGroup(line3(wind_center, mid, color, thickness),
-                  line3(mid, seg_point, color, thickness))
+def coil_lead(wind_center, seg_point, color, thickness=0.018, dot_r=0.055):
+    """จุดต่อจุด แทนเส้นลวดโค้งอ้อมสมจริง — Min บอกว่าเส้น 2 ช่วงเดิมยังดูปลอมอยู่ดี
+    ("เอาจุดต่อจุดจะง่ายกว่าไหม") จุดเด่นสีเดียวกันที่ปลายขดกับที่ซี่คอมมิวเตเตอร์
+    ต่อด้วยเส้นตรงเส้นเดียวบางๆ — ไม่พยายามเลียนแบบเส้นทางจริงของลวด แค่บอกว่า "จุดนี้ต่อกับจุดนี้" """
+    # Dot ธรรมดา (แบน) ไม่ใช่ Dot3D (ทรงกลม mesh จริง) — วงกลมแบนมองจากมุมไหนก็ยังอ่านง่าย
+    # เหมือนกัน ไม่ต้องแบกต้นทุนเรนเดอร์ตาข่าย 3D แบบเดียวกับที่ Arrow3D ช้ากว่า Arrow แบน 62 เท่า
+    return VGroup(
+        Dot(np.asarray(wind_center, dtype=float), radius=dot_r, color=color),
+        Dot(np.asarray(seg_point, dtype=float), radius=dot_r, color=color),
+        line3(wind_center, seg_point, color, thickness),
+    )
 
 
 def tooth_shape(pole_dir, center=STAGE, r_arm=R_ARM, l_half=L_HALF, color=METAL):
