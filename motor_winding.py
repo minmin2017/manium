@@ -37,6 +37,11 @@ R_SCHEM = 1.5
 
 PATH_COLORS = [CURRENT, OK, FORCE, TORQUE, EMF, "#4FC3F7"]
 
+# โซนข้อความรองที่ปลอดภัย — ไม่ใช่ CAP_Y (-3.15) ของ mlib เดิม เพราะพิสูจน์แล้วว่าโปรแกรม
+# เล่นวิดิโอบางตัว (Windows Movies&TV) มีแถบควบคุมคลุมลึกกว่าที่คิด บังข้อความที่ -3.15 พอดี
+# (เจอจริงตอน Min ดู v2 preview — ป้าย "pole pitch" อ่านไม่ออกเพราะโดนแถบเล่นทับ)
+SAFE_LOW_Y = -2.5
+
 
 # ============================================================== shared parts
 def armature_core(n_slot, center=STAGE, r_arm=R_ARM, l_half=L_HALF):
@@ -198,7 +203,7 @@ class W01_WhyManyCoils_PolePitchVsCommPitch(SafeThreeDScene):
         # ระยะที่ ① pole pitch — ระยะข้ามขั้วของตัวขดลวดเอง (บาร์ 1 ถึงบาร์ 3 ห่าง C/P=2)
         pp_line = chord(SCHEM_C, R_SCHEM, angs[0], angs[2], WARN, sw=5)
         pp_tag = self.hud(Text("① pole pitch — ช่วงกว้างของขดลวดเอง (ข้ามขั้ว)",
-                               font_size=19, color=WARN).move_to([0, -3.15, 0]))
+                               font_size=19, color=WARN).move_to([0, SAFE_LOW_Y, 0]))
         self.play(Create(pp_line), FadeIn(pp_tag), run_time=1.0)
         self.wait(1.8)
         self.play(FadeOut(pp_line), FadeOut(pp_tag), run_time=0.6)
@@ -206,7 +211,7 @@ class W01_WhyManyCoils_PolePitchVsCommPitch(SafeThreeDScene):
         # ระยะที่ ② commutator pitch — ระยะที่ปลายสายไป "กระโดด" ไปต่อซี่ถัดไป
         cp_line = chord(SCHEM_C, R_SCHEM, angs[0], angs[1], OK, sw=5)
         cp_tag = self.hud(Text("② commutator pitch — ปลายสายกระโดดไปต่อซี่ไหน",
-                               font_size=19, color=OK).move_to([0, -3.15, 0]))
+                               font_size=19, color=OK).move_to([0, SAFE_LOW_Y, 0]))
         self.play(Create(cp_line), FadeIn(cp_tag), run_time=1.0)
         self.wait(1.8)
 
@@ -245,7 +250,7 @@ class W02_LapWinding(SafeThreeDScene):
 
         note = self.hud(Text(
             "ตัวอย่างสาธิต: 4 ขั้ว, 8 ขด/8 ซี่ (เลขตัวอย่างเพื่อสอน ไม่ใช่มอเตอร์จริงเครื่องใดเครื่องหนึ่ง)",
-            font_size=15, color=GRAYTXT).move_to([0, -3.55, 0]))
+            font_size=15, color=GRAYTXT).move_to([0, SAFE_LOW_Y, 0]))
         self.play(FadeIn(note), run_time=0.6)
 
         cap1 = self.hud(caption_top("ขดที่ 1: ปลายเริ่มที่ซี่ 1 ปลายจบที่ซี่ 2 — ติดกันเป๊ะ"))
@@ -312,7 +317,7 @@ class W03_WaveWinding(SafeThreeDScene):
 
         note = self.hud(Text(
             "ตัวอย่างสาธิต: 4 ขั้ว, 9 ขด/9 ซี่ (เลขคี่ตั้งใจเลือก ให้เส้นทางเดียววนครบทุกซี่พอดี)",
-            font_size=15, color=GRAYTXT).move_to([0, -3.55, 0]))
+            font_size=15, color=GRAYTXT).move_to([0, SAFE_LOW_Y, 0]))
         self.play(FadeIn(note), run_time=0.6)
 
         cap1 = self.hud(caption_top("ขดที่ 1: เริ่มซี่ 1 กระโดดไปจบที่ซี่ 5 — ข้ามเกือบสุดวง"))
@@ -456,7 +461,7 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         self.play(FadeOut(VGroup(n1, n2)), run_time=0.5)
 
         step_hdr = self.hud(Text("ขั้นตอนที่ 1 — พันขั้วที่ 1", font_size=17,
-                                 color=WARN).move_to([0, -3.55, 0]))
+                                 color=WARN).move_to([0, SAFE_LOW_Y, 0]))
         self.play(FadeIn(step_hdr), run_time=0.5)
 
         cap1 = self.hud(caption_top("พันลวด 24 AWG รอบขั้ว 1 ทิศทางเดียวกันทุกรอบ แน่นและเรียงชิด"))
@@ -483,7 +488,7 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         self.wait(1.2)
 
         step_hdr2 = self.hud(Text("ขั้นตอนที่ 2 — พันขั้วที่ 2 แล้วต่อซี่ 1→2", font_size=17,
-                                  color=WARN).move_to([0, -3.55, 0]))
+                                  color=WARN).move_to([0, SAFE_LOW_Y, 0]))
         self.play(ReplacementTransform(step_hdr, step_hdr2), run_time=0.5)
 
         a1 = angs[1]
@@ -502,7 +507,7 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         self.wait(1.0)
 
         step_hdr3 = self.hud(Text("ขั้นตอนที่ 3 — พันขั้วที่ 3 แล้วปิดวง 3→1", font_size=17,
-                                  color=WARN).move_to([0, -3.55, 0]))
+                                  color=WARN).move_to([0, SAFE_LOW_Y, 0]))
         self.play(ReplacementTransform(step_hdr2, step_hdr3), run_time=0.5)
 
         a2 = angs[2]
