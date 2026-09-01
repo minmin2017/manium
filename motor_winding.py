@@ -139,6 +139,37 @@ def coil_lead(wind_center, pole_dir, seg_point, color, thickness=0.03, dot_r=0.0
     )
 
 
+def wound_coil(wind_center, pole_dir, start_seg, end_seg, color, n_turns=4,
+               wire_gap=0.075, hw=0.05, thickness=0.026, dot_r=0.07):
+    """ขดลวดแบบ "เส้นตรงต่อกัน" ตามที่ Min ขอ (ไม่เอาวงรี/วงกลม):
+
+    เริ่มที่ซี่คอมมิวเตเตอร์ (จุดเริ่ม มี Dot ชัด) -> ลากไปที่หน้าฟัน -> ลง Z ไปหลังฟัน ->
+    อ้อมข้าง (ทิศสัมผัส) -> ขึ้น Z กลับมาหน้าฟัน = ครบ 1 รอบ -> เยื้องไปทำรอบถัดไป (n_turns รอบ)
+    -> จบที่ซี่คอมมิวเตเตอร์อีกซี่ (จุดจบ มี Dot ชัด) ทุกช่วงเป็นเส้นตรงล้วน มองออกว่าลวด
+    เดินทางยังไง เริ่มที่ซี่ไหน จบที่ซี่ไหน
+
+    คืน (VGroup ของเส้นเรียงตามลำดับการเดินสาย, VGroup ของจุดเริ่ม-จุดจบ)
+    """
+    tangent = coil_ring_axis(pole_dir)
+    front_c = np.array([wind_center[0], wind_center[1], L_HALF], dtype=float)
+    back_c = np.array([wind_center[0], wind_center[1], -L_HALF], dtype=float)
+
+    pts = [np.asarray(start_seg, dtype=float)]
+    for k in range(n_turns):
+        off = (k - (n_turns - 1) / 2.0) * wire_gap
+        pts.append(front_c + tangent * (off - hw))   # เข้าหน้าฟัน ฝั่งใกล้
+        pts.append(back_c + tangent * (off - hw))    # ลง Z ไปหลัง
+        pts.append(back_c + tangent * (off + hw))    # อ้อมข้างที่ด้านหลัง
+        pts.append(front_c + tangent * (off + hw))   # ขึ้น Z กลับมาหน้า = ครบ 1 รอบ
+    pts.append(np.asarray(end_seg, dtype=float))
+
+    segs = VGroup(*[line3(pts[i], pts[i + 1], color, thickness)
+                    for i in range(len(pts) - 1)])
+    dots = VGroup(Dot(pts[0], radius=dot_r, color=color),
+                  Dot(pts[-1], radius=dot_r, color=color))
+    return segs, dots
+
+
 def tooth_shape(pole_dir, center=STAGE, r_arm=R_ARM, l_half=L_HALF, color=METAL):
     """ฟันยื่นแบบขั้วนูน (salient pole) บนแกนหมุน — Min ถามตรงๆ ว่าลวดต้องพันอ้อมไปหลัง
     แกนด้วยไหม (แกนจริงไม่ใช่ทรงกระบอกเรียบ มีฟันยื่น 3 ซี่ให้พันลวดรอบแต่ละซี่แบบพันหม้อแปลง)
@@ -487,144 +518,114 @@ class W04_Compare_ApplyToYourMotor(SafeThreeDScene):
 
 
 # ================================================================ SCENE W05
-# Min ขอเทียบ 2 มุมกล้อง (เสียง 2026-09-01): "1 คือมุมกล้องที่ตามตัวเส้นขดลวดไปทีละเส้น"
-# vs "2 คือเข้าให้มอเตอร์อยู่ตรงกลางจอมากกว่านี้ แค่เอียงพอเห็นฝั่งที่พิจารณาอยู่"
-# แยกเป็นคลาสฐานร่วม + 2 คลาสย่อยต่างกันแค่พฤติกรรมกล้อง จะได้ไม่ต้องก็อปโค้ดทั้งซีน
-class _W05Base(SafeThreeDScene):
-    CAM = "wide"  # ลูกคลาสเซ็ตทับเป็น "follow" หรือ "centered"
-
-    def cam_focus(self, point, zoom=1.7, run_time=1.0):
-        """ซูม/แพนกล้องไปโฟกัสจุดนี้ — ทำงานเฉพาะโหมด follow เท่านั้น"""
-        if self.CAM == "follow":
-            self.zoom_to(point, zoom=zoom, run_time=run_time)
-
-    def cam_reset(self, run_time=1.0):
-        if self.CAM == "follow":
-            self.zoom_to(STAGE, zoom=1.0, run_time=run_time)
-
+# รอบนี้แก้ตามฟีดแบ็ก Min (เสียง 2026-09-01):
+#  1) ขดลวดต้องเป็น "เส้นตรงต่อกัน" เห็นทางเดินสายชัด ไม่ใช่วงรี/วงกลมสวยๆ ที่ดูไม่ออกว่าเริ่ม-จบตรงไหน
+#  2) ต้องเห็นชัดว่า "เริ่มที่ซี่คอมมิวเตเตอร์ไหน" และ "ไปจบที่ซี่ไหน" (จุด Dot เด่นทั้งหัวและท้าย)
+#  3) มุมกล้องเอาแบบเดิม (แบบ 1) แต่ให้ "หมุนตัวมอเตอร์" ระหว่างเปลี่ยนไปพันขั้วถัดไป จะได้ดูง่าย
+#     -> พันที่ตำแหน่งหน้าเดิมทุกครั้ง แล้วหมุนโรเตอร์ 120° เอาฟันซี่ถัดไปมาไว้ตรงหน้าแทน
+class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
     def construct(self):
-        if self.CAM == "centered":
-            # มองเกือบตรงหน้า เอียงแค่นิดเดียวพอเห็นความลึก โมเดลอยู่กลางจอตลอด ไม่แพน/ไม่ซูม
-            self.set_camera_orientation(phi=24 * DEGREES, theta=-98 * DEGREES)
-        else:
-            self.set_camera_orientation(phi=58 * DEGREES, theta=-48 * DEGREES)
-        n_bars = n_poles = 3
+        self.set_camera_orientation(phi=58 * DEGREES, theta=-48 * DEGREES)
+        n_bars = 3
 
         ttl = self.hud(title("พันจริง — อาร์เมเจอร์ 3 ขั้ว", size=27))
         ref = self.hud(page_ref("ซีรีส์พันมอเตอร์ · ตอน 5"))
         cap0 = self.hud(caption_top(
-            "มอเตอร์รถแข่งของ Min — ใช้หลักการแลป/เวฟที่เพิ่งเห็น แต่ 3 ซี่ = ทางเดียว"))
+            "มอเตอร์รถแข่งของ Min — พันทีละขั้ว หมุนแกนมาทีละซี่ ดูเส้นลวดทีละเส้น"))
         self.play(FadeIn(ttl), FadeIn(ref), FadeIn(cap0), run_time=1.0)
-        self.wait(1.2)
+        self.wait(1.0)
 
         core = armature_core(n_bars)
         bars, nums, angs = commutator_bars(n_bars)
-        # ฟันยื่น 3 ซี่บนแกนหมุน (salient pole) — Min ถามว่าลวดต้องพันอ้อมไปหลังแกนไหม
-        # คำตอบคือใช่ เพราะแกนจริงมีฟันยื่นแบบนี้ ไม่ใช่ทรงกระบอกเรียบ ลวดพันรอบฟันแต่ละซี่
         teeth = VGroup(*[tooth_shape(np.array([np.cos(a), np.sin(a), 0])) for a in angs])
-        # nums อยู่ในโลก 3D (ไม่ hud) — จะได้หมุนไปพร้อมบาร์จริงตอนม้วนสุดท้าย (rotor_group)
         self.play(FadeIn(core), FadeIn(teeth), Create(bars), FadeIn(nums), run_time=1.3)
 
-        # naming pass เฉพาะคลิปนี้ (อาจมีคนดูข้ามมาจากคลิปอื่น — skill §21.8)
-        a0v = np.array([np.cos(angs[0]), np.sin(angs[0]), 0])
-        n1 = name_pointer(STAGE + a0v * R_ARM * 0.55, a0v, "ฟันยื่น (พันลวดรอบนี้)", CURRENT,
-                          dist=0.85)
+        # ตำแหน่ง "หน้า" ที่ใช้พันทุกครั้ง (ฟันซี่ถัดไปจะถูกหมุนมาที่นี่)
+        front_dir = np.array([np.cos(angs[0]), np.sin(angs[0]), 0.0])
+        wind_center = STAGE + front_dir * (R_ARM * 0.55)
+        start_seg = SCHEM_C + R_SCHEM * 0.84 * front_dir
+        end_seg = SCHEM_C + R_SCHEM * 0.84 * np.array(
+            [np.cos(angs[1]), np.sin(angs[1]), 0.0])
+
+        n1 = name_pointer(wind_center, front_dir, "ฟันยื่น (พันลวดรอบนี้)", CURRENT, dist=0.85)
         n2 = name_pointer(SCHEM_C, [0.8, 0.6, 0], "คอมมิวเตเตอร์ 3 ซี่ (ติดหน้าแกน)", METAL,
                           dist=R_SCHEM + 0.7)
         self.play(FadeIn(n1), FadeIn(n2), run_time=0.9)
-        self.wait(1.3)
+        self.wait(1.2)
         self.play(FadeOut(VGroup(n1, n2)), run_time=0.5)
 
-        step_hdr = self.hud(Text("ขั้นตอนที่ 1 — พันขั้วที่ 1", font_size=17,
+        coil_colors = [CURRENT, OK, FORCE]
+        rotor = VGroup(core, teeth, bars, nums)
+        caps = cap0
+
+        for i in range(3):
+            step = self.hud(Text(f"ขั้นตอนที่ {i + 1} — พันขั้วที่ {i + 1}", font_size=17,
                                  color=WARN).move_to([0, SAFE_LOW_Y, 0]))
-        self.play(FadeIn(step_hdr), run_time=0.5)
+            cap_a = self.hud(caption_top(
+                f"เริ่มที่ซี่ {i + 1} → ลงไปหลังแกน → อ้อมข้าง → ขึ้นมาหน้า = 1 รอบ",
+                color=coil_colors[i]))
+            self.play(FadeIn(step), ReplacementTransform(caps, cap_a), run_time=0.8)
+            caps = cap_a
 
-        cap1 = self.hud(caption_top("พันลวด 24 AWG รอบขั้ว 1 ทิศทางเดียวกันทุกรอบ แน่นและเรียงชิด"))
-        self.play(ReplacementTransform(cap0, cap1), run_time=0.8)
+            segs, dots = wound_coil(wind_center, front_dir, start_seg, end_seg,
+                                    coil_colors[i])
+            # จุดเริ่มขึ้นก่อน แล้วค่อยลากเส้นทีละช่วงตามลำดับการเดินสายจริง แล้วจบด้วยจุดจบ
+            self.play(FadeIn(dots[0], scale=1.6), run_time=0.4)
+            self.play(LaggedStart(*[Create(s) for s in segs], lag_ratio=0.55),
+                      run_time=3.4)
+            cap_b = self.hud(caption_top(
+                f"พันครบ 4 รอบแล้ว → ปลายสายไปจบที่ซี่ {((i + 1) % 3) + 1}",
+                color=coil_colors[i]))
+            self.play(ReplacementTransform(caps, cap_b), FadeIn(dots[1], scale=1.6),
+                      run_time=0.8)
+            caps = cap_b
+            self.wait(1.4)
 
-        # พันลวดรอบฟันที่ 1 — ห่วงรียาวคลุมทั้งความยาวฟัน (อ้อมหน้า-ข้าง-หลัง-ข้าง-หน้า จริง)
-        a0 = angs[0]
-        pole_dir = np.array([np.cos(a0), np.sin(a0), 0])
-        wind_center = STAGE + pole_dir * (R_ARM * 0.55)
-        self.cam_focus(wind_center)
-        coil_loops = coil_winding(wind_center, pole_dir, color=CURRENT)
-        self.play(LaggedStart(*[Create(l) for l in coil_loops], lag_ratio=0.35), run_time=2.2)
-        self.wait(0.8)
+            coil_group = VGroup(segs, dots)
+            rotor.add(coil_group)
+            self.play(FadeOut(step), run_time=0.3)
 
-        lead1 = coil_lead(wind_center, pole_dir, SCHEM_C + R_SCHEM * 0.84 *
-                         np.array([np.cos(angs[0]), np.sin(angs[0]), 0]), CURRENT)
-        self.play(Create(lead1), run_time=0.8)
-        cap2 = self.hud(caption_top("ปลายขดต่อเข้าซี่ 1 → พันขั้ว 2 ต่อ ทิศทางเดียวกันเสมอ"))
-        self.play(ReplacementTransform(cap1, cap2), run_time=0.8)
-        self.wait(1.2)
+            if i < 2:
+                turn_cap = self.hud(caption_top(
+                    "หมุนแกนมา 120° เอาฟันซี่ถัดไปมาไว้ข้างหน้า แล้วพันแบบเดิมซ้ำ"))
+                self.play(ReplacementTransform(caps, turn_cap), run_time=0.6)
+                caps = turn_cap
+                self.play(Rotating(rotor, angle=-TAU / 3, axis=[0, 0, 1],
+                                   about_point=STAGE, run_time=1.6,
+                                   rate_func=smooth))
+                self.wait(0.5)
 
-        step_hdr2 = self.hud(Text("ขั้นตอนที่ 2 — พันขั้วที่ 2 แล้วต่อซี่ 1→2", font_size=17,
-                                  color=WARN).move_to([0, SAFE_LOW_Y, 0]))
-        self.play(ReplacementTransform(step_hdr, step_hdr2), run_time=0.5)
-
-        a1 = angs[1]
-        pole_dir2 = np.array([np.cos(a1), np.sin(a1), 0])
-        wind_center2 = STAGE + pole_dir2 * (R_ARM * 0.55)
-        self.cam_focus(wind_center2)
-        coil_loops2 = coil_winding(wind_center2, pole_dir2, color=OK)
-        self.play(LaggedStart(*[Create(l) for l in coil_loops2], lag_ratio=0.35), run_time=2.0)
-        lead2 = coil_lead(wind_center2, pole_dir2, SCHEM_C + R_SCHEM * 0.84 *
-                         np.array([np.cos(angs[1]), np.sin(angs[1]), 0]), OK)
-        self.play(Create(lead2), run_time=0.8)
-        self.wait(1.0)
-
-        step_hdr3 = self.hud(Text("ขั้นตอนที่ 3 — พันขั้วที่ 3 แล้วปิดวง 3→1", font_size=17,
-                                  color=WARN).move_to([0, SAFE_LOW_Y, 0]))
-        self.play(ReplacementTransform(step_hdr2, step_hdr3), run_time=0.5)
-
-        a2 = angs[2]
-        pole_dir3 = np.array([np.cos(a2), np.sin(a2), 0])
-        wind_center3 = STAGE + pole_dir3 * (R_ARM * 0.55)
-        self.cam_focus(wind_center3)
-        coil_loops3 = coil_winding(wind_center3, pole_dir3, color=FORCE)
-        self.play(LaggedStart(*[Create(l) for l in coil_loops3], lag_ratio=0.35), run_time=2.0)
-        lead3 = coil_lead(wind_center3, pole_dir3, SCHEM_C + R_SCHEM * 0.84 *
-                          np.array([np.cos(angs[2]), np.sin(angs[2]), 0]), FORCE)
-        lead3b = chord(SCHEM_C, R_SCHEM, angs[2], angs[0], FORCE, sw=5)
-        self.play(Create(lead3), Create(lead3b), run_time=1.0)
-        self.cam_reset()
-
-        cap3 = self.hud(caption_top("ครบวงพอดี — 3 ขด 3 ซี่ ต่อไล่กันไปจนกลับมาที่ซี่แรก", color=OK))
-        self.play(ReplacementTransform(cap2, cap3), run_time=0.8)
+        cap_done = self.hud(caption_top(
+            "ครบ 3 ขด — ปลายขดหนึ่งไปเริ่มอีกขดหนึ่ง วนจนกลับมาที่ซี่แรกพอดี", color=OK))
+        self.play(ReplacementTransform(caps, cap_done), run_time=0.8)
         self.wait(2.0)
-
-        self.play(FadeOut(step_hdr3), run_time=0.4)
 
         # ------------------------------------------------- ประกอบ + ทดสอบ
         poles, pole_labels, pole_pos = pole_pieces(2, pole_x=1.6)
         cap4 = self.hud(caption_top(
             "ประกอบแม่เหล็กประกบ 2 ข้าง — อย่าลืมปลอกเหล็กอ่อนรอบนอก (โยคนำฟลักซ์กลับ)"))
-        self.play(ReplacementTransform(cap3, cap4), FadeIn(poles), FadeIn(pole_labels), run_time=1.2)
-        self.wait(2.0)
+        self.play(ReplacementTransform(cap_done, cap4), FadeIn(poles), FadeIn(pole_labels),
+                  run_time=1.2)
+        self.wait(1.8)
 
         cap5 = self.hud(caption_top(
             "ก่อนใส่จริง: วัดต่อเนื่อง (continuity) ด้วยมัลติมิเตอร์ทุกคู่ซี่ ต้องไม่ช็อต/ไม่ขาด",
             color=WARN))
         self.play(ReplacementTransform(cap4, cap5), run_time=0.9)
-        self.wait(2.2)
+        self.wait(2.0)
 
         cap6 = self.hud(caption_top("หมุนด้วยมือก่อนต่อไฟ — ต้องหมุนลื่น ไม่สะดุด ไม่เสียดสีแม่เหล็ก"))
         self.play(ReplacementTransform(cap5, cap6), run_time=0.9)
-        self.wait(2.0)
+        self.wait(1.8)
 
-        cap7 = self.hud(caption_top("ต่อไฟจริง ปรับตำแหน่งแปรงถ่านเล็กน้อยจนรอบสูงสุด/นิ่งสุด", color=OK))
+        cap7 = self.hud(caption_top("ต่อไฟจริง ปรับตำแหน่งแปรงถ่านเล็กน้อยจนรอบสูงสุด/นิ่งสุด",
+                                    color=OK))
         self.play(ReplacementTransform(cap6, cap7), run_time=0.9)
-        self.wait(2.0)
+        self.play(Rotating(rotor, angle=TAU * 2, axis=[0, 0, 1], about_point=STAGE,
+                           run_time=2.6, rate_func=linear))
+        self.wait(0.5)
 
-        rotor_group = VGroup(core, teeth, bars, nums, coil_loops, coil_loops2, coil_loops3,
-                             lead1, lead2, lead3, lead3b)
-        self.play(Rotating(rotor_group, angle=TAU * 3, axis=[0, 0, 1], about_point=STAGE,
-                           run_time=3.0, rate_func=linear))
-        self.wait(0.6)
-
-        # เก็บโมเดลทั้งหมดก่อนขึ้นการ์ดสรุป — กันไม่ให้ N/S ของแม่เหล็ก (อยู่ใกล้กึ่งกลางจอ
-        # พอดีสำหรับ config 2 ขั้ว) ไปทับข้อความการ์ด (เจอจริงตอนเรนเดอร์รอบ 2)
-        self.play(FadeOut(VGroup(rotor_group, poles, pole_labels)), run_time=0.6)
+        self.play(FadeOut(VGroup(rotor, poles, pole_labels)), run_time=0.6)
 
         summary = overlay_card(self, [
             Text("เสร็จแล้ว — มอเตอร์ 3 ขั้วของ Min", font_size=26, color=OK),
@@ -632,16 +633,6 @@ class _W05Base(SafeThreeDScene):
                  font_size=19, color=GRAYTXT),
         ], move_to=(0, -0.4, 0))
         self.play(FadeIn(summary, shift=UP * 0.2), run_time=1.0)
-        self.wait(2.6)
+        self.wait(2.4)
 
         self.fade_out_all()
-
-
-class W05a_CameraFollow(_W05Base):
-    """มุมกล้องแบบ 1 — กล้องซูม/แพนตามไปโฟกัสฟันที่กำลังพันอยู่ทีละซี่"""
-    CAM = "follow"
-
-
-class W05b_CameraCentered(_W05Base):
-    """มุมกล้องแบบ 2 — โมเดลอยู่กลางจอตลอด เอียงแค่นิดเดียว ไม่แพน/ไม่ซูม"""
-    CAM = "centered"
