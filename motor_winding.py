@@ -28,12 +28,15 @@ L_HALF = 0.80
 POLE_X = 2.0
 POLE_W = 0.85
 POLE_H = 1.5
-COMM_Z = L_HALF + 0.45
-R_COMM = 0.45
 
-# ------------------------------------------------------------ schematic ring
-SCHEM_C = np.array([3.55, -0.65, 0.0])
-R_SCHEM = 1.5
+# คอมมิวเตเตอร์ติดอยู่หน้าอาร์เมเจอร์จริงๆ ในโมเดล 3D เดียวกัน (Min ขอหลังดู v5: "ผมอยากเห็น
+# เป็น 3D มากกว่า ... เริ่มที่หน้าของ commutator แล้วไปเกี่ยวที่อาร์เมเจอร์" — เดิมวาดเป็น
+# แผนผังลอยแยกไปไกลๆ ทางขวา เส้นลวดเลยลากยาวข้ามจอไม่สมจริง) วางไว้ตามแนวเพลา ถัดจาก
+# หน้าอาร์เมเจอร์ (z=L_HALF) ก่อนถึงปลายเพลา (z=L_HALF+0.85) วงเล็กกว่าอาร์เมเจอร์เอง
+# ตามสัดส่วนคอมมิวเตเตอร์จริง
+COMM_Z = L_HALF + 0.40
+R_SCHEM = R_ARM * 0.75
+SCHEM_C = STAGE + np.array([0.0, 0.0, COMM_Z])
 
 PATH_COLORS = [CURRENT, OK, FORCE, TORQUE, EMF, "#4FC3F7"]
 
@@ -114,6 +117,41 @@ def chord(center, r, a1, a2, color, sw=3.5):
     return Line(p1, p2, color=color, stroke_width=sw)
 
 
+def coil_lead(wind_center, seg_point, color, thickness=0.02):
+    """เส้นลวดจากขด → ซี่คอมมิวเตเตอร์ วิ่งผ่าน 2 ช่วง (ยกระดับไปหน้าอาร์เมเจอร์ก่อน ค่อยเข้าซี่)
+    แทนเส้นตรงเส้นเดียวที่ตัดทะลุแกนตรงๆ — สมจริงกว่า เพราะคอมมิวเตเตอร์อยู่คนละ z กับขด"""
+    mid = np.array([wind_center[0], wind_center[1], L_HALF], dtype=float)
+    return VGroup(line3(wind_center, mid, color, thickness),
+                  line3(mid, seg_point, color, thickness))
+
+
+def tooth_shape(pole_dir, center=STAGE, r_arm=R_ARM, l_half=L_HALF, color=METAL):
+    """ฟันยื่นแบบขั้วนูน (salient pole) บนแกนหมุน — Min ถามตรงๆ ว่าลวดต้องพันอ้อมไปหลัง
+    แกนด้วยไหม (แกนจริงไม่ใช่ทรงกระบอกเรียบ มีฟันยื่น 3 ซี่ให้พันลวดรอบแต่ละซี่แบบพันหม้อแปลง)
+    วาดเป็นแผ่นสี่เหลี่ยมยื่นจากใกล้เพลาออกไปใกล้ผิว ยาวเต็มความยาวแกน (-l_half ถึง +l_half)"""
+    r_in, r_out = r_arm * 0.15, r_arm * 0.92
+    pts = [center + pole_dir * r_in + [0, 0, -l_half],
+           center + pole_dir * r_out + [0, 0, -l_half],
+           center + pole_dir * r_out + [0, 0, l_half],
+           center + pole_dir * r_in + [0, 0, l_half]]
+    return Polygon(*pts, color=color, fill_color=color, fill_opacity=0.6, stroke_width=2)
+
+
+def coil_winding(wind_center, pole_dir, n_turns=7, color=CURRENT,
+                 axial_len=2 * L_HALF, thick=0.30, bundle=0.22):
+    """ขดลวดพันรอบฟัน — ห่วงรี (แนวแกน Z x ทิศสัมผัส, ยาวคลุมทั้งความยาวฟัน) เรียงเหลื่อม
+    กันตามแนวทิศสัมผัส (tangential) ให้เห็นว่าลวดพันซ้อนหลายรอบอ้อมฟันจากหน้าไปหลัง"""
+    loops = VGroup()
+    axis = coil_ring_axis(pole_dir)
+    for k in range(n_turns):
+        shift = (k - (n_turns - 1) / 2) * (bundle / n_turns)
+        loop = Ellipse(width=thick, height=axial_len + 0.30, color=color, stroke_width=2.2)
+        loop.move_to(wind_center + axis * shift)
+        loop.rotate(PI / 2, axis=axis)
+        loops.add(loop)
+    return loops
+
+
 def coil_ring_axis(pole_dir):
     """แกนหมุนที่ถูกต้องสำหรับพลิกวงแหวน (ปกติ normal=OUT) ให้ normal ชี้ตาม pole_dir
     pole_dir อยู่ในระนาบ XY เสมอ (z=0) จึงตั้งฉากกับ OUT เสมอ มุมหมุนคงที่ 90°
@@ -189,7 +227,8 @@ class W01_WhyManyCoils_PolePitchVsCommPitch(SafeThreeDScene):
         self.wait(1.8)
 
         # -------- ย้ายกล้อง/จาง armature ไปโฟกัสที่ระยะสองแบบบนวงแหวนคอมมิวเตเตอร์
-        self.zoom_to(SCHEM_C, zoom=1.15, run_time=1.3)
+        # (คอมมิวเตเตอร์ติดหน้าอาร์เมเจอร์ วงเล็ก ต้องซูมเข้าไปมากกว่าตอนวางลอยแยกไกลๆ)
+        self.zoom_to(SCHEM_C, zoom=2.4, run_time=1.3)
         bars, nums, angs = commutator_bars(8)
         self.play(core.animate.set_opacity(0.25), poles.animate.set_opacity(0.15),
                   pole_labels.animate.set_opacity(0.15),
@@ -448,14 +487,18 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
 
         core = armature_core(n_bars)
         bars, nums, angs = commutator_bars(n_bars)
+        # ฟันยื่น 3 ซี่บนแกนหมุน (salient pole) — Min ถามว่าลวดต้องพันอ้อมไปหลังแกนไหม
+        # คำตอบคือใช่ เพราะแกนจริงมีฟันยื่นแบบนี้ ไม่ใช่ทรงกระบอกเรียบ ลวดพันรอบฟันแต่ละซี่
+        teeth = VGroup(*[tooth_shape(np.array([np.cos(a), np.sin(a), 0])) for a in angs])
         # nums อยู่ในโลก 3D (ไม่ hud) — จะได้หมุนไปพร้อมบาร์จริงตอนม้วนสุดท้าย (rotor_group)
-        self.play(FadeIn(core), Create(bars), FadeIn(nums), run_time=1.3)
+        self.play(FadeIn(core), FadeIn(teeth), Create(bars), FadeIn(nums), run_time=1.3)
 
         # naming pass เฉพาะคลิปนี้ (อาจมีคนดูข้ามมาจากคลิปอื่น — skill §21.8)
-        n1 = name_pointer(STAGE + [0, R_ARM + 0.2, L_HALF], [0, 1, 0],
-                          "แกน 3 ขั้ว", OK, dist=0.55)
-        n2 = name_pointer(SCHEM_C, [0, 1, 0], "คอมมิวเตเตอร์ 3 ซี่", METAL,
-                          dist=R_SCHEM + 0.65)
+        a0v = np.array([np.cos(angs[0]), np.sin(angs[0]), 0])
+        n1 = name_pointer(STAGE + a0v * R_ARM * 0.55, a0v, "ฟันยื่น (พันลวดรอบนี้)", CURRENT,
+                          dist=0.85)
+        n2 = name_pointer(SCHEM_C, [0.8, 0.6, 0], "คอมมิวเตเตอร์ 3 ซี่ (ติดหน้าแกน)", METAL,
+                          dist=R_SCHEM + 0.7)
         self.play(FadeIn(n1), FadeIn(n2), run_time=0.9)
         self.wait(1.3)
         self.play(FadeOut(VGroup(n1, n2)), run_time=0.5)
@@ -467,21 +510,16 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         cap1 = self.hud(caption_top("พันลวด 24 AWG รอบขั้ว 1 ทิศทางเดียวกันทุกรอบ แน่นและเรียงชิด"))
         self.play(ReplacementTransform(cap0, cap1), run_time=0.8)
 
-        # แสดงเส้นลวดพันรอบขั้วที่ 1 (แถบพันหลายรอบ แบบง่าย — ห่วงวงรีรอบแกนที่มุม slot 0)
+        # พันลวดรอบฟันที่ 1 — ห่วงรียาวคลุมทั้งความยาวฟัน (อ้อมหน้า-ข้าง-หลัง-ข้าง-หน้า จริง)
         a0 = angs[0]
         pole_dir = np.array([np.cos(a0), np.sin(a0), 0])
-        wind_center = STAGE + pole_dir * (R_ARM + 0.55)
-        coil_loops = VGroup()
-        for k in range(5):
-            loop = Circle(radius=0.42 - k * 0.01, color=CURRENT, stroke_width=2.5)
-            loop.move_to(wind_center)
-            loop.rotate(PI / 2, axis=coil_ring_axis(pole_dir))
-            coil_loops.add(loop)
-        self.play(LaggedStart(*[Create(l) for l in coil_loops], lag_ratio=0.5), run_time=2.0)
+        wind_center = STAGE + pole_dir * (R_ARM * 0.55)
+        coil_loops = coil_winding(wind_center, pole_dir, color=CURRENT)
+        self.play(LaggedStart(*[Create(l) for l in coil_loops], lag_ratio=0.35), run_time=2.2)
         self.wait(0.8)
 
-        lead1 = line3(wind_center, SCHEM_C + R_SCHEM * 0.84 *
-                     np.array([np.cos(angs[0]), np.sin(angs[0]), 0]), CURRENT, thickness=0.02)
+        lead1 = coil_lead(wind_center, SCHEM_C + R_SCHEM * 0.84 *
+                         np.array([np.cos(angs[0]), np.sin(angs[0]), 0]), CURRENT)
         self.play(Create(lead1), run_time=0.8)
         cap2 = self.hud(caption_top("ปลายขดต่อเข้าซี่ 1 → พันขั้ว 2 ต่อ ทิศทางเดียวกันเสมอ"))
         self.play(ReplacementTransform(cap1, cap2), run_time=0.8)
@@ -493,16 +531,11 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
 
         a1 = angs[1]
         pole_dir2 = np.array([np.cos(a1), np.sin(a1), 0])
-        wind_center2 = STAGE + pole_dir2 * (R_ARM + 0.55)
-        coil_loops2 = VGroup()
-        for k in range(5):
-            loop = Circle(radius=0.42 - k * 0.01, color=OK, stroke_width=2.5)
-            loop.move_to(wind_center2)
-            loop.rotate(PI / 2, axis=coil_ring_axis(pole_dir2))
-            coil_loops2.add(loop)
-        self.play(LaggedStart(*[Create(l) for l in coil_loops2], lag_ratio=0.5), run_time=1.8)
-        lead2 = line3(wind_center2, SCHEM_C + R_SCHEM * 0.84 *
-                     np.array([np.cos(angs[1]), np.sin(angs[1]), 0]), OK, thickness=0.02)
+        wind_center2 = STAGE + pole_dir2 * (R_ARM * 0.55)
+        coil_loops2 = coil_winding(wind_center2, pole_dir2, color=OK)
+        self.play(LaggedStart(*[Create(l) for l in coil_loops2], lag_ratio=0.35), run_time=2.0)
+        lead2 = coil_lead(wind_center2, SCHEM_C + R_SCHEM * 0.84 *
+                         np.array([np.cos(angs[1]), np.sin(angs[1]), 0]), OK)
         self.play(Create(lead2), run_time=0.8)
         self.wait(1.0)
 
@@ -512,19 +545,12 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
 
         a2 = angs[2]
         pole_dir3 = np.array([np.cos(a2), np.sin(a2), 0])
-        wind_center3 = STAGE + pole_dir3 * (R_ARM + 0.55)
-        coil_loops3 = VGroup()
-        for k in range(5):
-            loop = Circle(radius=0.42 - k * 0.01, color=FORCE, stroke_width=2.5)
-            loop.move_to(wind_center3)
-            loop.rotate(PI / 2, axis=coil_ring_axis(pole_dir3))
-            coil_loops3.add(loop)
-        self.play(LaggedStart(*[Create(l) for l in coil_loops3], lag_ratio=0.5), run_time=1.8)
-        lead3 = line3(wind_center3, SCHEM_C + R_SCHEM * 0.84 *
-                     np.array([np.cos(angs[2]), np.sin(angs[2]), 0]), FORCE, thickness=0.02)
-        lead3b = line3(SCHEM_C + R_SCHEM * 0.84 * np.array([np.cos(angs[2]), np.sin(angs[2]), 0]),
-                       SCHEM_C + R_SCHEM * 0.84 * np.array([np.cos(angs[0]), np.sin(angs[0]), 0]),
-                       FORCE, thickness=0.02)
+        wind_center3 = STAGE + pole_dir3 * (R_ARM * 0.55)
+        coil_loops3 = coil_winding(wind_center3, pole_dir3, color=FORCE)
+        self.play(LaggedStart(*[Create(l) for l in coil_loops3], lag_ratio=0.35), run_time=2.0)
+        lead3 = coil_lead(wind_center3, SCHEM_C + R_SCHEM * 0.84 *
+                          np.array([np.cos(angs[2]), np.sin(angs[2]), 0]), FORCE)
+        lead3b = chord(SCHEM_C, R_SCHEM, angs[2], angs[0], FORCE, sw=5)
         self.play(Create(lead3), Create(lead3b), run_time=1.0)
 
         cap3 = self.hud(caption_top("ครบวงพอดี — 3 ขด 3 ซี่ ต่อไล่กันไปจนกลับมาที่ซี่แรก", color=OK))
@@ -554,7 +580,7 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         self.play(ReplacementTransform(cap6, cap7), run_time=0.9)
         self.wait(2.0)
 
-        rotor_group = VGroup(core, bars, nums, coil_loops, coil_loops2, coil_loops3,
+        rotor_group = VGroup(core, teeth, bars, nums, coil_loops, coil_loops2, coil_loops3,
                              lead1, lead2, lead3, lead3b)
         self.play(Rotating(rotor_group, angle=TAU * 3, axis=[0, 0, 1], about_point=STAGE,
                            run_time=3.0, rate_func=linear))
