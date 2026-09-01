@@ -1322,8 +1322,10 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
         field_coil_n.add_updater(color_by_temp)
         self.play(t.animate.set_value(70), run_time=1.8, rate_func=linear)
         field_coil_n.clear_updaters()
-        self.wait(0.3)
 
+        # ไม่ wait() ก่อนสลับป้าย — สีคอยล์ถึงแดง(ร้อน)เต็มที่ตอนจบแอนิเมชันข้างบน
+        # พอดีแล้ว เว้นจังหวะเพิ่มจะทำให้ป้าย "T=20°C" ค้างอยู่ทั้งที่สีเปลี่ยนไปแล้ว
+        # (temporal contiguity, §14) — สลับป้ายทันทีให้ตรงจังหวะกับสีที่เปลี่ยนจริง
         self.play(FadeOut(temp_before), run_time=0.3)
         temp_after = Text("T = 70°C", font_size=24, color=EMF).move_to([0, 1.6, 0])
         self.hud(temp_after)
