@@ -117,19 +117,25 @@ def chord(center, r, a1, a2, color, sw=3.5):
     return Line(p1, p2, color=color, stroke_width=sw)
 
 
-def coil_lead(wind_center, seg_point, color, thickness=0.03, dot_r=0.06):
-    """จุดต่อจุด ผ่านด้านหลังอาร์เมเจอร์ — Min ปรับจากรอบก่อน (เส้นตรงเดียวยังดูปลอม):
-    "เอาจุดเริ่มจาก commutator แล้วปลายที่หลังอาร์เมเจอร์ แล้วลาก...มาที่ปลายไหนซักที่ของคอมมู"
-    เส้นทาง: ซี่คอมมิวเตเตอร์ (จุดเริ่ม) -> ด้านหลังอาร์เมเจอร์ตรงตำแหน่งขด (จุดปลาย) -> ขด
-    หนาขึ้นกว่ารอบก่อน (0.018 -> 0.03) ตามที่ขอ "ความหนานิดหน่อย"
-    Dot ธรรมดา (แบน) ไม่ใช่ Dot3D (ทรงกลม mesh จริง) — วงกลมแบนมองจากมุมไหนก็ยังอ่านง่าย
-    เหมือนกัน ไม่ต้องแบกต้นทุนเรนเดอร์ตาข่าย 3D แบบเดียวกับที่ Arrow3D ช้ากว่า Arrow แบน 62 เท่า"""
-    back_pt = np.array([wind_center[0], wind_center[1], -L_HALF], dtype=float)
+def coil_lead(wind_center, pole_dir, seg_point, color, thickness=0.03, dot_r=0.06,
+             wrap_width=0.34):
+    """เส้นทางตามที่ Min สั่งเป๊ะๆ (ข้อความเสียง): เริ่มที่ซี่คอมมิวเตเตอร์ -> ลากลงตรงตามแกน Z
+    ล้วนๆ (x,y คงที่) ไปสุดที่ด้านหลังอาร์เมเจอร์ -> เปลี่ยนแกนให้ขนานกับ "Normal" ของฟัน
+    (=ทิศสัมผัส coil_ring_axis) อ้อมไปอีกฝั่งหนึ่งของฟัน (สี่เหลี่ยมผืนผ้า) -> ขึ้นตามแกน Z
+    ล้วนๆ กลับไปที่ปลายขดด้านหน้า — จำลองเส้นลวดพันอ้อมฟันจริง ไม่ใช่เส้นตรงเฉียงข้ามจอ
+    Dot ธรรมดา (แบน) ไม่ใช่ Dot3D (ทรงกลม mesh จริง) — วงกลมแบนมองจากมุมไหนก็ยังอ่านง่ายเหมือนกัน
+    ไม่ต้องแบกต้นทุนเรนเดอร์ตาข่าย 3D แบบเดียวกับที่ Arrow3D ช้ากว่า Arrow แบน 62 เท่า"""
+    seg_point = np.asarray(seg_point, dtype=float)
+    tangent = coil_ring_axis(pole_dir)
+    down_pt = np.array([seg_point[0], seg_point[1], -L_HALF], dtype=float)
+    across_pt = down_pt + tangent * wrap_width
+    up_pt = np.array([across_pt[0], across_pt[1], L_HALF], dtype=float)
     return VGroup(
-        Dot(np.asarray(seg_point, dtype=float), radius=dot_r, color=color),
-        Dot(back_pt, radius=dot_r, color=color),
-        line3(seg_point, back_pt, color, thickness),
-        line3(back_pt, wind_center, color, thickness),
+        Dot(seg_point, radius=dot_r, color=color),
+        Dot(up_pt, radius=dot_r, color=color),
+        line3(seg_point, down_pt, color, thickness),
+        line3(down_pt, across_pt, color, thickness),
+        line3(across_pt, up_pt, color, thickness),
     )
 
 
@@ -481,9 +487,27 @@ class W04_Compare_ApplyToYourMotor(SafeThreeDScene):
 
 
 # ================================================================ SCENE W05
-class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
+# Min ขอเทียบ 2 มุมกล้อง (เสียง 2026-09-01): "1 คือมุมกล้องที่ตามตัวเส้นขดลวดไปทีละเส้น"
+# vs "2 คือเข้าให้มอเตอร์อยู่ตรงกลางจอมากกว่านี้ แค่เอียงพอเห็นฝั่งที่พิจารณาอยู่"
+# แยกเป็นคลาสฐานร่วม + 2 คลาสย่อยต่างกันแค่พฤติกรรมกล้อง จะได้ไม่ต้องก็อปโค้ดทั้งซีน
+class _W05Base(SafeThreeDScene):
+    CAM = "wide"  # ลูกคลาสเซ็ตทับเป็น "follow" หรือ "centered"
+
+    def cam_focus(self, point, zoom=1.7, run_time=1.0):
+        """ซูม/แพนกล้องไปโฟกัสจุดนี้ — ทำงานเฉพาะโหมด follow เท่านั้น"""
+        if self.CAM == "follow":
+            self.zoom_to(point, zoom=zoom, run_time=run_time)
+
+    def cam_reset(self, run_time=1.0):
+        if self.CAM == "follow":
+            self.zoom_to(STAGE, zoom=1.0, run_time=run_time)
+
     def construct(self):
-        self.set_camera_orientation(phi=58 * DEGREES, theta=-48 * DEGREES)
+        if self.CAM == "centered":
+            # มองเกือบตรงหน้า เอียงแค่นิดเดียวพอเห็นความลึก โมเดลอยู่กลางจอตลอด ไม่แพน/ไม่ซูม
+            self.set_camera_orientation(phi=24 * DEGREES, theta=-98 * DEGREES)
+        else:
+            self.set_camera_orientation(phi=58 * DEGREES, theta=-48 * DEGREES)
         n_bars = n_poles = 3
 
         ttl = self.hud(title("พันจริง — อาร์เมเจอร์ 3 ขั้ว", size=27))
@@ -522,11 +546,12 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         a0 = angs[0]
         pole_dir = np.array([np.cos(a0), np.sin(a0), 0])
         wind_center = STAGE + pole_dir * (R_ARM * 0.55)
+        self.cam_focus(wind_center)
         coil_loops = coil_winding(wind_center, pole_dir, color=CURRENT)
         self.play(LaggedStart(*[Create(l) for l in coil_loops], lag_ratio=0.35), run_time=2.2)
         self.wait(0.8)
 
-        lead1 = coil_lead(wind_center, SCHEM_C + R_SCHEM * 0.84 *
+        lead1 = coil_lead(wind_center, pole_dir, SCHEM_C + R_SCHEM * 0.84 *
                          np.array([np.cos(angs[0]), np.sin(angs[0]), 0]), CURRENT)
         self.play(Create(lead1), run_time=0.8)
         cap2 = self.hud(caption_top("ปลายขดต่อเข้าซี่ 1 → พันขั้ว 2 ต่อ ทิศทางเดียวกันเสมอ"))
@@ -540,9 +565,10 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         a1 = angs[1]
         pole_dir2 = np.array([np.cos(a1), np.sin(a1), 0])
         wind_center2 = STAGE + pole_dir2 * (R_ARM * 0.55)
+        self.cam_focus(wind_center2)
         coil_loops2 = coil_winding(wind_center2, pole_dir2, color=OK)
         self.play(LaggedStart(*[Create(l) for l in coil_loops2], lag_ratio=0.35), run_time=2.0)
-        lead2 = coil_lead(wind_center2, SCHEM_C + R_SCHEM * 0.84 *
+        lead2 = coil_lead(wind_center2, pole_dir2, SCHEM_C + R_SCHEM * 0.84 *
                          np.array([np.cos(angs[1]), np.sin(angs[1]), 0]), OK)
         self.play(Create(lead2), run_time=0.8)
         self.wait(1.0)
@@ -554,12 +580,14 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         a2 = angs[2]
         pole_dir3 = np.array([np.cos(a2), np.sin(a2), 0])
         wind_center3 = STAGE + pole_dir3 * (R_ARM * 0.55)
+        self.cam_focus(wind_center3)
         coil_loops3 = coil_winding(wind_center3, pole_dir3, color=FORCE)
         self.play(LaggedStart(*[Create(l) for l in coil_loops3], lag_ratio=0.35), run_time=2.0)
-        lead3 = coil_lead(wind_center3, SCHEM_C + R_SCHEM * 0.84 *
+        lead3 = coil_lead(wind_center3, pole_dir3, SCHEM_C + R_SCHEM * 0.84 *
                           np.array([np.cos(angs[2]), np.sin(angs[2]), 0]), FORCE)
         lead3b = chord(SCHEM_C, R_SCHEM, angs[2], angs[0], FORCE, sw=5)
         self.play(Create(lead3), Create(lead3b), run_time=1.0)
+        self.cam_reset()
 
         cap3 = self.hud(caption_top("ครบวงพอดี — 3 ขด 3 ซี่ ต่อไล่กันไปจนกลับมาที่ซี่แรก", color=OK))
         self.play(ReplacementTransform(cap2, cap3), run_time=0.8)
@@ -607,3 +635,13 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
         self.wait(2.6)
 
         self.fade_out_all()
+
+
+class W05a_CameraFollow(_W05Base):
+    """มุมกล้องแบบ 1 — กล้องซูม/แพนตามไปโฟกัสฟันที่กำลังพันอยู่ทีละซี่"""
+    CAM = "follow"
+
+
+class W05b_CameraCentered(_W05Base):
+    """มุมกล้องแบบ 2 — โมเดลอยู่กลางจอตลอด เอียงแค่นิดเดียว ไม่แพน/ไม่ซูม"""
+    CAM = "centered"
