@@ -32,8 +32,8 @@ class Delta_Circular_Harvesting_Pitch(SafeThreeDScene):
         self.set_camera_orientation(phi=55 * DEGREES, theta=-45 * DEGREES, distance=8.5)
         
         # Header
-        ttl = self.hud(title("Delta Academy 2026 -- Lean Canvas: Closed-Loop Harvesting", size=22))
-        pref = self.hud(page_ref("KMITL x Delta 2026 . Lean Pitch"))
+        ttl = self.hud(title("Delta Academy 2026: Closed-Loop Harvesting", size=21))
+        pref = self.hud(page_ref("KMITL x Delta 2026"))
         self.play(FadeIn(ttl), FadeIn(pref), run_time=0.8)
 
         # -------------------------------------------------------------
@@ -71,7 +71,7 @@ class Delta_Circular_Harvesting_Pitch(SafeThreeDScene):
         # -------------------------------------------------------------
         # BEAT 2: SOLUTION & UNIQUE VALUE PROP (4-Device Automation)
         # -------------------------------------------------------------
-        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeOut(cap1), FadeOut(hud_group), run_time=0.3)
         cap2 = self.hud(caption_top(
             "2. Solution: ระบบ 4-Device อัตโนมัติ สแกน-ถอด-วัด SOH ใน 5 วิ ปลอดภัย 100%", color=CURRENT))
         self.play(FadeIn(cap2), run_time=0.6)
@@ -83,20 +83,20 @@ class Delta_Circular_Harvesting_Pitch(SafeThreeDScene):
         self.play(FadeOut(scan_line), run_time=0.2)
 
         # 4 Device Badges
-        dev_badges = VGroup(
-            VGroup(Square(0.3, fill_color=CURRENT, fill_opacity=0.9), Text("Vision (DMV2000)", font_size=16, color=WHITE)).arrange(RIGHT, buff=0.15),
-            VGroup(Square(0.3, fill_color=OK, fill_opacity=0.9), Text("Servo (ASD-A3)", font_size=16, color=WHITE)).arrange(RIGHT, buff=0.15),
-            VGroup(Square(0.3, fill_color=FIELD, fill_opacity=0.9), Text("PLC (AS320T)", font_size=16, color=WHITE)).arrange(RIGHT, buff=0.15),
-            VGroup(Square(0.3, fill_color=WARN, fill_opacity=0.9), Text("VFD (MS300)", font_size=16, color=WHITE)).arrange(RIGHT, buff=0.15),
-        ).arrange(RIGHT, buff=0.4).move_to([0, -1.8, 0])
+        b_vis = VGroup(Square(0.3, fill_color=CURRENT, fill_opacity=0.9), Text("Vision (DMV2000)", font_size=16, color=WHITE)).arrange(RIGHT, buff=0.15)
+        b_srv = VGroup(Square(0.3, fill_color=OK, fill_opacity=0.9), Text("Servo (ASD-A3)", font_size=16, color=WHITE)).arrange(RIGHT, buff=0.15)
+        b_plc = VGroup(Square(0.3, fill_color=FIELD, fill_opacity=0.9), Text("PLC (AS320T)", font_size=16, color=WHITE)).arrange(RIGHT, buff=0.15)
+        b_vfd = VGroup(Square(0.3, fill_color=WARN, fill_opacity=0.9), Text("VFD (MS300)", font_size=16, color=WHITE)).arrange(RIGHT, buff=0.15)
+        dev_badges = VGroup(b_vis, b_srv, b_plc, b_vfd).arrange(RIGHT, buff=0.4).move_to([0, -1.8, 0])
         fit_width(dev_badges, 11.5)
-        self.hud(dev_badges)
+        self.hud(b_vis, b_srv, b_plc, b_vfd)
         self.play(FadeIn(dev_badges), run_time=0.8)
         self.wait(1.5)
 
         # Clear 3D objects
-        self.play(FadeOut(pack_box), FadeOut(cell_grid), FadeOut(hud_group),
-                  FadeOut(dev_badges), FadeOut(cap2), run_time=0.6)
+        self.play(FadeOut(pack_box), FadeOut(cell_grid),
+                  FadeOut(b_vis), FadeOut(b_srv), FadeOut(b_plc), FadeOut(b_vfd),
+                  FadeOut(cap2), run_time=0.6)
 
         # -------------------------------------------------------------
         # BEAT 3: REVENUE STREAMS & CUSTOMER SEGMENTS
@@ -114,8 +114,7 @@ class Delta_Circular_Harvesting_Pitch(SafeThreeDScene):
                 Text("• ประกอบเป็นชุดกักเก็บพลังงาน", font_size=14, color=WHITE),
                 Text("• กำไร 200,000-400,000 บ./ลูก", font_size=14, color=OK),
             ).arrange(DOWN, aligned_edge=LEFT, buff=0.16).move_to([0, 0, 0])
-        )
-        rev_card1.move_to([-4.0, -0.4, 0])
+        ).move_to([-4.0, -0.4, 0])
 
         rev_card2 = VGroup(
             RoundedRectangle(width=3.6, height=3.0, corner_radius=0.15,
@@ -126,8 +125,7 @@ class Delta_Circular_Harvesting_Pitch(SafeThreeDScene):
                 Text("• สแตนด์บายอะไหล่ Zero Downtime", font_size=14, color=WHITE),
                 Text("• ลดต้นทุนอะไหล่ 50% (Win-Win)", font_size=14, color=CURRENT),
             ).arrange(DOWN, aligned_edge=LEFT, buff=0.16).move_to([0, 0, 0])
-        )
-        rev_card2.move_to([0, -0.4, 0])
+        ).move_to([0, -0.4, 0])
 
         rev_card3 = VGroup(
             RoundedRectangle(width=3.6, height=3.0, corner_radius=0.15,
@@ -138,13 +136,9 @@ class Delta_Circular_Harvesting_Pitch(SafeThreeDScene):
                 Text("• สกัดทองแดง 100% + แม่เหล็ก NdFeB", font_size=14, color=WHITE),
                 Text("• ขายราคาสูงกว่าเศษเหล็ก 3 เท่า", font_size=14, color=WARN),
             ).arrange(DOWN, aligned_edge=LEFT, buff=0.16).move_to([0, 0, 0])
-        )
-        rev_card3.move_to([4.0, -0.4, 0])
+        ).move_to([4.0, -0.4, 0])
 
-        all_cards = VGroup(rev_card1, rev_card2, rev_card3)
-        fit_width(all_cards, 12.0)
-        self.hud(all_cards)
-
+        self.hud(rev_card1, rev_card2, rev_card3)
         self.play(FadeIn(rev_card1, shift=UP*0.2),
                   FadeIn(rev_card2, shift=UP*0.2),
                   FadeIn(rev_card3, shift=UP*0.2), run_time=1.1)
@@ -153,20 +147,21 @@ class Delta_Circular_Harvesting_Pitch(SafeThreeDScene):
         # -------------------------------------------------------------
         # BEAT 4: KEY METRICS & INVESTOR ROI
         # -------------------------------------------------------------
-        self.play(FadeOut(all_cards), FadeOut(cap3), run_time=0.4)
+        self.play(FadeOut(rev_card1), FadeOut(rev_card2), FadeOut(rev_card3),
+                  FadeOut(cap3), run_time=0.4)
         cap4 = self.hud(caption_top(
             "4. Key Metrics & ROI: คืนทุนไวใน 0.96 ปี และเพิ่ม Throughput 1,400%", color=OK))
         self.play(FadeIn(cap4), run_time=0.6)
 
-        roi_box = VGroup(
-            MathTex(r"\text{CAPEX (Automation Line)} \approx 1{,}200{,}000\ \text{THB}", font_size=28, color=WHITE),
-            MathTex(r"\text{Annual Revenue (BESS + Parts + Cu)} \approx 1{,}500{,}000\ \text{THB/Year}", font_size=28, color=OK),
-            MathTex(r"\text{Payback Period} = \frac{1{,}200{,}000}{1{,}500{,}000} \approx \mathbf{0.96\ \text{Years}}\quad (\mathbf{\text{ROI } 125\%})", font_size=32, color=OK),
-            MathTex(r"\text{Testing Time: } 45\ \text{min} \to \mathbf{3\ \text{min/pack}}\quad (\mathbf{+1{,}400\%\ \text{Throughput}})", font_size=28, color=CURRENT)
-        ).arrange(DOWN, buff=0.30).move_to([0, 0.35, 0])
+        m1 = MathTex(r"\text{CAPEX (Automation Line)} \approx 1{,}200{,}000\ \text{THB}", font_size=28, color=WHITE)
+        m2 = MathTex(r"\text{Annual Revenue (BESS + Parts + Cu)} \approx 1{,}500{,}000\ \text{THB/Year}", font_size=28, color=OK)
+        m3 = MathTex(r"\text{Payback Period} = \frac{1{,}200{,}000}{1{,}500{,}000} \approx \mathbf{0.96\ \text{Years}}\quad (\mathbf{\text{ROI } 125\%})", font_size=32, color=OK)
+        m4 = MathTex(r"\text{Testing Time: } 45\ \text{min} \to \mathbf{3\ \text{min/pack}}\quad (\mathbf{+1{,}400\%\ \text{Throughput}})", font_size=28, color=CURRENT)
+        
+        roi_box = VGroup(m1, m2, m3, m4).arrange(DOWN, buff=0.30).move_to([0, 0.35, 0])
         fit_width(roi_box, 11.2)
-        self.hud(roi_box)
-        self.play(FadeIn(roi_box), run_time=1.0)
+        self.hud(m1, m2, m3, m4)
+        self.play(FadeIn(m1), FadeIn(m2), FadeIn(m3), FadeIn(m4), run_time=1.0)
         self.wait(2.2)
 
         # Final pitch card
