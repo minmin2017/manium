@@ -1213,6 +1213,7 @@ class P01_TwoLossTypes(SafeThreeDScene):
         card = exam_card(
             "จุดออกสอบ 7-2: การสูญเสียแบ่งกี่ชนิด",
             "2 ชนิด — Copper loss (ขึ้นกับโหลด) และ Rotational loss (คงที่)")
+        self.hud(card)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
 
@@ -1274,6 +1275,7 @@ class P02_WireSizing(SafeThreeDScene):
         card = exam_card(
             "จุดออกสอบ 7-4: เครื่องความเร็วรอบสูงใช้ cmil/A ต่ำกว่าเพราะอะไร",
             "หมุนเร็ว -> ลมพัดผ่านมาก -> ระบายความร้อนดีกว่า -> ยอมให้กระแสหนาแน่นขึ้นได้")
+        self.hud(card)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
 
@@ -1311,9 +1313,11 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
 
         self.play(field_coil_n.animate.set_color(FIELD), FadeIn(temp_label), run_time=0.5)
 
+        cold_c, hot_c = ManimColor(FIELD), ManimColor(EMF)
+
         def color_by_temp(mob):
             frac = (t.get_value() - 20) / 50.0
-            mob.set_color(interpolate_color(FIELD, EMF, frac))
+            mob.set_color(interpolate_color(cold_c, hot_c, frac))
         field_coil_n.add_updater(color_by_temp)
         self.play(t.animate.set_value(70), run_time=1.8, rate_func=linear)
         field_coil_n.clear_updaters()
@@ -1350,6 +1354,7 @@ class P03_TemperatureFieldLoss(SafeThreeDScene):
         card = exam_card(
             "จุดออกสอบ 7-5: ความต้านทานตอนร้อนสูงกว่าตอนเย็นจริงหรือไม่",
             "จริง — ทองแดงมีสัมประสิทธิ์อุณหภูมิเป็นบวก (~1% ต่อ 2.5°C)")
+        self.hud(card)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
 
@@ -1401,6 +1406,7 @@ class P04_EddyCurrentOrigin(SafeThreeDScene):
         card = exam_card(
             "สังเกต",
             "แม้ยังไม่มีกระแสในขดลวดเลย แกนเหล็กที่หมุนก็ร้อนได้จาก eddy current")
+        self.hud(card)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
 
@@ -1456,6 +1462,7 @@ class P05_EddySplit(SafeThreeDScene):
         card = exam_card(
             "สังเกต",
             "แบ่งความหนาลงครึ่งหนึ่ง -> ค่าสูญเสียเหลือ 1/4 — ที่มาของ lamination")
+        self.hud(card)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
 
@@ -1516,6 +1523,7 @@ class P06_LaminationHysteresis(SafeThreeDScene):
         card = exam_card(
             "จุดออกสอบ 7-8/7-9: การสูญเสียในแกนเหล็กมีกี่ชนิด แก้อย่างไร",
             "2 ชนิด — eddy (แก้ด้วยรูปทรง: แบ่งแผ่นบาง) และ hysteresis (แก้ด้วยวัสดุ: เหล็กซิลิกอน)")
+        self.hud(card)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
 
@@ -1571,6 +1579,7 @@ class P07_MechLossEfficiency(SafeThreeDScene):
         card = exam_card(
             "ในทางปฏิบัติใช้สูตรไหน",
             "η = Pout/(Pout+Ploss) แทบทุกข้อ — โจทย์มักให้ Pout และค่าสูญเสียมา ไม่ให้ Pin ตรงๆ")
+        self.hud(card)
         self.play(FadeIn(card, shift=UP * 0.2), run_time=1.0)
         self.wait(1.8)
 
