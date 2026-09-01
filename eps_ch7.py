@@ -1058,10 +1058,12 @@ class EP18B_ChapterSummary3D(SafeThreeDScene):
             "แบ่งเป็นแผ่นบาง (lamination) — P ∝ ความหนา² -> เหลือ 1/4 เมื่อหั่นครึ่ง",
             color=OK))
         self.play(FadeOut(core), FadeIn(lam), run_time=0.7)
-        self.play(FadeOut(cap3), FadeIn(cap3b), run_time=0.5)
+        self.play(FadeOut(cap3), run_time=0.3)
+        self.play(FadeIn(cap3b), run_time=0.4)
         p_lam = Text("P = 25 W  (เหลือ 1/4)", font_size=22, color=OK).move_to([0, 1.7, 0])
         self.hud(p_lam)
-        self.play(FadeOut(p_solid), FadeIn(p_lam), run_time=0.6)
+        self.play(FadeOut(p_solid), run_time=0.3)
+        self.play(FadeIn(p_lam), run_time=0.4)
         self.wait(1.2)
 
         # ========== กลับสู่ภาพรวม — จุดที่ 4: ตรวจคำตอบด้วยสมการไหลกำลัง ==========
@@ -1081,7 +1083,9 @@ class EP18B_ChapterSummary3D(SafeThreeDScene):
         self.wait(1.3)
 
         # ========== จุดที่ 5: ประสิทธิภาพสูงสุด — เฟรมเดิม ไม่ตัดฉาก ==========
-        self.play(FadeOut(cap4), run_time=0.3)
+        # เก็บลูกศร/สมการของจุดที่ 4 ก่อน — ปล่อยค้างไว้จะไปทับป้าย long/short-shunt
+        # ของจุดที่ 6 ตอนซูมเข้า (เจอจริงจากเฟรมที่แตกออกมาตรวจ ที่ t=33s)
+        self.play(FadeOut(cap4), FadeOut(eq), FadeOut(p_in), FadeOut(p_out), run_time=0.4)
         cap5 = self.hud(caption_top(
             "จุดที่ 5 — โหลดลดครึ่ง: ตัวนำอาร์เมเจอร์ (เหลือง) หรี่ลง"
             " แต่ขดลวด+แกน (คงที่) ไม่หรี่"))
@@ -1101,6 +1105,11 @@ class EP18B_ChapterSummary3D(SafeThreeDScene):
         cap6 = self.hud(caption_top(
             "จุดที่ 6 — เซรี่ฟิลด์ตัวเดียวกัน ต่อคนละจุดบนสายเส้นเดียวกันนี้"))
         self.play(FadeIn(cap6), run_time=0.7)
+        # เก็บเสา N/S + ขดลวดก่อนซูม — ไม่งั้นตอนซูม 1.7x เสา N (ซ้ายสุด) จะพองขึ้นไป
+        # ชนโซนคำบรรยายบน (บทเรียน §19: zoom_to() ที่ linter ตรวจไม่เจอ — เจอจริงจาก
+        # เฟรมที่แตกออกมาตรวจที่ t=30s/33s) เสา/ขดลวดก็ไม่ใช่จุดสนใจของช่วงนี้อยู่แล้ว
+        self.play(FadeOut(pole_n), FadeOut(pole_s),
+                  FadeOut(field_coil_n), FadeOut(field_coil_s), run_time=0.5)
         self.zoom_to((brush_pt + load_pt) / 2, zoom=1.7, run_time=1.4)
 
         series_coil = Circle(radius=0.28, color=CURRENT, stroke_width=5).move_to(brush_pt)
@@ -1112,7 +1121,8 @@ class EP18B_ChapterSummary3D(SafeThreeDScene):
         tag_short = Text("short-shunt: Is = IL", font_size=22, color=OK).move_to([0, 1.7, 0])
         self.hud(tag_short)
         self.play(series_coil.animate.move_to(load_pt), run_time=1.0)
-        self.play(FadeOut(tag_long), FadeIn(tag_short), run_time=0.5)
+        self.play(FadeOut(tag_long), run_time=0.3)
+        self.play(FadeIn(tag_short), run_time=0.3)
         self.wait(1.1)
 
         # ---------- ปิดคลิป ----------
