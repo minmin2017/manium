@@ -118,15 +118,19 @@ def coil_ring_axis(pole_dir):
     return np.array([-pole_dir[1], pole_dir[0], 0.0])
 
 
-def name_pointer(scene, base_pos, dir_vec, label_txt, color=OK, dist=0.75, fsize=18):
-    """ลูกศร(โลก 3D)+ป้าย(ตรึงเฟรม) ชี้ชิ้นส่วน — ใช้ตอนแนะนำโมเดลครั้งแรกในคลิป (skill §21.8)
-    ลูกศรอยู่ในโลก 3D จริง (ต้องอย่างนั้นเพื่อชี้ตำแหน่งจริง) แต่ป้ายชื่อต้อง hud() ให้ตรึงจอ
-    ไม่งั้นจะเอียงเมื่อกล้องหมุน/ซูม"""
+def name_pointer(base_pos, dir_vec, label_txt, color=OK, dist=0.75, fsize=18):
+    """ลูกศร+ป้าย ชี้ชิ้นส่วน — ใช้ตอนแนะนำโมเดลครั้งแรกในคลิป (skill §21.8)
+
+    ทั้งลูกศรและป้ายอยู่ในโลก 3D จริงด้วยกัน (ไม่ hud() ป้าย) — เจอบั๊กจริงตอนลองหุ้ม
+    ป้ายด้วย self.hud(): fixed-in-frame ในสภาพแวดล้อมนี้ใช้พิกัด (x,y) ดิบของมอเตอร์
+    ตรงๆ เป็นพิกัดจอแบน ไม่ได้แปลงมุมกล้อง (phi/theta) ให้เลย ป้ายเลย "หลุด" ไปอยู่คนละ
+    ที่กับวัตถุ 3D ที่มันควรจะชี้ (ยืนยันจากพิกเซลจริงในเฟรมที่เรนเดอร์ออกมา 2 รอบติด)
+    ปล่อยให้อยู่ในโลก 3D เหมือนกันทั้งคู่แทน — ตราบใดที่กล้องนิ่งตอนแสดงป้ายพวกนี้
+    (ทุกซีนในไฟล์นี้กล้องนิ่งตลอดช่วงที่มี naming pass) ก็ไม่เอียง ไม่ต้อง hud()"""
     end = base_pos + np.array(dir_vec, dtype=float) * dist
     arr = arrow3(base_pos, end, color, thickness=0.016)
     lab = Text(label_txt, font_size=fsize, color=color)
     lab.move_to(end + np.array(dir_vec, dtype=float) * 0.32)
-    lab = scene.hud(lab)
     return VGroup(arr, lab)
 
 
@@ -154,23 +158,20 @@ class W01_WhyManyCoils_PolePitchVsCommPitch(SafeThreeDScene):
 
         core = armature_core(8)
         poles, pole_labels, pole_pos = pole_pieces(4)
-        pole_labels = self.hud(pole_labels)
         self.play(FadeIn(core), FadeIn(poles), FadeIn(pole_labels), run_time=1.4)
-        self.begin_ambient_camera_rotation(rate=0.12)
         self.wait(1.0)
 
         # -------- naming pass (ครั้งแรกในซีรีส์นี้ — ชี้บอกชื่อทุกชิ้น) --------
-        n1 = name_pointer(self, STAGE + [0, 0, L_HALF], [0, 0, 1], "แกนอาร์เมเจอร์ (หมุน)", OK)
-        n2 = name_pointer(self, pole_pos[0], [1, 0, 0],
+        n1 = name_pointer(STAGE + [0, 0, L_HALF], [0, 0, 1], "แกนอาร์เมเจอร์ (หมุน)", OK)
+        n2 = name_pointer(pole_pos[0], [1, 0, 0],
                           "ขั้วแม่เหล็กหลัก (อยู่กับที่)", METAL, dist=0.9)
-        n3 = name_pointer(self, STAGE + [0, 0, L_HALF + 0.85], [0.6, 0.3, 0.3],
+        n3 = name_pointer(STAGE + [0, 0, L_HALF + 0.85], [0.6, 0.3, 0.3],
                           "เพลา", GRAYTXT, dist=0.7)
         cap_name = self.hud(caption_top("ก่อนอื่น รู้จักชิ้นส่วนก่อน", color=GRAYTXT))
         self.play(FadeIn(n1), FadeIn(n2), FadeIn(n3), ReplacementTransform(cap0, cap_name),
                   run_time=1.0)
         self.wait(1.4)
         self.play(FadeOut(VGroup(n1, n2, n3)), run_time=0.6)
-        self.stop_ambient_camera_rotation()
 
         cap1 = self.hud(caption_top(
             "ขดเดียวมีจุดตายทุกครึ่งรอบ — มอเตอร์จริงจึงพันหลายขด รอบแกนเดียวกัน"))
@@ -185,7 +186,6 @@ class W01_WhyManyCoils_PolePitchVsCommPitch(SafeThreeDScene):
         # -------- ย้ายกล้อง/จาง armature ไปโฟกัสที่ระยะสองแบบบนวงแหวนคอมมิวเตเตอร์
         self.zoom_to(SCHEM_C, zoom=1.15, run_time=1.3)
         bars, nums, angs = commutator_bars(8)
-        nums = self.hud(nums)
         self.play(core.animate.set_opacity(0.25), poles.animate.set_opacity(0.15),
                   pole_labels.animate.set_opacity(0.15),
                   Create(bars), FadeIn(nums), run_time=1.4)
@@ -235,12 +235,10 @@ class W02_LapWinding(SafeThreeDScene):
 
         core = armature_core(n_bars)
         poles, pole_labels, pole_pos = pole_pieces(n_poles)
-        pole_labels = self.hud(pole_labels)
         core.set_opacity(0.35)
         poles.set_opacity(0.22)
         pole_labels.set_opacity(0.22)
         bars, nums, angs = commutator_bars(n_bars)
-        nums = self.hud(nums)
         self.play(FadeIn(core), FadeIn(poles), FadeIn(pole_labels),
                   Create(bars), FadeIn(nums), run_time=1.4)
         self.wait(0.6)
@@ -304,12 +302,10 @@ class W03_WaveWinding(SafeThreeDScene):
 
         core = armature_core(n_bars)
         poles, pole_labels, pole_pos = pole_pieces(n_poles)
-        pole_labels = self.hud(pole_labels)
         core.set_opacity(0.35)
         poles.set_opacity(0.22)
         pole_labels.set_opacity(0.22)
         bars, nums, angs = commutator_bars(n_bars)
-        nums = self.hud(nums)
         self.play(FadeIn(core), FadeIn(poles), FadeIn(pole_labels),
                   Create(bars), FadeIn(nums), run_time=1.4)
         self.wait(0.6)
@@ -447,16 +443,13 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
 
         core = armature_core(n_bars)
         bars, nums, angs = commutator_bars(n_bars)
-        # หมายเหตุ: ตั้งใจ "ไม่" hud() nums ในซีนนี้ — กล้องนิ่งตลอดทั้งซีน (ไม่มี zoom_to/
-        # move_camera เลย) จึงไม่เสี่ยงเอียงตามกล้อง และปล่อยให้เลขยังอยู่ในโลก 3D จะได้หมุน
-        # ไปพร้อมบาร์จริงตอนม้วนสุดท้าย (rotor_group) แทนที่จะค้างนิ่งขณะบาร์หมุน (ถ้า hud()
-        # จะกลายเป็นบั๊กภาพเลขหลุดออกจากบาร์ระหว่างหมุน — เลือกยอมรับ [LAYOUT] เตือนตรงนี้แทน)
+        # nums อยู่ในโลก 3D (ไม่ hud) — จะได้หมุนไปพร้อมบาร์จริงตอนม้วนสุดท้าย (rotor_group)
         self.play(FadeIn(core), Create(bars), FadeIn(nums), run_time=1.3)
 
         # naming pass เฉพาะคลิปนี้ (อาจมีคนดูข้ามมาจากคลิปอื่น — skill §21.8)
-        n1 = name_pointer(self, STAGE + [0, R_ARM + 0.2, L_HALF], [0, 1, 0],
+        n1 = name_pointer(STAGE + [0, R_ARM + 0.2, L_HALF], [0, 1, 0],
                           "แกน 3 ขั้ว", OK, dist=0.55)
-        n2 = name_pointer(self, SCHEM_C, [0, 1, 0], "คอมมิวเตเตอร์ 3 ซี่", METAL,
+        n2 = name_pointer(SCHEM_C, [0, 1, 0], "คอมมิวเตเตอร์ 3 ซี่", METAL,
                           dist=R_SCHEM + 0.65)
         self.play(FadeIn(n1), FadeIn(n2), run_time=0.9)
         self.wait(1.3)
@@ -537,7 +530,6 @@ class W05_YourMotor_WindAndAssemble(SafeThreeDScene):
 
         # ------------------------------------------------- ประกอบ + ทดสอบ
         poles, pole_labels, pole_pos = pole_pieces(2, pole_x=1.6)
-        pole_labels = self.hud(pole_labels)
         cap4 = self.hud(caption_top(
             "ประกอบแม่เหล็กประกบ 2 ข้าง — อย่าลืมปลอกเหล็กอ่อนรอบนอก (โยคนำฟลักซ์กลับ)"))
         self.play(ReplacementTransform(cap3, cap4), FadeIn(poles), FadeIn(pole_labels), run_time=1.2)
