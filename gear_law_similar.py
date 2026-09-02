@@ -212,11 +212,8 @@ class G05A_PointsAndLines(SafeScene):
 
         # --- line of centers ------------------------------------------------
         cap4 = caption_top("ลากเส้นเชื่อมสองแกนหมุน = line of centers", size=23)
-        loc_start, loc_end = A + (A - B) * 0.06, B + (B - A) * 0.06
-        loc = DashedLine(loc_start, loc_end,
-                         color=C_LOC, stroke_width=3, dash_length=0.13)
-        t_loc = tag("line of centers", loc_start + (loc_end - loc_start) * 0.30,
-                    RIGHT, C_LOC, 19)
+        loc = DashedLine(A, B, color=C_LOC, stroke_width=3, dash_length=0.13)
+        t_loc = tag("line of centers", A + (B - A) * 0.5, RIGHT, C_LOC, 19)
         self.play(FadeOut(cap3))
         self.play(FadeIn(cap4), Create(loc), FadeIn(t_loc))
         self.wait(0.8)
@@ -235,7 +232,7 @@ class G05A_PointsAndLines(SafeScene):
         self.play(FadeOut(cap5))
         self.play(FadeIn(cap6), Create(n_line), FadeIn(t_n), run_time=1.3)
         self.wait(0.8)
-        self.play(FadeOut(lb2), FadeOut(lb3))
+        self.play(FadeOut(lb2), FadeOut(lb3), FadeOut(arc2), FadeOut(arc3))
 
         # --- AQ + w2 ----------------------------------------------------------
         cap7 = caption_top("AQ = แขนรัศมีของชิ้นที่ 2 (จากแกน A ถึงจุดสัมผัส)", size=22)
@@ -254,7 +251,7 @@ class G05A_PointsAndLines(SafeScene):
         a_v2 = Arrow(Q, E, buff=0, color=C_VQ2, stroke_width=5,
                      max_tip_length_to_length_ratio=0.13)
         t_v2 = MathTex("v_{Q_2}", font_size=26, color=C_VQ2).next_to(a_v2.get_center(), DL, buff=0.10)
-        dE, tE = pt(E, C_VQ2, 0.075), tag("E", E, DR, C_VQ2, 24, 0.12)
+        dE, tE = pt(E, C_VQ2, 0.075), tag("E", E, normalize(E - P), C_VQ2, 24, 0.16)
         ra2 = ra_mark(Q, A - Q, E - Q, C_VQ2)
         self.play(FadeOut(cap7))
         self.play(FadeIn(cap8), GrowArrow(a_v2), FadeIn(t_v2), Create(ra2))
@@ -278,7 +275,7 @@ class G05A_PointsAndLines(SafeScene):
         a_v3 = Arrow(Q, F, buff=0, color=C_VQ3, stroke_width=5,
                      max_tip_length_to_length_ratio=0.13)
         t_v3 = MathTex("v_{Q_3}", font_size=26, color=C_VQ3).next_to(a_v3.get_center(), UL, buff=0.10)
-        dF, tF = pt(F, C_VQ3, 0.075), tag("F", F, UR, C_VQ3, 24, 0.12)
+        dF, tF = pt(F, C_VQ3, 0.075), tag("F", F, normalize(F - P), C_VQ3, 24, 0.16)
         ra3 = ra_mark(Q, B - Q, F - Q, C_VQ3)
         self.play(FadeOut(cap9))
         self.play(FadeIn(cap10), GrowArrow(a_v3), FadeIn(t_v3), Create(ra3))
@@ -302,9 +299,10 @@ class G05A_PointsAndLines(SafeScene):
 
         cap13 = caption_top("QP คือองค์ประกอบตามแนว normal — สองชิ้นต้องเท่ากัน ไม่งั้นจะแทรกกัน", size=21)
         l_QP = seg(Q, P, C_VN, 8)
-        t_QP = tag("QP", Q + (P - Q) * 0.55, UP, C_VN, 22, 0.14)
+        # ไม่ใส่ป้าย "QP" แยก — R อยู่บนเส้น QP พอดี (Q,R,P เรียงกันบนเส้น normal)
+        # ป้ายใดๆ บนเส้นนี้จะชนจุด R/เครื่องหมายมุมฉากที่ R เกือบแน่นอน
         self.play(FadeOut(cap12))
-        self.play(FadeIn(cap13), Create(l_QP), FadeIn(t_QP))
+        self.play(FadeIn(cap13), Create(l_QP))
         self.wait(1.0)
         self.play(FadeOut(pr_E), FadeOut(pr_F), FadeOut(a_v2), FadeOut(a_v3),
                   FadeOut(t_v2), FadeOut(t_v3), FadeOut(ra2), FadeOut(ra3),
@@ -313,8 +311,8 @@ class G05A_PointsAndLines(SafeScene):
         # --- R ------------------------------------------------------------------
         cap14 = caption_top("จาก A ลากฉากลงเส้น normal — เท้าของฉากคือจุด R", size=22)
         l_AR = seg(A, R, C_AR, 5)
-        dR, tR = pt(R, C_AR, 0.075), tag("R", R, DOWN, C_AR, 24, 0.13)
-        t_AR = tag("AR", A + (R - A) * 0.45, RIGHT, C_AR, 22, 0.12)
+        dR, tR = pt(R, C_AR, 0.075), tag("R", R, DOWN, C_AR, 20, 0.10)
+        t_AR = tag("AR", A + (R - A) * 0.45, UP, C_AR, 20, 0.12)
         raR = ra_mark(R, A - R, Q - R, C_AR)
         self.play(FadeOut(cap13))
         self.play(FadeIn(cap14), Create(l_AR), FadeIn(t_AR))
@@ -324,7 +322,7 @@ class G05A_PointsAndLines(SafeScene):
         # --- S ------------------------------------------------------------------
         cap15 = caption_top("จาก B ลากฉากลงเส้น normal — เท้าของฉากคือจุด S", size=22)
         l_BS = seg(B, S, C_BS, 5)
-        dS, tS = pt(S, C_BS, 0.075), tag("S", S, UR, C_BS, 24, 0.13)
+        dS, tS = pt(S, C_BS, 0.075), tag("S", S, UR, C_BS, 20, 0.10)
         t_BS = tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 22, 0.12)
         raS = ra_mark(S, B - S, Q - S, C_BS)
         self.play(FadeOut(cap14))
@@ -363,13 +361,10 @@ class G05B_SimilarTriangles(SafeScene):
         dots = VGroup(*[pt(p, c, 0.06) for p, c in
                         ((A, C_AQ), (B, C_BQ), (Q, WHITE), (P, C_VN),
                          (R, C_AR), (S, C_BS), (E, C_VQ2), (F, C_VQ3))])
-        labels = VGroup(
-            tag("A", A, UP, C_AQ, 22), tag("B", B, DOWN, C_BQ, 22),
-            tag("Q", Q, UL, WHITE, 22, 0.12), tag("P", P, DR, C_VN, 22, 0.12),
-            tag("R", R, DOWN, C_AR, 22, 0.12), tag("S", S, UR, C_BS, 22, 0.12),
-            tag("E", E, DR, C_VQ2, 22, 0.12), tag("F", F, UR, C_VQ3, 22, 0.12),
-        )
-        return VGroup(g, dots, labels)
+        # ไม่ใส่ป้ายชื่อจุดที่นี่ — R/P/Q/E/F อยู่ใกล้กันมากจนป้ายชนกันแน่นอน
+        # (เห็นชื่อครบแล้วจากคลิปก่อนหน้า และแต่ละสามเหลี่ยมที่ดึงออกมาขยาย
+        # ด้านล่างนี้ก็มีป้ายกำกับจุดยอดของตัวเองชัดเจนอยู่แล้ว)
+        return VGroup(g, dots)
 
     def construct(self):
         self.add(title("สามเหลี่ยมคล้ายอยู่ตรงไหน", size=30))
@@ -564,8 +559,7 @@ class G06_PitchPoint(SafeScene):
         self.add(title("จุด P บนเส้นศูนย์กลาง", size=30))
         self.add(page_ref("หน้า 6 · Law of Gearing"))
 
-        loc = DashedLine(A + (A - B) * 0.05, B + (B - A) * 0.05,
-                         color=C_LOC, stroke_width=3, dash_length=0.13)
+        loc = DashedLine(A, B, color=C_LOC, stroke_width=3, dash_length=0.13)
         n_line = Line(Q - UN * 1.0, Q + UN * 3.2, color=C_NORM, stroke_width=4)
         base = VGroup(
             loc, n_line,
@@ -573,9 +567,9 @@ class G06_PitchPoint(SafeScene):
             pt(A, C_AQ, 0.08), pt(B, C_BQ, 0.08),
             pt(R, C_AR, 0.07), pt(S, C_BS, 0.07), pt(P, C_VN, 0.09),
             tag("A", A, UP, C_AQ, 24), tag("B", B, DOWN, C_BQ, 24),
-            tag("R", R, DOWN, C_AR, 22, 0.13), tag("S", S, UR, C_BS, 22, 0.13),
-            tag("P", P, LEFT, C_VN, 24, 0.14),
-            tag("AR", A + (R - A) * 0.45, RIGHT, C_AR, 21, 0.12),
+            tag("R", R, DOWN, C_AR, 20, 0.10), tag("S", S, UR, C_BS, 20, 0.10),
+            tag("P", P, DR, C_VN, 24, 0.14),
+            tag("AR", A + (R - A) * 0.45, UP, C_AR, 20, 0.12),
             tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 21, 0.12),
             ra_mark(R, A - R, Q - R, C_AR),
             ra_mark(S, B - S, Q - S, C_BS),
