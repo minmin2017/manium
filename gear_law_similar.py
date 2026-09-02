@@ -1,0 +1,640 @@
+"""
+gear_law_similar.py — Mechanics of Machinery (W06) หน้า 5-6
+"To find angular velocity ratio for contact between 2 rotating bodies"
+
+ที่มาของรูป: Exam_Prep/Mechanics of Machinery/pages_gear/page-05.jpg, page-06.jpg
+
+โจทย์จาก Min: "ผมไม่เห็นภาพว่าสามเหลี่ยมมันอยู่ตรงไหน"
+ -> วาดทีละจุด ทีละเส้น แล้วยกสามเหลี่ยมออกมาขยายทีละรูป บอกว่าแต่ละด้านคือเส้นอะไร
+ -> สีของเส้นในรูป = สีของตัวอักษรในสมการ (Min สั่ง "แบ่งสีเส้นตามสมการด้วย")
+
+ซีน
+  G05A_PointsAndLines   หน้า 5 (1/2) สร้างรูปทีละจุด ทีละเส้น
+  G05B_SimilarTriangles หน้า 5 (2/2) สามเหลี่ยมคล้าย 2 คู่ (ยกออกมาขยาย)
+  G06_PitchPoint        หน้า 6 จุด P บนเส้นศูนย์กลาง -> w2/w3 = BP/AP
+"""
+
+import numpy as np
+from manim import *
+from mlib import *
+
+# ----------------------------------------------------------------- สีตามสมการ
+C_AQ  = "#4FC3F7"   # AQ   แขนรัศมีชิ้นที่ 2
+C_AR  = "#1E88E5"   # AR   ระยะตั้งฉากจาก A ลงเส้น normal
+C_VQ2 = "#B3E5FC"   # EQ   ความเร็ว v_Q2
+C_BQ  = "#FFB74D"   # BQ   แขนรัศมีชิ้นที่ 3
+C_BS  = "#F4511E"   # BS   ระยะตั้งฉากจาก B ลงเส้น normal
+C_VQ3 = "#FFE082"   # FQ   ความเร็ว v_Q3
+C_VN  = "#26C6DA"   # PQ   องค์ประกอบตามแนว normal (ตัวร่วมของทั้งสองสมการ)
+C_NORM = "#EF5350"  # เส้น contact normal (แดง ตามสไลด์)
+C_LOC  = "#90A4AE"  # line of centers
+C_TAN  = "#78909C"  # ด้านที่เหลือ (องค์ประกอบตามแนวสัมผัส)
+C_BODY = "#607D8B"  # ผิวของชิ้นงาน
+
+# ------------------------------------------------------- เรขาคณิต (โลคอล, P = origin)
+# เลือกพารามิเตอร์ให้มุมของสามเหลี่ยมกว้างพอจะมองเห็นเป็นสามเหลี่ยมจริง
+# (ในสไลด์ต้นฉบับมุมที่ A แค่ ~5 องศา รูปเลยแบนจนดูเหมือนเส้นตรง)
+PHI   = 20 * DEGREES     # pressure angle: มุมระหว่าง contact normal กับแนวสัมผัสที่ P
+A_LEN = 1.60             # AP
+B_LEN = 3.43             # BP
+T_Q   = -1.347           # ตำแหน่งของ Q บนเส้น normal วัดจาก P (ลบ = อยู่ฝั่ง A)
+
+U = np.array([np.cos(PHI), -np.sin(PHI), 0.0])          # ทิศ contact normal
+T = np.array([-np.sin(PHI), -np.cos(PHI), 0.0])         # ตั้งฉากกับ normal
+
+
+def _perp_ccw(v):
+    return np.array([-v[1], v[0], 0.0])
+
+
+def _perp_cw(v):
+    return np.array([v[1], -v[0], 0.0])
+
+
+_P = np.array([0.0, 0.0, 0.0])
+_A = np.array([0.0,  A_LEN, 0.0])
+_B = np.array([0.0, -B_LEN, 0.0])
+_Q = _P + T_Q * U
+_R = _P + float(np.dot(_A - _P, U)) * U      # เท้าของฉากจาก A ลงเส้น normal
+_S = _P + float(np.dot(_B - _P, U)) * U      # เท้าของฉากจาก B ลงเส้น normal
+
+_VN = float(np.linalg.norm(_P - _Q))         # องค์ประกอบตามแนว normal ที่ใช้ร่วมกัน
+_AR = float(np.linalg.norm(_A - _R))
+_BS = float(np.linalg.norm(_B - _S))
+W2 = _VN / _AR                               # w2 ที่ทำให้ v_Q2 ฉายลงตรงจุด P พอดี
+W3 = _VN / _BS
+
+_E = _Q + W2 * _perp_ccw(_Q - _A)            # ปลายเวกเตอร์ v_Q2 (ชิ้น 2 หมุนทวนเข็ม)
+_F = _Q + W3 * _perp_cw(_Q - _B)             # ปลายเวกเตอร์ v_Q3 (ชิ้น 3 หมุนตามเข็ม)
+
+# ตรวจว่าฉายลงเส้น normal ได้ระยะเท่ากันจริง (ถ้าผิดจะพังตั้งแต่ import)
+assert abs(float(np.dot(_E - _Q, U)) - _VN) < 1e-9
+assert abs(float(np.dot(_F - _Q, U)) - _VN) < 1e-9
+
+SC = 0.90
+OFF = np.array([-4.0, -0.55, 0.0]) - SC * np.array([
+    (_Q[0] + _S[0]) / 2, (_A[1] + _B[1]) / 2, 0.0])
+
+
+def xf(p):
+    return SC * np.asarray(p, dtype=float) + OFF
+
+
+A, B, P, Q, R, S, E, F = (xf(p) for p in (_A, _B, _P, _Q, _R, _S, _E, _F))
+UN = U                     # ทิศ normal ไม่เปลี่ยนเมื่อสเกล/เลื่อน
+
+
+# ------------------------------------------------------------------- ตัวช่วยวาด
+def seg(p, q, color, w=5):
+    return Line(p, q, color=color, stroke_width=w)
+
+
+def pt(p, color=WHITE, r=0.065):
+    return Dot(p, color=color, radius=r)
+
+
+def tag(txt, p, direction, color=WHITE, size=24, buff=0.16):
+    return Text(txt, font_size=size, color=color).next_to(p, direction, buff=buff)
+
+
+def ra_mark(corner, d1, d2, color=GRAYTXT, size=0.22):
+    """เครื่องหมายมุมฉากที่จุด corner ระหว่างทิศ d1 กับ d2"""
+    d1 = np.asarray(d1, float) / np.linalg.norm(d1)
+    d2 = np.asarray(d2, float) / np.linalg.norm(d2)
+    a = corner + d1 * size
+    b = corner + d2 * size
+    return VMobject().set_points_as_corners(
+        [a, a + d2 * size, b]).set_stroke(color, 3)
+
+
+def frac2(num, den, c_num, c_den, size=34):
+    """เศษส่วนที่ระบายสีเศษกับส่วนคนละสีได้ (เลี่ยงการยุ่งกับ substring ของ MathTex)"""
+    n = MathTex(num, color=c_num, font_size=size)
+    d = MathTex(den, color=c_den, font_size=size)
+    bar = Line(LEFT, RIGHT).set_stroke(WHITE, 2.5)
+    bar.set_length(max(n.width, d.width) + 0.22)
+    return VGroup(n, bar, d).arrange(DOWN, buff=0.15)
+
+
+def eq_row(*parts, buff=0.22):
+    return VGroup(*parts).arrange(RIGHT, buff=buff)
+
+
+def body_arc(center_side, radius, span=52 * DEGREES, color=C_BODY):
+    """ผิวโค้งของชิ้นงานที่สัมผัสกันที่ Q — จุดศูนย์กลางความโค้งอยู่บนเส้น normal"""
+    c = Q + center_side * radius * UN
+    base = np.arctan2(*(Q - c)[1::-1])
+    return Arc(radius=radius, start_angle=base - span, angle=2 * span,
+               arc_center=c, color=color, stroke_width=3.5)
+
+
+def ground(p, up=True):
+    """สัญลักษณ์จุดหมุนยึดกับพื้น"""
+    s = 0.30
+    y = 0.16 if up else -0.16
+    base = Line(p + LEFT * s + UP * y * 0, p + RIGHT * s, color=METAL, stroke_width=3)
+    base.move_to(p + np.array([s * 0.55, 0, 0]))
+    ticks = VGroup(*[
+        Line(base.get_start() + RIGHT * (i * s * 0.5),
+             base.get_start() + RIGHT * (i * s * 0.5) + np.array([-0.13, -0.16, 0]),
+             color=METAL, stroke_width=2.5) for i in range(4)])
+    return VGroup(base, ticks)
+
+
+def upright_tri(pa, pb, pc, names, colors, center, height):
+    """
+    ยกสามเหลี่ยมออกมาวางใหม่ให้ 'ตั้งตรง': ด้าน pa->pb นอนเป็นแนวนอน
+    คืน (group, dict ของจุดยอดที่ตำแหน่งใหม่, dict ของด้าน)
+    colors = (สี pa->pb, สี pa->pc, สี pb->pc)
+    """
+    pa, pb, pc = (np.asarray(x, float) for x in (pa, pb, pc))
+    th = np.arctan2(*(pb - pa)[1::-1])
+    rot = np.array([[np.cos(-th), -np.sin(-th)], [np.sin(-th), np.cos(-th)]])
+    loc = [rot @ (p - pa)[:2] for p in (pa, pb, pc)]
+    loc = [np.array([v[0], v[1], 0.0]) for v in loc]
+    ctr = (np.min(loc, axis=0) + np.max(loc, axis=0)) / 2
+    ext = np.max(loc, axis=0) - np.min(loc, axis=0)
+    k = height / max(ext[1], 1e-6)
+    if ext[0] * k > 4.6:                     # กันล้นความกว้างพาเนล
+        k = 4.6 / ext[0]
+    va, vb, vc = [(p - ctr) * k + np.asarray(center, float) for p in loc]
+
+    sides = {
+        "ab": seg(va, vb, colors[0], 6),
+        "ac": seg(va, vc, colors[1], 6),
+        "bc": seg(vb, vc, colors[2], 6),
+    }
+    away_c = normalize(vc - (va + vb) / 2)
+    labels = VGroup(
+        tag(names[0], va, normalize(va - vb) - away_c * 0.4, colors[1], 24, 0.13),
+        tag(names[1], vb, normalize(vb - va) - away_c * 0.4, colors[0], 24, 0.13),
+        tag(names[2], vc, away_c, colors[2], 24, 0.13),
+    )
+    dots = VGroup(pt(va, WHITE, 0.055), pt(vb, WHITE, 0.055), pt(vc, WHITE, 0.055))
+    g = VGroup(sides["ab"], sides["ac"], sides["bc"], dots, labels)
+    return g, {"a": va, "b": vb, "c": vc}, sides
+
+
+# =====================================================================
+# ซีน 1 — หน้า 5 (1/2): วาดทีละจุด ทีละเส้น
+# =====================================================================
+class G05A_PointsAndLines(SafeScene):
+    def construct(self):
+        self.add(title("วาดทีละจุด ทีละเส้น", size=30))
+        self.add(page_ref("หน้า 5 · Law of Gearing"))
+
+        cap = caption_top("สองชิ้นงานหมุนคนละแกน มาแตะกันที่จุดเดียว", size=23)
+        self.play(FadeIn(cap))
+
+        # --- ผิวสัมผัสของสองชิ้น -------------------------------------------
+        arc2 = body_arc(-1, 1.30 * SC)
+        arc3 = body_arc(+1, 1.05 * SC)
+        lb2 = tag("ชิ้นที่ 2", arc2.point_from_proportion(0.06), LEFT, C_BODY, 20)
+        lb3 = tag("ชิ้นที่ 3", arc3.point_from_proportion(0.94), RIGHT, C_BODY, 20)
+        self.play(Create(arc2), Create(arc3), FadeIn(lb2), FadeIn(lb3), run_time=1.4)
+        self.wait(0.6)
+
+        # --- A -------------------------------------------------------------
+        cap2 = caption_top("จุด A คือแกนหมุนของชิ้นที่ 2", size=23)
+        dA, tA = pt(A, C_AQ, 0.085), tag("A", A, UP, C_AQ, 26)
+        gA = ground(A)
+        self.play(FadeOut(cap), FadeIn(cap2), FadeIn(dA), FadeIn(tA), Create(gA))
+        self.wait(0.7)
+
+        # --- B -------------------------------------------------------------
+        cap3 = caption_top("จุด B คือแกนหมุนของชิ้นที่ 3", size=23)
+        dB, tB = pt(B, C_BQ, 0.085), tag("B", B, DOWN, C_BQ, 26)
+        gB = ground(B)
+        self.play(FadeOut(cap2), FadeIn(cap3), FadeIn(dB), FadeIn(tB), Create(gB))
+        self.wait(0.7)
+
+        # --- line of centers ------------------------------------------------
+        cap4 = caption_top("ลากเส้นเชื่อมสองแกนหมุน = line of centers", size=23)
+        loc = DashedLine(A + (A - B) * 0.06, B + (B - A) * 0.06,
+                         color=C_LOC, stroke_width=3, dash_length=0.13)
+        t_loc = tag("line of centers", loc.point_from_proportion(0.30), RIGHT, C_LOC, 19)
+        self.play(FadeOut(cap3), FadeIn(cap4), Create(loc), FadeIn(t_loc))
+        self.wait(0.8)
+
+        # --- Q ---------------------------------------------------------------
+        cap5 = caption_top("จุด Q คือจุดที่ผิวสองชิ้นแตะกัน", size=23)
+        dQ, tQ = pt(Q, WHITE, 0.09), tag("Q", Q, UL, WHITE, 26, 0.12)
+        self.play(FadeOut(cap4), FadeIn(cap5), FadeIn(dQ), FadeIn(tQ), Flash(Q, color=WHITE))
+        self.wait(0.7)
+
+        # --- contact normal ---------------------------------------------------
+        cap6 = caption_top("ที่ Q ลากเส้นตั้งฉากกับผิวสัมผัส = contact normal", size=23)
+        n_line = Line(Q - UN * 1.05, Q + UN * 3.30, color=C_NORM, stroke_width=4)
+        t_n = tag("contact normal", n_line.get_end(), DR, C_NORM, 19, 0.12)
+        self.play(FadeOut(cap5), FadeIn(cap6), Create(n_line), FadeIn(t_n), run_time=1.3)
+        self.wait(0.8)
+        self.play(FadeOut(lb2), FadeOut(lb3))
+
+        # --- AQ + w2 ----------------------------------------------------------
+        cap7 = caption_top("AQ = แขนรัศมีของชิ้นที่ 2 (จากแกน A ถึงจุดสัมผัส)", size=22)
+        l_AQ = seg(A, Q, C_AQ, 5)
+        t_AQ = tag("AQ", (A + Q) / 2, LEFT, C_AQ, 22, 0.12)
+        f_w2 = eq_row(MathTex(r"\omega_2", font_size=34, color=C_AQ),
+                      MathTex("=", font_size=34),
+                      frac2("v_{Q_2}", "AQ", C_VQ2, C_AQ)).move_to([3.1, 1.60, 0])
+        self.play(FadeOut(cap6), FadeIn(cap7), Create(l_AQ), FadeIn(t_AQ))
+        self.play(FadeIn(f_w2))
+        self.wait(0.8)
+
+        # --- v_Q2 -> E ---------------------------------------------------------
+        cap8 = caption_top("ความเร็วของ Q บนชิ้นที่ 2 ตั้งฉากกับ AQ · ปลายลูกศรคือจุด E", size=22)
+        a_v2 = Arrow(Q, E, buff=0, color=C_VQ2, stroke_width=5,
+                     max_tip_length_to_length_ratio=0.13)
+        t_v2 = MathTex("v_{Q_2}", font_size=26, color=C_VQ2).next_to(a_v2.get_center(), DL, buff=0.10)
+        dE, tE = pt(E, C_VQ2, 0.075), tag("E", E, DR, C_VQ2, 24, 0.12)
+        ra2 = ra_mark(Q, A - Q, E - Q, C_VQ2)
+        self.play(FadeOut(cap7), FadeIn(cap8), GrowArrow(a_v2), FadeIn(t_v2), Create(ra2))
+        self.play(FadeIn(dE), FadeIn(tE))
+        self.wait(0.8)
+
+        # --- BQ + w3 -----------------------------------------------------------
+        cap9 = caption_top("BQ = แขนรัศมีของชิ้นที่ 3 (จากแกน B ถึงจุดสัมผัสจุดเดียวกัน)", size=22)
+        l_BQ = seg(B, Q, C_BQ, 5)
+        t_BQ = tag("BQ", B + (Q - B) * 0.42, RIGHT, C_BQ, 22, 0.12)
+        f_w3 = eq_row(MathTex(r"\omega_3", font_size=34, color=C_BQ),
+                      MathTex("=", font_size=34),
+                      frac2("v_{Q_3}", "BQ", C_VQ3, C_BQ)).move_to([3.1, 0.05, 0])
+        self.play(FadeOut(cap8), FadeIn(cap9), Create(l_BQ), FadeIn(t_BQ))
+        self.play(FadeIn(f_w3))
+        self.wait(0.8)
+
+        # --- v_Q3 -> F ----------------------------------------------------------
+        cap10 = caption_top("ความเร็วของ Q บนชิ้นที่ 3 ตั้งฉากกับ BQ · ปลายลูกศรคือจุด F", size=22)
+        a_v3 = Arrow(Q, F, buff=0, color=C_VQ3, stroke_width=5,
+                     max_tip_length_to_length_ratio=0.13)
+        t_v3 = MathTex("v_{Q_3}", font_size=26, color=C_VQ3).next_to(a_v3.get_center(), UL, buff=0.10)
+        dF, tF = pt(F, C_VQ3, 0.075), tag("F", F, UR, C_VQ3, 24, 0.12)
+        ra3 = ra_mark(Q, B - Q, F - Q, C_VQ3)
+        self.play(FadeOut(cap9), FadeIn(cap10), GrowArrow(a_v3), FadeIn(t_v3), Create(ra3))
+        self.play(FadeIn(dF), FadeIn(tF))
+        self.wait(0.8)
+
+        # --- หัวใจ: ฉาย E และ F ลงเส้น normal ได้จุดเดียวกัน = P ------------------
+        cap11 = caption_top("ลากฉากจาก E ลงเส้น normal", size=23)
+        pr_E = DashedLine(E, P, color=C_TAN, stroke_width=3, dash_length=0.10)
+        self.play(FadeOut(cap10), FadeIn(cap11), Create(pr_E))
+        self.wait(0.5)
+
+        cap12 = caption_top("ลากฉากจาก F ลงเส้น normal — ตกที่จุดเดิม!", size=23)
+        pr_F = DashedLine(F, P, color=C_TAN, stroke_width=3, dash_length=0.10)
+        dP, tP = pt(P, C_VN, 0.10), tag("P", P, DR, C_VN, 26, 0.13)
+        self.play(FadeOut(cap11), FadeIn(cap12), Create(pr_F))
+        self.play(FadeIn(dP), FadeIn(tP), Flash(P, color=C_VN, flash_radius=0.45))
+        self.wait(0.8)
+
+        cap13 = caption_top("QP คือองค์ประกอบตามแนว normal — สองชิ้นต้องเท่ากัน ไม่งั้นจะแทรกกัน", size=21)
+        l_QP = seg(Q, P, C_VN, 8)
+        t_QP = tag("QP", Q + (P - Q) * 0.55, UP, C_VN, 22, 0.14)
+        self.play(FadeOut(cap12), FadeIn(cap13), Create(l_QP), FadeIn(t_QP))
+        self.wait(1.0)
+        self.play(FadeOut(pr_E), FadeOut(pr_F), FadeOut(a_v2), FadeOut(a_v3),
+                  FadeOut(t_v2), FadeOut(t_v3), FadeOut(ra2), FadeOut(ra3),
+                  FadeOut(f_w2), FadeOut(f_w3))
+
+        # --- R ------------------------------------------------------------------
+        cap14 = caption_top("จาก A ลากฉากลงเส้น normal — เท้าของฉากคือจุด R", size=22)
+        l_AR = seg(A, R, C_AR, 5)
+        dR, tR = pt(R, C_AR, 0.075), tag("R", R, DOWN, C_AR, 24, 0.13)
+        t_AR = tag("AR", A + (R - A) * 0.45, RIGHT, C_AR, 22, 0.12)
+        raR = ra_mark(R, A - R, Q - R, C_AR)
+        self.play(FadeOut(cap13), FadeIn(cap14), Create(l_AR), FadeIn(t_AR))
+        self.play(FadeIn(dR), FadeIn(tR), Create(raR))
+        self.wait(0.9)
+
+        # --- S ------------------------------------------------------------------
+        cap15 = caption_top("จาก B ลากฉากลงเส้น normal — เท้าของฉากคือจุด S", size=22)
+        l_BS = seg(B, S, C_BS, 5)
+        dS, tS = pt(S, C_BS, 0.075), tag("S", S, UR, C_BS, 24, 0.13)
+        t_BS = tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 22, 0.12)
+        raS = ra_mark(S, B - S, Q - S, C_BS)
+        self.play(FadeOut(cap14), FadeIn(cap15), Create(l_BS), FadeIn(t_BS))
+        self.play(FadeIn(dS), FadeIn(tS), Create(raS))
+        self.wait(0.9)
+
+        # --- สรุปจุดทั้งหมด ---------------------------------------------------------
+        cap16 = caption_top("ครบแล้ว 8 จุด — คลิปหน้าเอาไปประกอบเป็นสามเหลี่ยม", size=23)
+        legend = VGroup(
+            Text("A, B = แกนหมุน", font_size=21, color=GRAYTXT),
+            Text("Q = จุดสัมผัส", font_size=21, color=WHITE),
+            Text("E, F = ปลายเวกเตอร์ความเร็ว", font_size=21, color=C_VQ2),
+            Text("P = จุดฉายร่วมบนเส้น normal", font_size=21, color=C_VN),
+            Text("R, S = เท้าของฉากจาก A และ B", font_size=21, color=C_AR),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.30).move_to([3.0, 0.30, 0])
+        self.play(FadeOut(cap15), FadeIn(cap16), FadeIn(legend, shift=UP * 0.2))
+        self.wait(2.4)
+
+
+# =====================================================================
+# ซีน 2 — หน้า 5 (2/2): สามเหลี่ยมคล้าย 2 คู่
+# =====================================================================
+class G05B_SimilarTriangles(SafeScene):
+    def base_figure(self):
+        """รูปพื้นหลังแบบจาง ๆ ไว้อ้างอิงตำแหน่ง"""
+        g = VGroup(
+            DashedLine(A, B, color=C_LOC, stroke_width=2.5, dash_length=0.13),
+            Line(Q - UN * 1.0, Q + UN * 3.2, color=C_NORM, stroke_width=3),
+            seg(A, Q, C_AQ, 3), seg(B, Q, C_BQ, 3),
+            seg(A, R, C_AR, 3), seg(B, S, C_BS, 3),
+            seg(Q, E, C_VQ2, 3), seg(Q, F, C_VQ3, 3),
+            seg(Q, P, C_VN, 4),
+        )
+        dots = VGroup(*[pt(p, c, 0.06) for p, c in
+                        ((A, C_AQ), (B, C_BQ), (Q, WHITE), (P, C_VN),
+                         (R, C_AR), (S, C_BS), (E, C_VQ2), (F, C_VQ3))])
+        labels = VGroup(
+            tag("A", A, UP, C_AQ, 22), tag("B", B, DOWN, C_BQ, 22),
+            tag("Q", Q, UL, WHITE, 22, 0.12), tag("P", P, DR, C_VN, 22, 0.12),
+            tag("R", R, DOWN, C_AR, 22, 0.12), tag("S", S, UR, C_BS, 22, 0.12),
+            tag("E", E, DR, C_VQ2, 22, 0.12), tag("F", F, UR, C_VQ3, 22, 0.12),
+        )
+        return VGroup(g, dots, labels)
+
+    def construct(self):
+        self.add(title("สามเหลี่ยมคล้ายอยู่ตรงไหน", size=30))
+        self.add(page_ref("หน้า 5 · Law of Gearing"))
+
+        fig = self.base_figure()
+        self.play(FadeIn(fig), run_time=1.2)
+        cap = caption_top("รูปเดิมจากคลิปที่แล้ว — คราวนี้ดึงสามเหลี่ยมออกมาทีละรูป", size=22)
+        self.play(FadeIn(cap))
+        self.wait(1.0)
+
+        # ---------------- คู่ที่ 1 : สามเหลี่ยมของชิ้นที่ 2 -----------------------
+        cap = self.swap_cap(cap, "รูปที่ 1 — สามเหลี่ยมความเร็วของชิ้นที่ 2: Q, E, P")
+        tri1_in = Polygon(Q, E, P, color=C_VQ2, fill_opacity=0.30, stroke_width=4)
+        self.play(FadeIn(tri1_in))
+        self.wait(0.7)
+
+        g1, v1, s1 = upright_tri(Q, P, E, ("Q", "P", "E"),
+                                 (C_VN, C_VQ2, C_TAN), [2.2, 1.35, 0], 1.30)
+        self.play(TransformFromCopy(tri1_in, g1), run_time=1.4)
+        note1 = VGroup(
+            Text("QE = ความเร็ว v_Q2", font_size=20, color=C_VQ2),
+            Text("QP = องค์ประกอบตามแนว normal", font_size=20, color=C_VN),
+            Text("PE = ส่วนที่ลื่นไถลไปตามผิว", font_size=20, color=C_TAN),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).next_to(g1, RIGHT, buff=0.45)
+        self.play(FadeIn(note1, shift=RIGHT * 0.15))
+        self.wait(2.2)
+        self.play(FadeOut(note1))
+
+        # ---------------- รูปที่ 2 : สามเหลี่ยมรูปทรงของชิ้นที่ 2 ------------------
+        cap = self.swap_cap(cap, "รูปที่ 2 — สามเหลี่ยมรูปทรงของชิ้นที่ 2: A, R, Q")
+        tri2_in = Polygon(A, R, Q, color=C_AQ, fill_opacity=0.30, stroke_width=4)
+        self.play(FadeOut(tri1_in), FadeIn(tri2_in))
+        self.wait(0.7)
+
+        g2, v2, s2 = upright_tri(A, R, Q, ("A", "R", "Q"),
+                                 (C_AR, C_AQ, C_TAN), [2.2, -1.35, 0], 1.30)
+        self.play(TransformFromCopy(tri2_in, g2), run_time=1.4)
+        note2 = VGroup(
+            Text("AQ = แขนรัศมีถึงจุดสัมผัส", font_size=20, color=C_AQ),
+            Text("AR = ระยะตั้งฉากจาก A ลงเส้น normal", font_size=20, color=C_AR),
+            Text("RQ = ระยะบนเส้น normal", font_size=20, color=C_TAN),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).next_to(g2, RIGHT, buff=0.45)
+        self.play(FadeIn(note2, shift=RIGHT * 0.15))
+        self.wait(2.2)
+
+        # ---------------- ทำไมสองรูปนี้ถึง "คล้ายกัน" --------------------------
+        # เหตุผลจริง (AA): มีมุมฉากทั้งคู่ + อีกหนึ่งมุมเท่ากัน = 90° - alpha
+        cap = self.swap_cap(cap, "แล้วสองรูปนี้คล้ายกันได้ยังไง? พิสูจน์ทีละขั้น", size=23)
+        self.play(FadeOut(note2))
+        self.wait(0.5)
+
+        # ขั้น 1 — มุมฉากทั้งคู่
+        cap = self.swap_cap(cap, "ขั้น 1: ทั้งสองรูปมีมุมฉาก (ที่ P และที่ R)", size=23)
+        raq1 = ra_mark(v1["b"], v1["a"] - v1["b"], v1["c"] - v1["b"], C_VN, 0.24)
+        raq2 = ra_mark(v2["b"], v2["a"] - v2["b"], v2["c"] - v2["b"], C_AR, 0.24)
+        self.play(Create(raq1), Create(raq2))
+        self.wait(1.6)
+
+        # ขั้น 2 — นิยาม alpha บนรูปจริง
+        cap = self.swap_cap(cap, "ขั้น 2: ให้ α = มุมระหว่างแขน AQ กับเส้น normal", size=23)
+        ang_a = Angle(Line(Q, R), Line(Q, A), radius=0.48, color=WARN, stroke_width=4)
+        lb_a = MathTex(r"\alpha", font_size=30, color=WARN).move_to(
+            Q + normalize(normalize(R - Q) + normalize(A - Q)) * 0.72)
+        self.play(Create(ang_a), FadeIn(lb_a))
+        self.wait(1.6)
+
+        # ขั้น 3 — มุมที่ A ในสามเหลี่ยมรูปทรง
+        cap = self.swap_cap(cap, "ขั้น 3: ใน A-R-Q มุมที่ Q คือ α → มุมที่ A ต้องเป็น 90° − α", size=22)
+        ang2 = Angle(s2["ab"], s2["ac"], radius=0.44, color=WARN, stroke_width=4)
+        lb2a = MathTex(r"90^\circ-\alpha", font_size=24, color=WARN).next_to(
+            v2["a"], UR, buff=0.30)
+        self.play(Create(ang2), FadeIn(lb2a))
+        self.wait(2.0)
+
+        # ขั้น 4 — มุมที่ Q ในสามเหลี่ยมความเร็ว: ได้ 90 - alpha เหมือนกัน
+        cap = self.swap_cap(cap, "ขั้น 4: v_Q2 ตั้งฉากกับ AQ → มุมที่ Q ในรูปความเร็วก็ 90° − α", size=22)
+        ang1 = Angle(s1["ab"], s1["ac"], radius=0.44, color=WARN, stroke_width=4)
+        lb1a = MathTex(r"90^\circ-\alpha", font_size=24, color=WARN).next_to(
+            v1["a"], UR, buff=0.30)
+        self.play(Create(ang1), FadeIn(lb1a))
+        self.wait(2.2)
+
+        # ขั้น 5 — สรุป AA
+        cap = self.swap_cap(cap, "มุมฉากตรงกัน + อีกมุมตรงกัน = คล้ายกันแน่นอน (แบบ มุม-มุม)", size=22)
+        self.play(Indicate(VGroup(raq1, raq2), color=OK, scale_factor=1.2))
+        self.play(Indicate(VGroup(ang1, ang2, lb1a, lb2a), color=OK, scale_factor=1.1))
+        self.wait(1.4)
+
+        cap = self.swap_cap(cap, "ด้านที่คู่กันจึงเป็นสัดส่วนกัน: QE คู่ AQ · QP คู่ AR", size=22)
+        eq1 = eq_row(frac2("EQ", "PQ", C_VQ2, C_VN),
+                     MathTex("=", font_size=34),
+                     frac2("AQ", "AR", C_AQ, C_AR)).move_to([2.2, -3.15, 0])
+        self.play(FadeIn(eq1, shift=UP * 0.2))
+        self.wait(2.4)
+
+        self.play(FadeOut(g1), FadeOut(g2), FadeOut(ang1), FadeOut(ang2),
+                  FadeOut(lb1a), FadeOut(lb2a), FadeOut(raq1), FadeOut(raq2),
+                  FadeOut(ang_a), FadeOut(lb_a), FadeOut(tri2_in), FadeOut(eq1))
+
+        # ---------------- คู่ที่ 2 : ชิ้นที่ 3 ---------------------------------------
+        cap = self.swap_cap(cap, "รูปที่ 3 — สามเหลี่ยมความเร็วของชิ้นที่ 3: Q, F, P")
+        tri3_in = Polygon(Q, F, P, color=C_VQ3, fill_opacity=0.30, stroke_width=4)
+        self.play(FadeIn(tri3_in))
+        self.wait(0.6)
+        g3, v3, s3 = upright_tri(Q, P, F, ("Q", "P", "F"),
+                                 (C_VN, C_VQ3, C_TAN), [2.2, 1.35, 0], 1.30)
+        self.play(TransformFromCopy(tri3_in, g3), run_time=1.3)
+        note3 = VGroup(
+            Text("QF = ความเร็ว v_Q3", font_size=20, color=C_VQ3),
+            Text("QP = ตัวเดิม! เท่ากับของชิ้นที่ 2", font_size=20, color=C_VN),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).next_to(g3, RIGHT, buff=0.45)
+        self.play(FadeIn(note3, shift=RIGHT * 0.15))
+        self.wait(2.0)
+        self.play(FadeOut(note3))
+
+        cap = self.swap_cap(cap, "รูปที่ 4 — สามเหลี่ยมรูปทรงของชิ้นที่ 3: B, S, Q")
+        tri4_in = Polygon(B, S, Q, color=C_BQ, fill_opacity=0.30, stroke_width=4)
+        self.play(FadeOut(tri3_in), FadeIn(tri4_in))
+        self.wait(0.6)
+        g4, v4, s4 = upright_tri(B, S, Q, ("B", "S", "Q"),
+                                 (C_BS, C_BQ, C_TAN), [2.2, -1.35, 0], 1.30)
+        self.play(TransformFromCopy(tri4_in, g4), run_time=1.3)
+        note4 = VGroup(
+            Text("BQ = แขนรัศมีถึงจุดสัมผัส", font_size=20, color=C_BQ),
+            Text("BS = ระยะตั้งฉากจาก B ลงเส้น normal", font_size=20, color=C_BS),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).next_to(g4, RIGHT, buff=0.45)
+        self.play(FadeIn(note4, shift=RIGHT * 0.15))
+        self.wait(2.0)
+
+        # เหตุผลเดียวกับคู่แรก แค่เปลี่ยนจาก alpha เป็น beta
+        cap = self.swap_cap(cap, "เหตุผลเดียวกับคู่แรก: ให้ β = มุมระหว่างแขน BQ กับเส้น normal", size=22)
+        self.play(FadeOut(note4))
+        ang_b = Angle(Line(Q, B), Line(Q, S), radius=0.48, color=WARN, stroke_width=4)
+        lb_b = MathTex(r"\beta", font_size=30, color=WARN).move_to(
+            Q + normalize(normalize(B - Q) + normalize(S - Q)) * 0.78)
+        self.play(Create(ang_b), FadeIn(lb_b))
+        self.wait(1.5)
+
+        cap = self.swap_cap(cap, "มุมฉากที่ P และที่ S · อีกมุมเป็น 90° − β ทั้งคู่ → คล้ายกัน", size=22)
+        rb1 = ra_mark(v3["b"], v3["a"] - v3["b"], v3["c"] - v3["b"], C_VN, 0.24)
+        rb2 = ra_mark(v4["b"], v4["a"] - v4["b"], v4["c"] - v4["b"], C_BS, 0.24)
+        ang3 = Angle(s3["ab"], s3["ac"], radius=0.44, color=WARN, stroke_width=4)
+        ang4 = Angle(s4["ab"], s4["ac"], radius=0.44, color=WARN, stroke_width=4)
+        self.play(Create(rb1), Create(rb2))
+        self.play(Create(ang3), Create(ang4))
+        self.wait(2.0)
+
+        eq2 = eq_row(frac2("FQ", "PQ", C_VQ3, C_VN),
+                     MathTex("=", font_size=34),
+                     frac2("BQ", "BS", C_BQ, C_BS)).move_to([2.2, -3.15, 0])
+        self.play(FadeIn(eq2, shift=UP * 0.2))
+        self.wait(2.2)
+        self.play(FadeOut(ang_b), FadeOut(lb_b), FadeOut(rb1), FadeOut(rb2),
+                  FadeOut(ang3), FadeOut(ang4))
+
+        # ---------------- รวมสองสมการ ----------------------------------------------
+        self.play(FadeOut(g3), FadeOut(g4), FadeOut(tri4_in), FadeOut(eq2), FadeOut(fig))
+        cap = self.swap_cap(cap, "เอาสองคู่มารวมกัน — v_n ตัวร่วมหายไป เหลือแค่ BS กับ AR", size=22)
+
+        chain = VGroup(
+            eq_row(frac2(r"\omega_2", r"\omega_3", C_AQ, C_BQ),
+                   MathTex("=", font_size=34),
+                   frac2("EQ", "AQ", C_VQ2, C_AQ),
+                   frac2("BQ", "FQ", C_BQ, C_VQ3)),
+            eq_row(MathTex("=", font_size=34),
+                   frac2("PQ", "AR", C_VN, C_AR),
+                   frac2("BS", "PQ", C_BS, C_VN)),
+            eq_row(MathTex("=", font_size=38),
+                   frac2("BS", "AR", C_BS, C_AR, size=40)),
+        ).arrange(DOWN, buff=0.55).move_to([0, -0.35, 0])
+        for row in chain:
+            self.play(FadeIn(row, shift=UP * 0.15), run_time=0.9)
+            self.wait(1.1)
+
+        box = SurroundingRectangle(chain[2], color=OK, buff=0.22, stroke_width=4)
+        self.play(Create(box))
+        self.wait(2.6)
+
+    def swap_cap(self, old, txt, size=22):
+        new = caption_top(txt, size=size)
+        self.play(FadeOut(old), FadeIn(new))
+        return new
+
+
+# =====================================================================
+# ซีน 3 — หน้า 6: จุด P บนเส้นศูนย์กลาง
+# =====================================================================
+class G06_PitchPoint(SafeScene):
+    def construct(self):
+        self.add(title("จุด P บนเส้นศูนย์กลาง", size=30))
+        self.add(page_ref("หน้า 6 · Law of Gearing"))
+
+        loc = DashedLine(A + (A - B) * 0.05, B + (B - A) * 0.05,
+                         color=C_LOC, stroke_width=3, dash_length=0.13)
+        n_line = Line(Q - UN * 1.0, Q + UN * 3.2, color=C_NORM, stroke_width=4)
+        base = VGroup(
+            loc, n_line,
+            seg(A, R, C_AR, 5), seg(B, S, C_BS, 5),
+            pt(A, C_AQ, 0.08), pt(B, C_BQ, 0.08),
+            pt(R, C_AR, 0.07), pt(S, C_BS, 0.07), pt(P, C_VN, 0.09),
+            tag("A", A, UP, C_AQ, 24), tag("B", B, DOWN, C_BQ, 24),
+            tag("R", R, DOWN, C_AR, 22, 0.13), tag("S", S, UR, C_BS, 22, 0.13),
+            tag("P", P, LEFT, C_VN, 24, 0.14),
+            tag("AR", A + (R - A) * 0.45, RIGHT, C_AR, 21, 0.12),
+            tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 21, 0.12),
+            ra_mark(R, A - R, Q - R, C_AR),
+            ra_mark(S, B - S, Q - S, C_BS),
+        )
+        self.play(FadeIn(base), run_time=1.3)
+
+        cap = caption_top("P คือจุดที่ contact normal ตัดกับเส้นศูนย์กลาง", size=23)
+        self.play(FadeIn(cap), Flash(P, color=C_VN, flash_radius=0.5))
+        self.wait(1.2)
+
+        # --- สามเหลี่ยม APR และ BPS ---------------------------------------------
+        cap = self.swap_cap(cap, "ได้สามเหลี่ยมมุมฉาก 2 รูป: A-P-R และ B-P-S")
+        t_APR = Polygon(A, P, R, color=C_AQ, fill_opacity=0.30, stroke_width=4)
+        t_BPS = Polygon(B, P, S, color=C_BQ, fill_opacity=0.30, stroke_width=4)
+        self.play(FadeIn(t_APR))
+        self.wait(0.6)
+        self.play(FadeIn(t_BPS))
+        self.wait(0.9)
+
+        # ---- ทำไมคู่นี้ถึงคล้ายกัน (AA อีกครั้ง แต่คนละเหตุผลกับหน้า 5) ----
+        cap = self.swap_cap(cap, "ขั้น 1: มุมฉากที่ R และที่ S (เพราะ AR และ BS ตั้งฉากกับ normal)",
+                            size=21)
+        rr = ra_mark(R, A - R, Q - R, OK, 0.26)
+        rs = ra_mark(S, B - S, Q - S, OK, 0.26)
+        self.play(Create(rr), Create(rs))
+        self.wait(1.6)
+
+        cap = self.swap_cap(cap, "ขั้น 2: ที่ P มีเส้นตรง 2 เส้นตัดกัน — เส้นศูนย์กลาง กับ normal",
+                            size=21)
+        self.play(Indicate(loc, color=C_LOC, scale_factor=1.0),
+                  Indicate(n_line, color=C_NORM, scale_factor=1.0))
+        self.wait(1.2)
+
+        cap = self.swap_cap(cap, "เส้นตรงตัดกัน → มุมตรงข้ามเท่ากันเสมอ", size=23)
+        ap1 = Angle(Line(P, A), Line(P, R), radius=0.40, color=WARN, stroke_width=4)
+        ap2 = Angle(Line(P, S), Line(P, B), radius=0.40, color=WARN, stroke_width=4)
+        self.play(Create(ap1), Create(ap2))
+        self.wait(1.8)
+
+        cap = self.swap_cap(cap, "มุมฉาก + มุมตรงข้าม = คล้ายกันแบบ มุม-มุม (AA)", size=23)
+        self.play(Indicate(VGroup(rr, rs, ap1, ap2), color=OK, scale_factor=1.1))
+        self.wait(1.4)
+
+        g1, _, _ = upright_tri(A, R, P, ("A", "R", "P"),
+                               (C_AR, C_AQ, C_TAN), [3.0, 1.45, 0], 1.15)
+        g2, _, _ = upright_tri(B, S, P, ("B", "S", "P"),
+                               (C_BS, C_BQ, C_TAN), [3.0, -0.35, 0], 1.15)
+        self.play(TransformFromCopy(t_APR, g1), run_time=1.2)
+        self.play(TransformFromCopy(t_BPS, g2), run_time=1.2)
+        self.wait(1.4)
+
+        eq1 = eq_row(frac2("AP", "AR", C_AQ, C_AR),
+                     MathTex("=", font_size=34),
+                     frac2("BP", "BS", C_BQ, C_BS)).move_to([3.0, -2.15, 0])
+        self.play(FadeIn(eq1, shift=UP * 0.15))
+        self.wait(1.8)
+
+        cap = self.swap_cap(cap, "จัดรูปใหม่ แล้วแทนผลจากหน้า 5 (ω₂/ω₃ = BS/AR)", size=22)
+        eq2 = eq_row(frac2("BS", "AR", C_BS, C_AR),
+                     MathTex("=", font_size=34),
+                     frac2("BP", "AP", C_BQ, C_AQ)).move_to([3.0, -3.20, 0])
+        self.play(FadeIn(eq2, shift=UP * 0.15))
+        self.wait(2.0)
+
+        self.play(FadeOut(g1), FadeOut(g2), FadeOut(eq1), FadeOut(eq2))
+        final = eq_row(frac2(r"\omega_2", r"\omega_3", C_AQ, C_BQ, size=44),
+                       MathTex("=", font_size=44),
+                       frac2("BP", "AP", C_BQ, C_AQ, size=44)).move_to([3.0, 0.55, 0])
+        box = SurroundingRectangle(final, color=OK, buff=0.30, stroke_width=4)
+        self.play(FadeIn(final, shift=UP * 0.2), Create(box))
+        self.wait(1.6)
+
+        cap = self.swap_cap(cap, "อัตราทดขึ้นกับจุด P ล้วน ๆ — ถ้าอยากให้คงที่ P ต้องอยู่นิ่ง", size=22)
+        self.play(Indicate(VGroup(final, box), color=OK, scale_factor=1.08))
+        self.wait(2.6)
+
+    def swap_cap(self, old, txt, size=23):
+        new = caption_top(txt, size=size)
+        self.play(FadeOut(old), FadeIn(new))
+        return new
