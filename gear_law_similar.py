@@ -164,11 +164,14 @@ def upright_tri(pa, pb, pc, names, colors, center, height):
         "ac": seg(va, vc, colors[1], 6),
         "bc": seg(vb, vc, colors[2], 6),
     }
-    away_c = normalize(vc - (va + vb) / 2)
+    # ทิศป้ายกำกับ = ออกจากจุดศูนย์ถ่วงของสามเหลี่ยม ผ่านมุมนั้นแล้วออกไปเรื่อยๆ
+    # (การันตีว่าไม่มีทางย้อนเข้าไปทับด้านของสามเหลี่ยมตัวเอง ต่างจากสูตรเดิม
+    # ที่ผสมทิศขอบ+ทิศเข้าหา c ซึ่งพลิกทิศผิดได้เมื่อรูปทรงเบี้ยว)
+    centroid = (va + vb + vc) / 3
     labels = VGroup(
-        tag(names[0], va, normalize(va - vb) - away_c * 0.4, colors[1], 24, 0.13),
-        tag(names[1], vb, normalize(vb - va) - away_c * 0.4, colors[0], 24, 0.13),
-        tag(names[2], vc, away_c, colors[2], 24, 0.13),
+        tag(names[0], va, normalize(va - centroid), colors[1], 24, 0.18),
+        tag(names[1], vb, normalize(vb - centroid), colors[0], 24, 0.18),
+        tag(names[2], vc, normalize(vc - centroid), colors[2], 24, 0.18),
     )
     dots = VGroup(pt(va, WHITE, 0.055), pt(vb, WHITE, 0.055), pt(vc, WHITE, 0.055))
     g = VGroup(sides["ab"], sides["ac"], sides["bc"], dots, labels)
