@@ -198,35 +198,42 @@ class G05A_PointsAndLines(SafeScene):
         cap2 = caption_top("จุด A คือแกนหมุนของชิ้นที่ 2", size=23)
         dA, tA = pt(A, C_AQ, 0.085), tag("A", A, UP, C_AQ, 26)
         gA = ground(A)
-        self.play(FadeOut(cap), FadeIn(cap2), FadeIn(dA), FadeIn(tA), Create(gA))
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2), FadeIn(dA), FadeIn(tA), Create(gA))
         self.wait(0.7)
 
         # --- B -------------------------------------------------------------
         cap3 = caption_top("จุด B คือแกนหมุนของชิ้นที่ 3", size=23)
         dB, tB = pt(B, C_BQ, 0.085), tag("B", B, DOWN, C_BQ, 26)
         gB = ground(B)
-        self.play(FadeOut(cap2), FadeIn(cap3), FadeIn(dB), FadeIn(tB), Create(gB))
+        self.play(FadeOut(cap2))
+        self.play(FadeIn(cap3), FadeIn(dB), FadeIn(tB), Create(gB))
         self.wait(0.7)
 
         # --- line of centers ------------------------------------------------
         cap4 = caption_top("ลากเส้นเชื่อมสองแกนหมุน = line of centers", size=23)
-        loc = DashedLine(A + (A - B) * 0.06, B + (B - A) * 0.06,
+        loc_start, loc_end = A + (A - B) * 0.06, B + (B - A) * 0.06
+        loc = DashedLine(loc_start, loc_end,
                          color=C_LOC, stroke_width=3, dash_length=0.13)
-        t_loc = tag("line of centers", loc.point_from_proportion(0.30), RIGHT, C_LOC, 19)
-        self.play(FadeOut(cap3), FadeIn(cap4), Create(loc), FadeIn(t_loc))
+        t_loc = tag("line of centers", loc_start + (loc_end - loc_start) * 0.30,
+                    RIGHT, C_LOC, 19)
+        self.play(FadeOut(cap3))
+        self.play(FadeIn(cap4), Create(loc), FadeIn(t_loc))
         self.wait(0.8)
 
         # --- Q ---------------------------------------------------------------
         cap5 = caption_top("จุด Q คือจุดที่ผิวสองชิ้นแตะกัน", size=23)
         dQ, tQ = pt(Q, WHITE, 0.09), tag("Q", Q, UL, WHITE, 26, 0.12)
-        self.play(FadeOut(cap4), FadeIn(cap5), FadeIn(dQ), FadeIn(tQ), Flash(Q, color=WHITE))
+        self.play(FadeOut(cap4))
+        self.play(FadeIn(cap5), FadeIn(dQ), FadeIn(tQ), Flash(Q, color=WHITE))
         self.wait(0.7)
 
         # --- contact normal ---------------------------------------------------
         cap6 = caption_top("ที่ Q ลากเส้นตั้งฉากกับผิวสัมผัส = contact normal", size=23)
         n_line = Line(Q - UN * 1.05, Q + UN * 3.30, color=C_NORM, stroke_width=4)
         t_n = tag("contact normal", n_line.get_end(), DR, C_NORM, 19, 0.12)
-        self.play(FadeOut(cap5), FadeIn(cap6), Create(n_line), FadeIn(t_n), run_time=1.3)
+        self.play(FadeOut(cap5))
+        self.play(FadeIn(cap6), Create(n_line), FadeIn(t_n), run_time=1.3)
         self.wait(0.8)
         self.play(FadeOut(lb2), FadeOut(lb3))
 
@@ -237,7 +244,8 @@ class G05A_PointsAndLines(SafeScene):
         f_w2 = eq_row(MathTex(r"\omega_2", font_size=34, color=C_AQ),
                       MathTex("=", font_size=34),
                       frac2("v_{Q_2}", "AQ", C_VQ2, C_AQ)).move_to([3.1, 1.60, 0])
-        self.play(FadeOut(cap6), FadeIn(cap7), Create(l_AQ), FadeIn(t_AQ))
+        self.play(FadeOut(cap6))
+        self.play(FadeIn(cap7), Create(l_AQ), FadeIn(t_AQ))
         self.play(FadeIn(f_w2))
         self.wait(0.8)
 
@@ -248,7 +256,8 @@ class G05A_PointsAndLines(SafeScene):
         t_v2 = MathTex("v_{Q_2}", font_size=26, color=C_VQ2).next_to(a_v2.get_center(), DL, buff=0.10)
         dE, tE = pt(E, C_VQ2, 0.075), tag("E", E, DR, C_VQ2, 24, 0.12)
         ra2 = ra_mark(Q, A - Q, E - Q, C_VQ2)
-        self.play(FadeOut(cap7), FadeIn(cap8), GrowArrow(a_v2), FadeIn(t_v2), Create(ra2))
+        self.play(FadeOut(cap7))
+        self.play(FadeIn(cap8), GrowArrow(a_v2), FadeIn(t_v2), Create(ra2))
         self.play(FadeIn(dE), FadeIn(tE))
         self.wait(0.8)
 
@@ -259,7 +268,8 @@ class G05A_PointsAndLines(SafeScene):
         f_w3 = eq_row(MathTex(r"\omega_3", font_size=34, color=C_BQ),
                       MathTex("=", font_size=34),
                       frac2("v_{Q_3}", "BQ", C_VQ3, C_BQ)).move_to([3.1, 0.05, 0])
-        self.play(FadeOut(cap8), FadeIn(cap9), Create(l_BQ), FadeIn(t_BQ))
+        self.play(FadeOut(cap8))
+        self.play(FadeIn(cap9), Create(l_BQ), FadeIn(t_BQ))
         self.play(FadeIn(f_w3))
         self.wait(0.8)
 
@@ -270,27 +280,31 @@ class G05A_PointsAndLines(SafeScene):
         t_v3 = MathTex("v_{Q_3}", font_size=26, color=C_VQ3).next_to(a_v3.get_center(), UL, buff=0.10)
         dF, tF = pt(F, C_VQ3, 0.075), tag("F", F, UR, C_VQ3, 24, 0.12)
         ra3 = ra_mark(Q, B - Q, F - Q, C_VQ3)
-        self.play(FadeOut(cap9), FadeIn(cap10), GrowArrow(a_v3), FadeIn(t_v3), Create(ra3))
+        self.play(FadeOut(cap9))
+        self.play(FadeIn(cap10), GrowArrow(a_v3), FadeIn(t_v3), Create(ra3))
         self.play(FadeIn(dF), FadeIn(tF))
         self.wait(0.8)
 
         # --- หัวใจ: ฉาย E และ F ลงเส้น normal ได้จุดเดียวกัน = P ------------------
         cap11 = caption_top("ลากฉากจาก E ลงเส้น normal", size=23)
         pr_E = DashedLine(E, P, color=C_TAN, stroke_width=3, dash_length=0.10)
-        self.play(FadeOut(cap10), FadeIn(cap11), Create(pr_E))
+        self.play(FadeOut(cap10))
+        self.play(FadeIn(cap11), Create(pr_E))
         self.wait(0.5)
 
         cap12 = caption_top("ลากฉากจาก F ลงเส้น normal — ตกที่จุดเดิม!", size=23)
         pr_F = DashedLine(F, P, color=C_TAN, stroke_width=3, dash_length=0.10)
         dP, tP = pt(P, C_VN, 0.10), tag("P", P, DR, C_VN, 26, 0.13)
-        self.play(FadeOut(cap11), FadeIn(cap12), Create(pr_F))
+        self.play(FadeOut(cap11))
+        self.play(FadeIn(cap12), Create(pr_F))
         self.play(FadeIn(dP), FadeIn(tP), Flash(P, color=C_VN, flash_radius=0.45))
         self.wait(0.8)
 
         cap13 = caption_top("QP คือองค์ประกอบตามแนว normal — สองชิ้นต้องเท่ากัน ไม่งั้นจะแทรกกัน", size=21)
         l_QP = seg(Q, P, C_VN, 8)
         t_QP = tag("QP", Q + (P - Q) * 0.55, UP, C_VN, 22, 0.14)
-        self.play(FadeOut(cap12), FadeIn(cap13), Create(l_QP), FadeIn(t_QP))
+        self.play(FadeOut(cap12))
+        self.play(FadeIn(cap13), Create(l_QP), FadeIn(t_QP))
         self.wait(1.0)
         self.play(FadeOut(pr_E), FadeOut(pr_F), FadeOut(a_v2), FadeOut(a_v3),
                   FadeOut(t_v2), FadeOut(t_v3), FadeOut(ra2), FadeOut(ra3),
@@ -302,7 +316,8 @@ class G05A_PointsAndLines(SafeScene):
         dR, tR = pt(R, C_AR, 0.075), tag("R", R, DOWN, C_AR, 24, 0.13)
         t_AR = tag("AR", A + (R - A) * 0.45, RIGHT, C_AR, 22, 0.12)
         raR = ra_mark(R, A - R, Q - R, C_AR)
-        self.play(FadeOut(cap13), FadeIn(cap14), Create(l_AR), FadeIn(t_AR))
+        self.play(FadeOut(cap13))
+        self.play(FadeIn(cap14), Create(l_AR), FadeIn(t_AR))
         self.play(FadeIn(dR), FadeIn(tR), Create(raR))
         self.wait(0.9)
 
@@ -312,7 +327,8 @@ class G05A_PointsAndLines(SafeScene):
         dS, tS = pt(S, C_BS, 0.075), tag("S", S, UR, C_BS, 24, 0.13)
         t_BS = tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 22, 0.12)
         raS = ra_mark(S, B - S, Q - S, C_BS)
-        self.play(FadeOut(cap14), FadeIn(cap15), Create(l_BS), FadeIn(t_BS))
+        self.play(FadeOut(cap14))
+        self.play(FadeIn(cap15), Create(l_BS), FadeIn(t_BS))
         self.play(FadeIn(dS), FadeIn(tS), Create(raS))
         self.wait(0.9)
 
@@ -325,7 +341,8 @@ class G05A_PointsAndLines(SafeScene):
             Text("P = จุดฉายร่วมบนเส้น normal", font_size=21, color=C_VN),
             Text("R, S = เท้าของฉากจาก A และ B", font_size=21, color=C_AR),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.30).move_to([3.0, 0.30, 0])
-        self.play(FadeOut(cap15), FadeIn(cap16), FadeIn(legend, shift=UP * 0.2))
+        self.play(FadeOut(cap15))
+        self.play(FadeIn(cap16), FadeIn(legend, shift=UP * 0.2))
         self.wait(2.4)
 
 
@@ -533,8 +550,9 @@ class G05B_SimilarTriangles(SafeScene):
         self.wait(2.6)
 
     def swap_cap(self, old, txt, size=22):
+        self.play(FadeOut(old))
         new = caption_top(txt, size=size)
-        self.play(FadeOut(old), FadeIn(new))
+        self.play(FadeIn(new))
         return new
 
 
@@ -635,6 +653,7 @@ class G06_PitchPoint(SafeScene):
         self.wait(2.6)
 
     def swap_cap(self, old, txt, size=23):
+        self.play(FadeOut(old))
         new = caption_top(txt, size=size)
-        self.play(FadeOut(old), FadeIn(new))
+        self.play(FadeIn(new))
         return new
