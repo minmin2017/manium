@@ -387,7 +387,11 @@ class G05B_SimilarTriangles(SafeScene):
 
         g1, v1, s1 = upright_tri(Q, P, E, ("Q", "P", "E"),
                                  (C_VN, C_VQ2, C_TAN), [2.2, 1.35, 0], 1.30)
-        self.play(TransformFromCopy(tri1_in, g1), run_time=1.4)
+        # FadeOut+FadeIn แทน TransformFromCopy — Polygon (1 ชิ้น) กับกลุ่มที่มี
+        # เส้น 3 เส้น+จุด 3 จุด+ป้าย 3 ป้าย (9 ชิ้น) โครงสร้างไม่ตรงกัน manim จะ
+        # จับคู่แบบเบี้ยว ทำให้ป้ายกลายเป็นรูปเปื้อนวิ่งผ่านตำแหน่งเดิมกลางอากาศ
+        self.play(FadeOut(tri1_in))
+        self.play(FadeIn(g1, shift=RIGHT * 0.3), run_time=1.0)
         note1 = VGroup(
             Text("QE = ความเร็ว v_Q2", font_size=20, color=C_VQ2),
             Text("QP = องค์ประกอบตามแนว normal", font_size=20, color=C_VN),
@@ -405,7 +409,8 @@ class G05B_SimilarTriangles(SafeScene):
 
         g2, v2, s2 = upright_tri(A, R, Q, ("A", "R", "Q"),
                                  (C_AR, C_AQ, C_TAN), [2.2, -1.35, 0], 1.30)
-        self.play(TransformFromCopy(tri2_in, g2), run_time=1.4)
+        self.play(FadeOut(tri2_in))
+        self.play(FadeIn(g2, shift=RIGHT * 0.3), run_time=1.0)
         note2 = VGroup(
             Text("AQ = แขนรัศมีถึงจุดสัมผัส", font_size=20, color=C_AQ),
             Text("AR = ระยะตั้งฉากจาก A ลงเส้น normal", font_size=20, color=C_AR),
@@ -475,7 +480,8 @@ class G05B_SimilarTriangles(SafeScene):
         self.wait(0.6)
         g3, v3, s3 = upright_tri(Q, P, F, ("Q", "P", "F"),
                                  (C_VN, C_VQ3, C_TAN), [2.2, 1.35, 0], 1.30)
-        self.play(TransformFromCopy(tri3_in, g3), run_time=1.3)
+        self.play(FadeOut(tri3_in))
+        self.play(FadeIn(g3, shift=RIGHT * 0.3), run_time=1.0)
         note3 = VGroup(
             Text("QF = ความเร็ว v_Q3", font_size=20, color=C_VQ3),
             Text("QP = ตัวเดิม! เท่ากับของชิ้นที่ 2", font_size=20, color=C_VN),
@@ -490,7 +496,8 @@ class G05B_SimilarTriangles(SafeScene):
         self.wait(0.6)
         g4, v4, s4 = upright_tri(B, S, Q, ("B", "S", "Q"),
                                  (C_BS, C_BQ, C_TAN), [2.2, -1.35, 0], 1.30)
-        self.play(TransformFromCopy(tri4_in, g4), run_time=1.3)
+        self.play(FadeOut(tri4_in))
+        self.play(FadeIn(g4, shift=RIGHT * 0.3), run_time=1.0)
         note4 = VGroup(
             Text("BQ = แขนรัศมีถึงจุดสัมผัส", font_size=20, color=C_BQ),
             Text("BS = ระยะตั้งฉากจาก B ลงเส้น normal", font_size=20, color=C_BS),
@@ -620,8 +627,9 @@ class G06_PitchPoint(SafeScene):
                                (C_AR, C_AQ, C_TAN), [3.0, 1.45, 0], 1.15)
         g2, _, _ = upright_tri(B, S, P, ("B", "S", "P"),
                                (C_BS, C_BQ, C_TAN), [3.0, -0.35, 0], 1.15)
-        self.play(TransformFromCopy(t_APR, g1), run_time=1.2)
-        self.play(TransformFromCopy(t_BPS, g2), run_time=1.2)
+        self.play(FadeOut(t_APR), FadeOut(t_BPS))
+        self.play(FadeIn(g1, shift=RIGHT * 0.3), run_time=1.0)
+        self.play(FadeIn(g2, shift=RIGHT * 0.3), run_time=1.0)
         self.wait(1.4)
 
         eq1 = eq_row(frac2("AP", "AR", C_AQ, C_AR),
