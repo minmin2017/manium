@@ -560,7 +560,7 @@ class HV10_FourWayThreePosPilot(SafeScene):
                            stroke_color=WHITE, stroke_width=2).move_to([0, y, 0])
         coil = Rectangle(width=0.7, height=0.6, fill_color=WARN, fill_opacity=0.5,
                           stroke_color=WARN, stroke_width=2).move_to([-3.4, y, 0])
-        coil_lbl = Text("โซลินอยด์", font_size=14, color=WARN).next_to(coil, DOWN, buff=0.12)
+        coil_lbl = Text("โซลินอยด์", font_size=14, color=WARN).next_to(coil, DOWN, buff=0.3)
         self.play(FadeIn(spool), Create(spring_R), FadeIn(coil), FadeIn(coil_lbl), run_time=0.8)
 
         cap1 = caption_top("กลไกกึ่งกลางเหมือนหน้าที่แล้ว แต่เปลี่ยนตัวขับจากคันโยกเป็นโซลินอยด์")
@@ -754,8 +754,8 @@ class HV16_PilotOperatedRelief(SafeScene):
                            max_tip_length_to_length_ratio=0.28)
         tank_arrow = Arrow([0, y - 1.1, 0], [0, y - 1.6, 0], color=RETURN, buff=0, stroke_width=6,
                             max_tip_length_to_length_ratio=0.28)
-        in_lbl = Text("Inlet (จากปั๊ม)", font_size=14, color=SUPPLY).move_to([-3.7, y - 0.6, 0])
-        out_lbl = Text("Outlet (ไปวงจร)", font_size=14, color=OK).move_to([3.7, y - 0.6, 0])
+        in_lbl = Text("Inlet (จากปั๊ม)", font_size=14, color=SUPPLY).move_to([-3.9, y - 0.75, 0])
+        out_lbl = Text("Outlet (ไปวงจร)", font_size=14, color=OK).move_to([3.9, y - 0.75, 0])
         tank_lbl = Text("Tank", font_size=14, color=RETURN).move_to([0, y - 1.78, 0])
         self.play(GrowArrow(in_arrow), GrowArrow(out_arrow), GrowArrow(tank_arrow),
                    FadeIn(in_lbl), FadeIn(out_lbl), FadeIn(tank_lbl), run_time=1.1)
@@ -866,8 +866,8 @@ class HV18_UnloadingValve(SafeScene):
                            max_tip_length_to_length_ratio=0.28)
         tank_arrow = Arrow([0, y - 1.1, 0], [0, y - 1.6, 0], color=RETURN, buff=0, stroke_width=6,
                             max_tip_length_to_length_ratio=0.28)
-        in_lbl = Text("Primary (จากปั๊ม)", font_size=14, color=SUPPLY).move_to([-3.7, y - 0.6, 0])
-        out_lbl = Text("ไปวงจรหลัก", font_size=14, color=OK).move_to([3.7, y - 0.6, 0])
+        in_lbl = Text("Primary (จากปั๊ม)", font_size=14, color=SUPPLY).move_to([-3.9, y - 0.75, 0])
+        out_lbl = Text("ไปวงจรหลัก", font_size=14, color=OK).move_to([3.9, y - 0.75, 0])
         tank_lbl = Text("Tank", font_size=14, color=RETURN).move_to([0, y - 1.78, 0])
         piston = Rectangle(width=0.9, height=0.36, fill_color=METAL, fill_opacity=0.9,
                             stroke_color=WHITE, stroke_width=2).move_to([0, y - 0.75, 0])
@@ -921,8 +921,8 @@ class HV19_SequenceValve(SafeScene):
                            max_tip_length_to_length_ratio=0.28)
         sec_arrow = Arrow([0, y - 1.1, 0], [0, y - 1.6, 0], color=SECONDARY, buff=0, stroke_width=6,
                            max_tip_length_to_length_ratio=0.28)
-        in_lbl = Text("Primary line", font_size=14, color=SUPPLY).move_to([-3.7, y - 0.6, 0])
-        out_lbl = Text("Primary (ต่อตรง)", font_size=13, color=SUPPLY).move_to([3.7, y - 0.6, 0])
+        in_lbl = Text("Primary line", font_size=14, color=SUPPLY).move_to([-3.9, y - 0.75, 0])
+        out_lbl = Text("Primary (ต่อตรง)", font_size=13, color=SUPPLY).move_to([3.9, y - 0.75, 0])
         sec_lbl = Text("To Secondary system", font_size=13, color=SECONDARY).move_to([0.9, y - 1.78, 0])
         piston = Rectangle(width=0.9, height=0.36, fill_color=METAL, fill_opacity=0.9,
                             stroke_color=WHITE, stroke_width=2).move_to([0, y - 0.75, 0])
