@@ -341,13 +341,18 @@ class Q1_04_VelocityA(SafeScene):
         self.play(Create(ac_line), Create(ac_leader), FadeIn(ac_lbl), run_time=0.9)
         self.wait(1.6)
 
-        cap1 = caption_top("v_A = omega x (ระยะ IC-A) = 6 x 1 = 6 cm/s")
+        cap1a = caption_top("สูตรทั่วไปก่อน: v_A = omega x r   (r = ระยะจาก IC ถึงจุด A)")
         self.play(FadeOut(cap0), run_time=0.3)
-        self.play(FadeIn(cap1), run_time=0.7)
-        self.wait(1.4)
+        self.play(FadeIn(cap1a), run_time=0.7)
+        self.wait(1.6)
+
+        cap1b = caption_top("แทนค่า: omega = 6 rad/s (ให้มา), r = 1 cm (เพิ่งหาข้างบน) => v_A = 6x1 = 6 cm/s")
+        self.play(FadeOut(cap1a), run_time=0.3)
+        self.play(FadeIn(cap1b), run_time=0.8)
+        self.wait(1.6)
 
         cap2 = caption_top("ทิศ: v_A ตั้งฉากกับเส้น IC-A เสมอ — เส้นนี้ตั้ง (ดิ่ง) ⇒ v_A ต้องแนวนอน")
-        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeOut(cap1b), run_time=0.3)
         self.play(FadeIn(cap2), run_time=0.8)
         self.wait(1.7)
 
@@ -509,13 +514,25 @@ class Q1_07_CrossCheck(SafeScene):
         self.play(Create(r_diagram), run_time=1.0)
         self.wait(1.4)
 
+        rule = MathTex(r"(\vec{\omega}_{AB}\times\vec{r}_{B/A})_y = \omega_{AB}\,r_x",
+                        font_size=22, color=WHITE).move_to([2.3, 0.15, 0])
+        self.play(FadeIn(rule), run_time=0.8)
+        self.wait(1.3)
+
+        cap1b = caption_top("กฎ cross product: แกน y ดึงมาจาก r_x เท่านั้น (ไม่ใช่ r_y) — ที่นี่ r_x = 4 cm")
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap1b), run_time=0.9)
+        self.wait(1.9)
+
+        self.play(FadeOut(rule), run_time=0.3)
+
         eq1 = MathTex(r"v_{B,y} = v_{A,y} + \omega_{AB}\,(4)", font_size=26, color=WHITE)
         eq1.move_to([2.3, -0.9, 0])
         self.play(FadeIn(eq1), run_time=0.7)
         self.wait(1.0)
 
         cap2 = caption_top("v_A ไม่มีองค์ประกอบดิ่ง (แนวนอนล้วน) และ v_B ก็ต้องไม่มีองค์ประกอบดิ่ง (รางบังคับ)")
-        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeOut(cap1b), run_time=0.3)
         self.play(FadeIn(cap2), run_time=0.8)
         self.wait(1.6)
 
