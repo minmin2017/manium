@@ -410,57 +410,130 @@ class HV07_ThreeWay(SafeScene):
         self.fade_out_all(run_time=0.9)
 
 
-def four_way_housing(y=-1.8):
-    """Shared 4-port sleeve (A,P,B,T along one bore) used by pages 8-11.
-    Port order along the bore: A(top,-1.8) P(bottom,-0.6) B(top,0.6) T(bottom,1.8).
-    Top/bottom walls are each ONE continuous strip of metal with a gap ONLY where
-    a stem passes through it — segment widths below are derived exactly from the
-    bore edges and stem edges so there is no unintended hole between segments
-    (a real coordinate bug, not a style choice — confirmed from a rendered frame
-    that showed the wall pieces floating apart with visible gaps between them)."""
-    BORE_L, BORE_R = -2.9, 2.9
-    top_1 = Rectangle(width=1.0, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([-2.4, y + 0.4, 0])
-    top_2 = Rectangle(width=2.2, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([-0.6, y + 0.4, 0])
-    top_3 = Rectangle(width=2.2, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([1.8, y + 0.4, 0])
-    bot_1 = Rectangle(width=2.2, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([-1.8, y - 0.7, 0])
-    bot_2 = Rectangle(width=2.2, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([0.6, y - 0.7, 0])
-    bot_3 = Rectangle(width=1.0, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([2.4, y - 0.7, 0])
-    stem_A = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
-                        stroke_color=METAL, stroke_width=2).move_to([-1.8, y + 1.05, 0])
-    stem_B = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
-                        stroke_color=METAL, stroke_width=2).move_to([0.6, y + 1.05, 0])
-    stem_P = Rectangle(width=0.2, height=0.6, fill_color=METAL, fill_opacity=0.35,
-                        stroke_color=METAL, stroke_width=2).move_to([-0.6, y - 1.1, 0])
-    stem_T = Rectangle(width=0.2, height=0.6, fill_color=METAL, fill_opacity=0.35,
-                        stroke_color=METAL, stroke_width=2).move_to([1.8, y - 1.1, 0])
-    end_cap_L = Rectangle(width=0.15, height=0.8, fill_color=METAL, fill_opacity=0.35,
-                           stroke_color=METAL, stroke_width=2).move_to([BORE_L - 0.075, y - 0.15, 0])
-    end_cap_R = Rectangle(width=0.15, height=0.8, fill_color=METAL, fill_opacity=0.35,
-                           stroke_color=METAL, stroke_width=2).move_to([BORE_R + 0.075, y - 0.15, 0])
-    housing = VGroup(top_1, top_2, top_3, bot_1, bot_2, bot_3, stem_A, stem_B, stem_P, stem_T,
-                      end_cap_L, end_cap_R)
+# --- four-way valve geometry (pages 8-11) -----------------------------------
+# SINGLE SOURCE OF TRUTH for these numbers:
+#   Desktop/Main_note/Claude_Specs/Manim — Hydraulic Valve Geometry Spec.md
+# Every width below is derived from the port/bore edges, never eyeballed, and the
+# segment sums are asserted at import time so code and spec cannot silently drift.
+FW_BORE_L, FW_BORE_R = -3.0, 3.0     # inner bore ends
+FW_CAV = 0.4                          # cavity half-height (symmetric about y)
+FW_WALL_T = 0.3                       # wall thickness
+FW_STEM_W = 0.2                       # port stem width
+# ports along the bore: T1 A P B T2 (T at both ends so one groove can bridge
+# exactly one adjacent pair — the real T-A-P-B-T spool-valve arrangement)
+FW_PORTS = {"T1": -2.4, "A": -1.2, "P": 0.0, "B": 1.2, "T2": 2.4}
 
-    a_top = Arrow([-1.8, y + 1.65, 0], [-1.8, y + 2.4, 0], color=OK, buff=0, stroke_width=5,
-                  max_tip_length_to_length_ratio=0.3)
-    b_top = Arrow([0.6, y + 1.65, 0], [0.6, y + 2.4, 0], color=OK, buff=0, stroke_width=5,
-                  max_tip_length_to_length_ratio=0.3)
-    p_bot = Arrow([-0.6, y - 1.85, 0], [-0.6, y - 1.35, 0], color=SUPPLY, buff=0, stroke_width=5,
-                  max_tip_length_to_length_ratio=0.3)
-    t_bot = Arrow([1.8, y - 1.35, 0], [1.8, y - 1.85, 0], color=RETURN, buff=0, stroke_width=5,
-                  max_tip_length_to_length_ratio=0.3)
+
+def _wall_segments(gaps, left=FW_BORE_L, right=FW_BORE_R, gap_w=FW_STEM_W):
+    """Return [(width, center), ...] filling `left`..`right` minus a gap centred
+    on each x in `gaps`. Derived, never hand-typed — see spec §1.3/§1.4."""
+    segs, cursor = [], left
+    for gx in sorted(gaps):
+        seg_r = gx - gap_w / 2
+        segs.append((seg_r - cursor, (cursor + seg_r) / 2))
+        cursor = gx + gap_w / 2
+    segs.append((right - cursor, (cursor + right) / 2))
+    covered = sum(w for w, _ in segs) + gap_w * len(gaps)
+    assert abs(covered - (right - left)) < 1e-9, "wall segments do not tile the bore"
+    return segs
+
+
+def four_way_housing(y=-1.8):
+    """4-way sleeve, ports T1-A-P-B-T2 along one bore (spec §1).
+
+    Cavity is symmetric about `y` (y-0.4 .. y+0.4) so a spool placed at `y` sits
+    exactly mid-passage; end caps span the FULL body height so the corners close
+    flush. Both were real bugs Min caught from rendered frames (2026-09-03)."""
+    top_y, bot_y = y + FW_CAV + FW_WALL_T / 2, y - FW_CAV - FW_WALL_T / 2
+    body_h = 2 * (FW_CAV + FW_WALL_T)
+
+    def wall(w, cx, cy):
+        return Rectangle(width=w, height=FW_WALL_T, fill_color=METAL, fill_opacity=0.35,
+                         stroke_color=METAL, stroke_width=2).move_to([cx, cy, 0])
+
+    top_walls = [wall(w, cx, top_y)
+                 for w, cx in _wall_segments([FW_PORTS["A"], FW_PORTS["B"]])]
+    bot_walls = [wall(w, cx, bot_y)
+                 for w, cx in _wall_segments([FW_PORTS["T1"], FW_PORTS["P"], FW_PORTS["T2"]])]
+
+    def stem(px, up):
+        h = 1.1 if up else 0.9
+        cy = y + FW_CAV + h / 2 if up else y - FW_CAV - h / 2
+        return Rectangle(width=FW_STEM_W, height=h, fill_color=METAL, fill_opacity=0.35,
+                         stroke_color=METAL, stroke_width=2).move_to([px, cy, 0])
+
+    stems = [stem(FW_PORTS["A"], True), stem(FW_PORTS["B"], True),
+             stem(FW_PORTS["T1"], False), stem(FW_PORTS["P"], False),
+             stem(FW_PORTS["T2"], False)]
+
+    def cap(px):
+        return Rectangle(width=0.2, height=body_h, fill_color=METAL, fill_opacity=0.35,
+                         stroke_color=METAL, stroke_width=2).move_to([px, y, 0])
+
+    caps = [cap(FW_BORE_L - 0.1), cap(FW_BORE_R + 0.1)]
+    housing = VGroup(*top_walls, *bot_walls, *stems, *caps)
+
+    top_tip, bot_tip = y + FW_CAV + 1.1, y - FW_CAV - 0.9
+
+    def out_arrow(px, color):
+        return Arrow([px, top_tip - 0.05, 0], [px, top_tip + 0.6, 0], color=color, buff=0,
+                     stroke_width=5, max_tip_length_to_length_ratio=0.3)
+
+    a_top, b_top = out_arrow(FW_PORTS["A"], OK), out_arrow(FW_PORTS["B"], OK)
+    p_bot = Arrow([FW_PORTS["P"], bot_tip - 0.55, 0], [FW_PORTS["P"], bot_tip, 0],
+                  color=SUPPLY, buff=0, stroke_width=5, max_tip_length_to_length_ratio=0.3)
+    t1_bot = Arrow([FW_PORTS["T1"], bot_tip, 0], [FW_PORTS["T1"], bot_tip - 0.55, 0],
+                   color=RETURN, buff=0, stroke_width=5, max_tip_length_to_length_ratio=0.3)
+    t2_bot = Arrow([FW_PORTS["T2"], bot_tip, 0], [FW_PORTS["T2"], bot_tip - 0.55, 0],
+                   color=RETURN, buff=0, stroke_width=5, max_tip_length_to_length_ratio=0.3)
+
     a_lbl = Text("A", font_size=16, color=OK).next_to(a_top, UP, buff=0.08)
     b_lbl = Text("B", font_size=16, color=OK).next_to(b_top, UP, buff=0.08)
     p_lbl = Text("P", font_size=16, color=SUPPLY).next_to(p_bot, DOWN, buff=0.08)
-    t_lbl = Text("T", font_size=16, color=RETURN).next_to(t_bot, DOWN, buff=0.08)
-    ports = VGroup(a_top, b_top, p_bot, t_bot, a_lbl, b_lbl, p_lbl, t_lbl)
+    t1_lbl = Text("T", font_size=16, color=RETURN).next_to(t1_bot, DOWN, buff=0.08)
+    t2_lbl = Text("T", font_size=16, color=RETURN).next_to(t2_bot, DOWN, buff=0.08)
+    ports = VGroup(a_top, b_top, p_bot, t1_bot, t2_bot, a_lbl, b_lbl, p_lbl, t1_lbl, t2_lbl)
 
     return housing, ports
+
+
+def four_way_spool(cx, y=-1.8):
+    """Land-and-groove spool (spec §1.6): two lands 2.4 apart on a thin rod.
+    Land pitch equals two port pitches so one groove bridges exactly one adjacent
+    port pair; at cx=0 the lands cover A and B = closed centre."""
+    rod = Rectangle(width=2.9, height=0.18, fill_color=METAL, fill_opacity=0.9,
+                    stroke_color=WHITE, stroke_width=1.5).move_to([cx, y, 0])
+    lands = [Rectangle(width=0.5, height=2 * FW_CAV - 0.04, fill_color=METAL,
+                       fill_opacity=0.9, stroke_color=WHITE,
+                       stroke_width=2).move_to([cx + off, y, 0])
+             for off in (-1.2, 1.2)]
+    return VGroup(rod, *lands)
+
+
+def _fw_path(y, from_port, to_port):
+    """Oil path between two ports through the bore (spec §1.8). Bottom ports
+    enter/leave downward, top ports upward — the elbow is always on the bore
+    centreline `y`, so the dots visibly travel through the open groove."""
+    def stub(name):
+        px = FW_PORTS[name]
+        top = name in ("A", "B")
+        return [px, y + (FW_CAV + 1.2) * (1 if top else -1), 0], [px, y, 0]
+
+    (a_out, a_in), (b_in, b_out) = stub(from_port), stub(to_port)
+    return VMobject().set_points_as_corners([a_out, a_in, b_out, b_in])
+
+
+def fw_flow_dots(y, position, n=3, run_time=1.7):
+    """Supply + return dot streams for a four-way spool position (spec §1.7)."""
+    pairs = {"pos1": (("P", "A"), ("B", "T2")),
+             "pos2": (("P", "B"), ("A", "T1"))}[position]
+    out = []
+    for (src, dst), color in zip(pairs, (SUPPLY, RETURN)):
+        path = _fw_path(y, src, dst)
+        dots = VGroup(*[Dot(radius=0.055, color=color) for _ in range(n)])
+        anims = [MoveAlongPath(d, path, rate_func=linear, run_time=run_time) for d in dots]
+        out.append((dots, anims))
+    return out
 
 
 class HV08_FourWayTwoPos(SafeScene):
@@ -474,31 +547,20 @@ class HV08_FourWayTwoPos(SafeScene):
         housing, ports = four_way_housing(y)
         self.play(Create(housing), FadeIn(ports), run_time=1.4)
 
-        spool = Rectangle(width=2.6, height=0.42, fill_color=METAL, fill_opacity=0.9,
-                           stroke_color=WHITE, stroke_width=2).move_to([-0.6, y, 0])
+        spool = four_way_spool(-0.6, y)
         self.play(FadeIn(spool), run_time=0.6)
 
-        cap1 = caption_top("ตำแหน่ง 1: P → B (ยืดกระบอกสูบ), A → T (น้ำมันฝั่งตรงข้ามไหลกลับ)")
+        cap1 = caption_top("ตำแหน่ง 1: P → A (ยืดกระบอกสูบ), B → T (น้ำมันฝั่งตรงข้ามไหลกลับถัง)")
         self.play(FadeIn(cap1), run_time=0.6)
-        pathA = VMobject().set_points_as_corners([[-0.6, y - 0.9, 0], [-0.6, y, 0], [-1.8, y, 0], [-1.8, y + 1.5, 0]])
-        pathB = VMobject().set_points_as_corners([[-0.6, y - 0.9, 0], [-0.6, y, 0], [0.6, y, 0], [0.6, y + 1.5, 0]])
-        dotsA = VGroup(*[Dot(radius=0.05, color=RETURN) for _ in range(3)])
-        dotsB = VGroup(*[Dot(radius=0.05, color=SUPPLY) for _ in range(3)])
-        anims = ([MoveAlongPath(d, pathA, rate_func=linear, run_time=1.6) for d in dotsA] +
-                  [MoveAlongPath(d, pathB, rate_func=linear, run_time=1.6) for d in dotsB])
-        self.play(LaggedStart(*anims, lag_ratio=0.2))
-        self.play(FadeOut(dotsA), FadeOut(dotsB), FadeOut(cap1), run_time=0.4)
+        dotsA, dotsB = fw_flow_dots(y, "pos1")
+        self.play(LaggedStart(*dotsA[1], *dotsB[1], lag_ratio=0.2))
+        self.play(FadeOut(dotsA[0]), FadeOut(dotsB[0]), FadeOut(cap1), run_time=0.4)
 
-        cap2 = caption_top("สลับตำแหน่ง 2: P → A (หดกระบอกสูบกลับ), B → T")
+        cap2 = caption_top("สลับตำแหน่ง 2: P → B (หดกระบอกสูบกลับ), A → T")
         self.play(FadeIn(cap2), spool.animate.move_to([0.6, y, 0]), run_time=1.4)
-        pathA2 = VMobject().set_points_as_corners([[-0.6, y - 0.9, 0], [-0.6, y, 0], [-1.8, y, 0], [-1.8, y + 1.5, 0]])
-        pathT2 = VMobject().set_points_as_corners([[0.6, y + 1.5, 0], [0.6, y, 0], [1.8, y, 0], [1.8, y - 0.9, 0]])
-        dotsA2 = VGroup(*[Dot(radius=0.05, color=SUPPLY) for _ in range(3)])
-        dotsT2 = VGroup(*[Dot(radius=0.05, color=RETURN) for _ in range(3)])
-        anims2 = ([MoveAlongPath(d, pathA2, rate_func=linear, run_time=1.6) for d in dotsA2] +
-                   [MoveAlongPath(d, pathT2, rate_func=linear, run_time=1.6) for d in dotsT2])
-        self.play(LaggedStart(*anims2, lag_ratio=0.2))
-        self.play(FadeOut(dotsA2), FadeOut(dotsT2), run_time=0.3)
+        dotsA2, dotsB2 = fw_flow_dots(y, "pos2")
+        self.play(LaggedStart(*dotsA2[1], *dotsB2[1], lag_ratio=0.2))
+        self.play(FadeOut(dotsA2[0]), FadeOut(dotsB2[0]), run_time=0.3)
 
         cap3 = caption_top("มาตรฐานสำหรับคุม double-acting cylinder — สลับได้ครบ 2 ทิศ")
         self.play(FadeOut(cap2), run_time=0.3)
@@ -518,10 +580,9 @@ class HV09_FourWayThreePosManual(SafeScene):
         housing, ports = four_way_housing(y)
         self.play(Create(housing), FadeIn(ports), run_time=1.4)
 
-        spring_L = spring_zigzag(-4.0, -1.4, y, coils=5, amp=0.12)
-        spring_R = spring_zigzag(1.4, 4.0, y, coils=5, amp=0.12)
-        spool = Rectangle(width=2.6, height=0.42, fill_color=METAL, fill_opacity=0.9,
-                           stroke_color=WHITE, stroke_width=2).move_to([0, y, 0])
+        spring_L = spring_zigzag(-4.3, -3.2, y, coils=4, amp=0.12)
+        spring_R = spring_zigzag(3.2, 4.3, y, coils=4, amp=0.12)
+        spool = four_way_spool(0, y)
         self.play(FadeIn(spool), Create(spring_L), Create(spring_R), run_time=0.7)
 
         cap0 = caption_top("เพิ่มตำแหน่งกลาง (neutral) จากแบบ 2 ตำแหน่งในหน้าที่แล้ว")
@@ -534,7 +595,7 @@ class HV09_FourWayThreePosManual(SafeScene):
         self.play(FadeOut(cap1), run_time=0.4)
 
         cap2 = caption_top("ดันคันโยกไปข้างหนึ่ง สปริงฝั่งขวาถูกอัด — P→B, A→T (เหมือนหน้า 8)")
-        self.play(FadeIn(cap2), spool.animate.move_to([0.8, y, 0]), run_time=1.3)
+        self.play(FadeIn(cap2), spool.animate.move_to([0.6, y, 0]), run_time=1.3)
         self.wait(1.2)
 
         cap3 = caption_top("ประเภท center (open/closed/tandem) — ดูรายละเอียดหน้า 13")
@@ -555,11 +616,10 @@ class HV10_FourWayThreePosPilot(SafeScene):
         housing, ports = four_way_housing(y)
         self.play(Create(housing), FadeIn(ports), run_time=1.3)
 
-        spring_R = spring_zigzag(1.4, 4.0, y, coils=5, amp=0.12)
-        spool = Rectangle(width=2.6, height=0.42, fill_color=METAL, fill_opacity=0.9,
-                           stroke_color=WHITE, stroke_width=2).move_to([0, y, 0])
+        spring_R = spring_zigzag(3.2, 4.3, y, coils=4, amp=0.12)
+        spool = four_way_spool(0, y)
         coil = Rectangle(width=0.7, height=0.6, fill_color=WARN, fill_opacity=0.5,
-                          stroke_color=WARN, stroke_width=2).move_to([-3.4, y, 0])
+                          stroke_color=WARN, stroke_width=2).move_to([-3.75, y, 0])
         coil_lbl = Text("โซลินอยด์", font_size=14, color=WARN).next_to(coil, DOWN, buff=0.3)
         self.play(FadeIn(spool), Create(spring_R), FadeIn(coil), FadeIn(coil_lbl), run_time=0.8)
 
@@ -570,7 +630,7 @@ class HV10_FourWayThreePosPilot(SafeScene):
         cap2 = caption_top("โซลินอยด์ดันสปูล (ค้างตำแหน่ง) — คลายไฟ สปริงดันกลับกลางเอง")
         self.play(FadeOut(cap1), run_time=0.3)
         self.play(FadeIn(cap2), coil.animate.set_fill(opacity=1.0),
-                   spool.animate.move_to([0.8, y, 0]), run_time=1.2)
+                   spool.animate.move_to([0.6, y, 0]), run_time=1.2)
         self.wait(0.8)
         self.play(coil.animate.set_fill(opacity=0.5), spool.animate.move_to([0, y, 0]), run_time=1.0)
 
@@ -590,8 +650,7 @@ class HV11_SolenoidPilotOperated(SafeScene):
         self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
         y = -1.8
         housing, ports = four_way_housing(y)
-        main_spool = Rectangle(width=2.6, height=0.42, fill_color=METAL, fill_opacity=0.9,
-                                stroke_color=WHITE, stroke_width=2).move_to([0, y, 0])
+        main_spool = four_way_spool(0, y)
         self.play(Create(housing), FadeIn(ports), FadeIn(main_spool), run_time=1.3)
         cap_main = caption_top("ด้านล่าง: Main stage — สปูลใหญ่ที่คุมการไหลจริง (เหมือนหน้า 8-10)")
         self.play(FadeIn(cap_main), run_time=0.6)
@@ -622,7 +681,7 @@ class HV11_SolenoidPilotOperated(SafeScene):
         cap3 = caption_top("ขั้น 2: แรงดันไพลอตวิ่งไปดันปลายสปูลใหญ่ — บังคับให้เลื่อน")
         self.play(FadeOut(cap2), run_time=0.3)
         self.play(FadeIn(cap3), Create(pilot_line), run_time=0.9)
-        self.play(main_spool.animate.move_to([0.8, y, 0]), run_time=1.2)
+        self.play(main_spool.animate.move_to([0.6, y, 0]), run_time=1.2)
         self.wait(0.8)
 
         cap4 = caption_top("สปูลใหญ่เลื่อนแล้ว → เปลี่ยนทางไหล P/A/B/T เหมือนหน้า 8-10")
