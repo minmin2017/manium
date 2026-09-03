@@ -614,12 +614,15 @@ class HV11_SolenoidPilotOperated(SafeScene):
         self.play(main_spool.animate.move_to([0.8, y, 0]), run_time=1.2)
         self.wait(0.8)
 
-        override = Text("มี manual override ไว้ดันสปูลไพลอตด้วยมือตอนซ่อม/เทสต์",
-                         font_size=14, color=GRAYTXT).move_to([0, py + 0.7, 0])
         cap4 = caption_top("สปูลใหญ่เลื่อนแล้ว → เปลี่ยนทางไหล P/A/B/T เหมือนหน้า 8-10")
         self.play(FadeOut(cap3), run_time=0.3)
-        self.play(FadeIn(cap4), FadeIn(override), run_time=0.7)
-        self.wait(1.6)
+        self.play(FadeIn(cap4), run_time=0.7)
+        self.wait(0.8)
+
+        cap5 = caption_top("มี manual override ไว้ดันสปูลไพลอตด้วยมือตอนซ่อม/เทสต์")
+        self.play(FadeOut(cap4), run_time=0.3)
+        self.play(FadeIn(cap5), run_time=0.6)
+        self.wait(1.2)
         self.fade_out_all(run_time=0.9)
 
 
@@ -709,10 +712,10 @@ def branch_t_body(y=-1.8, branch="down"):
         top_wall_R.stretch_to_fit_width(2.95 - 0.2).move_to([1.575, y + 0.4, 0])
         walls = VGroup(top_wall_L, top_wall_R, bottom_wall_L, bottom_wall_R, stem_L, stem_R)
     else:
-        stem_L = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
-                            stroke_color=METAL, stroke_width=2).move_to([-0.45, y - 1.05, 0])
-        stem_R = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
-                            stroke_color=METAL, stroke_width=2).move_to([0.45, y - 1.05, 0])
+        stem_L = Rectangle(width=0.2, height=0.7, fill_color=METAL, fill_opacity=0.35,
+                            stroke_color=METAL, stroke_width=2).move_to([-0.45, y - 0.75, 0])
+        stem_R = Rectangle(width=0.2, height=0.7, fill_color=METAL, fill_opacity=0.35,
+                            stroke_color=METAL, stroke_width=2).move_to([0.45, y - 0.75, 0])
         bottom_wall_L.stretch_to_fit_width(2.95 - 0.2).move_to([-1.575, y - 0.4, 0])
         bottom_wall_R.stretch_to_fit_width(2.95 - 0.2).move_to([1.575, y - 0.4, 0])
         walls = VGroup(top_wall_L, top_wall_R, bottom_wall_L, bottom_wall_R, stem_L, stem_R)
@@ -734,16 +737,16 @@ class HV16_PilotOperatedRelief(SafeScene):
                           max_tip_length_to_length_ratio=0.28)
         out_arrow = Arrow([2.9, y, 0], [4.4, y, 0], color=OK, buff=0, stroke_width=6,
                            max_tip_length_to_length_ratio=0.28)
-        tank_arrow = Arrow([0, y - 1.7, 0], [0, y - 2.5, 0], color=RETURN, buff=0, stroke_width=6,
+        tank_arrow = Arrow([0, y - 1.1, 0], [0, y - 1.6, 0], color=RETURN, buff=0, stroke_width=6,
                             max_tip_length_to_length_ratio=0.28)
         in_lbl = Text("Inlet (จากปั๊ม)", font_size=14, color=SUPPLY).move_to([-3.7, y - 0.6, 0])
         out_lbl = Text("Outlet (ไปวงจร)", font_size=14, color=OK).move_to([3.7, y - 0.6, 0])
-        tank_lbl = Text("Tank", font_size=14, color=RETURN).move_to([0, y - 2.85, 0])
+        tank_lbl = Text("Tank", font_size=14, color=RETURN).move_to([0, y - 1.78, 0])
         self.play(GrowArrow(in_arrow), GrowArrow(out_arrow), GrowArrow(tank_arrow),
                    FadeIn(in_lbl), FadeIn(out_lbl), FadeIn(tank_lbl), run_time=1.1)
 
         piston = Rectangle(width=0.9, height=0.36, fill_color=METAL, fill_opacity=0.9,
-                            stroke_color=WHITE, stroke_width=2).move_to([0, y - 1.05, 0])
+                            stroke_color=WHITE, stroke_width=2).move_to([0, y - 0.75, 0])
         pilot_box = Rectangle(width=0.6, height=0.4, fill_color=METAL, fill_opacity=0.3,
                                stroke_color=METAL, stroke_width=2).move_to([0, y + 1.1, 0])
         pilot_poppet = Triangle(color=WHITE, fill_color=METAL, fill_opacity=0.9,
@@ -770,9 +773,9 @@ class HV16_PilotOperatedRelief(SafeScene):
         self.play(FadeOut(capB), run_time=0.4)
 
         capC = caption_top("C. Relieving: ลูกสูบใหญ่เลื่อนขึ้น เปิดทางถ่ายปั๊มตรงไปถังทั้งหมด")
-        self.play(FadeIn(capC), piston.animate.move_to([0, y - 0.5, 0]), run_time=1.1)
+        self.play(FadeIn(capC), piston.animate.move_to([0, y - 0.45, 0]), run_time=1.1)
         dots2 = VGroup(*[Dot(radius=0.06, color=RETURN) for _ in range(3)])
-        path2 = VMobject().set_points_as_corners([[-2.7, y, 0], [0, y, 0], [0, y - 2.3, 0]])
+        path2 = VMobject().set_points_as_corners([[-2.7, y, 0], [0, y, 0], [0, y - 1.6, 0]])
         anims2 = [MoveAlongPath(d, path2, rate_func=linear, run_time=1.4) for d in dots2]
         self.play(LaggedStart(*anims2, lag_ratio=0.3))
         self.play(FadeOut(dots2), run_time=0.3)
@@ -846,13 +849,13 @@ class HV18_UnloadingValve(SafeScene):
                           max_tip_length_to_length_ratio=0.28)
         out_arrow = Arrow([2.9, y, 0], [4.4, y, 0], color=OK, buff=0, stroke_width=6,
                            max_tip_length_to_length_ratio=0.28)
-        tank_arrow = Arrow([0, y - 1.7, 0], [0, y - 2.5, 0], color=RETURN, buff=0, stroke_width=6,
+        tank_arrow = Arrow([0, y - 1.1, 0], [0, y - 1.6, 0], color=RETURN, buff=0, stroke_width=6,
                             max_tip_length_to_length_ratio=0.28)
         in_lbl = Text("Primary (จากปั๊ม)", font_size=14, color=SUPPLY).move_to([-3.7, y - 0.6, 0])
         out_lbl = Text("ไปวงจรหลัก", font_size=14, color=OK).move_to([3.7, y - 0.6, 0])
-        tank_lbl = Text("Tank", font_size=14, color=RETURN).move_to([0, y - 2.85, 0])
+        tank_lbl = Text("Tank", font_size=14, color=RETURN).move_to([0, y - 1.78, 0])
         piston = Rectangle(width=0.9, height=0.36, fill_color=METAL, fill_opacity=0.9,
-                            stroke_color=WHITE, stroke_width=2).move_to([0, y - 1.05, 0])
+                            stroke_color=WHITE, stroke_width=2).move_to([0, y - 0.75, 0])
         self.play(GrowArrow(in_arrow), GrowArrow(out_arrow), GrowArrow(tank_arrow),
                    FadeIn(in_lbl), FadeIn(out_lbl), FadeIn(tank_lbl), FadeIn(piston), run_time=1.2)
 
@@ -872,9 +875,9 @@ class HV18_UnloadingValve(SafeScene):
         self.play(FadeOut(dots), FadeOut(cap1), run_time=0.4)
 
         cap2 = caption_top("B. Unloading: สัญญาณไพลอตเกินค่าตั้ง — เปิดเต็มที่ทันที (ไม่ค่อยๆ cracking แบบ relief)")
-        self.play(FadeIn(cap2), piston.animate.move_to([0, y - 0.4, 0]), run_time=0.5)
+        self.play(FadeIn(cap2), piston.animate.move_to([0, y - 0.45, 0]), run_time=0.5)
         dots2 = VGroup(*[Dot(radius=0.06, color=RETURN) for _ in range(4)])
-        path2 = VMobject().set_points_as_corners([[-2.7, y, 0], [0, y, 0], [0, y - 2.3, 0]])
+        path2 = VMobject().set_points_as_corners([[-2.7, y, 0], [0, y, 0], [0, y - 1.6, 0]])
         anims2 = [MoveAlongPath(d, path2, rate_func=linear, run_time=1.1) for d in dots2]
         self.play(LaggedStart(*anims2, lag_ratio=0.15))
         self.play(FadeOut(dots2), run_time=0.3)
@@ -901,13 +904,13 @@ class HV19_SequenceValve(SafeScene):
                           max_tip_length_to_length_ratio=0.28)
         out_arrow = Arrow([2.9, y, 0], [4.4, y, 0], color=SUPPLY, buff=0, stroke_width=6,
                            max_tip_length_to_length_ratio=0.28)
-        sec_arrow = Arrow([0, y - 1.7, 0], [0, y - 2.5, 0], color=SECONDARY, buff=0, stroke_width=6,
+        sec_arrow = Arrow([0, y - 1.1, 0], [0, y - 1.6, 0], color=SECONDARY, buff=0, stroke_width=6,
                            max_tip_length_to_length_ratio=0.28)
         in_lbl = Text("Primary line", font_size=14, color=SUPPLY).move_to([-3.7, y - 0.6, 0])
         out_lbl = Text("Primary (ต่อตรง)", font_size=13, color=SUPPLY).move_to([3.7, y - 0.6, 0])
-        sec_lbl = Text("To Secondary system", font_size=13, color=SECONDARY).move_to([0.9, y - 2.85, 0])
+        sec_lbl = Text("To Secondary system", font_size=13, color=SECONDARY).move_to([0.9, y - 1.78, 0])
         piston = Rectangle(width=0.9, height=0.36, fill_color=METAL, fill_opacity=0.9,
-                            stroke_color=WHITE, stroke_width=2).move_to([0, y - 1.05, 0])
+                            stroke_color=WHITE, stroke_width=2).move_to([0, y - 0.75, 0])
         self.play(GrowArrow(in_arrow), GrowArrow(out_arrow), GrowArrow(sec_arrow),
                    FadeIn(in_lbl), FadeIn(out_lbl), FadeIn(sec_lbl), FadeIn(piston), run_time=1.2)
 
@@ -920,9 +923,9 @@ class HV19_SequenceValve(SafeScene):
         self.play(FadeOut(dots), FadeOut(cap1), run_time=0.4)
 
         cap2 = caption_top("B. Open: primary ถึงความดันตั้ง (งาน 1 เสร็จ/ชนสุด) — เปิดให้ไหลต่อไปยัง secondary")
-        self.play(FadeIn(cap2), piston.animate.move_to([0, y - 0.5, 0]), run_time=1.0)
+        self.play(FadeIn(cap2), piston.animate.move_to([0, y - 0.45, 0]), run_time=1.0)
         dots2 = VGroup(*[Dot(radius=0.06, color=SECONDARY) for _ in range(3)])
-        path2 = VMobject().set_points_as_corners([[-2.7, y, 0], [0, y, 0], [0, y - 2.3, 0]])
+        path2 = VMobject().set_points_as_corners([[-2.7, y, 0], [0, y, 0], [0, y - 1.6, 0]])
         anims2 = [MoveAlongPath(d, path2, rate_func=linear, run_time=1.4) for d in dots2]
         self.play(LaggedStart(*anims2, lag_ratio=0.3))
         self.play(FadeOut(dots2), run_time=0.3)
@@ -990,4 +993,251 @@ class HV20_Counterbalance(SafeScene):
         self.play(FadeOut(cap2), run_time=0.3)
         self.play(FadeIn(cap3), run_time=0.6)
         self.wait(1.6)
+        self.fade_out_all(run_time=0.9)
+
+
+# =====================================================================
+# Batch 4: Flow Control section (pages 21,22,23,24,25 — final pages)
+# =====================================================================
+
+
+class HV21_Title(SafeScene):
+    def construct(self):
+        pref = page_ref("หน้า 21 · Hydraulic Valves")
+        t = Text("Flow Control Valves", font_size=40, color=WHITE)
+        sub = fit_width(Text("คุม \"อัตราการไหล\" = คุมความเร็ว — needle, one-way, pressure/temp compensated",
+                              font_size=18, color=GRAYTXT), 11.0)
+        sub.next_to(t, DOWN, buff=0.6)
+        self.play(FadeIn(pref), Write(t), run_time=1.3)
+        self.play(FadeIn(sub), run_time=0.8)
+        self.wait(1.6)
+        self.fade_out_all(run_time=0.8)
+
+
+def needle_body(cx=0, y=-1.8, gap=0.5):
+    """Adjustable orifice: horizontal bore with a tapered needle descending
+    into the passage from the top — gap controls how far it has narrowed."""
+    body = Rectangle(width=5.0, height=0.9, fill_color=METAL, fill_opacity=0.25,
+                      stroke_color=METAL, stroke_width=2).move_to([cx, y, 0])
+    stem_housing = Rectangle(width=0.35, height=1.2, fill_color=METAL, fill_opacity=0.35,
+                              stroke_color=METAL, stroke_width=2).move_to([cx, y + 1.0, 0])
+    needle = Triangle(color=WHITE, fill_color=METAL, fill_opacity=0.9, stroke_width=2)
+    needle.scale(0.22).rotate(PI).move_to([cx, y + (0.5 - gap), 0])
+    return VGroup(body, stem_housing), needle
+
+
+class HV22_NeedleValve(SafeScene):
+    """Page 22 — Needle Valve, Q = Cv sqrt(dP/SG)."""
+
+    def construct(self):
+        ttl = title("Needle Valve")
+        pref = page_ref("หน้า 22 · Hydraulic Valves")
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
+
+        y = -1.9
+        body, needle = needle_body(0, y, gap=0.55)
+        in_arrow = Arrow([-4.3, y, 0], [-2.6, y, 0], color=SUPPLY, buff=0, stroke_width=6,
+                          max_tip_length_to_length_ratio=0.28)
+        out_arrow = Arrow([2.6, y, 0], [4.3, y, 0], color=OK, buff=0, stroke_width=6,
+                           max_tip_length_to_length_ratio=0.28)
+        self.play(Create(body), GrowArrow(in_arrow), GrowArrow(out_arrow), run_time=1.1)
+        self.play(FadeIn(needle), run_time=0.5)
+
+        cap0 = caption_top("เข็มปรับ (needle) เลื่อนเข้า-ออก เปลี่ยนพื้นที่ช่องแคบที่น้ำมันไหลผ่าน")
+        self.play(FadeIn(cap0), run_time=0.6)
+        dots1 = VGroup(*[Dot(radius=0.06, color=SUPPLY) for _ in range(4)])
+        path1 = VMobject().set_points_as_corners([[-2.5, y, 0], [2.5, y, 0]])
+        anims1 = [MoveAlongPath(d, path1, rate_func=linear, run_time=1.1) for d in dots1]
+        self.play(LaggedStart(*anims1, lag_ratio=0.2))
+        self.play(FadeOut(dots1), run_time=0.3)
+        self.play(FadeOut(cap0), run_time=0.3)
+
+        cap1 = caption_top("หมุนเข็มลงลึก — ช่องแคบลง น้ำมันไหลช้าลงชัดเจน")
+        self.play(FadeIn(cap1), run_time=0.6)
+        self.play(needle.animate.move_to([0, y + (0.5 - 0.15), 0]), run_time=1.0)
+        dots2 = VGroup(*[Dot(radius=0.06, color=SUPPLY) for _ in range(4)])
+        path2 = VMobject().set_points_as_corners([[-2.5, y, 0], [2.5, y, 0]])
+        anims2 = [MoveAlongPath(d, path2, rate_func=linear, run_time=2.6) for d in dots2]
+        self.play(LaggedStart(*anims2, lag_ratio=0.25))
+        self.play(FadeOut(dots2), run_time=0.3)
+        self.play(FadeOut(cap1), run_time=0.3)
+
+        formula = MathTex(r"Q = C_v \sqrt{\dfrac{\Delta P}{SG_{oil}}}", font_size=34, color=WHITE)
+        formula.move_to([-3.6, 0.9, 0])
+        self.play(FadeIn(formula), run_time=0.7)
+
+        axes = Axes(x_range=[0, 4, 1], y_range=[0, 2, 1], x_length=3.2, y_length=2.0,
+                    axis_config={"stroke_color": GRAYTXT, "stroke_width": 2},
+                    tips=False).move_to([3.1, 0.6, 0])
+        curve = axes.plot(lambda x: np.sqrt(x), color=OK, x_range=[0.01, 4])
+        x_lbl = Text("ΔP", font_size=14, color=GRAYTXT).next_to(axes.c2p(4, 0), RIGHT, buff=0.1)
+        y_lbl = Text("Q", font_size=14, color=GRAYTXT).next_to(axes.c2p(0, 2), LEFT, buff=0.12)
+        self.play(Create(axes), FadeIn(x_lbl), FadeIn(y_lbl), run_time=0.7)
+        self.play(Create(curve), run_time=1.0)
+
+        cap2 = caption_top("Q ไม่เป็นเส้นตรงกับ ΔP (เป็น √ΔP) — โหลดเปลี่ยน ความเร็วกระบอกสูบเปลี่ยนตาม")
+        self.play(FadeIn(cap2), run_time=0.7)
+        self.wait(1.8)
+        self.fade_out_all(run_time=0.9)
+
+
+class HV23_OneWayFlowControl(SafeScene):
+    """Page 23 — One-Way Flow Control Valve (needle + check combined)."""
+
+    def construct(self):
+        ttl = title("One-Way Flow Control Valve")
+        pref = page_ref("หน้า 23 · Hydraulic Valves")
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
+        cap0 = caption_top("รวม needle valve หน้าที่แล้ว + check valve จากหน้า 5 ไว้ในตัวเดียว")
+        self.play(FadeIn(cap0), run_time=0.6)
+        self.wait(1.0)
+        self.play(FadeOut(cap0), run_time=0.4)
+
+        yN, yC = -1.1, -2.6
+        body_top = Rectangle(width=5.0, height=0.55, fill_color=METAL, fill_opacity=0.25,
+                              stroke_color=METAL, stroke_width=2).move_to([0, yN, 0])
+        body_bot = Rectangle(width=5.0, height=0.55, fill_color=METAL, fill_opacity=0.25,
+                              stroke_color=METAL, stroke_width=2).move_to([0, yC, 0])
+        needle = Triangle(color=WHITE, fill_color=METAL, fill_opacity=0.9, stroke_width=2)
+        needle.scale(0.16).rotate(PI).move_to([0, yN + 0.15, 0])
+        check = Circle(radius=0.14, color=WHITE, stroke_width=2).move_to([0, yC, 0])
+        top_lbl = Text("ทางที่ปรับความเร็วได้ (throttled)", font_size=14, color=WARN).move_to([0, yN + 0.55, 0])
+        bot_lbl = Text("ทางไหลอิสระ (free flow ผ่าน check)", font_size=14, color=OK).move_to([0, yC - 0.55, 0])
+
+        left_join = Line([-3.0, 0, 0], [-3.0, -3.4, 0], color=METAL, stroke_width=3)
+        right_join = Line([3.0, 0, 0], [3.0, -3.4, 0], color=METAL, stroke_width=3)
+        left_cap = Line([-3.0, yN, 0], [-2.5, yN, 0], color=METAL, stroke_width=3)
+        right_cap = Line([2.5, yN, 0], [3.0, yN, 0], color=METAL, stroke_width=3)
+
+        self.play(Create(body_top), Create(body_bot), Create(left_join), Create(right_join),
+                   FadeIn(needle), Create(check), FadeIn(top_lbl), FadeIn(bot_lbl), run_time=1.5)
+
+        cap1 = caption_top("ทิศทางหนึ่ง: ผ่านช่องแคบที่ปรับได้ — คุมความเร็วได้")
+        self.play(FadeIn(cap1), run_time=0.6)
+        dotsA = VGroup(*[Dot(radius=0.05, color=WARN) for _ in range(3)])
+        pathA = VMobject().set_points_as_corners([[-3.0, -0.6, 0], [-3.0, yN, 0], [3.0, yN, 0], [3.0, -0.6, 0]])
+        animsA = [MoveAlongPath(d, pathA, rate_func=linear, run_time=1.8) for d in dotsA]
+        self.play(LaggedStart(*animsA, lag_ratio=0.3))
+        self.play(FadeOut(dotsA), run_time=0.3)
+        self.play(FadeOut(cap1), run_time=0.3)
+
+        cap2 = caption_top("อีกทิศทาง: check valve เปิดอิสระเต็มที่ — ไหลเร็วเต็มที่ ไม่ถูกจำกัด")
+        self.play(FadeIn(cap2), run_time=0.6)
+        dotsB = VGroup(*[Dot(radius=0.05, color=OK) for _ in range(3)])
+        pathB = VMobject().set_points_as_corners([[3.0, -3.0, 0], [3.0, yC, 0], [-3.0, yC, 0], [-3.0, -3.0, 0]])
+        animsB = [MoveAlongPath(d, pathB, rate_func=linear, run_time=0.9) for d in dotsB]
+        self.play(LaggedStart(*animsB, lag_ratio=0.25))
+        self.play(FadeOut(dotsB), run_time=0.3)
+
+        cap3 = caption_top("เช่น คุมความเร็วตอนยืดออก แต่หดกลับได้เร็วเต็มที่")
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
+        self.wait(1.5)
+        self.fade_out_all(run_time=0.9)
+
+
+class HV24_PressureCompensated(SafeScene):
+    """Page 24 — Pressure Compensated Flow Control Valve."""
+
+    def construct(self):
+        ttl = title("Pressure Compensated Flow Control")
+        pref = page_ref("หน้า 24 · Hydraulic Valves")
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
+        y = -1.9
+
+        comp = Rectangle(width=1.1, height=0.75, fill_color=METAL, fill_opacity=0.35,
+                          stroke_color=METAL, stroke_width=2).move_to([-1.6, y, 0])
+        comp_spring = spring_zigzag(-2.5, -2.15, y, coils=3, amp=0.09)
+        throttle_gap = Triangle(color=WHITE, fill_color=METAL, fill_opacity=0.9, stroke_width=2)
+        throttle_gap.scale(0.16).rotate(PI).move_to([0.5, y + 0.2, 0])
+        throttle_body = Rectangle(width=1.3, height=0.75, fill_color=METAL, fill_opacity=0.2,
+                                   stroke_color=METAL, stroke_width=2).move_to([0.5, y, 0])
+
+        in_arrow = Arrow([-4.3, y, 0], [-2.6, y, 0], color=SUPPLY, buff=0, stroke_width=6,
+                          max_tip_length_to_length_ratio=0.28)
+        out_arrow = Arrow([2.7, y, 0], [4.3, y, 0], color=OK, buff=0, stroke_width=6,
+                           max_tip_length_to_length_ratio=0.28)
+        sense_line = VMobject(color=WARN, stroke_width=2).set_points_as_corners(
+            [[2.7, y, 0], [2.7, y + 1.3, 0], [-1.6, y + 1.3, 0], [-1.6, y + 0.55, 0]])
+        sense_lbl = Text("sensing line (ป้อนความดันหลัง throttle กลับมา)", font_size=13, color=WARN)
+        sense_lbl.move_to([0.5, y + 1.55, 0])
+
+        self.play(Create(comp), Create(comp_spring), Create(throttle_body), FadeIn(throttle_gap),
+                   GrowArrow(in_arrow), GrowArrow(out_arrow), run_time=1.4)
+        self.play(Create(sense_line), FadeIn(sense_lbl), run_time=0.9)
+
+        cap0 = caption_top("compensator spool คอยรักษา ΔP คร่อม throttle ให้คงที่เสมอ ไม่ว่าโหลดเปลี่ยนแค่ไหน")
+        self.play(FadeIn(cap0), run_time=0.7)
+        self.wait(1.4)
+        self.play(FadeOut(cap0), run_time=0.4)
+
+        cap1 = caption_top("โหลดเบา: แรงต้านน้อย — compensator เลื่อนแคบชดเชย ให้ ΔP ที่ throttle เท่าเดิม")
+        self.play(FadeIn(cap1), run_time=0.6)
+        dots1 = VGroup(*[Dot(radius=0.06, color=OK) for _ in range(4)])
+        path1 = VMobject().set_points_as_corners([[-2.5, y, 0], [2.5, y, 0]])
+        anims1 = [MoveAlongPath(d, path1, rate_func=linear, run_time=1.6) for d in dots1]
+        self.play(LaggedStart(*anims1, lag_ratio=0.2))
+        self.play(FadeOut(dots1), run_time=0.3)
+        self.play(FadeOut(cap1), run_time=0.3)
+
+        cap2 = caption_top("โหลดหนัก: แรงต้านมาก — compensator เลื่อนเปิดกว้างขึ้นชดเชย Q เท่าเดิม!")
+        self.play(FadeIn(cap2), comp.animate.stretch(1.3, 0), run_time=1.0)
+        dots2 = VGroup(*[Dot(radius=0.06, color=OK) for _ in range(4)])
+        path2 = VMobject().set_points_as_corners([[-2.5, y, 0], [2.5, y, 0]])
+        anims2 = [MoveAlongPath(d, path2, rate_func=linear, run_time=1.6) for d in dots2]
+        self.play(LaggedStart(*anims2, lag_ratio=0.2))
+        self.play(FadeOut(dots2), run_time=0.3)
+
+        cap3 = caption_top("ผลลัพธ์: ความเร็วกระบอกสูบไม่ขึ้นกับโหลดอีกต่อไป (ต่างจาก needle ธรรมดาหน้า 22)")
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.7)
+        self.wait(1.6)
+        self.fade_out_all(run_time=0.9)
+
+
+class HV25_PressureTempCompensated(SafeScene):
+    """Page 25 — Pressure and Temperature Compensated Flow Control Valve."""
+
+    def construct(self):
+        ttl = title("Pressure & Temp Compensated Flow Control")
+        pref = page_ref("หน้า 25 · Hydraulic Valves")
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
+        cap0 = caption_top("เพิ่มการชดเชยอุณหภูมิจากกลไกหน้าที่แล้ว")
+        self.play(FadeIn(cap0), run_time=0.6)
+        self.wait(1.0)
+        self.play(FadeOut(cap0), run_time=0.4)
+
+        y = -1.9
+        comp = Rectangle(width=1.1, height=0.75, fill_color=METAL, fill_opacity=0.35,
+                          stroke_color=METAL, stroke_width=2).move_to([-1.9, y, 0])
+        throttle_body = Rectangle(width=1.3, height=0.75, fill_color=METAL, fill_opacity=0.2,
+                                   stroke_color=METAL, stroke_width=2).move_to([0.1, y, 0])
+        throttle_gap = Triangle(color=WHITE, fill_color=METAL, fill_opacity=0.9, stroke_width=2)
+        throttle_gap.scale(0.16).rotate(PI).move_to([0.1, y + 0.2, 0])
+        rod = Rectangle(width=0.18, height=1.1, fill_color=PRIMARY, fill_opacity=0.9,
+                         stroke_color=WHITE, stroke_width=1.5).move_to([1.0, y + 0.9, 0])
+        rod_lbl = Text("แท่งชดเชยอุณหภูมิ", font_size=13, color=GRAYTXT).move_to([1.0, y + 1.6, 0])
+
+        in_arrow = Arrow([-4.3, y, 0], [-2.8, y, 0], color=SUPPLY, buff=0, stroke_width=6,
+                          max_tip_length_to_length_ratio=0.28)
+        out_arrow = Arrow([2.9, y, 0], [4.3, y, 0], color=OK, buff=0, stroke_width=6,
+                           max_tip_length_to_length_ratio=0.28)
+
+        self.play(Create(comp), Create(throttle_body), FadeIn(throttle_gap),
+                   GrowArrow(in_arrow), GrowArrow(out_arrow), run_time=1.3)
+        self.play(FadeIn(rod), FadeIn(rod_lbl), run_time=0.6)
+
+        cap1 = caption_top("น้ำมันเย็น: แท่งหดตัว (สีฟ้า) — หนืดมาก ไหลยาก")
+        self.play(FadeIn(cap1), run_time=0.6)
+        self.wait(1.0)
+        self.play(FadeOut(cap1), run_time=0.3)
+
+        cap2 = caption_top("น้ำมันร้อนขึ้น: แท่งขยายตัว (สีแดง) ดันตำแหน่ง throttle ชดเชยความหนืดที่ลดลง")
+        self.play(FadeIn(cap2), rod.animate.set_color(WARN).stretch(1.15, 1), run_time=1.2)
+        self.wait(1.3)
+
+        cap3 = caption_top("ผลลัพธ์: ความเร็วกระบอกสูบคงที่ ไม่ว่าโหลดจะเปลี่ยน หรืออุณหภูมิน้ำมันจะเปลี่ยน")
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.7)
+        self.wait(1.8)
         self.fade_out_all(run_time=0.9)
