@@ -1199,7 +1199,7 @@ class HV25_PressureTempCompensated(SafeScene):
     """Page 25 — Pressure and Temperature Compensated Flow Control Valve."""
 
     def construct(self):
-        ttl = title("Pressure & Temp Compensated Flow Control")
+        ttl = title("P&T Compensated Flow Control", size=26)
         pref = page_ref("หน้า 25 · Hydraulic Valves")
         self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
         cap0 = caption_top("เพิ่มการชดเชยอุณหภูมิจากกลไกหน้าที่แล้ว")
