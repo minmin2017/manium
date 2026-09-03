@@ -114,8 +114,8 @@ class HV06_ShuttleValve(SafeScene):
         outlet_arrow = Arrow([0, 0.35, 0], [0, 1.25, 0], color=OK,
                               buff=0, stroke_width=6, max_tip_length_to_length_ratio=0.28)
 
-        primary_lbl = Text("Primary Supply", font_size=16, color=PRIMARY).next_to(primary_arrow, DOWN, buff=0.15)
-        secondary_lbl = Text("Secondary Supply", font_size=16, color=SECONDARY).next_to(secondary_arrow, DOWN, buff=0.15)
+        primary_lbl = Text("Primary Supply", font_size=16, color=PRIMARY).move_to([-3.9, -2.65, 0])
+        secondary_lbl = Text("Secondary Supply", font_size=16, color=SECONDARY).move_to([3.9, -2.65, 0])
         outlet_lbl = Text("Outlet", font_size=16, color=OK).next_to(outlet_arrow, UP, buff=0.12)
 
         self.play(
@@ -133,14 +133,12 @@ class HV06_ShuttleValve(SafeScene):
         spring.add_updater(lambda m: m.become(
             spring_zigzag(-3.1, piston.get_x() - PISTON_W / 2, BORE_Y)))
 
-        piston_lbl = Text("ลูกสูบ + สปริงคืนตำแหน่งเบาๆ (Piston + Spring)",
-                           font_size=15, color=WHITE).move_to([0, -0.85, 0])
-        piston_leader = Line([0, -1.0, 0], [0, -1.75, 0], color=WHITE, stroke_width=1.5)
+        piston_lbl = caption_top("กลไกภายใน: ลูกสูบ + สปริงคืนตำแหน่งเบาๆ (Piston + Spring)")
 
         self.play(FadeIn(piston), Create(spring), run_time=0.8)
-        self.play(FadeIn(piston_lbl), Create(piston_leader), run_time=0.9)
+        self.play(FadeIn(piston_lbl), run_time=0.9)
         self.wait(0.6)
-        self.play(FadeOut(piston_lbl), FadeOut(piston_leader), run_time=0.6)
+        self.play(FadeOut(piston_lbl), run_time=0.6)
 
         # ---- state A: default — secondary blocked, primary flows ---------
         cap1 = caption_top("สถานะปกติ: สปริงดันลูกสูบไปชิด Secondary — ปิดกั้นทางเข้า Secondary ไว้ก่อน")
