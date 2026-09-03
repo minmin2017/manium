@@ -287,7 +287,7 @@ class Q2_06_CrossCheck(SafeScene):
         self.wait(2.0)
 
         eq0 = MathTex(
-            r"\vec{v}_C\cdot\hat n = \vec{v}_{(C\,\text{บน}\,AB)}\cdot\hat n \;=\; -2.598",
+            r"\vec{v}_C\cdot\hat n = \vec{v}_{(C\,on\,AB)}\cdot\hat n \;=\; -2.598",
             font_size=24, color=WHITE).move_to([1.9, 0.9, 0])
         self.play(FadeIn(eq0), run_time=0.8)
         self.wait(1.6)
