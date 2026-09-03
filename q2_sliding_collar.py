@@ -158,7 +158,7 @@ class Q2_02_Trap(SafeScene):
         self.play(FadeIn(cap1), run_time=0.9)
         self.wait(1.8)
 
-        eq_real = MathTex(r"v_C^{\text{จริง}} = 3\sqrt{3} \approx 5.196\ \text{m/s}",
+        eq_real = MathTex(r"v_C^{\text{real}} = 3\sqrt{3} \approx 5.196\ \text{m/s}",
                            font_size=26, color=VC_COL).move_to([1.6, -0.4, 0])
         self.play(FadeIn(eq_real), run_time=0.8)
         self.wait(2.0)
@@ -235,7 +235,7 @@ class Q2_05_Step3(SafeScene):
         diagram = build_diagram()
         self.play(FadeIn(diagram), run_time=1.0)
 
-        eq0 = MathTex(r"\vec{v}_C = \vec{v}_{(C\,\text{บน}\,AB)} + \vec{v}_{\text{ไถล}}",
+        eq0 = MathTex(r"\vec{v}_C = \vec{v}_{(C\,on\,AB)} + \vec{v}_{slip}",
                        font_size=28, color=WHITE).move_to([2.1, 1.3, 0])
         self.play(FadeIn(eq0), run_time=0.8)
         self.wait(1.4)
@@ -261,9 +261,9 @@ class Q2_05_Step3(SafeScene):
         self.play(FadeIn(cap1), run_time=0.9)
         self.wait(1.8)
 
-        eq1 = MathTex(r"v_C = 3\sqrt{3} \approx 5.196\ \text{m/s (ซ้าย)}",
+        eq1 = MathTex(r"v_C = 3\sqrt{3} \approx 5.196\ \text{m/s (left)}",
                        font_size=24, color=VC_COL).move_to([2.1, -1.6, 0])
-        eq2 = MathTex(r"\omega_{DC} = 6\sqrt{3} \approx 10.39\ \text{rad/s (ทวนเข็ม)}",
+        eq2 = MathTex(r"\omega_{DC} = 6\sqrt{3} \approx 10.39\ \text{rad/s (CCW)}",
                        font_size=24, color=OMEGA_DC_COL).move_to([2.1, -2.15, 0])
         self.play(FadeIn(eq1), run_time=0.8)
         self.wait(1.0)
@@ -297,7 +297,7 @@ class Q2_06_CrossCheck(SafeScene):
         self.play(FadeIn(cap1), run_time=0.9)
         self.wait(2.0)
 
-        eq1 = MathTex(r"v_C \;\text{แนวนอน} \Rightarrow 0.5\,v_{Cx} = -2.598 \Rightarrow v_{Cx}=-5.196",
+        eq1 = MathTex(r"v_C\ \text{horizontal} \Rightarrow 0.5\,v_{Cx} = -2.598 \Rightarrow v_{Cx}=-5.196",
                        font_size=22, color=VC_COL).move_to([1.9, -0.4, 0])
         self.play(FadeIn(eq1), run_time=0.8)
         self.wait(1.8)
