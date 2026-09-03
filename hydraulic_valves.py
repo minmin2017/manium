@@ -1012,61 +1012,123 @@ class HV19_SequenceValve(SafeScene):
 
 
 class HV20_Counterbalance(SafeScene):
-    """Page 20 — Counterbalance Valve."""
+    """Page 20 — Counterbalance Valve (spec §2b).
+
+    Verified against TWO sources before building: the book's own p.20 symbol
+    (which carries a dashed external pilot line) and powermotiontech's
+    "Understanding Counterbalance Valves" — the valve is opened by pressure
+    from the OPPOSITE (cap-end) line, not by the returning oil alone. The first
+    version of this scene showed only a plain back-pressure throttle and was
+    missing that pilot line entirely."""
 
     def construct(self):
         ttl = title("Counterbalance Valve")
         pref = page_ref("หน้า 20 · Hydraulic Valves")
         self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
 
-        cyl = Rectangle(width=1.0, height=1.8, fill_color=METAL, fill_opacity=0.3,
-                         stroke_color=METAL, stroke_width=2).move_to([2.6, 0.1, 0])
-        piston_rod = Rectangle(width=0.35, height=1.0, fill_color=METAL, fill_opacity=0.9,
-                                stroke_color=WHITE, stroke_width=2).move_to([2.6, -1.3, 0])
-        load = Text("โหลด", font_size=14, color=GRAYTXT).move_to([2.6, -2.0, 0])
-        valve_body = Rectangle(width=1.6, height=1.4, fill_color=METAL, fill_opacity=0.3,
-                                stroke_color=METAL, stroke_width=2).move_to([-1.2, -0.9, 0])
-        check = Circle(radius=0.12, color=WHITE, stroke_width=2).move_to([-1.55, -0.9, 0])
-        spring2 = spring_zigzag(-0.9, -0.5, -0.9, coils=4, amp=0.1)
-        spool2 = Rectangle(width=0.35, height=0.4, fill_color=METAL, fill_opacity=0.9,
-                            stroke_color=WHITE, stroke_width=2).move_to([-0.7, -0.9, 0])
+        # ---- cylinder (rod exits downward, load hangs on the rod) ----------
+        barrel = Rectangle(width=1.2, height=2.2, fill_color=METAL, fill_opacity=0.22,
+                            stroke_color=METAL, stroke_width=2).move_to([3.4, 0.3, 0])
+        piston = Rectangle(width=1.1, height=0.25, fill_color=METAL, fill_opacity=0.95,
+                            stroke_color=WHITE, stroke_width=2).move_to([3.4, 0.9, 0])
+        rod = Line([3.4, 0.78, 0], [3.4, -1.35, 0], color=WHITE, stroke_width=6)
+        load = Rectangle(width=0.9, height=0.5, fill_color=GRAYTXT, fill_opacity=0.5,
+                          stroke_color=GRAYTXT, stroke_width=2).move_to([3.4, -1.6, 0])
+        load_lbl = Text("โหลด", font_size=13, color=GRAYTXT).move_to([3.4, -1.6, 0])
 
-        to_valve = Arrow([-4.4, -0.9, 0], [-2.0, -0.9, 0], color=GRAYTXT, buff=0, stroke_width=5,
-                          max_tip_length_to_length_ratio=0.25)
-        to_valve_lbl = Text("ไป/มาจาก directional valve", font_size=13, color=GRAYTXT).move_to([-3.3, -1.6, 0])
-        up_pipe = Line([-1.2, -0.2, 0], [-1.2, 0.4, 0], color=METAL, stroke_width=3)
-        to_cyl = Line([-1.2, 0.4, 0], [2.1, 0.4, 0], color=METAL, stroke_width=3)
+        # ---- lines: cap-end (top) direct, rod-end (bottom) via the valve ---
+        cap_line = VMobject(color=METAL, stroke_width=3).set_points_as_corners(
+            [[-4.3, 1.8, 0], [3.4, 1.8, 0], [3.4, 1.4, 0]])
+        rod_line = VMobject(color=METAL, stroke_width=3).set_points_as_corners(
+            [[2.8, -0.4, 0], [2.4, -0.4, 0], [2.4, -1.7, 0], [0.0, -1.7, 0]])
+        left_line = Line([-4.3, -1.7, 0], [-2.2, -1.7, 0], color=METAL, stroke_width=3)
+        dv_lbl = Text("ไป/มาจาก directional valve", font_size=13, color=GRAYTXT).move_to([-3.2, -2.15, 0])
+        cap_lbl = Text("cap-end", font_size=13, color=GRAYTXT).move_to([-3.4, 2.05, 0])
 
-        self.play(Create(cyl), FadeIn(piston_rod), FadeIn(load),
-                   Create(valve_body), Create(check), Create(spring2), FadeIn(spool2),
-                   Create(up_pipe), Create(to_cyl), GrowArrow(to_valve), FadeIn(to_valve_lbl),
-                   run_time=1.6)
+        # ---- counterbalance valve: two parallel internal paths -------------
+        v_body = Rectangle(width=2.2, height=1.4, fill_color=METAL, fill_opacity=0.22,
+                            stroke_color=METAL, stroke_width=2).move_to([-1.1, -1.7, 0])
+        manifold_L = Line([-2.2, -1.7, 0], [-2.2, -2.05, 0], color=METAL, stroke_width=2)
+        manifold_L2 = Line([-2.2, -1.7, 0], [-2.2, -1.35, 0], color=METAL, stroke_width=2)
+        manifold_R = Line([0.0, -1.7, 0], [0.0, -2.05, 0], color=METAL, stroke_width=2)
+        manifold_R2 = Line([0.0, -1.7, 0], [0.0, -1.35, 0], color=METAL, stroke_width=2)
+        # upper path: spring-loaded throttle (normally CLOSED)
+        thr_line_L = Line([-2.2, -1.35, 0], [-1.55, -1.35, 0], color=METAL, stroke_width=2)
+        thr_line_R = Line([-0.65, -1.35, 0], [0.0, -1.35, 0], color=METAL, stroke_width=2)
+        throttle = Rectangle(width=0.34, height=0.42, fill_color=METAL, fill_opacity=0.95,
+                              stroke_color=WHITE, stroke_width=2).move_to([-1.1, -1.35, 0])
+        thr_spring = spring_zigzag(-0.93, -0.68, -1.35, coils=3, amp=0.09)
+        thr_lbl = Text("throttle (ปกติปิด)", font_size=12, color=GRAYTXT).move_to([-1.1, -0.95, 0])
+        # lower path: check valve, free flow toward the cylinder only
+        chk_line_L = Line([-2.2, -2.05, 0], [-1.35, -2.05, 0], color=METAL, stroke_width=2)
+        chk_line_R = Line([-0.85, -2.05, 0], [0.0, -2.05, 0], color=METAL, stroke_width=2)
+        check = Circle(radius=0.15, color=WHITE, stroke_width=2).move_to([-1.1, -2.05, 0])
+        chk_lbl = Text("check valve", font_size=12, color=GRAYTXT).move_to([-1.1, -2.45, 0])
+
+        # ---- THE MISSING PIECE: external pilot line from the cap-end line --
+        pilot = DashedLine([-2.8, 1.8, 0], [-2.8, -1.0, 0], color=WARN, stroke_width=3,
+                            dash_length=0.12)
+        pilot_tap = Dot([-2.8, 1.8, 0], radius=0.06, color=WARN)
+        pilot_into = Line([-2.8, -1.0, 0], [-1.1, -1.0, 0], color=WARN, stroke_width=3)
+
+        self.play(Create(barrel), FadeIn(piston), Create(rod), FadeIn(load), FadeIn(load_lbl),
+                   Create(cap_line), Create(rod_line), Create(left_line),
+                   FadeIn(dv_lbl), FadeIn(cap_lbl), run_time=1.6)
+        self.play(Create(v_body),
+                   *[Create(m) for m in (manifold_L, manifold_L2, manifold_R, manifold_R2,
+                                          thr_line_L, thr_line_R, chk_line_L, chk_line_R)],
+                   FadeIn(throttle), Create(thr_spring), Create(check),
+                   FadeIn(thr_lbl), FadeIn(chk_lbl), run_time=1.4)
 
         cap0 = caption_top("กันโหลดหนักตกกระแทกตอนกระบอกสูบแนวตั้งลดโหลดลง")
         self.play(FadeIn(cap0), run_time=0.6)
-        self.wait(1.0)
-        self.play(FadeOut(cap0), run_time=0.4)
+        self.wait(1.2)
+        self.play(FadeOut(cap0), run_time=0.3)
 
-        cap1 = caption_top("Raising: check valve เปิดอิสระ — น้ำมันไหลเข้ากระบอกสูบไม่มีแรงต้าน")
+        # ---- state 1: raising — free flow through the check valve ----------
+        cap1 = caption_top("ยกขึ้น: ปั๊มดันเข้า rod-end → ผ่าน check valve อิสระ ไม่มีแรงต้าน")
         self.play(FadeIn(cap1), run_time=0.6)
-        dotsR = VGroup(*[Dot(radius=0.06, color=OK) for _ in range(3)])
-        pathR = VMobject().set_points_as_corners([[-3.9, -0.9, 0], [-1.55, -0.9, 0], [-1.2, -0.2, 0], [-1.2, 0.4, 0], [2.1, 0.4, 0], [2.6, 0.4, 0]])
-        animsR = [MoveAlongPath(d, pathR, rate_func=linear, run_time=1.6) for d in dotsR]
-        self.play(LaggedStart(*animsR, lag_ratio=0.25))
-        self.play(FadeOut(dotsR), FadeOut(cap1), run_time=0.4)
+        pathR = VMobject().set_points_as_corners(
+            [[-4.1, -1.7, 0], [-2.2, -1.7, 0], [-2.2, -2.05, 0], [0.0, -2.05, 0],
+             [0.0, -1.7, 0], [2.4, -1.7, 0], [2.4, -0.4, 0], [3.0, -0.4, 0]])
+        dotsR = VGroup(*[Dot(radius=0.06, color=OK) for _ in range(4)])
+        self.play(LaggedStart(*[MoveAlongPath(d, pathR, rate_func=linear, run_time=1.9)
+                                 for d in dotsR], lag_ratio=0.22))
+        self.play(FadeOut(dotsR), piston.animate.move_to([3.4, 0.9, 0]), run_time=0.5)
+        self.play(FadeOut(cap1), run_time=0.3)
 
-        cap2 = caption_top("Lowering: check valve ปิด — น้ำมันขาออกต้องดันผ่านวาล์วปรับ back-pressure ก่อน")
+        # ---- state 2: lowering — pilot from the OPPOSITE line opens it -----
+        cap2 = caption_top("ลดลง: ปั๊มดันเข้า cap-end (ท่อบน) — แรงดันนี้แยกไปตามเส้น pilot")
         self.play(FadeIn(cap2), run_time=0.6)
-        dotsL = VGroup(*[Dot(radius=0.06, color=RESIST) for _ in range(3)])
-        pathL = VMobject().set_points_as_corners([[2.6, 0.4, 0], [-1.2, 0.4, 0], [-1.2, -0.2, 0], [-0.7, -0.9, 0], [-3.9, -0.9, 0]])
-        animsL = [MoveAlongPath(d, pathL, rate_func=linear, run_time=1.8) for d in dotsL]
-        self.play(LaggedStart(*animsL, lag_ratio=0.25))
-        self.play(FadeOut(dotsL), run_time=0.3)
-
-        cap3 = caption_top("แรงต้านนี้ค้ำโหลดไว้ไม่ให้ตกเร็วเกิน — เทียบได้กับ cylinder cushion ใน W05")
+        self.play(Create(pilot), FadeIn(pilot_tap), Create(pilot_into), run_time=1.0)
+        dotsP = VGroup(*[Dot(radius=0.055, color=WARN) for _ in range(3)])
+        pathP = VMobject().set_points_as_corners(
+            [[-4.1, 1.8, 0], [-2.8, 1.8, 0], [-2.8, -1.0, 0], [-1.1, -1.0, 0]])
+        self.play(LaggedStart(*[MoveAlongPath(d, pathP, rate_func=linear, run_time=1.5)
+                                 for d in dotsP], lag_ratio=0.25))
+        self.play(FadeOut(dotsP), run_time=0.25)
         self.play(FadeOut(cap2), run_time=0.3)
-        self.play(FadeIn(cap3), run_time=0.6)
-        self.wait(1.6)
+
+        cap3 = caption_top("แรงดัน pilot ชนะสปริง → เปิด throttle ให้น้ำมัน rod-end ออกได้แบบมีแรงต้าน")
+        self.play(FadeIn(cap3), throttle.animate.shift(RIGHT * 0.28), run_time=1.0)
+        pathL = VMobject().set_points_as_corners(
+            [[3.0, -0.4, 0], [2.4, -0.4, 0], [2.4, -1.7, 0], [0.0, -1.7, 0],
+             [0.0, -1.35, 0], [-2.2, -1.35, 0], [-2.2, -1.7, 0], [-4.1, -1.7, 0]])
+        dotsL = VGroup(*[Dot(radius=0.06, color=RESIST) for _ in range(3)])
+        self.play(LaggedStart(*[MoveAlongPath(d, pathL, rate_func=linear, run_time=2.4)
+                                 for d in dotsL], lag_ratio=0.3),
+                   piston.animate.move_to([3.4, -0.4, 0]), run_time=2.4)
+        self.play(FadeOut(dotsL), run_time=0.3)
+        self.play(FadeOut(cap3), run_time=0.3)
+
+        cap4 = caption_top("ไม่มีสัญญาณ pilot = วาล์วปิดสนิท โหลดถูกล็อกค้าง ไม่ไหลตกเอง")
+        self.play(FadeIn(cap4), throttle.animate.shift(LEFT * 0.28), run_time=0.9)
+        self.wait(1.4)
+        self.play(FadeOut(cap4), run_time=0.3)
+
+        cap5 = caption_top("ต่างจาก pilot operated check valve (หน้า 5): อันนั้นคุมโหลดที่ไหลหนีไม่ได้")
+        self.play(FadeIn(cap5), run_time=0.6)
+        self.wait(1.7)
         self.fade_out_all(run_time=0.9)
 
 
