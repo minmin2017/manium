@@ -286,7 +286,8 @@ class HV02_Classification(SafeScene):
         self.play(LaggedStart(*[FadeIn(c) for c in col_groups], lag_ratio=0.3), run_time=1.6)
         self.wait(1.0)
         note = caption_top("⭐ = สัญลักษณ์ที่ข้อสอบเก่าเคยออกให้วาด (ดูรายละเอียดหน้า 5,6,17,18)")
-        self.play(FadeOut(cap), FadeIn(note), run_time=0.6)
+        self.play(FadeOut(cap), run_time=0.3)
+        self.play(FadeIn(note), run_time=0.6)
         self.wait(1.8)
         self.fade_out_all(run_time=0.9)
 
@@ -340,7 +341,8 @@ class HV04_TwoWayOnOff(SafeScene):
         self.play(FadeOut(dots), run_time=0.3)
 
         cap3 = caption_top("แบบโซลินอยด์: ใช้แรงดันไพลอตช่วยดันสปูลแทนแรงคน — กลไกละเอียดดูหน้า 11")
-        self.play(FadeOut(cap2), FadeIn(cap3), run_time=0.6)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
         self.wait(1.6)
         self.fade_out_all(run_time=0.9)
 
@@ -402,7 +404,8 @@ class HV07_ThreeWay(SafeScene):
         self.play(FadeOut(dots2), run_time=0.3)
 
         cap3 = caption_top("ใช้กับ single-acting cylinder — มีทางเข้า-ออกทางเดียว")
-        self.play(FadeOut(cap2), FadeIn(cap3), run_time=0.6)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
         self.wait(1.4)
         self.fade_out_all(run_time=0.9)
 
@@ -426,19 +429,19 @@ def four_way_housing(y=-1.8):
                         stroke_color=METAL, stroke_width=2).move_to([-1.8, y + 1.05, 0])
     stem_B = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
                         stroke_color=METAL, stroke_width=2).move_to([0.6, y + 1.05, 0])
-    stem_P = Rectangle(width=0.2, height=0.8, fill_color=METAL, fill_opacity=0.35,
-                        stroke_color=METAL, stroke_width=2).move_to([-0.6, y - 1.4, 0])
-    stem_T = Rectangle(width=0.2, height=0.8, fill_color=METAL, fill_opacity=0.35,
-                        stroke_color=METAL, stroke_width=2).move_to([1.8, y - 1.4, 0])
+    stem_P = Rectangle(width=0.2, height=0.6, fill_color=METAL, fill_opacity=0.35,
+                        stroke_color=METAL, stroke_width=2).move_to([-0.6, y - 1.1, 0])
+    stem_T = Rectangle(width=0.2, height=0.6, fill_color=METAL, fill_opacity=0.35,
+                        stroke_color=METAL, stroke_width=2).move_to([1.8, y - 1.1, 0])
     housing = VGroup(top_1, top_2, top_3, bot_1, bot_2, bot_3, stem_A, stem_B, stem_P, stem_T)
 
     a_top = Arrow([-1.8, y + 1.65, 0], [-1.8, y + 2.4, 0], color=OK, buff=0, stroke_width=5,
                   max_tip_length_to_length_ratio=0.3)
     b_top = Arrow([0.6, y + 1.65, 0], [0.6, y + 2.4, 0], color=OK, buff=0, stroke_width=5,
                   max_tip_length_to_length_ratio=0.3)
-    p_bot = Arrow([-0.6, y - 2.5, 0], [-0.6, y - 1.75, 0], color=SUPPLY, buff=0, stroke_width=5,
+    p_bot = Arrow([-0.6, y - 1.85, 0], [-0.6, y - 1.35, 0], color=SUPPLY, buff=0, stroke_width=5,
                   max_tip_length_to_length_ratio=0.3)
-    t_bot = Arrow([1.8, y - 1.75, 0], [1.8, y - 2.5, 0], color=RETURN, buff=0, stroke_width=5,
+    t_bot = Arrow([1.8, y - 1.35, 0], [1.8, y - 1.85, 0], color=RETURN, buff=0, stroke_width=5,
                   max_tip_length_to_length_ratio=0.3)
     a_lbl = Text("A", font_size=16, color=OK).next_to(a_top, UP, buff=0.08)
     b_lbl = Text("B", font_size=16, color=OK).next_to(b_top, UP, buff=0.08)
@@ -487,7 +490,8 @@ class HV08_FourWayTwoPos(SafeScene):
         self.play(FadeOut(dotsA2), FadeOut(dotsT2), run_time=0.3)
 
         cap3 = caption_top("มาตรฐานสำหรับคุม double-acting cylinder — สลับได้ครบ 2 ทิศ")
-        self.play(FadeOut(cap2), FadeIn(cap3), run_time=0.6)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
         self.wait(1.4)
         self.fade_out_all(run_time=0.9)
 
@@ -512,22 +516,19 @@ class HV09_FourWayThreePosManual(SafeScene):
         cap0 = caption_top("เพิ่มตำแหน่งกลาง (neutral) จากแบบ 2 ตำแหน่งในหน้าที่แล้ว")
         self.play(FadeIn(cap0), run_time=0.6)
         self.wait(1.0)
-        cap1 = caption_top("Spring centered: ปล่อยมือ สปริงทั้ง 2 ข้างดันสปูลกลับกลางอัตโนมัติ")
-        self.play(FadeOut(cap0), FadeIn(cap1), run_time=0.6)
-        self.wait(0.6)
-
-        blocked = Text("ปิดกั้นทุกพอร์ต (closed center)", font_size=16, color=BLOCKED)
-        blocked.move_to([0, -0.55, 0])
-        self.play(FadeIn(blocked), run_time=0.5)
-        self.wait(1.0)
-        self.play(FadeOut(blocked), FadeOut(cap1), run_time=0.4)
+        cap1 = caption_top("Spring centered: ปล่อยมือ สปริงทั้ง 2 ข้างดันสปูลกลับกลาง — ปิดกั้นทุกพอร์ต (closed center)")
+        self.play(FadeOut(cap0), run_time=0.3)
+        self.play(FadeIn(cap1), run_time=0.6)
+        self.wait(1.6)
+        self.play(FadeOut(cap1), run_time=0.4)
 
         cap2 = caption_top("ดันคันโยกไปข้างหนึ่ง สปริงฝั่งขวาถูกอัด — P→B, A→T (เหมือนหน้า 8)")
         self.play(FadeIn(cap2), spool.animate.move_to([0.8, y, 0]), run_time=1.3)
         self.wait(1.2)
 
         cap3 = caption_top("ประเภท center (open/closed/tandem) — ดูรายละเอียดหน้า 13")
-        self.play(FadeOut(cap2), FadeIn(cap3), run_time=0.6)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
         self.wait(1.4)
         self.fade_out_all(run_time=0.9)
 
@@ -556,14 +557,15 @@ class HV10_FourWayThreePosPilot(SafeScene):
         self.wait(1.0)
 
         cap2 = caption_top("โซลินอยด์ดันสปูล (ค้างตำแหน่ง) — คลายไฟ สปริงดันกลับกลางเอง")
-        self.play(FadeOut(cap1), FadeIn(cap2),
-                   coil.animate.set_fill(opacity=1.0),
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), coil.animate.set_fill(opacity=1.0),
                    spool.animate.move_to([0.8, y, 0]), run_time=1.2)
         self.wait(0.8)
         self.play(coil.animate.set_fill(opacity=0.5), spool.animate.move_to([0, y, 0]), run_time=1.0)
 
         cap3 = caption_top("แบบ air-pilot: ใช้ลมอัดดันแทนโซลินอยด์ทั้งสองฝั่ง (ดูหน้า 10 ต้นฉบับ)")
-        self.play(FadeOut(cap2), FadeIn(cap3), run_time=0.6)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
         self.wait(1.4)
         self.fade_out_all(run_time=0.9)
 
@@ -575,18 +577,17 @@ class HV11_SolenoidPilotOperated(SafeScene):
         ttl = title("Solenoid Pilot Operated 4-Way Valve")
         pref = page_ref("หน้า 11 · Hydraulic Valves")
         self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
-        y = -2.1
+        y = -1.8
         housing, ports = four_way_housing(y)
         main_spool = Rectangle(width=2.6, height=0.42, fill_color=METAL, fill_opacity=0.9,
                                 stroke_color=WHITE, stroke_width=2).move_to([0, y, 0])
         self.play(Create(housing), FadeIn(ports), FadeIn(main_spool), run_time=1.3)
-        main_lbl = Text("Main stage (สปูลใหญ่ คุมการไหลจริง)", font_size=15, color=WHITE)
-        main_lbl.move_to([0, y + 0.85, 0])
-        self.play(FadeIn(main_lbl), run_time=0.5)
-        self.wait(0.8)
-        self.play(FadeOut(main_lbl), run_time=0.4)
+        cap_main = caption_top("ด้านล่าง: Main stage — สปูลใหญ่ที่คุมการไหลจริง (เหมือนหน้า 8-10)")
+        self.play(FadeIn(cap_main), run_time=0.6)
+        self.wait(1.0)
+        self.play(FadeOut(cap_main), run_time=0.4)
 
-        py = 0.55
+        py = 1.6
         pilot_body = Rectangle(width=1.6, height=0.35, fill_color=METAL, fill_opacity=0.5,
                                 stroke_color=METAL, stroke_width=2).move_to([0, py, 0])
         pilot_spool = Rectangle(width=0.7, height=0.3, fill_color=METAL, fill_opacity=0.9,
@@ -602,19 +603,22 @@ class HV11_SolenoidPilotOperated(SafeScene):
         self.wait(1.0)
 
         cap2 = caption_top("ขั้น 1: โซลินอยด์ดันสปูลไพลอต (เล็ก) ก่อน")
-        self.play(FadeOut(cap1), FadeIn(cap2), coil.animate.set_fill(opacity=1.0),
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), coil.animate.set_fill(opacity=1.0),
                    pilot_spool.animate.move_to([0.3, py, 0]), run_time=1.0)
 
         pilot_line = Line([0.3, py - 0.18, 0], [0.9, y + 0.21, 0], color=WARN, stroke_width=3)
         cap3 = caption_top("ขั้น 2: แรงดันไพลอตวิ่งไปดันปลายสปูลใหญ่ — บังคับให้เลื่อน")
-        self.play(FadeOut(cap2), FadeIn(cap3), Create(pilot_line), run_time=0.9)
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), Create(pilot_line), run_time=0.9)
         self.play(main_spool.animate.move_to([0.8, y, 0]), run_time=1.2)
         self.wait(0.8)
 
         override = Text("มี manual override ไว้ดันสปูลไพลอตด้วยมือตอนซ่อม/เทสต์",
-                         font_size=14, color=GRAYTXT).move_to([0, py + 0.9, 0])
+                         font_size=14, color=GRAYTXT).move_to([0, py + 0.7, 0])
         cap4 = caption_top("สปูลใหญ่เลื่อนแล้ว → เปลี่ยนทางไหล P/A/B/T เหมือนหน้า 8-10")
-        self.play(FadeOut(cap3), FadeIn(cap4), FadeIn(override), run_time=0.7)
+        self.play(FadeOut(cap3), run_time=0.3)
+        self.play(FadeIn(cap4), FadeIn(override), run_time=0.7)
         self.wait(1.6)
         self.fade_out_all(run_time=0.9)
 
@@ -659,6 +663,331 @@ class HV12_SolenoidDesign(SafeScene):
         self.play(FadeIn(cap1), run_time=0.6)
         self.wait(1.3)
         cap2 = caption_top("Wet armature: static seal อยู่กับที่ (รั่วยากกว่า) — อาร์เมเจอร์แช่น้ำมันเต็มตัว")
-        self.play(FadeOut(cap1), FadeIn(cap2), run_time=0.6)
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2), run_time=0.6)
+        self.wait(1.6)
+        self.fade_out_all(run_time=0.9)
+
+
+# =====================================================================
+# Batch 3: Pressure Control section (pages 14,16,17,18,19,20 — 15 already done)
+# =====================================================================
+
+RESIST = "#FF7043"  # oil forced through a throttled/resisting path (counterbalance)
+
+
+class HV14_Title(SafeScene):
+    def construct(self):
+        pref = page_ref("หน้า 14 · Hydraulic Valves")
+        t = Text("Pressure Control Valves", font_size=40, color=WHITE)
+        sub = fit_width(Text("จำกัด/ปรับ \"ระดับความดัน\" — relief, reducing, sequence, unloading, counterbalance",
+                              font_size=18, color=GRAYTXT), 11.0)
+        sub.next_to(t, DOWN, buff=0.6)
+        self.play(FadeIn(pref), Write(t), run_time=1.3)
+        self.play(FadeIn(sub), run_time=0.8)
+        self.wait(1.6)
+        self.fade_out_all(run_time=0.8)
+
+
+def branch_t_body(y=-1.8, branch="down"):
+    """T-body: horizontal bore (inlet left / outlet right) + a branch stem
+    (up or down) at center — shared shape for the relief/unloading/sequence family."""
+    top_wall_L = Rectangle(width=2.95, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                            stroke_color=METAL, stroke_width=2).move_to([-1.825, y + 0.4, 0])
+    top_wall_R = Rectangle(width=2.95, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                            stroke_color=METAL, stroke_width=2).move_to([1.825, y + 0.4, 0])
+    bottom_wall_L = Rectangle(width=2.95, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                               stroke_color=METAL, stroke_width=2).move_to([-1.825, y - 0.4, 0])
+    bottom_wall_R = Rectangle(width=2.95, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                               stroke_color=METAL, stroke_width=2).move_to([1.825, y - 0.4, 0])
+    if branch == "up":
+        stem_L = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
+                            stroke_color=METAL, stroke_width=2).move_to([-0.45, y + 1.05, 0])
+        stem_R = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
+                            stroke_color=METAL, stroke_width=2).move_to([0.45, y + 1.05, 0])
+        top_wall_L.stretch_to_fit_width(2.95 - 0.2).move_to([-1.575, y + 0.4, 0])
+        top_wall_R.stretch_to_fit_width(2.95 - 0.2).move_to([1.575, y + 0.4, 0])
+        walls = VGroup(top_wall_L, top_wall_R, bottom_wall_L, bottom_wall_R, stem_L, stem_R)
+    else:
+        stem_L = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
+                            stroke_color=METAL, stroke_width=2).move_to([-0.45, y - 1.05, 0])
+        stem_R = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
+                            stroke_color=METAL, stroke_width=2).move_to([0.45, y - 1.05, 0])
+        bottom_wall_L.stretch_to_fit_width(2.95 - 0.2).move_to([-1.575, y - 0.4, 0])
+        bottom_wall_R.stretch_to_fit_width(2.95 - 0.2).move_to([1.575, y - 0.4, 0])
+        walls = VGroup(top_wall_L, top_wall_R, bottom_wall_L, bottom_wall_R, stem_L, stem_R)
+    return walls
+
+
+class HV16_PilotOperatedRelief(SafeScene):
+    """Page 16 — Pilot Operated Pressure Relief Valve (2-stage)."""
+
+    def construct(self):
+        ttl = title("Pilot Operated Relief Valve")
+        pref = page_ref("หน้า 16 · Hydraulic Valves")
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
+        y = -1.7
+        housing = branch_t_body(y, branch="down")
+        self.play(Create(housing), run_time=1.1)
+
+        in_arrow = Arrow([-4.4, y, 0], [-2.9, y, 0], color=SUPPLY, buff=0, stroke_width=6,
+                          max_tip_length_to_length_ratio=0.28)
+        out_arrow = Arrow([2.9, y, 0], [4.4, y, 0], color=OK, buff=0, stroke_width=6,
+                           max_tip_length_to_length_ratio=0.28)
+        tank_arrow = Arrow([0, y - 1.7, 0], [0, y - 2.5, 0], color=RETURN, buff=0, stroke_width=6,
+                            max_tip_length_to_length_ratio=0.28)
+        in_lbl = Text("Inlet (จากปั๊ม)", font_size=14, color=SUPPLY).move_to([-3.7, y - 0.6, 0])
+        out_lbl = Text("Outlet (ไปวงจร)", font_size=14, color=OK).move_to([3.7, y - 0.6, 0])
+        tank_lbl = Text("Tank", font_size=14, color=RETURN).move_to([0, y - 2.85, 0])
+        self.play(GrowArrow(in_arrow), GrowArrow(out_arrow), GrowArrow(tank_arrow),
+                   FadeIn(in_lbl), FadeIn(out_lbl), FadeIn(tank_lbl), run_time=1.1)
+
+        piston = Rectangle(width=0.9, height=0.36, fill_color=METAL, fill_opacity=0.9,
+                            stroke_color=WHITE, stroke_width=2).move_to([0, y - 1.05, 0])
+        pilot_box = Rectangle(width=0.6, height=0.4, fill_color=METAL, fill_opacity=0.3,
+                               stroke_color=METAL, stroke_width=2).move_to([0, y + 1.1, 0])
+        pilot_poppet = Triangle(color=WHITE, fill_color=METAL, fill_opacity=0.9,
+                                 stroke_width=2).scale(0.13).rotate(PI).move_to([0, y + 1.1, 0])
+        pilot_lbl = Text("ไพลอตสปูลเล็ก", font_size=13, color=GRAYTXT).move_to([0, y + 1.55, 0])
+        self.play(FadeIn(piston), FadeIn(pilot_box), FadeIn(pilot_poppet), FadeIn(pilot_lbl), run_time=0.8)
+
+        cap0 = caption_top("2 ชั้นเหมือนวาล์วทิศทางหน้า 11 — แต่ตัวกระตุ้นคือความดันเอง ไม่ใช่โซลินอยด์")
+        self.play(FadeIn(cap0), run_time=0.6)
+        self.wait(1.2)
+        self.play(FadeOut(cap0), run_time=0.4)
+
+        capA = caption_top("A. Closed: สปริงกดลูกสูบปิดกั้นทางลงถัง — inlet ไหลตรงไป outlet ปกติ")
+        self.play(FadeIn(capA), run_time=0.6)
+        dots = VGroup(*[Dot(radius=0.06, color=SUPPLY) for _ in range(3)])
+        path = VMobject().set_points_as_corners([[-2.7, y, 0], [2.7, y, 0]])
+        anims = [MoveAlongPath(d, path, rate_func=linear, run_time=1.3) for d in dots]
+        self.play(LaggedStart(*anims, lag_ratio=0.3))
+        self.play(FadeOut(dots), FadeOut(capA), run_time=0.4)
+
+        capB = caption_top("B. Cracked: ถึงค่าตั้ง — ไพลอตสปูลเล็กเปิดก่อน ระบายความดันเหนือลูกสูบ")
+        self.play(FadeIn(capB), pilot_poppet.animate.shift(UP * 0.12), run_time=0.9)
+        self.wait(0.8)
+        self.play(FadeOut(capB), run_time=0.4)
+
+        capC = caption_top("C. Relieving: ลูกสูบใหญ่เลื่อนขึ้น เปิดทางถ่ายปั๊มตรงไปถังทั้งหมด")
+        self.play(FadeIn(capC), piston.animate.move_to([0, y - 0.5, 0]), run_time=1.1)
+        dots2 = VGroup(*[Dot(radius=0.06, color=RETURN) for _ in range(3)])
+        path2 = VMobject().set_points_as_corners([[-2.7, y, 0], [0, y, 0], [0, y - 2.3, 0]])
+        anims2 = [MoveAlongPath(d, path2, rate_func=linear, run_time=1.4) for d in dots2]
+        self.play(LaggedStart(*anims2, lag_ratio=0.3))
+        self.play(FadeOut(dots2), run_time=0.3)
+
+        cap_end = caption_top("ข้อดี: สปูลไพลอตเล็กคุมลูกสูบใหญ่ได้ — รับ flow มากๆ โดยสปริงไม่ต้องแข็งมาก")
+        self.play(FadeOut(capC), run_time=0.3)
+        self.play(FadeIn(cap_end), run_time=0.6)
+        self.wait(1.5)
+        self.fade_out_all(run_time=0.9)
+
+
+class HV17_PressureReducing(SafeScene):
+    """Page 17 — Pressure Reducing Valve (direct acting)."""
+
+    def construct(self):
+        ttl = title("Pressure Reducing Valve")
+        pref = page_ref("หน้า 17 · Hydraulic Valves")
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
+        y = -1.8
+
+        body = Rectangle(width=5.2, height=1.1, fill_color=METAL, fill_opacity=0.3,
+                          stroke_color=METAL, stroke_width=2).move_to([0, y, 0])
+        self.play(Create(body), run_time=0.9)
+
+        in_arrow = Arrow([-4.4, y, 0], [-2.6, y, 0], color=SUPPLY, buff=0, stroke_width=6,
+                          max_tip_length_to_length_ratio=0.28)
+        out_arrow = Arrow([2.6, y, 0], [4.4, y, 0], color=OK, buff=0, stroke_width=6,
+                           max_tip_length_to_length_ratio=0.28)
+        in_lbl = Text("Inlet (main system)", font_size=14, color=SUPPLY).move_to([-3.5, y - 0.85, 0])
+        out_lbl = Text("Outlet (reduced pressure)", font_size=14, color=OK).move_to([3.5, y - 0.85, 0])
+        self.play(GrowArrow(in_arrow), GrowArrow(out_arrow), FadeIn(in_lbl), FadeIn(out_lbl), run_time=1.0)
+
+        spring = spring_zigzag(1.3, 2.4, y, coils=5, amp=0.14)
+        spool = Rectangle(width=1.8, height=0.35, fill_color=METAL, fill_opacity=0.9,
+                           stroke_color=WHITE, stroke_width=2).move_to([-0.4, y, 0])
+        gap_lbl = Text("ช่องเปิดกว้าง", font_size=13, color=OK).move_to([-0.4, y + 0.75, 0])
+        self.play(FadeIn(spool), Create(spring), FadeIn(gap_lbl), run_time=0.8)
+
+        cap1 = caption_top("ปกติ: สปริงดันสปูลเปิดค้างไว้เต็มที่ — ตรงข้ามกับ relief วาล์วที่ปกติปิด!")
+        self.play(FadeIn(cap1), run_time=0.7)
+        self.wait(1.2)
+        self.play(FadeOut(cap1), FadeOut(gap_lbl), run_time=0.5)
+
+        cap2 = caption_top("outlet ความดันขึ้นถึงค่าตั้ง (feedback ป้อนกลับ) — สปูลเริ่มบีบตัวเองแคบลง")
+        self.play(FadeIn(cap2), spool.animate.move_to([0.9, y, 0]).stretch(0.4, 0),
+                   run_time=1.3)
+        throttled_lbl = Text("ช่องแคบลง — จำกัดความดัน outlet ไม่ให้เกิน", font_size=14, color=WARN)
+        throttled_lbl.move_to([0, y + 0.75, 0])
+        self.play(FadeIn(throttled_lbl), run_time=0.5)
+        self.wait(1.4)
+
+        cap3 = caption_top("Reducing คุม outlet / Relief คุม inlet — ทิศทางลอจิกตรงข้ามกันเพราะคนละตัวแปร")
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
+        self.wait(1.6)
+        self.fade_out_all(run_time=0.9)
+
+
+class HV18_UnloadingValve(SafeScene):
+    """Page 18 — Unloading Valve."""
+
+    def construct(self):
+        ttl = title("Unloading Valve")
+        pref = page_ref("หน้า 18 · Hydraulic Valves")
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
+        y = -1.7
+        housing = branch_t_body(y, branch="down")
+        self.play(Create(housing), run_time=1.0)
+
+        in_arrow = Arrow([-4.4, y, 0], [-2.9, y, 0], color=SUPPLY, buff=0, stroke_width=6,
+                          max_tip_length_to_length_ratio=0.28)
+        out_arrow = Arrow([2.9, y, 0], [4.4, y, 0], color=OK, buff=0, stroke_width=6,
+                           max_tip_length_to_length_ratio=0.28)
+        tank_arrow = Arrow([0, y - 1.7, 0], [0, y - 2.5, 0], color=RETURN, buff=0, stroke_width=6,
+                            max_tip_length_to_length_ratio=0.28)
+        in_lbl = Text("Primary (จากปั๊ม)", font_size=14, color=SUPPLY).move_to([-3.7, y - 0.6, 0])
+        out_lbl = Text("ไปวงจรหลัก", font_size=14, color=OK).move_to([3.7, y - 0.6, 0])
+        tank_lbl = Text("Tank", font_size=14, color=RETURN).move_to([0, y - 2.85, 0])
+        piston = Rectangle(width=0.9, height=0.36, fill_color=METAL, fill_opacity=0.9,
+                            stroke_color=WHITE, stroke_width=2).move_to([0, y - 1.05, 0])
+        self.play(GrowArrow(in_arrow), GrowArrow(out_arrow), GrowArrow(tank_arrow),
+                   FadeIn(in_lbl), FadeIn(out_lbl), FadeIn(tank_lbl), FadeIn(piston), run_time=1.2)
+
+        remote_line = Line([3.9, y + 0.9, 0], [3.9, y + 2.4, 0], color=WARN, stroke_width=3)
+        remote_line2 = Line([3.9, y + 2.4, 0], [0.3, y + 2.4, 0], color=WARN, stroke_width=3)
+        remote_lbl = fit_width(Text("สัญญาณไพลอตจากระยะไกล (remote connection) — คนละจุดกับ inlet ตัวเอง",
+                                     font_size=13, color=WARN), 8.5)
+        remote_lbl.move_to([1.2, y + 2.75, 0])
+        self.play(Create(remote_line), Create(remote_line2), FadeIn(remote_lbl), run_time=0.8)
+
+        cap1 = caption_top("A. Closed: ไม่มีสัญญาณ — น้ำมันไหลผ่านฝั่ง primary ตามปกติ")
+        self.play(FadeIn(cap1), run_time=0.6)
+        dots = VGroup(*[Dot(radius=0.06, color=SUPPLY) for _ in range(3)])
+        path = VMobject().set_points_as_corners([[-2.7, y, 0], [2.7, y, 0]])
+        anims = [MoveAlongPath(d, path, rate_func=linear, run_time=1.2) for d in dots]
+        self.play(LaggedStart(*anims, lag_ratio=0.3))
+        self.play(FadeOut(dots), FadeOut(cap1), run_time=0.4)
+
+        cap2 = caption_top("B. Unloading: สัญญาณไพลอตเกินค่าตั้ง — เปิดเต็มที่ทันที (ไม่ค่อยๆ cracking แบบ relief)")
+        self.play(FadeIn(cap2), piston.animate.move_to([0, y - 0.4, 0]), run_time=0.5)
+        dots2 = VGroup(*[Dot(radius=0.06, color=RETURN) for _ in range(4)])
+        path2 = VMobject().set_points_as_corners([[-2.7, y, 0], [0, y, 0], [0, y - 2.3, 0]])
+        anims2 = [MoveAlongPath(d, path2, rate_func=linear, run_time=1.1) for d in dots2]
+        self.play(LaggedStart(*anims2, lag_ratio=0.15))
+        self.play(FadeOut(dots2), run_time=0.3)
+
+        cap3 = caption_top("ต่างจาก relief ตรงที่กระตุ้นด้วยสัญญาณภายนอก ไม่ใช่ความดันตัวเอง — ประหยัดพลังงาน")
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
+        self.wait(1.5)
+        self.fade_out_all(run_time=0.9)
+
+
+class HV19_SequenceValve(SafeScene):
+    """Page 19 — Sequence Valve."""
+
+    def construct(self):
+        ttl = title("Sequence Valve")
+        pref = page_ref("หน้า 19 · Hydraulic Valves")
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
+        y = -1.7
+        housing = branch_t_body(y, branch="down")
+        self.play(Create(housing), run_time=1.0)
+
+        in_arrow = Arrow([-4.4, y, 0], [-2.9, y, 0], color=SUPPLY, buff=0, stroke_width=6,
+                          max_tip_length_to_length_ratio=0.28)
+        out_arrow = Arrow([2.9, y, 0], [4.4, y, 0], color=SUPPLY, buff=0, stroke_width=6,
+                           max_tip_length_to_length_ratio=0.28)
+        sec_arrow = Arrow([0, y - 1.7, 0], [0, y - 2.5, 0], color=SECONDARY, buff=0, stroke_width=6,
+                           max_tip_length_to_length_ratio=0.28)
+        in_lbl = Text("Primary line", font_size=14, color=SUPPLY).move_to([-3.7, y - 0.6, 0])
+        out_lbl = Text("Primary (ต่อตรง)", font_size=13, color=SUPPLY).move_to([3.7, y - 0.6, 0])
+        sec_lbl = Text("To Secondary system", font_size=13, color=SECONDARY).move_to([0.9, y - 2.85, 0])
+        piston = Rectangle(width=0.9, height=0.36, fill_color=METAL, fill_opacity=0.9,
+                            stroke_color=WHITE, stroke_width=2).move_to([0, y - 1.05, 0])
+        self.play(GrowArrow(in_arrow), GrowArrow(out_arrow), GrowArrow(sec_arrow),
+                   FadeIn(in_lbl), FadeIn(out_lbl), FadeIn(sec_lbl), FadeIn(piston), run_time=1.2)
+
+        cap1 = caption_top("A. Closed: primary ยังไม่ถึงค่าตั้ง — ส่ง flow ไปแค่ primary เท่านั้น")
+        self.play(FadeIn(cap1), run_time=0.6)
+        dots = VGroup(*[Dot(radius=0.06, color=SUPPLY) for _ in range(3)])
+        path = VMobject().set_points_as_corners([[-2.7, y, 0], [2.7, y, 0]])
+        anims = [MoveAlongPath(d, path, rate_func=linear, run_time=1.3) for d in dots]
+        self.play(LaggedStart(*anims, lag_ratio=0.3))
+        self.play(FadeOut(dots), FadeOut(cap1), run_time=0.4)
+
+        cap2 = caption_top("B. Open: primary ถึงความดันตั้ง (งาน 1 เสร็จ/ชนสุด) — เปิดให้ไหลต่อไปยัง secondary")
+        self.play(FadeIn(cap2), piston.animate.move_to([0, y - 0.5, 0]), run_time=1.0)
+        dots2 = VGroup(*[Dot(radius=0.06, color=SECONDARY) for _ in range(3)])
+        path2 = VMobject().set_points_as_corners([[-2.7, y, 0], [0, y, 0], [0, y - 2.3, 0]])
+        anims2 = [MoveAlongPath(d, path2, rate_func=linear, run_time=1.4) for d in dots2]
+        self.play(LaggedStart(*anims2, lag_ratio=0.3))
+        self.play(FadeOut(dots2), run_time=0.3)
+
+        cap3 = caption_top("ต่างจาก unloading หน้าที่แล้ว: sequence สัมผัสความดัน primary ของตัวเอง ไม่ใช่สัญญาณนอก")
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.7)
+        self.wait(1.6)
+        self.fade_out_all(run_time=0.9)
+
+
+class HV20_Counterbalance(SafeScene):
+    """Page 20 — Counterbalance Valve."""
+
+    def construct(self):
+        ttl = title("Counterbalance Valve")
+        pref = page_ref("หน้า 20 · Hydraulic Valves")
+        self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
+
+        cyl = Rectangle(width=1.0, height=1.8, fill_color=METAL, fill_opacity=0.3,
+                         stroke_color=METAL, stroke_width=2).move_to([2.6, 0.1, 0])
+        piston_rod = Rectangle(width=0.35, height=1.0, fill_color=METAL, fill_opacity=0.9,
+                                stroke_color=WHITE, stroke_width=2).move_to([2.6, -1.3, 0])
+        load = Text("โหลด", font_size=14, color=GRAYTXT).move_to([2.6, -2.0, 0])
+        valve_body = Rectangle(width=1.6, height=1.4, fill_color=METAL, fill_opacity=0.3,
+                                stroke_color=METAL, stroke_width=2).move_to([-1.2, -0.9, 0])
+        check = Circle(radius=0.12, color=WHITE, stroke_width=2).move_to([-1.55, -0.9, 0])
+        spring2 = spring_zigzag(-0.9, -0.5, -0.9, coils=4, amp=0.1)
+        spool2 = Rectangle(width=0.35, height=0.4, fill_color=METAL, fill_opacity=0.9,
+                            stroke_color=WHITE, stroke_width=2).move_to([-0.7, -0.9, 0])
+
+        to_valve = Arrow([-4.4, -0.9, 0], [-2.0, -0.9, 0], color=GRAYTXT, buff=0, stroke_width=5,
+                          max_tip_length_to_length_ratio=0.25)
+        to_valve_lbl = Text("ไป/มาจาก directional valve", font_size=13, color=GRAYTXT).move_to([-3.3, -1.6, 0])
+        up_pipe = Line([-1.2, -0.2, 0], [-1.2, 0.4, 0], color=METAL, stroke_width=3)
+        to_cyl = Line([-1.2, 0.4, 0], [2.1, 0.4, 0], color=METAL, stroke_width=3)
+
+        self.play(Create(cyl), FadeIn(piston_rod), FadeIn(load),
+                   Create(valve_body), Create(check), Create(spring2), FadeIn(spool2),
+                   Create(up_pipe), Create(to_cyl), GrowArrow(to_valve), FadeIn(to_valve_lbl),
+                   run_time=1.6)
+
+        cap0 = caption_top("กันโหลดหนักตกกระแทกตอนกระบอกสูบแนวตั้งลดโหลดลง")
+        self.play(FadeIn(cap0), run_time=0.6)
+        self.wait(1.0)
+        self.play(FadeOut(cap0), run_time=0.4)
+
+        cap1 = caption_top("Raising: check valve เปิดอิสระ — น้ำมันไหลเข้ากระบอกสูบไม่มีแรงต้าน")
+        self.play(FadeIn(cap1), run_time=0.6)
+        dotsR = VGroup(*[Dot(radius=0.06, color=OK) for _ in range(3)])
+        pathR = VMobject().set_points_as_corners([[-3.9, -0.9, 0], [-1.55, -0.9, 0], [-1.2, -0.2, 0], [-1.2, 0.4, 0], [2.1, 0.4, 0], [2.6, 0.4, 0]])
+        animsR = [MoveAlongPath(d, pathR, rate_func=linear, run_time=1.6) for d in dotsR]
+        self.play(LaggedStart(*animsR, lag_ratio=0.25))
+        self.play(FadeOut(dotsR), FadeOut(cap1), run_time=0.4)
+
+        cap2 = caption_top("Lowering: check valve ปิด — น้ำมันขาออกต้องดันผ่านวาล์วปรับ back-pressure ก่อน")
+        self.play(FadeIn(cap2), run_time=0.6)
+        dotsL = VGroup(*[Dot(radius=0.06, color=RESIST) for _ in range(3)])
+        pathL = VMobject().set_points_as_corners([[2.6, 0.4, 0], [-1.2, 0.4, 0], [-1.2, -0.2, 0], [-0.7, -0.9, 0], [-3.9, -0.9, 0]])
+        animsL = [MoveAlongPath(d, pathL, rate_func=linear, run_time=1.8) for d in dotsL]
+        self.play(LaggedStart(*animsL, lag_ratio=0.25))
+        self.play(FadeOut(dotsL), run_time=0.3)
+
+        cap3 = caption_top("แรงต้านนี้ค้ำโหลดไว้ไม่ให้ตกเร็วเกิน — เทียบได้กับ cylinder cushion ใน W05")
+        self.play(FadeOut(cap2), run_time=0.3)
+        self.play(FadeIn(cap3), run_time=0.6)
         self.wait(1.6)
         self.fade_out_all(run_time=0.9)
