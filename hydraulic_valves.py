@@ -66,6 +66,7 @@ def build_shuttle_symbol(center=ORIGIN, box_w=2.8, box_h=1.6):
     circle = Circle(radius=0.22, color=WHITE, stroke_width=2.5).move_to([cx - 0.45, y, 0])
     shuttle_arc = CurvedArrow([cx - 0.63, y + 0.14, 0], [cx - 0.27, y + 0.14, 0],
                                angle=-TAU / 4, color=WHITE, stroke_width=2)
+    shuttle_arc.tip.scale(0.35, about_point=shuttle_arc.get_end())
     mid_line = Line([cx - 0.23, y, 0], [cx + 0.05, y, 0], color=WHITE, stroke_width=2.5)
     dot = Dot([cx + 0.05, y, 0], radius=0.05, color=WHITE)
     down_line = Line([cx + 0.05, y, 0], [cx + 0.05, cy - box_h / 2, 0], color=WHITE, stroke_width=2.5)
