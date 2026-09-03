@@ -6,7 +6,7 @@ from mlib import *
 import numpy as np
 
 SCALE2 = 1.55
-A_PT = np.array([-5.8, 1.7, 0])
+A_PT = np.array([-4.2, 1.7, 0])
 DIRV = np.array([np.sin(PI / 3), -np.cos(PI / 3), 0])          # (0.8660, -0.5)
 NRM = np.array([0.5, np.sin(PI / 3), 0])                        # perp to DIRV (rotate +90)
 AC_LEN, AB_LEN, CD_LEN = 0.8660, 1.126, 0.5
@@ -43,7 +43,11 @@ def fixed_support(center, up=True, size=0.22):
     return VGroup(tri, ground, pin_dot)
 
 
-def build_diagram():
+def build_diagram(show_angle_construction=True):
+    """show_angle_construction=False drops the 60 deg vertical-reference arc/label once the
+    geometry is already established (clips 03+), since that corner is needed for velocity
+    vectors from then on and the construction arc collided with them (found via frame check,
+    2026-09-04)."""
     rod_ab = Line(A_PT, B_PT, color=METAL, stroke_width=6)
     rod_cd = Line(C_PT, D_PT, color=METAL, stroke_width=6)
     a_sup = fixed_support(A_PT, up=True)
@@ -56,29 +60,33 @@ def build_diagram():
     c_lbl = Text("C", font_size=16, color=WHITE).next_to(C_PT, UP, buff=0.12)
     d_lbl = Text("D", font_size=16, color=WHITE).next_to(D_PT, DOWN, buff=0.32)
 
-    vert_dash = DashedLine(A_PT, A_PT + DOWN * 1.3, color=GRAYTXT, stroke_width=2)
-    ang_arc = Arc(radius=0.55, start_angle=-90 * DEGREES, angle=60 * DEGREES,
-                  arc_center=A_PT, color=GRAYTXT, stroke_width=2)
-    ang_lbl = Text("60°", font_size=15, color=GRAYTXT).move_to(
-        A_PT + np.array([0.42, -0.62, 0]))
-
     dim_v = DashedLine(A_PT, [C_PT[0], A_PT[1], 0], color=GRAYTXT, stroke_width=2)
     dim_h = DashedLine([C_PT[0], A_PT[1], 0], C_PT, color=GRAYTXT, stroke_width=2)
     dim_lbl = Text("0.75 m", font_size=14, color=GRAYTXT).next_to(dim_v, UP, buff=0.1)
 
     cd_lbl = Text("0.5 m", font_size=14, color=GRAYTXT).next_to(rod_cd, RIGHT, buff=0.15)
 
-    omega_arc = Arc(radius=0.42, start_angle=110 * DEGREES, angle=-150 * DEGREES,
+    # sweeps only the upper-left quadrant (145 down to 15 deg) so it never crosses the
+    # rightward dim_v line (0 deg) or the rod (-30 deg) -- both pass through A too.
+    omega_arc = Arc(radius=0.42, start_angle=145 * DEGREES, angle=-130 * DEGREES,
                      arc_center=A_PT, color=OMEGA_AB_COL, stroke_width=4)
     omega_arc.add_tip(tip_length=0.14, tip_width=0.11)
     omega_lbl = Text("omega_AB = 3 rad/s", font_size=14, color=OMEGA_AB_COL).move_to(
-        A_PT + np.array([-1.55, 0.55, 0]))
+        A_PT + np.array([-1.35, 0.6, 0]))
     alpha_lbl = Text("alpha_AB = 5 rad/s^2 (ไม่ใช้ข้อนี้)", font_size=13, color=GRAYTXT).move_to(
-        A_PT + np.array([-1.55, 0.25, 0]))
+        A_PT + np.array([-1.35, 0.3, 0]))
 
     grp = VGroup(rod_ab, rod_cd, a_sup, d_sup, c_dot, b_dot, a_lbl, b_lbl, c_lbl, d_lbl,
-                 vert_dash, ang_arc, ang_lbl, dim_v, dim_h, dim_lbl, cd_lbl,
-                 omega_arc, omega_lbl, alpha_lbl)
+                 dim_v, dim_h, dim_lbl, cd_lbl, omega_arc, omega_lbl, alpha_lbl)
+
+    if show_angle_construction:
+        vert_dash = DashedLine(A_PT, A_PT + DOWN * 1.3, color=GRAYTXT, stroke_width=2)
+        ang_arc = Arc(radius=0.55, start_angle=-90 * DEGREES, angle=60 * DEGREES,
+                      arc_center=A_PT, color=GRAYTXT, stroke_width=2)
+        ang_lbl = Text("60°", font_size=15, color=GRAYTXT).move_to(
+            A_PT + np.array([0.42, -0.62, 0]))
+        grp.add(vert_dash, ang_arc, ang_lbl)
+
     return grp
 
 
@@ -172,7 +180,7 @@ class Q2_03_Step1(SafeScene):
         pref = page_ref("โจทย์ 2 · ขั้น 3")
         self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
 
-        diagram = build_diagram()
+        diagram = build_diagram(show_angle_construction=False)
         self.play(FadeIn(diagram), run_time=1.0)
 
         cap0 = caption_top("สูตรทั่วไปก่อน: v_(C บน AB) = omega_AB x r_(C/A)")
@@ -184,7 +192,7 @@ class Q2_03_Step1(SafeScene):
         self.play(FadeIn(cap1), run_time=0.8)
         self.wait(1.8)
 
-        v_cab = Arrow(C_PT, C_PT + V_CAB_DIR * 1.3, color=VCAB_COL, buff=0, stroke_width=6,
+        v_cab = Arrow(C_PT, C_PT + V_CAB_DIR * 0.9, color=VCAB_COL, buff=0, stroke_width=6,
                       max_tip_length_to_length_ratio=0.25)
         v_cab_lbl = Text("v_(C บน AB) = 2.598 m/s", font_size=15, color=VCAB_COL).next_to(
             v_cab, RIGHT, buff=0.15)
@@ -204,7 +212,7 @@ class Q2_04_Step2(SafeScene):
         pref = page_ref("โจทย์ 2 · ขั้น 4")
         self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
 
-        diagram = build_diagram()
+        diagram = build_diagram(show_angle_construction=False)
         self.play(FadeIn(diagram), run_time=1.0)
 
         cap0 = caption_top("C เป็นจุดบนแขน DC ด้วย — DC หมุนรอบ D คงที่")
@@ -232,7 +240,7 @@ class Q2_05_Step3(SafeScene):
         pref = page_ref("โจทย์ 2 · ขั้น 5")
         self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
 
-        diagram = build_diagram()
+        diagram = build_diagram(show_angle_construction=False)
         self.play(FadeIn(diagram), run_time=1.0)
 
         eq0 = MathTex(r"\vec{v}_C = \vec{v}_{(C\,on\,AB)} + \vec{v}_{slip}",
@@ -244,12 +252,12 @@ class Q2_05_Step3(SafeScene):
         self.play(FadeIn(cap0), run_time=0.8)
         self.wait(1.8)
 
-        v_cab = Arrow(C_PT, C_PT + V_CAB_DIR * 1.3, color=VCAB_COL, buff=0, stroke_width=5,
+        v_cab = Arrow(C_PT, C_PT + V_CAB_DIR * 0.9, color=VCAB_COL, buff=0, stroke_width=5,
                       max_tip_length_to_length_ratio=0.25)
-        v_slip = Arrow(C_PT + V_CAB_DIR * 1.3, C_PT + V_CAB_DIR * 1.3 + V_SLIP_DIR * 1.7,
+        v_slip = Arrow(C_PT + V_CAB_DIR * 0.9, C_PT + V_CAB_DIR * 0.9 + V_SLIP_DIR * 1.1,
                        color=VSLIP_COL, buff=0, stroke_width=5,
                        max_tip_length_to_length_ratio=0.2)
-        v_c = Arrow(C_PT, C_PT + V_C_DIR * V_C_MAG * 0.23, color=VC_COL, buff=0, stroke_width=6,
+        v_c = Arrow(C_PT, C_PT + V_C_DIR * 1.2, color=VC_COL, buff=0, stroke_width=6,
                     max_tip_length_to_length_ratio=0.18)
         self.play(GrowArrow(v_cab), run_time=0.6)
         self.play(GrowArrow(v_slip), run_time=0.7)
