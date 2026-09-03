@@ -373,7 +373,8 @@ class Q1_05_RodIC(SafeScene):
         # Sideways, not DOWN/UP: the perpendicular construction lines added below
         # are vertical through these exact x-positions, so DOWN/UP placement
         # would sit the label right on top of its own line regardless of buff.
-        a_lbl = Text("A", font_size=16, color=WHITE).next_to(a_dot, LEFT, buff=0.15)
+        # up-left of A: down/left is v_a's arrow path, straight up is perp_a
+        a_lbl = Text("A", font_size=16, color=WHITE).move_to(a2 + np.array([-0.35, 0.3, 0]))
         b_lbl = Text("B", font_size=16, color=WHITE).next_to(b_dot, RIGHT, buff=0.15)
         self.play(Create(rod2), FadeIn(a_dot), FadeIn(b_dot), FadeIn(a_lbl), FadeIn(b_lbl),
                    run_time=0.9)
