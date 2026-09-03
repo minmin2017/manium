@@ -93,8 +93,7 @@ def build_mechanism():
     omega_arc = CurvedArrow(cm(-2.6, 1.2), cm(-2.6, -1.2), angle=-TAU / 5, color=GIVEN_OMEGA,
                              stroke_width=4)
     omega_arc.tip.scale(0.45, about_point=omega_arc.get_end())
-    omega_lbl = Text("omega = 6 rad/s", font_size=15, color=GIVEN_OMEGA).move_to(
-        cm(*O_CM) + np.array([-1.55, 1.55, 0]))
+    omega_lbl = Text("omega = 6 rad/s", font_size=15, color=GIVEN_OMEGA).move_to([-3.7, -0.5, 0])
 
     parts = dict(gear=gear, rack=rack, o_dot=o_dot, a_hub=a_hub, b_collar=b_collar,
                  b_pin=b_pin, rod=rod, rail=rail, wall_l=wall_l, wall_r=wall_r,
@@ -105,9 +104,14 @@ def build_mechanism():
 
 
 def inset_of(full_group):
-    """Persistent shrunk copy for the corner, per visual-for-teach's layout rule."""
-    inset = full_group.copy().scale(0.35, about_point=cm(*O_CM))
-    inset.move_to([-5.4, -0.6, 0])
+    """Persistent shrunk copy for the corner, per visual-for-teach's layout rule.
+    Scale/position chosen from the mechanism's REAL bounding box (rack + both
+    rail end-supports, not just the gear) -- an earlier 0.35/[-5.4,-0.6] version
+    left only 0.07 units to the frame edge because the rail's supports extend
+    well past the gear on both sides; the linter can't catch this (it only
+    edge-checks text, not graphics), so it was verified by hand here instead."""
+    inset = full_group.copy().scale(0.30, about_point=cm(*O_CM))
+    inset.move_to([-5.2, -0.6, 0])
     return inset
 
 
@@ -124,19 +128,21 @@ class Q1_00_Setup(SafeScene):
                    FadeIn(p["o_dot"]), run_time=1.8)
         self.play(Create(p["omega_arc"]), FadeIn(p["omega_lbl"]), run_time=0.8)
 
-        # name the parts, per visual-for-teach clip-0 contract
+        # Name the parts, per visual-for-teach clip-0 contract. All four labels
+        # sit in the one strip of the frame nothing else occupies (above the
+        # rail, below caption_top) so leader lines can reach any part without
+        # the label itself ever landing on the mechanism's own geometry.
         labels = [
-            ("O = ศูนย์เฟือง (เคลื่อนที่ตามเฟือง)", cm(*O_CM) + np.array([1.3, -0.15, 0])),
-            ("A = หมุดเยื้องศูนย์ (ติดกับเฟือง)", cm(*A_CM) + np.array([-1.9, -0.35, 0])),
-            ("B = สไลเดอร์ในรางแนวนอน", cm(*B_CM) + np.array([0.2, 0.55, 0])),
-            ("จุดสัมผัสเฟือง-แร็ค", cm(*C_CM) + np.array([1.7, -0.15, 0])),
+            ("A = หมุดเยื้องศูนย์ (ติดกับเฟือง)", cm(*A_CM), [-4.9, 1.7, 0]),
+            ("O = ศูนย์เฟือง (เคลื่อนที่ตามเฟือง)", cm(*O_CM), [-2.1, 1.7, 0]),
+            ("จุดสัมผัสเฟือง-แร็ค", cm(*C_CM), [0.7, 1.7, 0]),
+            ("B = สไลเดอร์ในรางแนวนอน", cm(*B_CM), [3.5, 1.7, 0]),
         ]
         leaders = VGroup()
         texts = VGroup()
-        pts = [cm(*O_CM), cm(*A_CM), cm(*B_CM), cm(*C_CM)]
-        for (txt, pos), pt in zip(labels, pts):
-            t = Text(txt, font_size=14, color=WHITE).move_to(pos)
-            leaders.add(Line(pt, t.get_center(), color=GRAYTXT, stroke_width=1.2))
+        for txt, pt, lbl_pos in labels:
+            t = fit_width(Text(txt, font_size=14, color=WHITE).move_to(lbl_pos), 2.9)
+            leaders.add(Line(pt, t.get_bottom() + DOWN * 0.05, color=GRAYTXT, stroke_width=1.2))
             texts.add(t)
         self.play(Create(leaders), FadeIn(texts), run_time=1.2)
         self.wait(1.3)
@@ -216,8 +222,8 @@ class Q1_02_Trap(SafeScene):
         self.wait(1.3)
 
         wrong_line = Line(cm(*O_CM), cm(*A_CM), color=TRAP_COL, stroke_width=5)
-        wrong_lbl = Text("v_A = omega x OA = 6 x 2 = 12 cm/s ?", font_size=15, color=TRAP_COL)
-        wrong_lbl.move_to(cm(*O_CM) + np.array([1.9, -1.1, 0]))
+        wrong_lbl = fit_width(Text("v_A = omega x OA = 6 x 2 = 12 cm/s ?", font_size=15,
+                                    color=TRAP_COL), 4.5).move_to([0.5, 1.9, 0])
         self.play(Create(wrong_line), FadeIn(wrong_lbl), run_time=1.0)
         self.wait(1.6)
 
@@ -237,8 +243,8 @@ class Q1_02_Trap(SafeScene):
         self.play(FadeOut(cap1), run_time=0.3)
         self.play(FadeIn(cap2), run_time=0.7)
         self.wait(1.7)
-        preview = Text("คำตอบจริง: 6 cm/s (ครึ่งเดียวของ 12)", font_size=15, color=VA_COL)
-        preview.move_to(cm(*O_CM) + np.array([2.0, -1.6, 0]))
+        preview = fit_width(Text("คำตอบจริง: 6 cm/s (ครึ่งเดียวของ 12)", font_size=15,
+                                  color=VA_COL), 4.5).move_to([0.5, 1.3, 0])
         self.play(FadeIn(preview), run_time=0.6)
         self.wait(1.5)
 
@@ -319,8 +325,11 @@ class Q1_04_VelocityA(SafeScene):
         self.wait(1.5)
 
         ac_line = Line(c2, a2, color=IC_COL, stroke_width=4)
-        ac_lbl = Text("R - OA = 3 - 2 = 1 cm", font_size=15, color=IC_COL).next_to(ac_line, LEFT, buff=0.2)
-        self.play(Create(ac_line), FadeIn(ac_lbl), run_time=0.9)
+        ac_lbl = Text("R - OA = 3 - 2 = 1 cm", font_size=15, color=IC_COL)
+        ac_lbl.move_to([cx + 3.3, (c2[1] + a2[1]) / 2, 0])
+        ac_leader = Line(ac_line.get_center(), ac_lbl.get_left() + LEFT * 0.1,
+                          color=IC_COL, stroke_width=1.2)
+        self.play(Create(ac_line), Create(ac_leader), FadeIn(ac_lbl), run_time=0.9)
         self.wait(1.6)
 
         cap1 = caption_top("v_A = omega x (ระยะ IC-A) = 6 x 1 = 6 cm/s")
@@ -361,25 +370,31 @@ class Q1_05_RodIC(SafeScene):
         rod2 = Line(a2, b2, color=METAL, stroke_width=6)
         a_dot = Dot(a2, radius=0.07, color=WHITE)
         b_dot = Dot(b2, radius=0.07, color=WHITE)
-        a_lbl = Text("A", font_size=16, color=WHITE).next_to(a_dot, DOWN, buff=0.12)
-        b_lbl = Text("B", font_size=16, color=WHITE).next_to(b_dot, UP, buff=0.12)
+        # Sideways, not DOWN/UP: the perpendicular construction lines added below
+        # are vertical through these exact x-positions, so DOWN/UP placement
+        # would sit the label right on top of its own line regardless of buff.
+        a_lbl = Text("A", font_size=16, color=WHITE).next_to(a_dot, LEFT, buff=0.15)
+        b_lbl = Text("B", font_size=16, color=WHITE).next_to(b_dot, RIGHT, buff=0.15)
         self.play(Create(rod2), FadeIn(a_dot), FadeIn(b_dot), FadeIn(a_lbl), FadeIn(b_lbl),
                    run_time=0.9)
 
         v_a = Arrow(a2, a2 + LEFT * 1.1, color=VA_COL, buff=0, stroke_width=6,
                     max_tip_length_to_length_ratio=0.28)
-        va_lbl = Text("v_A แนวนอน (เพิ่งหา)", font_size=14, color=VA_COL).next_to(v_a, DOWN, buff=0.12)
+        va_lbl = Text("v_A แนวนอน (เพิ่งหา)", font_size=14, color=VA_COL).move_to([-3.1, -1.9, 0])
         v_b_dir = Arrow(b2, b2 + LEFT * 1.1, color=GRAYTXT, buff=0, stroke_width=4,
                         max_tip_length_to_length_ratio=0.28)
-        vb_lbl = Text("v_B แนวนอนแน่ (รางบังคับ)", font_size=14, color=GRAYTXT).next_to(v_b_dir, UP, buff=0.12)
+        vb_lbl = Text("v_B แนวนอนแน่ (รางบังคับ)", font_size=14, color=GRAYTXT).move_to([1.7, 1.9, 0])
         self.play(GrowArrow(v_a), FadeIn(va_lbl), GrowArrow(v_b_dir), FadeIn(vb_lbl), run_time=1.0)
 
         cap0 = caption_top("หา IC ของ AB: ลากเส้นตั้งฉากกับความเร็วที่ A และที่ B แล้วดูจุดตัด")
         self.play(FadeIn(cap0), run_time=0.7)
         self.wait(1.6)
 
+        # perp_b's UP extent is capped at 0.9 (not the symmetric 1.6 perp_a uses)
+        # because b2 already sits high (y=1.344) -- a symmetric +-1.6 would push
+        # its top to y=2.94, past caption_top's zone at y=2.72.
         perp_a = DashedLine(a2 + UP * 1.6, a2 + DOWN * 1.6, color=IC_COL, stroke_width=3)
-        perp_b = DashedLine(b2 + UP * 1.6, b2 + DOWN * 1.6, color=IC_COL, stroke_width=3)
+        perp_b = DashedLine(b2 + UP * 0.9, b2 + DOWN * 1.6, color=IC_COL, stroke_width=3)
         self.play(Create(perp_a), Create(perp_b), run_time=1.0)
         self.wait(1.0)
 
