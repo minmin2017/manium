@@ -1058,7 +1058,7 @@ class HV20_Counterbalance(SafeScene):
         throttle = Rectangle(width=0.34, height=0.42, fill_color=METAL, fill_opacity=0.95,
                               stroke_color=WHITE, stroke_width=2).move_to([-1.1, -1.35, 0])
         thr_spring = spring_zigzag(-0.93, -0.68, -1.35, coils=3, amp=0.09)
-        thr_lbl = Text("throttle (ปกติปิด)", font_size=12, color=GRAYTXT).move_to([1.35, -1.15, 0])
+        thr_lbl = Text("throttle (ปกติปิด)", font_size=12, color=GRAYTXT).move_to([-1.1, -0.72, 0])
         # lower path: check valve, free flow toward the cylinder only
         chk_line_L = Line([-2.2, -2.05, 0], [-1.35, -2.05, 0], color=METAL, stroke_width=2)
         chk_line_R = Line([-0.85, -2.05, 0], [0.0, -2.05, 0], color=METAL, stroke_width=2)
