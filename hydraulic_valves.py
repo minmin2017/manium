@@ -412,19 +412,25 @@ class HV07_ThreeWay(SafeScene):
 
 def four_way_housing(y=-1.8):
     """Shared 4-port sleeve (A,P,B,T along one bore) used by pages 8-11.
-    Port order along the bore: A(top,-1.8) P(bottom,-0.6) B(top,0.6) T(bottom,1.8)."""
-    top_1 = Rectangle(width=1.1, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([-2.25, y + 0.4, 0])
-    top_2 = Rectangle(width=1.0, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([-0.65, y + 0.4, 0])
-    top_3 = Rectangle(width=1.0, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([1.15, y + 0.4, 0])
-    bot_1 = Rectangle(width=1.4, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([-1.45, y - 0.7, 0])
-    bot_2 = Rectangle(width=1.0, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([0.15, y - 0.7, 0])
-    bot_3 = Rectangle(width=0.9, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                       stroke_color=METAL, stroke_width=2).move_to([2.45, y - 0.7, 0])
+    Port order along the bore: A(top,-1.8) P(bottom,-0.6) B(top,0.6) T(bottom,1.8).
+    Top/bottom walls are each ONE continuous strip of metal with a gap ONLY where
+    a stem passes through it — segment widths below are derived exactly from the
+    bore edges and stem edges so there is no unintended hole between segments
+    (a real coordinate bug, not a style choice — confirmed from a rendered frame
+    that showed the wall pieces floating apart with visible gaps between them)."""
+    BORE_L, BORE_R = -2.9, 2.9
+    top_1 = Rectangle(width=1.0, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                       stroke_color=METAL, stroke_width=2).move_to([-2.4, y + 0.4, 0])
+    top_2 = Rectangle(width=2.2, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                       stroke_color=METAL, stroke_width=2).move_to([-0.6, y + 0.4, 0])
+    top_3 = Rectangle(width=2.2, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                       stroke_color=METAL, stroke_width=2).move_to([1.8, y + 0.4, 0])
+    bot_1 = Rectangle(width=2.2, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                       stroke_color=METAL, stroke_width=2).move_to([-1.8, y - 0.7, 0])
+    bot_2 = Rectangle(width=2.2, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                       stroke_color=METAL, stroke_width=2).move_to([0.6, y - 0.7, 0])
+    bot_3 = Rectangle(width=1.0, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                       stroke_color=METAL, stroke_width=2).move_to([2.4, y - 0.7, 0])
     stem_A = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
                         stroke_color=METAL, stroke_width=2).move_to([-1.8, y + 1.05, 0])
     stem_B = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
@@ -433,7 +439,12 @@ def four_way_housing(y=-1.8):
                         stroke_color=METAL, stroke_width=2).move_to([-0.6, y - 1.1, 0])
     stem_T = Rectangle(width=0.2, height=0.6, fill_color=METAL, fill_opacity=0.35,
                         stroke_color=METAL, stroke_width=2).move_to([1.8, y - 1.1, 0])
-    housing = VGroup(top_1, top_2, top_3, bot_1, bot_2, bot_3, stem_A, stem_B, stem_P, stem_T)
+    end_cap_L = Rectangle(width=0.15, height=0.8, fill_color=METAL, fill_opacity=0.35,
+                           stroke_color=METAL, stroke_width=2).move_to([BORE_L - 0.075, y - 0.15, 0])
+    end_cap_R = Rectangle(width=0.15, height=0.8, fill_color=METAL, fill_opacity=0.35,
+                           stroke_color=METAL, stroke_width=2).move_to([BORE_R + 0.075, y - 0.15, 0])
+    housing = VGroup(top_1, top_2, top_3, bot_1, bot_2, bot_3, stem_A, stem_B, stem_P, stem_T,
+                      end_cap_L, end_cap_R)
 
     a_top = Arrow([-1.8, y + 1.65, 0], [-1.8, y + 2.4, 0], color=OK, buff=0, stroke_width=5,
                   max_tip_length_to_length_ratio=0.3)
@@ -694,30 +705,34 @@ class HV14_Title(SafeScene):
 
 def branch_t_body(y=-1.8, branch="down"):
     """T-body: horizontal bore (inlet left / outlet right) + a branch stem
-    (up or down) at center — shared shape for the relief/unloading/sequence family."""
-    top_wall_L = Rectangle(width=2.95, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                            stroke_color=METAL, stroke_width=2).move_to([-1.825, y + 0.4, 0])
-    top_wall_R = Rectangle(width=2.95, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                            stroke_color=METAL, stroke_width=2).move_to([1.825, y + 0.4, 0])
-    bottom_wall_L = Rectangle(width=2.95, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                               stroke_color=METAL, stroke_width=2).move_to([-1.825, y - 0.4, 0])
-    bottom_wall_R = Rectangle(width=2.95, height=0.3, fill_color=METAL, fill_opacity=0.35,
-                               stroke_color=METAL, stroke_width=2).move_to([1.825, y - 0.4, 0])
+    (up or down) at center — shared shape for the relief/unloading/sequence family.
+    The wall on the side WITHOUT the stem must stay fully solid (no gap) — an
+    earlier version left both top and bottom with a gap regardless of branch
+    direction, which showed up as a real hole in a rendered frame."""
+    BORE_L, BORE_R = -3.3, 3.3
+    top_wall_L = Rectangle(width=3.3, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                            stroke_color=METAL, stroke_width=2).move_to([-1.65, y + 0.4, 0])
+    top_wall_R = Rectangle(width=3.3, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                            stroke_color=METAL, stroke_width=2).move_to([1.65, y + 0.4, 0])
+    bottom_wall_L = Rectangle(width=3.3, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                               stroke_color=METAL, stroke_width=2).move_to([-1.65, y - 0.4, 0])
+    bottom_wall_R = Rectangle(width=3.3, height=0.3, fill_color=METAL, fill_opacity=0.35,
+                               stroke_color=METAL, stroke_width=2).move_to([1.65, y - 0.4, 0])
     if branch == "up":
         stem_L = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
                             stroke_color=METAL, stroke_width=2).move_to([-0.45, y + 1.05, 0])
         stem_R = Rectangle(width=0.2, height=1.3, fill_color=METAL, fill_opacity=0.35,
                             stroke_color=METAL, stroke_width=2).move_to([0.45, y + 1.05, 0])
-        top_wall_L.stretch_to_fit_width(2.95 - 0.2).move_to([-1.575, y + 0.4, 0])
-        top_wall_R.stretch_to_fit_width(2.95 - 0.2).move_to([1.575, y + 0.4, 0])
+        top_wall_L.stretch_to_fit_width(BORE_R + 0.55).move_to([(BORE_L - 0.55) / 2, y + 0.4, 0])
+        top_wall_R.stretch_to_fit_width(BORE_R - 0.55).move_to([(0.55 + BORE_R) / 2, y + 0.4, 0])
         walls = VGroup(top_wall_L, top_wall_R, bottom_wall_L, bottom_wall_R, stem_L, stem_R)
     else:
         stem_L = Rectangle(width=0.2, height=0.7, fill_color=METAL, fill_opacity=0.35,
                             stroke_color=METAL, stroke_width=2).move_to([-0.45, y - 0.75, 0])
         stem_R = Rectangle(width=0.2, height=0.7, fill_color=METAL, fill_opacity=0.35,
                             stroke_color=METAL, stroke_width=2).move_to([0.45, y - 0.75, 0])
-        bottom_wall_L.stretch_to_fit_width(2.95 - 0.2).move_to([-1.575, y - 0.4, 0])
-        bottom_wall_R.stretch_to_fit_width(2.95 - 0.2).move_to([1.575, y - 0.4, 0])
+        bottom_wall_L.stretch_to_fit_width(BORE_R - 0.55).move_to([(BORE_L - 0.55) / 2, y - 0.4, 0])
+        bottom_wall_R.stretch_to_fit_width(BORE_R - 0.55).move_to([(0.55 + BORE_R) / 2, y - 0.4, 0])
         walls = VGroup(top_wall_L, top_wall_R, bottom_wall_L, bottom_wall_R, stem_L, stem_R)
     return walls
 
