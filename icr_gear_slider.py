@@ -90,9 +90,18 @@ def build_mechanism():
     wall_l = hatch_block([cm(*O_CM)[0] - 2.6, rail_y, 0])
     wall_r = hatch_block([cm(*O_CM)[0] + 5.6, rail_y, 0])
 
-    omega_arc = CurvedArrow(cm(-2.6, 1.2), cm(-2.6, -1.2), angle=-TAU / 5, color=GIVEN_OMEGA,
-                             stroke_width=4)
-    omega_arc.tip.scale(0.45, about_point=omega_arc.get_end())
+    # A real Arc centered exactly on O (not an arbitrary two-point CurvedArrow,
+    # which bulged off the circle and cut across the teeth). Radius clears the
+    # gear's tooth tip (r_out = 3*SCALE*1.08 = 1.458) with margin; sweep sits on
+    # the left side, 140 deg to 220 deg, so it hugs the rim the way the source
+    # photo's arrow does. add_tip() orients the head to the path's own tangent
+    # at 220 deg, which for CCW motion points down-and-in -- matches the given
+    # "left side of gear moving down = CCW" reading, and looks continuous with
+    # the arc instead of a separately-aimed arrowhead.
+    r_arc = 3 * SCALE * 1.08 + 0.28
+    omega_arc = Arc(radius=r_arc, start_angle=140 * DEGREES, angle=80 * DEGREES,
+                     arc_center=cm(*O_CM), color=GIVEN_OMEGA, stroke_width=4)
+    omega_arc.add_tip(tip_length=0.18, tip_width=0.14)
     omega_lbl = Text("omega = 6 rad/s", font_size=15, color=GIVEN_OMEGA).move_to([-3.7, -0.5, 0])
 
     parts = dict(gear=gear, rack=rack, o_dot=o_dot, a_hub=a_hub, b_collar=b_collar,
