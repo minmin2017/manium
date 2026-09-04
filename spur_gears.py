@@ -75,10 +75,11 @@ class G01_CoverAndToc(SafeScene):
     def construct(self):
         head = Text("บทที่ 4 -- เฟืองตรง (Spur Gears)", font_size=38, color=WHITE)
         sub = Text("ส่งกำลังระหว่างเพลาขนานกัน 2 เพลา", font_size=24, color=GRAYTXT)
-        VGroup(head, sub).arrange(DOWN, buff=0.35).move_to(UP * 1.6)
+        VGroup(head, sub).arrange(DOWN, buff=0.35).move_to(UP * 0.3)
         self.play(FadeIn(head, shift=UP * 0.4))
         self.play(FadeIn(sub, shift=UP * 0.2))
-        self.wait(0.6)
+        self.wait(1.0)
+        self.play(FadeOut(head), FadeOut(sub))
 
         cap = caption_top("6 หัวข้อของบทนี้", size=24)
         self.play(FadeIn(cap))
@@ -141,35 +142,38 @@ class G02_WhatIsSpurGear(SafeScene):
         self.play(FadeIn(cap2))
 
         axes = Axes(x_range=[0, TAU, PI / 2], y_range=[0, 3.0, 1.0],
-                    x_length=8.6, y_length=3.6,
+                    x_length=7.6, y_length=2.7,
                     axis_config={"color": GRAYTXT, "stroke_width": 2,
                                  "include_tip": False})
-        axes.move_to(DOWN * 0.75)
-        xlab = Text("เวลา (1 รอบขบฟัน)", font_size=17, color=GRAYTXT).next_to(
-            axes.c2p(TAU, 0), DOWN, buff=0.35)
-        ylab = Text("อัตราทด ณ ขณะนั้น", font_size=17, color=GRAYTXT).next_to(
-            axes, LEFT, buff=0.25).rotate(PI / 2)
+        axes.move_to(LEFT * 1.1 + DOWN * 0.55)
+        xlab = Text("เวลา (1 รอบขบฟัน)", font_size=16, color=GRAYTXT).next_to(
+            axes.c2p(TAU, 0), DOWN, buff=0.55)
+        ylab = Text("อัตราทด ณ ขณะนั้น", font_size=16, color=GRAYTXT).next_to(
+            axes, LEFT, buff=0.3).rotate(PI / 2)
         self.play(Create(axes), FadeIn(xlab), FadeIn(ylab))
 
         avg_line = axes.plot(lambda x: 1.667, color=PITCH_C, stroke_width=4)
-        avg_lbl = Text("เฉลี่ย = N2/N1 (คงที่เสมอ)", font_size=18, color=PITCH_C).next_to(
-            axes.c2p(TAU * 0.62, 1.667), UP, buff=0.18)
-        self.play(Create(avg_line), FadeIn(avg_lbl))
-        self.wait(0.8)
-
         bad_curve = axes.plot(lambda x: 1.667 + 0.55 * np.sin(3 * x), color=WARN,
                                stroke_width=4)
-        bad_lbl = Text("ขณะหนึ่ง (ถ้ารูปฟันไม่ดี) -- กระตุก", font_size=18,
-                        color=WARN).next_to(axes.c2p(TAU * 0.22, 2.35), UP, buff=0.12)
-        illus = Text("(กราฟนี้คือภาพประกอบแนวคิด ไม่ใช่ข้อมูลจริง)", font_size=15,
-                      color=GRAYTXT).next_to(bad_lbl, DOWN, buff=0.08)
-        self.play(Create(bad_curve), FadeIn(bad_lbl), FadeIn(illus))
+        self.play(Create(avg_line))
+        self.play(Create(bad_curve))
+        self.wait(0.4)
+
+        legend = VGroup(
+            Text("เฉลี่ย = N2/N1 (คงที่เสมอ)", font_size=18, color=PITCH_C),
+            Text("ขณะหนึ่ง (ถ้ารูปฟันไม่ดี) -- กระตุก", font_size=18, color=WARN),
+            Text("(กราฟนี้คือภาพประกอบแนวคิด ไม่ใช่ข้อมูลจริง)", font_size=14, color=GRAYTXT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
+        legend.to_edge(RIGHT, buff=0.5).shift(UP * 0.4)
+        self.play(FadeIn(legend, shift=LEFT * 0.15))
         self.wait(1.6)
 
-        concl = Text("ฟันจำนวนเท่ากันให้อัตราทดเฉลี่ยเท่ากันเสมอ -- "
-                      "แต่รูปฟันผิดจะทำให้ขณะหนึ่งกระตุก = สั่น เสียงดัง ฟันสึก",
-                      font_size=19, color=OK).move_to([0, -3.15, 0])
-        self.play(FadeIn(concl, shift=UP * 0.15))
+        concl = Text("ฟันจำนวนเท่ากันให้อัตราทดเฉลี่ยเท่ากันเสมอ --",
+                      font_size=18, color=OK)
+        concl2 = Text("แต่รูปฟันผิดจะทำให้ขณะหนึ่งกระตุก = สั่น เสียงดัง ฟันสึก",
+                       font_size=18, color=OK)
+        concl_grp = VGroup(concl, concl2).arrange(DOWN, buff=0.1).move_to([0, -3.35, 0])
+        self.play(FadeIn(concl_grp, shift=UP * 0.15))
         self.wait(2.0)
 
 
@@ -222,24 +226,26 @@ class G07_KennedyPitchPoint(SafeScene):
         c1 = Circle(radius=R1, color=GEAR2, stroke_width=4).move_to(O1)
         c2 = Circle(radius=R2, color=GEAR3, stroke_width=4).move_to(O2)
         loc = DashedLine(O1 + LEFT * 0.5, O2 + RIGHT * 0.5, color=GRAYTXT, stroke_width=2.5)
-        lA = tag("A", O1, UP, GEAR2, 24)
-        lB = tag("B", O2, UP, GEAR3, 24)
+        lA = tag("A", O1, DOWN, GEAR2, 24, 0.22)
+        lB = tag("B", O2, DOWN, GEAR3, 24, 0.22)
         self.play(Create(loc), FadeIn(lA), FadeIn(lB))
         self.play(Create(c1), Create(c2))
         self.wait(0.6)
 
         dP = pt(P, WHITE, 0.09)
-        tP = tag("P", P, DOWN, WHITE, 26, 0.14)
+        tP = tag("P", P, RIGHT, WHITE, 26, 0.30)
         self.play(FadeIn(dP), Flash(P, color=WHITE, flash_radius=0.4), FadeIn(tP))
         self.wait(0.6)
 
         cap2 = caption_top("Kennedy: IC12(=A), IC13(=B), IC23 ต้อง collinear บนเส้นนี้", size=21)
-        self.play(FadeOut(cap), FadeIn(cap2))
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2))
         self.wait(0.8)
 
         cap3 = caption_top("หน้าที่แล้วพิสูจน์แล้วว่า contact normal ตัดเส้นนี้ที่ P พอดี "
                              "=> IC23 = P", size=21)
-        self.play(FadeOut(cap2), FadeIn(cap3))
+        self.play(FadeOut(cap2))
+        self.play(FadeIn(cap3))
         self.wait(1.0)
 
         # ---- ตารางศัพท์ -----------------------------------------------------
@@ -268,7 +274,8 @@ class G07_KennedyPitchPoint(SafeScene):
         formula = MathTex(
             r"\frac{\omega_1}{\omega_2}=\frac{R_2}{R_1}=\frac{N_2}{N_1}",
             font_size=30, color=WHITE).move_to([0, -3.15, 0])
-        self.play(FadeOut(cap4), FadeIn(formula, shift=UP * 0.15))
+        self.play(FadeOut(cap4))
+        self.play(FadeIn(formula, shift=UP * 0.15))
         self.wait(1.8)
 
         tick1.clear_updaters(); tick2.clear_updaters()
@@ -303,7 +310,7 @@ class G08_ConjugateProfiles(SafeScene):
         for i, (off, c, lb) in enumerate(zip(offsets, colors, labels)):
             Q = P + off
             direction = (Q - P) / np.linalg.norm(Q - P)
-            n_line = Line(P - direction * 0.4, Q + direction * 0.75, color=c, stroke_width=3.5)
+            n_line = Line(P, Q + direction * 0.75, color=c, stroke_width=3.5)
             dQ = pt(Q, c, 0.07)
             tQ = tag(lb, Q, direction, c, 18, 0.18)
             # ขีดสั้นตั้งฉากที่ Q แทนผิวสัมผัสสองชิ้น ณ ขณะนั้น (สัมผัสกันที่ Q)
@@ -312,22 +319,27 @@ class G08_ConjugateProfiles(SafeScene):
             grp = VGroup(n_line, dQ, tQ, flank)
             groups.add(grp)
             cap2 = caption_top(f"ขณะ {lb}: จุดสัมผัสอยู่ที่ Q -- ลาก normal ผ่าน Q กับ P", size=20)
-            self.play(FadeOut(cap) if i == 0 else FadeOut(cap2_prev), FadeIn(cap2))
+            self.play(FadeOut(cap) if i == 0 else FadeOut(cap2_prev))
+            self.play(FadeIn(cap2))
             self.play(Create(n_line), FadeIn(dQ), FadeIn(tQ), Create(flank))
             self.wait(0.7)
             cap2_prev = cap2
 
         cap3 = caption_top("ทุกขณะ normal ทิศต่างกัน แต่ 'ผ่าน P' เหมือนกันหมด", size=21)
-        self.play(FadeOut(cap2_prev), FadeIn(cap3))
+        self.play(FadeOut(cap2_prev))
+        self.play(FadeIn(cap3))
         self.wait(1.2)
 
         cap4 = caption_top("รู้รูปฟันตัวหนึ่ง -> ออกแบบรูปฟันอีกตัวให้เงื่อนไขนี้จริงได้เสมอ = conjugate",
                             size=20)
-        self.play(FadeOut(cap3), FadeIn(cap4))
+        self.play(FadeOut(cap3))
+        self.play(FadeIn(cap4))
         self.wait(1.2)
+        self.play(FadeOut(cap4))
+        self.play(FadeOut(VGroup(loc, dP, tPl, groups)))
 
         box_txt = MathTex(r"\text{conjugate teeth} \Rightarrow \text{constant angular velocity ratio}",
-                           font_size=26, color=WHITE).move_to(UP * 2.6)
+                           font_size=26, color=WHITE).move_to(UP * 0.3)
         box = SurroundingRectangle(box_txt, color=OK, buff=0.2)
         self.play(FadeIn(box_txt, shift=DOWN * 0.15), Create(box))
         self.wait(2.0)
@@ -356,7 +368,8 @@ class G09_WhyInvolute(SafeScene):
         self.wait(1.2)
 
         cap2 = caption_top("อุปมา: พูลเลย์ 2 ตัว (= base circle) มีสายพานไขว้พันอยู่", size=22)
-        self.play(FadeOut(cap), FadeIn(cap2))
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2))
 
         c1 = Circle(radius=Rb1, color=GEAR2, stroke_width=4).move_to(O1_0)
         c2 = Circle(radius=Rb2, color=GEAR3, stroke_width=4).move_to(O2_0)
@@ -387,16 +400,23 @@ class G09_WhyInvolute(SafeScene):
                         color=WHITE, stroke_width=3.5)
         belt = VGroup(belt_line1, belt_arc1, belt_line2, belt_arc2)
         cap3 = caption_top("สายพาน = line of action -- ตรึงอยู่กับที่เสมอ", size=22)
-        self.play(FadeOut(cap2), FadeIn(cap3))
+        self.play(FadeOut(cap2))
+        self.play(FadeIn(cap3))
         self.play(Create(belt), run_time=1.6)
         self.wait(1.0)
 
-        loc_tag = tag("line of action", (E1p + E2p) / 2, UP, WHITE, 17, 0.15)
-        self.play(FadeIn(loc_tag))
+        # ป้าย "line of action" วางไกลจากวงกลมทั้งสอง -- จุดกึ่งกลาง E1p-E2p อยู่ใน
+        # ช่องแคบระหว่างวงกลม (ห่างจากขอบวงกลมแค่ ~0.1) จึงต่อเส้นประออกไปนอกวงกลม
+        # ก่อนแล้วค่อยแปะป้ายตรงปลายเส้นประ (เช็คด้วยเลขจริงแล้วว่าห่างวงกลมทั้งคู่ >0.5)
+        ext_dir = np.array([np.sin(PHI0), np.cos(PHI0), 0.0])
+        ext_end = E2p + ext_dir * 1.2
+        ext_line = DashedLine(E2p, ext_end, color=WHITE, stroke_width=2.5, dash_length=0.1)
+        loc_tag = tag("line of action", ext_end, UR, WHITE, 17, 0.15)
+        self.play(Create(ext_line), FadeIn(loc_tag))
         self.wait(1.0)
 
         # ---- แสดงว่าอัตราทดคงที่แม้ C เปลี่ยน -----------------------------------
-        self.play(FadeOut(VGroup(cap3, loc_tag, l1, l2, adv)))
+        self.play(FadeOut(VGroup(cap3, loc_tag, ext_line, l1, l2, adv)))
         cap4 = caption_top("ลองยืดระยะศูนย์กลาง C ออก -- ดูว่าอัตราทดเปลี่ยนไหม", size=22)
         self.play(FadeIn(cap4))
 
@@ -438,7 +458,8 @@ class G09_WhyInvolute(SafeScene):
 
         concl = Text("Rb ไม่เปลี่ยน -> อัตราทด = Rb2/Rb1 ไม่เปลี่ยน แม้ C และ phi' เปลี่ยนไป",
                       font_size=20, color=OK).move_to([0, -3.15, 0])
-        self.play(FadeOut(cap4), FadeIn(concl, shift=UP * 0.15))
+        self.play(FadeOut(cap4))
+        self.play(FadeIn(concl, shift=UP * 0.15))
         self.wait(2.2)
 
 
@@ -476,13 +497,15 @@ class G10_InvoluteGenesis(SafeScene):
         self.add(traced)
         self.play(FadeIn(string_line), FadeIn(tip_dot))
         cap2 = caption_top("ปลายสายพาน (จุดสีเขียว) คลี่ออกทีละนิด -> ลากรอยทาง = อินโวลูท", size=20)
-        self.play(FadeOut(cap), FadeIn(cap2))
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2))
         self.play(t_tracker.animate.set_value(2.0), run_time=4.5, rate_func=linear)
         self.wait(0.8)
 
         rho_note = Text("รูปร่างของอินโวลูทขึ้นกับขนาดของ base circle เท่านั้น",
                           font_size=20, color=OK).move_to([0, -3.15, 0])
-        self.play(FadeOut(cap2), FadeIn(rho_note, shift=UP * 0.15))
+        self.play(FadeOut(cap2))
+        self.play(FadeIn(rho_note, shift=UP * 0.15))
         self.wait(1.4)
 
         string_line.clear_updaters(); tip_dot.clear_updaters()
@@ -543,7 +566,9 @@ class G11_Involutometry(SafeScene):
         self.play(FadeIn(cap))
 
         circ = Circle(radius=Rb, color=BASE_C, stroke_width=4).move_to(O)
-        curve = ParametricFunction(inv_pt, t_range=[0.02, t_A + 0.35],
+        # หยุดเส้นโค้งพอดีที่จุด A (ไม่ยืดเลยไปอีก) -- เพราะแทนเจนต์ของอินโวลูทที่ A
+        # ทับแนวเดียวกับส่วน C-A พอดี ถ้ายืดเลย A ไปจะไปทับป้าย rho_A ที่แปะไว้บนแนวนั้น
+        curve = ParametricFunction(inv_pt, t_range=[0.02, t_A],
                                     color=INVOL_C, stroke_width=4)
         self.play(Create(circ), Create(curve), run_time=1.2)
         lO = tag("O", O, DOWN, WHITE, 20, 0.15)
@@ -570,7 +595,8 @@ class G11_Involutometry(SafeScene):
         line_OC = seg(O, C_pt, BASE_C, 3)
         line_CA = seg(C_pt, A_pt, WARN, 4)
         cap3 = caption_top("C = จุดสัมผัสของเส้นสัมผัส CA กับ base circle (มุมฉากที่ C)", size=20)
-        self.play(FadeOut(cap2), FadeIn(cap3))
+        self.play(FadeOut(cap2))
+        self.play(FadeIn(cap3))
         self.play(FadeIn(dC), FadeIn(tC), Create(line_OC), Create(line_CA))
         ra = ra_mark(C_pt, O - C_pt, A_pt - C_pt, GRAYTXT, 0.22)
         self.play(Create(ra))
@@ -580,22 +606,26 @@ class G11_Involutometry(SafeScene):
         lbl_phi = MathTex(r"\phi_A", font_size=26, color=WARN).move_to(
             O + normalize(normalize(A_pt - O) + normalize(C_pt - O)) * 0.85)
         cap4 = caption_top(r"phi_A = มุม AOC: cos(phi_A) = Rb/R_A", size=20)
-        self.play(FadeOut(cap3), FadeIn(cap4))
+        self.play(FadeOut(cap3))
+        self.play(FadeIn(cap4))
         self.play(Create(ang_phi), FadeIn(lbl_phi))
         self.wait(1.0)
 
-        lbl_CA = tag("rho_A = CA = Rb tan(phi_A)", C_pt + (A_pt - C_pt) * 0.5,
-                     RIGHT, WARN, 17, 0.15)
-        self.play(FadeIn(lbl_CA))
+        # วางป้ายสูตรไว้ที่มุมขวาล่างของเฟรม (พื้นที่ว่างในช่วงนี้ของฉาก) แทนการแปะ
+        # ใกล้ส่วน CA โดยตรง -- แนว CA ชิดกับทั้งจุด A และเส้นโค้งอินโวลูท พื้นที่แคบมาก
+        lbl_CA = Text("rho_A = CA = Rb tan(phi_A)", font_size=18, color=WARN)
+        lbl_CA.move_to([4.3, -1.2, 0])
+        self.play(FadeIn(lbl_CA, shift=UP * 0.15))
         self.wait(0.8)
 
         # ---- ส่วนโค้ง BC บน base circle -----------------------------------------
         dB = pt(B_pt, GRAYTXT, 0.06)
-        tB = tag("B", B_pt, DOWN, GRAYTXT, 18, 0.12)
+        tB = tag("B", B_pt, RIGHT, GRAYTXT, 18, 0.22)
         arc_BC = Arc(radius=Rb, start_angle=0, angle=t_A, arc_center=O,
                      color=OK, stroke_width=5)
         cap5 = caption_top("B = จุดเริ่มอินโวลูท (t=0) -- ส่วนโค้ง BC ยาวเท่ากับสายพานที่คลี่ (rho_A)", size=19)
-        self.play(FadeOut(cap4), FadeIn(cap5))
+        self.play(FadeOut(cap4))
+        self.play(FadeIn(cap5))
         self.play(FadeIn(dB), FadeIn(tB), Create(arc_BC))
         self.wait(1.0)
 
@@ -607,7 +637,8 @@ class G11_Involutometry(SafeScene):
         self.wait(1.0)
 
         cap6 = caption_top("สายพานไม่ยืด: ส่วนโค้ง BC = ความยาวที่คลี่ออก CA พอดี", size=20)
-        self.play(FadeOut(cap5), FadeIn(cap6))
+        self.play(FadeOut(cap5))
+        self.play(FadeIn(cap6))
         self.wait(1.0)
 
         eqs = VGroup(
@@ -622,7 +653,8 @@ class G11_Involutometry(SafeScene):
         result = MathTex(r"\theta_A=\tan\phi_A-\phi_A \equiv \operatorname{inv}\phi_A",
                           font_size=28, color=OK).next_to(eqs, DOWN, buff=0.4)
         box = SurroundingRectangle(result, color=OK, buff=0.18)
-        self.play(FadeOut(cap6), FadeIn(result, shift=UP * 0.15), Create(box))
+        self.play(FadeOut(cap6))
+        self.play(FadeIn(result, shift=UP * 0.15), Create(box))
         self.wait(1.2)
 
         result2 = MathTex(r"\phi_A=\cos^{-1}\frac{R_b}{R_A}",
@@ -642,7 +674,7 @@ class G12_ToothThickness(SafeScene):
         cap = caption_top("ยิ่งออกไปไกลจากศูนย์กลาง ฟันยิ่ง 'บาง' ลง เพราะผิวโค้งบิดออกทีละนิด", size=21)
         self.play(FadeIn(cap))
 
-        O = DOWN * 0.3
+        O = LEFT * 3.3 + DOWN * 0.3
         Rb, R_B, R_A = 0.9, 1.5, 2.3
 
         c_base = Circle(radius=Rb, color=BASE_C, stroke_width=2.5)
@@ -679,29 +711,43 @@ class G12_ToothThickness(SafeScene):
         arc_tA = Arc(radius=R_A, start_angle=-delta_A, angle=2 * delta_A, arc_center=O,
                      color=GEAR3, stroke_width=6)
         self.play(Create(wedge_B), Create(arc_tB))
-        t_b_lbl = tag("t_b (ความหนาที่ B)", O + R_B * RIGHT, RIGHT, GEAR2, 16, 0.12)
-        self.play(FadeIn(t_b_lbl))
+        # ป้าย t_b/t_A: ปักหมุดจริงไว้ที่ขอบของแต่ละ arc (ang_b อยู่ในช่วง +-delta_B,
+        # ang_a อยู่ในช่วง +-delta_A จริง) แล้วลากเส้นชี้ (leader) ออกไปแปะป้ายที่ตำแหน่ง
+        # ปลอดภัย -- พ้นวงกลมใหญ่สุด (R_A) ทุกวง กันไม่ให้ป้ายทับ Circle/Arc หรือทับกันเอง
+        ang_b_lbl, ang_a_lbl = 20 * DEGREES, -12 * DEGREES
+        dir_b = np.array([np.cos(ang_b_lbl), np.sin(ang_b_lbl), 0.0])
+        dir_a = np.array([np.cos(ang_a_lbl), np.sin(ang_a_lbl), 0.0])
+        tip_b, tip_a = O + R_B * dir_b, O + R_A * dir_a
+        out_b, out_a = O + (R_A + 0.55) * dir_b, O + (R_A + 0.85) * dir_a
+        leader_b = Line(tip_b, out_b, color=GEAR2, stroke_width=1.5)
+        leader_a = Line(tip_a, out_a, color=GEAR3, stroke_width=1.5)
+        t_b_lbl = tag("t_b (ความหนาที่ B)", out_b, dir_b, GEAR2, 15, 0.1)
+        t_a_lbl = tag("t_A (ความหนาที่ A -- แคบกว่า)", out_a, dir_a, GEAR3, 15, 0.1)
+        self.play(Create(leader_b), FadeIn(t_b_lbl))
         self.wait(0.8)
         self.play(Create(wedge_A), Create(arc_tA))
-        t_a_lbl = tag("t_A (ความหนาที่ A -- แคบกว่า)", O + R_A * RIGHT, RIGHT, GEAR3, 16, 0.12)
-        self.play(FadeIn(t_a_lbl))
+        self.play(Create(leader_a), FadeIn(t_a_lbl))
         self.wait(1.2)
 
         cap2 = caption_top("ครึ่งมุมฟัน delta_A = t_A/(2 R_A) = t_b/(2 R_b) - theta_A", size=20)
-        self.play(FadeOut(cap), FadeIn(cap2))
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2))
         self.wait(1.0)
 
         theta_row = VGroup(
             MathTex(r"\theta_A=\tan\phi_A-\phi_A", font_size=22, color=GRAYTXT),
             Text("(แทนค่าจากคลิปก่อน)", font_size=18, color=GRAYTXT),
         ).arrange(RIGHT, buff=0.25)
+        last_formula = MathTex(
+            r"t_A=2R_A\!\left(\frac{t_B}{2R_B}-\tan\phi_A+\phi_A+\tan\phi_B-\phi_B\right)",
+            font_size=22, color=OK)
+        fit_width(last_formula, 6.8)
         deriv = VGroup(
             MathTex(r"\delta_A=\frac{t_A}{2R_A}=\frac{t_b}{2R_b}-\theta_A",
                     font_size=26, color=WHITE),
             theta_row,
-            MathTex(r"t_A=2R_A\!\left(\frac{t_B}{2R_B}-\tan\phi_A+\phi_A+\tan\phi_B-\phi_B\right)",
-                    font_size=24, color=OK),
-        ).arrange(DOWN, buff=0.32).to_edge(DOWN, buff=0.55).shift(UP*0.3)
+            last_formula,
+        ).arrange(DOWN, buff=0.32).to_edge(RIGHT, buff=0.35)
         box = SurroundingRectangle(deriv[2], color=OK, buff=0.15)
         self.play(FadeOut(cap2))
         for row in deriv:
@@ -749,22 +795,30 @@ class G13_LineOfAction(SafeScene):
         self.wait(0.6)
 
         cap2 = caption_top("1) Line of action ถูกกำหนดโดย base circle ทั้งสอง + ระยะศูนย์กลาง C", size=19)
-        self.play(FadeOut(cap), FadeIn(cap2))
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2))
         loa = Line(E1 - (E2 - E1) * 0.25, E2 + (E2 - E1) * 0.25, color=LOA_C, stroke_width=4)
         self.play(Create(loa))
         self.wait(0.8)
 
         cap3 = caption_top("2) Path of contact อยู่ตาม line of action = common tangent ของ base circle ทั้งสอง", size=19)
-        self.play(FadeOut(cap2), FadeIn(cap3))
+        self.play(FadeOut(cap2))
+        self.play(FadeIn(cap3))
         dE1 = pt(E1, BASE_C, 0.07)
         dE2 = pt(E2, BASE_C, 0.07)
-        tE1 = tag("E1", E1, LEFT, BASE_C, 18, 0.12)
-        tE2 = tag("E2", E2, RIGHT, BASE_C, 18, 0.12)
+        # ป้าย E1/E2: ชี้ออกจาก P ไปตามแนวเส้น line of action เอง (ไม่ใช่ซ้าย/ขวาตรงๆ)
+        # เพราะ E1, E2 อยู่ใกล้ P มาก (ใกล้กว่ารัศมีวงเล็บมุม phi ที่จะวาดทีหลัง) --
+        # ป้ายทิศอื่นจะเข้าไปอยู่ในบริเวณที่ Angle(vert, loa) กวาดผ่านพอดี
+        dir_E1 = (E1 - P) / np.linalg.norm(E1 - P)
+        dir_E2 = (E2 - P) / np.linalg.norm(E2 - P)
+        tE1 = tag("E1", E1, dir_E1, BASE_C, 18, 0.22)
+        tE2 = tag("E2", E2, dir_E2, BASE_C, 18, 0.22)
         self.play(FadeIn(dE1), FadeIn(dE2), FadeIn(tE1), FadeIn(tE2))
         self.wait(0.8)
 
         cap4 = caption_top("3) Pressure angle (phi) = มุมระหว่าง line of action กับเส้นตั้งฉากของ line of centers", size=19)
-        self.play(FadeOut(cap3), FadeIn(cap4))
+        self.play(FadeOut(cap3))
+        self.play(FadeIn(cap4))
         vert = DashedLine(P + UP * 0.9, P + DOWN * 0.9, color=GRAYTXT, stroke_width=2)
         self.play(Create(vert))
         ang = Angle(vert, loa, radius=0.5, color=WARN, stroke_width=4)
@@ -775,10 +829,299 @@ class G13_LineOfAction(SafeScene):
 
         formula = MathTex(r"R_b = R\cos\phi", font_size=28, color=WHITE).move_to([3.2, 1.9, 0])
         box = SurroundingRectangle(formula, color=OK, buff=0.15)
-        self.play(FadeOut(cap4), FadeIn(formula, shift=UP * 0.15), Create(box))
+        self.play(FadeOut(cap4))
+        self.play(FadeIn(formula, shift=UP * 0.15), Create(box))
         self.wait(1.4)
 
         note = Text("phi ใหญ่ -> แรงกดเข้าแบริ่งมากขึ้น แต่ฟันแข็งแรงขึ้น (ตัดฟันน้อยได้ -- ดูหน้า 37)",
                      font_size=18, color=GRAYTXT).move_to([0, -3.15, 0])
         self.play(FadeIn(note, shift=UP * 0.15))
         self.wait(2.2)
+
+
+# =====================================================================
+# G14 -- หน้า 14: ศัพท์เรขาคณิตเฟือง
+# =====================================================================
+class G14_GearVocabulary(SafeScene):
+    def construct(self):
+        self.add(title("ศัพท์เรขาคณิตเฟือง", size=28))
+        self.add(page_ref("หน้า 14"))
+
+        O = LEFT * 1.3
+        Ro, R, Rb, Ri = 2.35, 2.0, 1.78, 1.55
+        cap = caption_top("4 วงกลมซ้อนกัน จากในสุดไปนอกสุด", size=21)
+        self.play(FadeIn(cap))
+
+        rings = [
+            (Ri, GRAYTXT, "Dedendum circle  R_i", "โคนฟัน"),
+            (Rb, BASE_C, "Base circle  R_b", "จุดเริ่มอินโวลูท"),
+            (R, PITCH_C, "Pitch circle  R", "วงกลิ้ง -- อ้างอิงหลัก"),
+            (Ro, GEAR3, "Addendum circle  R_o", "ยอดฟัน"),
+        ]
+        legend = VGroup()
+        for i, (r, c, name, note_txt) in enumerate(rings):
+            circ = Circle(radius=r, color=c, stroke_width=3.5).move_to(O)
+            row = Text(name, font_size=18, color=c)
+            legend.add(row)
+            self.play(Create(circ), run_time=0.7)
+        legend.arrange(DOWN, aligned_edge=LEFT, buff=0.24).to_edge(RIGHT, buff=0.55).shift(UP * 0.6)
+        self.play(FadeIn(legend, shift=RIGHT * 0.2))
+        self.wait(1.0)
+
+        # addendum/dedendum เป็นระยะรัศมี
+        a_seg = seg(O + UP * R, O + UP * Ro, GEAR3, 5)
+        b_seg = seg(O + DOWN * Ri, O + DOWN * R, GRAYTXT, 5)
+        a_lbl = tag("a (addendum)", O + UP * (R + Ro) / 2, LEFT, GEAR3, 16, 0.15)
+        b_lbl = tag("b (dedendum)", O + DOWN * (R + Ri) / 2, LEFT, GRAYTXT, 16, 0.15)
+        cap2 = caption_top("addendum a = R_o - R (ฟันยื่นสูง) | dedendum b = R - R_i (โคนฟันลึก)", size=19)
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2))
+        self.play(Create(a_seg), Create(b_seg), FadeIn(a_lbl), FadeIn(b_lbl))
+        self.wait(1.4)
+
+        order = MathTex(r"R_i < R_b < R < R_o", font_size=28, color=OK).move_to([0, -3.15, 0])
+        self.play(FadeOut(cap2))
+        self.play(FadeIn(order, shift=UP * 0.15))
+        self.wait(1.2)
+
+        warn = Text("ถ้าฟันน้อยมาก R_b อาจโผล่เหนือ R_i -- นี่คือที่มาของ undercut (หน้า 34-37)",
+                     font_size=17, color=WARN).next_to(order, DOWN, buff=0.2)
+        self.play(FadeIn(warn))
+        self.wait(1.8)
+
+
+# =====================================================================
+# G15 -- หน้า 15: สูตรเรขาคณิตชุดหลัก
+# =====================================================================
+class G15_MainFormulas(SafeScene):
+    def construct(self):
+        self.add(title("สูตรเรขาคณิตชุดหลัก -- หน้าที่คุ้มที่สุดของบท", size=24))
+        self.add(page_ref("หน้า 15"))
+
+        N = 20
+        p_len = 1.2
+        R = p_len * N / TAU
+        O = LEFT * 2.0
+
+        cap = caption_top("ที่มาของ R = pN/(2 pi): เส้นรอบวงต้องบรรจุฟัน N ตัวพอดี", size=21)
+        self.play(FadeIn(cap))
+
+        circ = Circle(radius=R, color=PITCH_C, stroke_width=3).move_to(O)
+        self.play(Create(circ))
+        ticks = VGroup()
+        for i in range(N):
+            ang = TAU * i / N
+            p1 = O + R * np.array([np.cos(ang), np.sin(ang), 0])
+            p2 = O + (R + 0.16) * np.array([np.cos(ang), np.sin(ang), 0])
+            ticks.add(Line(p1, p2, color=GRAYTXT, stroke_width=2))
+        self.play(Create(ticks), run_time=1.2)
+        note1 = Text(f"N = {N} ตำแหน่งฟัน", font_size=18, color=GRAYTXT).next_to(
+            circ, DOWN, buff=0.35)
+        self.play(FadeIn(note1))
+        self.wait(0.6)
+
+        # เน้นช่วง p หนึ่งช่วง
+        a0 = 0
+        a1 = TAU / N
+        seg_arc = Arc(radius=R, start_angle=a0, angle=a1, arc_center=O, color=WARN,
+                      stroke_width=6)
+        p_lbl = tag("p (circular pitch)", O + R * np.array([np.cos(a1 / 2), np.sin(a1 / 2), 0]),
+                    UP, WARN, 16, 0.18)
+        cap2 = caption_top("แต่ละช่วงกินระยะ p (ตามส่วนโค้ง) -- มี N ช่วงรอบวง", size=20)
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2))
+        self.play(Create(seg_arc), FadeIn(p_lbl))
+        self.wait(1.0)
+
+        deriv = VGroup(
+            MathTex(r"2\pi R = pN", font_size=28, color=WHITE),
+            MathTex(r"R=\frac{pN}{2\pi}", font_size=30, color=OK),
+        ).arrange(RIGHT, buff=0.7).to_edge(RIGHT, buff=0.6).shift(UP * 1.6)
+        box = SurroundingRectangle(deriv[1], color=OK, buff=0.15)
+        self.play(FadeOut(cap2))
+        self.play(FadeIn(deriv[0], shift=UP * 0.15))
+        self.wait(0.6)
+        self.play(FadeIn(deriv[1], shift=UP * 0.15), Create(box))
+        self.wait(1.0)
+
+        formulas = VGroup(
+            MathTex(r"R_b=R\cos\phi", font_size=24, color=BASE_C),
+            MathTex(r"R_o=R+a", font_size=24, color=GEAR3),
+            MathTex(r"R_i=R-b", font_size=24, color=GRAYTXT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).next_to(deriv, DOWN, buff=0.5)
+        for f in formulas:
+            self.play(FadeIn(f, shift=RIGHT * 0.2), run_time=0.5)
+        self.wait(2.0)
+
+
+# =====================================================================
+# G16 -- หน้า 16: ภาพรวมเรขาคณิตเฟือง (รูปประกอบ)
+# =====================================================================
+class G16_GeometryOverview(SafeScene):
+    def construct(self):
+        self.add(title("ภาพรวมเรขาคณิตเฟือง", size=28))
+        self.add(page_ref("หน้า 16 -- ใช้เป็นภาพอ้างอิง"))
+
+        N = 20
+        p_len = 1.2
+        R = p_len * N / TAU
+        a, b = 0.18 * R, 0.22 * R
+        Ro, Ri = R + a, R - b
+        Rb = R * np.cos(20 * DEGREES)
+        O = ORIGIN + DOWN * 0.2
+
+        cap = caption_top("รวมทุกอย่างไว้ในรูปเดียว -- ใช้เทียบเวลาทำโจทย์", size=21)
+        self.play(FadeIn(cap))
+
+        rings = VGroup(*[
+            Circle(radius=r, color=c, stroke_width=2.5).move_to(O)
+            for r, c in [(Ri, GRAYTXT), (Rb, BASE_C), (R, PITCH_C), (Ro, GEAR3)]
+        ])
+        self.play(Create(rings), run_time=1.3)
+
+        # p และ t บนวงกลิ้ง
+        n_show = 3
+        for i in range(n_show):
+            a0 = TAU * i / N
+            a1 = TAU * (i + 1) / N
+            mid = (a0 + a1) / 2
+            half_t = (a1 - a0) * 0.5 * 0.42  # t ~ ครึ่งหนึ่งของ p โดยประมาณ (ไม่ backlash)
+            tooth_arc = Arc(radius=R, start_angle=mid - half_t, angle=2 * half_t,
+                             arc_center=O, color=WARN, stroke_width=7)
+            self.add(tooth_arc)
+        p_a0, p_a1 = 0, TAU / N
+        p_arc = Arc(radius=R + 0.35, start_angle=p_a0, angle=p_a1, arc_center=O,
+                    color=GRAYTXT, stroke_width=2)
+        p_lbl = tag("p", O + (R + 0.55) * np.array([np.cos(p_a1 / 2), np.sin(p_a1 / 2), 0]),
+                    UP, GRAYTXT, 18, 0.1)
+        t_lbl = tag("t (ความหนาฟัน)", O + R * np.array([1, 0, 0]), RIGHT, WARN, 16, 0.15)
+        self.play(Create(p_arc), FadeIn(p_lbl), FadeIn(t_lbl))
+        self.wait(0.8)
+
+        a_seg = seg(O + UP * R, O + UP * Ro, GEAR3, 4)
+        b_seg = seg(O + DOWN * Ri, O + DOWN * R, GRAYTXT, 4)
+        a_lbl = tag("a", O + UP * (R + Ro) / 2, LEFT, GEAR3, 16, 0.1)
+        b_lbl = tag("b", O + DOWN * (R + Ri) / 2, LEFT, GRAYTXT, 16, 0.1)
+        self.play(Create(a_seg), Create(b_seg), FadeIn(a_lbl), FadeIn(b_lbl))
+        self.wait(1.6)
+
+        legend = VGroup(
+            Text("เทา = dedendum (R_i)", font_size=16, color=GRAYTXT),
+            Text("ม่วง = base (R_b)", font_size=16, color=BASE_C),
+            Text("ฟ้าเขียว = pitch (R)", font_size=16, color=PITCH_C),
+            Text("ส้ม = addendum (R_o)", font_size=16, color=GEAR3),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.14).to_edge(RIGHT, buff=0.5).shift(UP*0.5)
+        self.play(FadeOut(cap))
+        self.play(FadeIn(legend, shift=RIGHT * 0.15))
+        self.wait(2.2)
+
+
+# =====================================================================
+# G17 -- หน้า 17: Base pitch + ตัวอย่างเล็ก
+# =====================================================================
+class G17_BasePitch(SafeScene):
+    def construct(self):
+        self.add(title("Base Pitch (p_b)", size=30))
+        self.add(page_ref("หน้า 17"))
+
+        cap = caption_top("ระยะห่างฟันวัดบน base circle -- เท่ากับที่วัดตาม line of action ด้วย", size=21)
+        self.play(FadeIn(cap))
+
+        formula = MathTex(r"p_b=\frac{2\pi R_b}{N}=p\cos\phi", font_size=30,
+                           color=WHITE).move_to(UP * 1.6)
+        box = SurroundingRectangle(formula, color=OK, buff=0.18)
+        self.play(FadeIn(formula, shift=UP * 0.15), Create(box))
+        self.wait(1.2)
+
+        # ---- ตัวอย่าง: N=8, R=2in หา p --------------------------------------
+        cap2 = caption_top("ตัวอย่าง: เฟือง 8 ฟัน, R = 2 นิ้ว -- หา circular pitch", size=21)
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2))
+
+        N, R = 8, 2.0
+        O = DOWN * 0.4 + LEFT * 3.0
+        circ = Circle(radius=1.15, color=PITCH_C, stroke_width=3).move_to(O)  # สเกลย่อเพื่อโชว์
+        ticks = VGroup(*[
+            Line(O + 1.15 * np.array([np.cos(TAU * i / N), np.sin(TAU * i / N), 0]),
+                 O + 1.32 * np.array([np.cos(TAU * i / N), np.sin(TAU * i / N), 0]),
+                 color=GRAYTXT, stroke_width=2) for i in range(N)
+        ])
+        self.play(Create(circ), Create(ticks))
+        given = Text("N=8, R=2 in", font_size=18, color=GRAYTXT).next_to(circ, DOWN, buff=0.3)
+        self.play(FadeIn(given))
+        self.wait(0.6)
+
+        steps = VGroup(
+            Text("ขั้น 1 -- โจทย์ให้: N=8, R=2 in หา p", font_size=19, color=WHITE),
+            MathTex(r"\text{ขั้น 2 -- สูตร: } R=\frac{pN}{2\pi}", font_size=19, color=WHITE),
+        )
+        # ขั้น 2 มีคำไทยปนสูตร -> แยกเป็น Text + MathTex คนละก้อน กัน LaTeX พัง
+        step2 = VGroup(Text("ขั้น 2 -- สูตร:", font_size=19, color=WHITE),
+                        MathTex(r"R=\frac{pN}{2\pi}", font_size=22, color=WHITE)
+                        ).arrange(RIGHT, buff=0.2)
+        step1 = Text("ขั้น 1 -- โจทย์ให้: N=8, R=2 in หา p", font_size=19, color=WHITE)
+        step3 = VGroup(Text("ขั้น 3 -- แทนค่า:", font_size=19, color=WHITE),
+                        MathTex(r"p=\frac{2\pi R}{N}=\frac{2\pi(2)}{8}=\frac{\pi}{2}\approx1.571\text{ in}",
+                                font_size=20, color=OK)).arrange(RIGHT, buff=0.2)
+        step4 = Text("ขั้น 4 -- ตรวจ: เส้นรอบวง = 2 pi(2) = 12.57 in / 8 ฟัน = 1.571 in/ฟัน (ตรง)",
+                      font_size=18, color=OK)
+        col = VGroup(step1, step2, step3, step4).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
+        col.to_edge(RIGHT, buff=0.5).shift(UP * 0.3)
+        for row in col:
+            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.6)
+            self.wait(0.5)
+        self.wait(1.8)
+
+
+# =====================================================================
+# G18 -- หน้า 18: ตัวอย่าง หา base circle radius และ addendum
+# =====================================================================
+class G18_ExampleBaseCircle(SafeScene):
+    def construct(self):
+        self.add(title("ตัวอย่าง: หา R_b และ addendum", size=27))
+        self.add(page_ref("หน้า 18"))
+
+        N, phi_deg, R, Ro = 24, 20, 1.5, 1.625
+        phi = phi_deg * DEGREES
+        Rb = R * np.cos(phi)
+        a = Ro - R
+        m_check = 2 * R / N
+
+        O = LEFT * 3.3 + DOWN * 0.3
+        cap = caption_top("โจทย์: N=24, phi=20°, R=1.5in, R_o=1.625in -- หา (ก) R_b (ข) a", size=19)
+        self.play(FadeIn(cap))
+
+        c_R = Circle(radius=1.5, color=PITCH_C, stroke_width=3).move_to(O)
+        c_Ro = Circle(radius=1.5 + (Ro - R) * 4, color=GEAR3, stroke_width=3).move_to(O)  # ขยาย a ให้เห็นชัด
+        self.play(Create(c_R), Create(c_Ro))
+        lR = tag("R = 1.5 in", O + UP * 1.5, UP, PITCH_C, 17, 0.12)
+        lRo = tag("R_o = 1.625 in", O + UP * (1.5 + (Ro - R) * 4), UP, GEAR3, 17, 0.28)
+        self.play(FadeIn(lR), FadeIn(lRo))
+        self.wait(0.8)
+
+        cap2 = caption_top("ขั้น 1 -- เข้าใจโจทย์: a = R_o - R (ส่วนต่างของสองรัศมี)", size=20)
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2))
+        a_seg = seg(O + UP * 1.5, O + UP * (1.5 + (Ro - R) * 4), GEAR3, 5)
+        self.play(Create(a_seg))
+        self.wait(0.8)
+
+        steps = VGroup(
+            Text("ขั้น 2 -- สูตร: R_b = R cos(phi), a = R_o - R", font_size=19, color=WHITE),
+            MathTex(r"R_b=1.5\cos20^\circ=1.5(0.93969)=1.409\text{ in}",
+                    font_size=21, color=BASE_C),
+            MathTex(r"a=1.625-1.5=0.125\text{ in}", font_size=21, color=GEAR3),
+            Text(f"ขั้น 4 -- ตรวจ: R_b < R เสมอ (cos phi<1) และ a ~ m = 2R/N = {m_check:.3f} "
+                 "-> ตรงพอดี = full-depth มาตรฐาน", font_size=17, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
+        steps.to_edge(RIGHT, buff=0.4).shift(UP * 0.3)
+        fit_width(steps[3], 5.8)
+        self.play(FadeOut(cap2))
+        for row in steps:
+            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.6)
+            self.wait(0.7)
+        self.wait(1.6)
+
+        c_Rb = Circle(radius=Rb, color=BASE_C, stroke_width=3).move_to(O)
+        self.play(Create(c_Rb))
+        self.wait(1.6)

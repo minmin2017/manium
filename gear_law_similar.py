@@ -168,10 +168,13 @@ def upright_tri(pa, pb, pc, names, colors, center, height):
     # (การันตีว่าไม่มีทางย้อนเข้าไปทับด้านของสามเหลี่ยมตัวเอง ต่างจากสูตรเดิม
     # ที่ผสมทิศขอบ+ทิศเข้าหา c ซึ่งพลิกทิศผิดได้เมื่อรูปทรงเบี้ยว)
     centroid = (va + vb + vc) / 3
+    # buff 0.30 (เดิม 0.18) -- แต่ละมุมมีวงเล็บมุม/Angle รัศมี ~0.44 มาวาดทับซ้ำทีหลัง
+    # (ang1/ang2/ang3/ang4 ในคลิปที่เรียกใช้ helper นี้) buff เดิมแคบไปหน่อย ทำให้
+    # ป้ายชื่อจุดเฉียดขอบ Angle arc ได้ในบางเฟรม
     labels = VGroup(
-        tag(names[0], va, normalize(va - centroid), colors[1], 24, 0.18),
-        tag(names[1], vb, normalize(vb - centroid), colors[0], 24, 0.18),
-        tag(names[2], vc, normalize(vc - centroid), colors[2], 24, 0.18),
+        tag(names[0], va, normalize(va - centroid), colors[1], 24, 0.30),
+        tag(names[1], vb, normalize(vb - centroid), colors[0], 24, 0.30),
+        tag(names[2], vc, normalize(vc - centroid), colors[2], 24, 0.30),
     )
     dots = VGroup(pt(va, WHITE, 0.055), pt(vb, WHITE, 0.055), pt(vc, WHITE, 0.055))
     g = VGroup(sides["ab"], sides["ac"], sides["bc"], dots, labels)
@@ -216,7 +219,9 @@ class G05A_PointsAndLines(SafeScene):
         # --- line of centers ------------------------------------------------
         cap4 = caption_top("ลากเส้นเชื่อมสองแกนหมุน = line of centers", size=23)
         loc = DashedLine(A, B, color=C_LOC, stroke_width=3, dash_length=0.13)
-        t_loc = tag("line of centers", A + (B - A) * 0.5, RIGHT, C_LOC, 19)
+        # แปะป้ายใกล้ A (t=0.15) แทนกึ่งกลาง -- กึ่งกลางเส้นอยู่ในระดับเดียวกับที่
+        # เส้น B-S (วาดทีหลังในคลิปนี้) พาดผ่าน ทำให้ป้ายที่ค้างอยู่ทั้งคลิปไปทับกัน
+        t_loc = tag("line of centers", A + (B - A) * 0.15, RIGHT, C_LOC, 19, 0.22)
         self.play(FadeOut(cap3))
         self.play(FadeIn(cap4), Create(loc), FadeIn(t_loc))
         self.wait(0.8)
@@ -264,7 +269,9 @@ class G05A_PointsAndLines(SafeScene):
         # --- BQ + w3 -----------------------------------------------------------
         cap9 = caption_top("BQ = แขนรัศมีของชิ้นที่ 3 (จากแกน B ถึงจุดสัมผัสจุดเดียวกัน)", size=22)
         l_BQ = seg(B, Q, C_BQ, 5)
-        t_BQ = tag("BQ", B + (Q - B) * 0.42, RIGHT, C_BQ, 22, 0.12)
+        # จุดนี้อยู่ซ้ายของเส้น line of centers (x คงที่ที่ B) -- ป้ายต้องชี้ LEFT
+        # (ออกห่างจากเส้น) ไม่ใช่ RIGHT (จะแกว่งกลับไปทับเส้น line of centers)
+        t_BQ = tag("BQ", B + (Q - B) * 0.42, LEFT, C_BQ, 22, 0.18)
         f_w3 = eq_row(MathTex(r"\omega_3", font_size=34, color=C_BQ),
                       MathTex("=", font_size=34),
                       frac2("v_{Q_3}", "BQ", C_VQ3, C_BQ)).move_to([3.1, 0.05, 0])
@@ -314,8 +321,13 @@ class G05A_PointsAndLines(SafeScene):
         # --- R ------------------------------------------------------------------
         cap14 = caption_top("จาก A ลากฉากลงเส้น normal — เท้าของฉากคือจุด R", size=22)
         l_AR = seg(A, R, C_AR, 5)
-        dR, tR = pt(R, C_AR, 0.075), tag("R", R, DOWN, C_AR, 20, 0.10)
-        t_AR = tag("AR", A + (R - A) * 0.45, UP, C_AR, 20, 0.12)
+        # R มีเส้นหลายเส้นมาบรรจบ (l_AR เกือบขนานแนวดิ่ง, เส้น normal เกือบแนวนอน) --
+        # ป้ายต้องชี้ทแยงออกจากทั้งคู่ (down-left) ไม่ใช่ DOWN ตรงๆ ซึ่งเกือบขนาน l_AR
+        dR, tR = pt(R, C_AR, 0.075), tag("R", R, DL, C_AR, 20, 0.22)
+        # ทิศของป้าย AR: ตั้งฉากกับเส้น A-R เอง (ไม่ใช่ UP ซึ่งเกือบขนานกับเส้นนั้น)
+        _ar_perp = np.array([(R - A)[1], -(R - A)[0], 0.0])
+        _ar_perp = _ar_perp / np.linalg.norm(_ar_perp)
+        t_AR = tag("AR", A + (R - A) * 0.45, _ar_perp, C_AR, 20, 0.22)
         raR = ra_mark(R, A - R, Q - R, C_AR)
         self.play(FadeOut(cap13))
         self.play(FadeIn(cap14), Create(l_AR), FadeIn(t_AR))
@@ -392,12 +404,14 @@ class G05B_SimilarTriangles(SafeScene):
         # จับคู่แบบเบี้ยว ทำให้ป้ายกลายเป็นรูปเปื้อนวิ่งผ่านตำแหน่งเดิมกลางอากาศ
         self.play(FadeOut(tri1_in))
         self.play(FadeIn(g1, shift=RIGHT * 0.3), run_time=1.0)
+        # วางไว้ใต้สามเหลี่ยม ไม่ใช่ด้านขวา -- สามเหลี่ยมกว้างได้ถึง 4.6 หน่วยที่ x=2.2
+        # ป้ายด้านขวายาว ๆ จะยื่นเลยขอบเฟรมขวา (X_MAX=7.11) ไปไกล
         note1 = VGroup(
-            Text("QE = ความเร็ว v_Q2", font_size=20, color=C_VQ2),
-            Text("QP = องค์ประกอบตามแนว normal", font_size=20, color=C_VN),
-            Text("PE = ส่วนที่ลื่นไถลไปตามผิว", font_size=20, color=C_TAN),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).next_to(g1, RIGHT, buff=0.45)
-        self.play(FadeIn(note1, shift=RIGHT * 0.15))
+            Text("QE = ความเร็ว v_Q2", font_size=18, color=C_VQ2),
+            Text("QP = องค์ประกอบตามแนว normal", font_size=18, color=C_VN),
+            Text("PE = ส่วนที่ลื่นไถลไปตามผิว", font_size=18, color=C_TAN),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18).next_to(g1, DOWN, buff=0.4)
+        self.play(FadeIn(note1, shift=DOWN * 0.15))
         self.wait(2.2)
         self.play(FadeOut(note1))
 
@@ -412,11 +426,11 @@ class G05B_SimilarTriangles(SafeScene):
         self.play(FadeOut(tri2_in))
         self.play(FadeIn(g2, shift=RIGHT * 0.3), run_time=1.0)
         note2 = VGroup(
-            Text("AQ = แขนรัศมีถึงจุดสัมผัส", font_size=20, color=C_AQ),
-            Text("AR = ระยะตั้งฉากจาก A ลงเส้น normal", font_size=20, color=C_AR),
-            Text("RQ = ระยะบนเส้น normal", font_size=20, color=C_TAN),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).next_to(g2, RIGHT, buff=0.45)
-        self.play(FadeIn(note2, shift=RIGHT * 0.15))
+            Text("AQ = แขนรัศมีถึงจุดสัมผัส", font_size=18, color=C_AQ),
+            Text("AR = ระยะตั้งฉากจาก A ลงเส้น normal", font_size=18, color=C_AR),
+            Text("RQ = ระยะบนเส้น normal", font_size=18, color=C_TAN),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18).next_to(g2, DOWN, buff=0.4)
+        self.play(FadeIn(note2, shift=DOWN * 0.15))
         self.wait(2.2)
 
         # ---------------- ทำไมสองรูปนี้ถึง "คล้ายกัน" --------------------------
@@ -458,8 +472,10 @@ class G05B_SimilarTriangles(SafeScene):
 
         # ขั้น 5 — สรุป AA
         cap = self.swap_cap(cap, "มุมฉากตรงกัน + อีกมุมตรงกัน = คล้ายกันแน่นอน (แบบ มุม-มุม)", size=22)
-        self.play(Indicate(VGroup(raq1, raq2), color=OK, scale_factor=1.2))
-        self.play(Indicate(VGroup(ang1, ang2, lb1a, lb2a), color=OK, scale_factor=1.1))
+        # scale_factor=1.0: เน้นด้วยสี ไม่ขยายขนาด -- กันไม่ให้มุม/ป้ายขยายเข้าไปชน
+        # โซนคำบรรยายบนที่เพิ่งขึ้นบรรทัดนี้
+        self.play(Indicate(VGroup(raq1, raq2), color=OK, scale_factor=1.0))
+        self.play(Indicate(VGroup(ang1, ang2, lb1a, lb2a), color=OK, scale_factor=1.0))
         self.wait(1.4)
 
         cap = self.swap_cap(cap, "ด้านที่คู่กันจึงเป็นสัดส่วนกัน: QE คู่ AQ · QP คู่ AR", size=22)
@@ -483,10 +499,10 @@ class G05B_SimilarTriangles(SafeScene):
         self.play(FadeOut(tri3_in))
         self.play(FadeIn(g3, shift=RIGHT * 0.3), run_time=1.0)
         note3 = VGroup(
-            Text("QF = ความเร็ว v_Q3", font_size=20, color=C_VQ3),
-            Text("QP = ตัวเดิม! เท่ากับของชิ้นที่ 2", font_size=20, color=C_VN),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).next_to(g3, RIGHT, buff=0.45)
-        self.play(FadeIn(note3, shift=RIGHT * 0.15))
+            Text("QF = ความเร็ว v_Q3", font_size=18, color=C_VQ3),
+            Text("QP = ตัวเดิม! เท่ากับของชิ้นที่ 2", font_size=18, color=C_VN),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18).next_to(g3, DOWN, buff=0.4)
+        self.play(FadeIn(note3, shift=DOWN * 0.15))
         self.wait(2.0)
         self.play(FadeOut(note3))
 
@@ -499,10 +515,10 @@ class G05B_SimilarTriangles(SafeScene):
         self.play(FadeOut(tri4_in))
         self.play(FadeIn(g4, shift=RIGHT * 0.3), run_time=1.0)
         note4 = VGroup(
-            Text("BQ = แขนรัศมีถึงจุดสัมผัส", font_size=20, color=C_BQ),
-            Text("BS = ระยะตั้งฉากจาก B ลงเส้น normal", font_size=20, color=C_BS),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).next_to(g4, RIGHT, buff=0.45)
-        self.play(FadeIn(note4, shift=RIGHT * 0.15))
+            Text("BQ = แขนรัศมีถึงจุดสัมผัส", font_size=18, color=C_BQ),
+            Text("BS = ระยะตั้งฉากจาก B ลงเส้น normal", font_size=18, color=C_BS),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18).next_to(g4, DOWN, buff=0.4)
+        self.play(FadeIn(note4, shift=DOWN * 0.15))
         self.wait(2.0)
 
         # เหตุผลเดียวกับคู่แรก แค่เปลี่ยนจาก alpha เป็น beta
@@ -571,15 +587,19 @@ class G06_PitchPoint(SafeScene):
 
         loc = DashedLine(A, B, color=C_LOC, stroke_width=3, dash_length=0.13)
         n_line = Line(Q - UN * 1.0, Q + UN * 3.2, color=C_NORM, stroke_width=4)
+        # R มีเส้นหลายเส้น+รูปสามเหลี่ยม (t_APR วาดทีหลัง) มาบรรจบ -- ป้าย "R"/"AR"
+        # ต้องชี้ทแยงออกจากกลุ่มเส้น ไม่ใช่ DOWN/UP ตรงๆ (เกือบขนานกับเส้น A-R เอง)
+        _ar_perp6 = np.array([(R - A)[1], -(R - A)[0], 0.0])
+        _ar_perp6 = _ar_perp6 / np.linalg.norm(_ar_perp6)
         base = VGroup(
             loc, n_line,
             seg(A, R, C_AR, 5), seg(B, S, C_BS, 5),
             pt(A, C_AQ, 0.08), pt(B, C_BQ, 0.08),
             pt(R, C_AR, 0.07), pt(S, C_BS, 0.07), pt(P, C_VN, 0.09),
             tag("A", A, UP, C_AQ, 24), tag("B", B, DOWN, C_BQ, 24),
-            tag("R", R, DOWN, C_AR, 20, 0.10), tag("S", S, UR, C_BS, 20, 0.10),
+            tag("R", R, DL, C_AR, 20, 0.24), tag("S", S, UR, C_BS, 20, 0.10),
             tag("P", P, DR, C_VN, 24, 0.14),
-            tag("AR", A + (R - A) * 0.45, UP, C_AR, 20, 0.12),
+            tag("AR", A + (R - A) * 0.45, _ar_perp6, C_AR, 20, 0.22),
             tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 21, 0.12),
             ra_mark(R, A - R, Q - R, C_AR),
             ra_mark(S, B - S, Q - S, C_BS),
