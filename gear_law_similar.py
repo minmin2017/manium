@@ -315,9 +315,14 @@ class G05A_PointsAndLines(SafeScene):
         self.play(FadeOut(cap12))
         self.play(FadeIn(cap13), Create(l_QP))
         self.wait(1.0)
+        # เพิ่ม t_AQ เข้าไปในชุดที่เอาออก -- ป้าย "AQ" ที่ค้างอยู่ใกล้ (A+Q)/2 ไปชนกับ
+        # ป้าย "AR" ที่กำลังจะโผล่ในโซนเดียวกัน (เจอจริงจาก [LAYOUT] log 2026-09-05,
+        # ยังทับซ้ำแม้ขยับตำแหน่ง AR แล้ว) AQ ได้ทำหน้าที่ของมันจบไปแล้วตอนนี้ (v_Q2/w2
+        # อธิบายไปแล้ว) เอาออกตรงนี้ปลอดภัยกว่าสู้แย่งพื้นที่ต่อ -- คงเส้น l_AQ ไว้
+        # (ให้บริบทภาพว่า R มาจากไหน) เอาออกแค่ตัวหนังสือ
         self.play(FadeOut(pr_E), FadeOut(pr_F), FadeOut(a_v2), FadeOut(a_v3),
                   FadeOut(t_v2), FadeOut(t_v3), FadeOut(ra2), FadeOut(ra3),
-                  FadeOut(f_w2), FadeOut(f_w3))
+                  FadeOut(f_w2), FadeOut(f_w3), FadeOut(t_AQ))
 
         # --- R ------------------------------------------------------------------
         cap14 = caption_top("จาก A ลากฉากลงเส้น normal — เท้าของฉากคือจุด R", size=22)
@@ -328,9 +333,11 @@ class G05A_PointsAndLines(SafeScene):
         # ทิศของป้าย AR: ตั้งฉากกับเส้น A-R เอง (ไม่ใช่ UP ซึ่งเกือบขนานกับเส้นนั้น)
         _ar_perp = np.array([(R - A)[1], -(R - A)[0], 0.0])
         _ar_perp = _ar_perp / np.linalg.norm(_ar_perp)
-        # 0.45 (กึ่งกลาง A-R) เคยชนกับป้าย "AQ" ที่ค้างอยู่ใกล้ (A+Q)/2 -- ขยับเข้าใกล้ R
-        # มากขึ้น (0.68) + เพิ่ม buff กันชน (เจอจริงจาก [LAYOUT] log 2026-09-05: ทับกัน 14%)
-        t_AR = tag("AR", A + (R - A) * 0.68, _ar_perp, C_AR, 20, 0.34)
+        # กลับมาใช้ 0.45 (กึ่งกลาง A-R, ไกลจาก R/เส้น normal ที่แน่นกว่า) -- รอบก่อนขยับ
+        # เข้าใกล้ R (0.68) กลับแย่ลง (ทับ Line ด้วย) เพราะ _ar_perp ขนานกับเส้น normal
+        # เอง (AR ตั้งฉากกับเส้น normal โดยนิยาม) ยิ่งเข้าใกล้ R ยิ่งเสี่ยงชนของบนเส้นนั้น
+        # -- fix จริงคือเอา t_AQ ออกไปแล้ว (ดูด้านบน) ไม่ต้องเสี่ยงต่อสู้พื้นที่ตรงนี้อีก
+        t_AR = tag("AR", A + (R - A) * 0.45, _ar_perp, C_AR, 20, 0.22)
         raR = ra_mark(R, A - R, Q - R, C_AR)
         self.play(FadeOut(cap13))
         self.play(FadeIn(cap14), Create(l_AR), FadeIn(t_AR))
@@ -597,17 +604,23 @@ class G06_PitchPoint(SafeScene):
         # ต้องชี้ทแยงออกจากกลุ่มเส้น ไม่ใช่ DOWN/UP ตรงๆ (เกือบขนานกับเส้น A-R เอง)
         _ar_perp6 = np.array([(R - A)[1], -(R - A)[0], 0.0])
         _ar_perp6 = _ar_perp6 / np.linalg.norm(_ar_perp6)
+        # R, P (และ S, Q) ทั้งหมดอยู่ "บนเส้น normal เดียวกัน" (n_line) โดยนิยาม -- แก้
+        # ครั้งแรกด้วย -UN/+UN นั้นยังผิดอยู่ดี เพราะ UN *คือ* ทิศของเส้น normal เอง
+        # (แค่งงว่าไปคำนวณแล้วดันตรงกับทิศ R->P พอดี เพราะ R,P colinear บนเส้นนั้น) --
+        # ป้ายที่ชี้ตาม UN จึงยื่นทับ n_line ตัวเอง (เจอจริงจาก [LAYOUT] log รอบสอง:
+        # 'P' ทับ Line 25 จุด + 'R'<->'P' ยังทับ 32% เท่าเดิม) ที่ถูกต้องคือชี้ "ตั้งฉาก"
+        # กับ n_line แทน (คนละฝั่งกัน กันชนทั้งกับเส้นและกันเอง)
+        _perp_un = np.array([-UN[1], UN[0], 0.0])
         base = VGroup(
             loc, n_line,
             seg(A, R, C_AR, 5), seg(B, S, C_BS, 5),
             pt(A, C_AQ, 0.08), pt(B, C_BQ, 0.08),
             pt(R, C_AR, 0.07), pt(S, C_BS, 0.07), pt(P, C_VN, 0.09),
             tag("A", A, UP, C_AQ, 24), tag("B", B, DOWN, C_BQ, 24),
-            # R และ P อยู่ห่างกันแค่ ~0.5 หน่วย (ใกล้กันมาก) -- เดิมใช้ DL/DR ทับกัน 32%
-            # (เจอจริงจาก [LAYOUT] log 2026-09-05) แก้โดยชี้ป้ายออกไปคนละทาง "ตามแนวเส้น
-            # normal เอง" (-UN สำหรับ R, +UN สำหรับ P) ซึ่งเป็นทิศที่ห่างจากอีกจุดมากที่สุด
-            tag("R", R, -UN, C_AR, 20, 0.4), tag("S", S, UR, C_BS, 20, 0.10),
-            tag("P", P, UN, C_VN, 24, 0.4),
+            tag("R", R, _perp_un, C_AR, 20, 0.4), tag("S", S, UR, C_BS, 20, 0.10),
+            # buff ของ P ขยับเป็น 0.55 (ไม่ใช่ 0.4) เพราะทีหลังในซีนนี้มี Angle(ap1/ap2)
+            # รัศมี 0.40 มาวาดล้อมรอบ P พอดี (ดูโค้ดด้านล่าง) ต้องเผื่อไม่ให้ป้ายชนส่วนโค้งนั้น
+            tag("P", P, -_perp_un, C_VN, 24, 0.55),
             tag("AR", A + (R - A) * 0.45, _ar_perp6, C_AR, 20, 0.22),
             tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 21, 0.12),
             ra_mark(R, A - R, Q - R, C_AR),
@@ -652,10 +665,26 @@ class G06_PitchPoint(SafeScene):
         self.play(Indicate(VGroup(rr, rs, ap1, ap2), color=OK, scale_factor=1.1))
         self.wait(1.4)
 
-        g1, _, _ = upright_tri(A, R, P, ("A", "R", "P"),
+        # สามเหลี่ยม A-R-P (และ B-S-P) เป็นทรง "บาง" มาก -- ด้าน R-P (และ S-P) สั้นกว่า
+        # อีกสองด้านมาก (ตรวจด้วยเลขจริง: A-R=1.35, A-P=1.44, R-P=0.49 หน่วย) ทำให้หลัง
+        # upright_tri() ยกออกมาวางใหม่ จุดยอด R กับ P (S กับ P) ยังอยู่ใกล้กันเกินกว่า
+        # buff เริ่มต้น (0.30) ของป้ายชื่อจะกันชนไหว (เจอจริงจาก [LAYOUT] log 2026-09-05:
+        # 'R'<->'P' ทับกัน 32% ซ้ำสองรอบ) แก้โดยดันป้าย R/P (S/P) ออกจากกันเพิ่มเติมตาม
+        # แนวตั้งฉากกับเส้น R-P (S-P) ของตัวเอง หลังสร้าง g1/g2 เสร็จ
+        def _separate_labels(vg, v, key_b, key_c, dist=0.3):
+            lb, lc = vg[4][1], vg[4][2]
+            d = v[key_c] - v[key_b]
+            n = np.linalg.norm(d)
+            perp = np.array([-d[1], d[0], 0.0]) / n if n > 1e-9 else np.array([0.0, 1.0, 0.0])
+            lb.shift(-perp * dist)
+            lc.shift(perp * dist)
+
+        g1, v1u, _ = upright_tri(A, R, P, ("A", "R", "P"),
                                (C_AR, C_AQ, C_TAN), [3.0, 1.45, 0], 1.15)
-        g2, _, _ = upright_tri(B, S, P, ("B", "S", "P"),
+        _separate_labels(g1, v1u, "b", "c")
+        g2, v2u, _ = upright_tri(B, S, P, ("B", "S", "P"),
                                (C_BS, C_BQ, C_TAN), [3.0, -0.35, 0], 1.15)
+        _separate_labels(g2, v2u, "b", "c")
         self.play(FadeOut(t_APR), FadeOut(t_BPS))
         self.play(FadeIn(g1, shift=RIGHT * 0.3), run_time=1.0)
         self.play(FadeIn(g2, shift=RIGHT * 0.3), run_time=1.0)

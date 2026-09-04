@@ -294,9 +294,13 @@ class G07_KennedyPitchPoint(SafeScene):
         self.wait(0.6)
 
         dP = pt(P, WHITE, 0.09)
-        # P อยู่บนเส้น loc แนวนอนพอดี -- ป้ายเดิมชี้ RIGHT (ขนานกับเส้น) ทำให้กรอบ
-        # ข้อความทับ DashedLine เอง (เจอจริงจาก [LAYOUT] log) เปลี่ยนเป็น UP ให้ตั้งฉาก
-        tP = tag("P", P, UP, WHITE, 26, 0.30)
+        # รอบแรกเปลี่ยน RIGHT->UP แก้ปัญหาขนานกับ loc ได้ แต่ P เป็นจุดสัมผัสของ c1/c2
+        # พอดี (รัศมีแนวนอนของทั้งคู่ = แทนเจนต์ที่ P เป็นแนวตั้ง) UP จึงวิ่งขนานเส้น
+        # สัมผัสของวงกลมทั้งสองวงแทน (เจอจริงจาก [LAYOUT] log 2026-09-05 รอบสอง:
+        # 'P' ทับ Circle x2) และ buff เดิม 0.30 < flash_radius 0.4 ทำให้ป้ายเข้าไปทับ
+        # เส้นรัศมีชั่วคราวของ Flash ด้วย -- แก้โดยใช้ทิศทแยง UR (ไม่ขนานสิ่งใดเลย)
+        # และเพิ่ม buff ให้เกิน flash_radius
+        tP = tag("P", P, UR, WHITE, 26, 0.45)
         self.play(FadeIn(dP), Flash(P, color=WHITE, flash_radius=0.4), FadeIn(tP))
         self.wait(0.6)
 
@@ -358,13 +362,19 @@ class G08_ConjugateProfiles(SafeScene):
 
         loc = DashedLine(O1 + LEFT * 0.6, O2 + RIGHT * 0.6, color=GRAYTXT, stroke_width=2.5)
         dP = pt(P, WHITE, 0.09)
-        # ป้ายเดิมชี้ DOWN ทับกับเส้น n_line เส้นที่ 3 (off=(0.15,-0.95,..) ก็พุ่งลงจาก P
-        # เกือบทางเดียวกัน) -- เจอจริงจาก [LAYOUT] log 2026-09-05 เปลี่ยนเป็น LEFT
-        # (ไม่มีเส้นไหนใน offsets ทั้ง 3 พุ่งไปทาง LEFT เลย จึงว่างแน่นอน)
-        tPl = tag("P (นิ่งตลอดเวลา)", P, LEFT, WHITE, 20, 0.2)
+        # รอบแรกลอง DOWN แล้ว LEFT ทั้งคู่ยังชนอยู่ดี -- P นั่งอยู่ "บน" เส้น loc แนวนอน
+        # เอง (LEFT/RIGHT จึงวิ่งขนานทับ loc ทันที) และมี n_line 3 เส้นแผ่ออกจาก P ใน
+        # ทิศต่างๆ รอบข้าง (DOWN ก็ชนเส้นที่ 3) -- ป้ายยาว "P (นิ่งตลอดเวลา)" กว้างพอที่
+        # จะกวาดผ่านเส้นใดเส้นหนึ่งได้เกือบทุกทิศในระยะใกล้ (เจอจริงจาก [LAYOUT] log
+        # 2026-09-05 ทั้งสองรอบ) แก้เด็ดขาดด้วยเส้นชี้ (leader) ไปวางป้ายที่มุมล่างซ้าย
+        # ซึ่งไม่มีเส้นไหนใน 3 เส้น + loc ผ่านเลย (ตรวจแล้ว: ทุกเส้นอยู่ทางขวา/บนของ P)
+        p_lbl_pos = P + LEFT * 2.0 + DOWN * 0.75
+        p_leader = Line(P + (LEFT * 0.6 + DOWN * 0.2), p_lbl_pos + RIGHT * 0.15 + UP * 0.05,
+                         color=WHITE, stroke_width=1.5)
+        tPl = Text("P (นิ่งตลอดเวลา)", font_size=20, color=WHITE).move_to(p_lbl_pos)
         cap = caption_top("เพื่อให้เคลื่อนที่เรียบ contact normal ต้องผ่านจุด P เสมอ", size=22)
         self.play(FadeIn(cap))
-        self.play(Create(loc), FadeIn(dP), FadeIn(tPl))
+        self.play(Create(loc), FadeIn(dP), Create(p_leader), FadeIn(tPl))
         self.wait(0.8)
 
         # 3 สแนปช็อตของจุดสัมผัส Q ที่ตำแหน่งต่างกัน แต่เส้นปกติทุกเส้นผ่าน P เสมอ
@@ -406,7 +416,7 @@ class G08_ConjugateProfiles(SafeScene):
         self.play(FadeIn(cap4))
         self.wait(1.2)
         self.play(FadeOut(cap4))
-        self.play(FadeOut(VGroup(loc, dP, tPl, groups)))
+        self.play(FadeOut(VGroup(loc, dP, tPl, p_leader, groups)))
 
         box_txt = MathTex(r"\text{conjugate teeth} \Rightarrow \text{constant angular velocity ratio}",
                            font_size=26, color=WHITE).move_to(UP * 0.3)
@@ -791,8 +801,12 @@ class G12_ToothThickness(SafeScene):
         out_b, out_a = O + (R_A + 0.55) * dir_b, O + (R_A + 0.85) * dir_a
         leader_b = Line(tip_b, out_b, color=GEAR2, stroke_width=1.5)
         leader_a = Line(tip_a, out_a, color=GEAR3, stroke_width=1.5)
-        t_b_lbl = tag("t_b (ความหนาที่ B)", out_b, dir_b, GEAR2, 15, 0.1)
-        t_a_lbl = tag("t_A (ความหนาที่ A -- แคบกว่า)", out_a, dir_a, GEAR3, 15, 0.1)
+        t_b_lbl = tag("t_b (ที่ B)", out_b, dir_b, GEAR2, 15, 0.1)
+        # ป้ายเดิมยาวมาก ("...แคบกว่า") ยื่นไปตามทิศ dir_a (ทแยงขวาล่าง) ไกลถึง x~2.75
+        # ทะลุเข้าไปในโซนสูตร deriv ทางขวาแม้จะย่อ fit_width ของสูตรนั้นแล้วก็ตาม (เจอ
+        # จริงจาก [LAYOUT] log 2026-09-05 ทั้งสองรอบ) -- ตัดข้อความสั้นลง (คำอธิบาย
+        # "แคบกว่า" อยู่ในคำบรรยายบนอยู่แล้วไม่จำเป็นต้องซ้ำในป้ายนี้)
+        t_a_lbl = tag("t_A (ที่ A)", out_a, dir_a, GEAR3, 15, 0.1)
         self.play(Create(leader_b), FadeIn(t_b_lbl))
         self.wait(0.8)
         self.play(Create(wedge_A), Create(arc_tA))
@@ -808,6 +822,7 @@ class G12_ToothThickness(SafeScene):
             MathTex(r"\theta_A=\tan\phi_A-\phi_A", font_size=22, color=GRAYTXT),
             Text("(แทนค่าจากคลิปก่อน)", font_size=18, color=GRAYTXT),
         ).arrange(RIGHT, buff=0.25)
+        fit_width(theta_row, 5.3)
         last_formula = MathTex(
             r"t_A=2R_A\!\left(\frac{t_B}{2R_B}-\tan\phi_A+\phi_A+\tan\phi_B-\phi_B\right)",
             font_size=22, color=OK)
@@ -884,10 +899,14 @@ class G13_LineOfAction(SafeScene):
         # ป้ายเดิมชี้ทิศ E-P (ทิศ line of action) ซึ่งไม่ใช่ทิศออกจากวงกลมของเฟือง
         # แต่ละตัว -- E1/E2 เป็นจุดสัมผัสอยู่บน/ใกล้ base+pitch circle ของตัวเองพอดี
         # (ช่องว่างระหว่าง Rb กับ R แคบมาก) เจอจริงจาก [LAYOUT] log: 'E2' ทับ Circle
-        # แก้โดยชี้ป้ายตามแนวรัศมีออกจากศูนย์กลางของแต่ละเฟืองแทน รับประกันว่าห่างออก
-        # จากวงกลมทั้งชุด (base+pitch) ของเฟืองนั้นเสมอ
-        dir_E1 = (E1 - O1) / np.linalg.norm(E1 - O1)
-        dir_E2 = (E2 - O2) / np.linalg.norm(E2 - O2)
+        # -- รอบแรกลองชี้ออกจากศูนย์กลาง "ของตัวเอง" (O1 สำหรับ E1) แต่ E1/E2 อยู่ใกล้
+        # จุด P มาก การชี้ออกจากศูนย์ตัวเองบางทีกลับพาไปใกล้วงกลมของ "อีกเฟือง" แทน
+        # (เจอจริงรอบสอง: 'E1' ทับ Circle) แก้เด็ดขาดด้วยการชี้ออกจากศูนย์กลางของ "อีก
+        # เฟือง" (ไม่ใช่ตัวเอง) แทน -- ทิศนี้เคลื่อนออกจากทั้งวงกลมของตัวเอง (เพราะ E
+        # อยู่บนวงกลมตัวเองอยู่แล้ว ทิศไหนที่ไม่พุ่งเข้าหาศูนย์ตัวเองก็ปลอดภัย) และออก
+        # จากวงกลมอีกฝั่งไปพร้อมกัน
+        dir_E1 = (E1 - O2) / np.linalg.norm(E1 - O2)
+        dir_E2 = (E2 - O1) / np.linalg.norm(E2 - O1)
         tE1 = tag("E1", E1, dir_E1, BASE_C, 18, 0.35)
         tE2 = tag("E2", E2, dir_E2, BASE_C, 18, 0.35)
         self.play(FadeIn(dE1), FadeIn(dE2), FadeIn(tE1), FadeIn(tE2))
@@ -951,8 +970,13 @@ class G14_GearVocabulary(SafeScene):
         # (UP/DOWN) แทน -- อยู่ในช่องว่างระหว่างวงแหวนพอดี ไม่กวาดข้ามเส้นรอบวงไหนเลย
         a_seg = seg(O + RIGHT * R, O + RIGHT * Ro, GEAR3, 5)
         b_seg = seg(O + LEFT * Ri, O + LEFT * R, GRAYTXT, 5)
-        a_lbl = tag("a (addendum)", O + RIGHT * (R + Ro) / 2, UP, GEAR3, 16, 0.15)
-        b_lbl = tag("b (dedendum)", O + LEFT * (R + Ri) / 2, DOWN, GRAYTXT, 16, 0.15)
+        # ป้ายยาว "a (addendum)"/"b (dedendum)" กว้างเกินไป -- ปลายป้ายด้านที่ยื่นออก
+        # จากศูนย์ไปทาง R_o/R_i ไปจ่อโดนขอบวงกลมพอดี (แม้จุดยึดตรงกลางจะห่างวงก็ตาม
+        # เพราะวงกลมโค้งแคบลงตรงขอบ) เจอจริงจาก [LAYOUT] log 2026-09-05 ซ้ำสองรอบ --
+        # cap2 ที่กำลังจะขึ้นอธิบาย a/b เต็มคำอยู่แล้ว ป้ายบนรูปจึงย่อเหลือตัวอักษรเดียว
+        # พอ (แบบเดียวกับ G16 ที่ใช้ท่านี้แล้วผ่าน [LAYOUT] คลีนจริง)
+        a_lbl = tag("a", O + RIGHT * (R + Ro) / 2, UP, GEAR3, 18, 0.28)
+        b_lbl = tag("b", O + LEFT * (R + Ri) / 2, DOWN, GRAYTXT, 18, 0.28)
         cap2 = caption_top("addendum a = R_o - R (ฟันยื่นสูง) | dedendum b = R - R_i (โคนฟันลึก)", size=19)
         self.play(FadeOut(cap))
         self.play(FadeIn(cap2))
@@ -1207,8 +1231,12 @@ class G18_ExampleBaseCircle(SafeScene):
         # ป้ายเดิมชี้ UP จากจุดเดียวกับที่ a_seg (เส้นแนวตั้ง) จะเริ่มต้น/สิ้นสุดพอดี --
         # กรอบข้อความเลยทับเส้นที่วาดทีหลัง (เจอจริงจาก [LAYOUT] log: 'R=1.5in' ทับ Line)
         # แก้โดยให้สองป้ายชี้คนละด้าน (LEFT/RIGHT) แทน หลบแนวตั้งที่ a_seg จะใช้
-        lR = tag("R = 1.5 in", O + UP * 1.5, LEFT, PITCH_C, 17, 0.2)
-        lRo = tag("R_o = 1.625 in", O + UP * (1.5 + (Ro - R) * 4), RIGHT, GEAR3, 17, 0.25)
+        # รอบก่อนแก้ทับ a_seg (แนวตั้ง) ได้แล้วด้วย LEFT/RIGHT แต่ยังทับส่วนโค้งของ
+        # c_Ro อยู่ (จุดยึดอยู่ตรง "ยอด" ของวงในแนวตั้ง ขยับแนวนอนล้วนๆ ยังอยู่ในช่วง
+        # ความสูงที่วงยังโค้งแคบอยู่) เจอจริงจาก [LAYOUT] log 2026-09-05 -- แก้เพิ่มด้วย
+        # การขยับทแยง (UL/UR) ให้สูงพ้นทั้งแนวนอนและแนวตั้งไปพร้อมกัน ปลอดภัยกว่า
+        lR = tag("R = 1.5 in", O + UP * 1.5, UL, PITCH_C, 15, 0.35)
+        lRo = tag("R_o = 1.625 in", O + UP * (1.5 + (Ro - R) * 4), UR, GEAR3, 15, 0.35)
         self.play(FadeIn(lR), FadeIn(lRo))
         self.wait(0.8)
 
