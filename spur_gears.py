@@ -369,7 +369,11 @@ class G08_ConjugateProfiles(SafeScene):
         # 2026-09-05 ทั้งสองรอบ) แก้เด็ดขาดด้วยเส้นชี้ (leader) ไปวางป้ายที่มุมล่างซ้าย
         # ซึ่งไม่มีเส้นไหนใน 3 เส้น + loc ผ่านเลย (ตรวจแล้ว: ทุกเส้นอยู่ทางขวา/บนของ P)
         p_lbl_pos = P + LEFT * 2.0 + DOWN * 0.75
-        p_leader = Line(P + (LEFT * 0.6 + DOWN * 0.2), p_lbl_pos + RIGHT * 0.15 + UP * 0.05,
+        # ปลายเส้นชี้เดิมหยุดห่างจากจุดศูนย์กลางป้ายแค่ 0.16 หน่วย -- ป้ายยาว
+        # "P (นิ่งตลอดเวลา)" ครึ่งความกว้างมากกว่านั้นมาก เส้นเลยพุ่งเข้าไปในกรอบ
+        # ข้อความเอง (เจอจริงจาก [LAYOUT] log 2026-09-05 รอบสาม) ขยับให้หยุดที่ขอบ
+        # ขวาของป้ายจริง ๆ แทน (เผื่อระยะกว้างกว่าความกว้างจริงของป้ายไว้ก่อน)
+        p_leader = Line(P + (LEFT * 0.6 + DOWN * 0.2), p_lbl_pos + RIGHT * 1.15,
                          color=WHITE, stroke_width=1.5)
         tPl = Text("P (นิ่งตลอดเวลา)", font_size=20, color=WHITE).move_to(p_lbl_pos)
         cap = caption_top("เพื่อให้เคลื่อนที่เรียบ contact normal ต้องผ่านจุด P เสมอ", size=22)
@@ -975,8 +979,10 @@ class G14_GearVocabulary(SafeScene):
         # เพราะวงกลมโค้งแคบลงตรงขอบ) เจอจริงจาก [LAYOUT] log 2026-09-05 ซ้ำสองรอบ --
         # cap2 ที่กำลังจะขึ้นอธิบาย a/b เต็มคำอยู่แล้ว ป้ายบนรูปจึงย่อเหลือตัวอักษรเดียว
         # พอ (แบบเดียวกับ G16 ที่ใช้ท่านี้แล้วผ่าน [LAYOUT] คลีนจริง)
-        a_lbl = tag("a", O + RIGHT * (R + Ro) / 2, UP, GEAR3, 18, 0.28)
-        b_lbl = tag("b", O + LEFT * (R + Ri) / 2, DOWN, GRAYTXT, 18, 0.28)
+        # ยังเหลือทับเล็กน้อยแม้ย่อเหลือตัวอักษรเดียวแล้ว (มุมของวงแคบลงตรงขอบพอดี) --
+        # เพิ่ม buff อีกรอบ (เจอจริงจาก [LAYOUT] log 2026-09-05 รอบสาม เหลือแค่ 'b' 2 จุด)
+        a_lbl = tag("a", O + RIGHT * (R + Ro) / 2, UP, GEAR3, 16, 0.45)
+        b_lbl = tag("b", O + LEFT * (R + Ri) / 2, DOWN, GRAYTXT, 16, 0.45)
         cap2 = caption_top("addendum a = R_o - R (ฟันยื่นสูง) | dedendum b = R - R_i (โคนฟันลึก)", size=19)
         self.play(FadeOut(cap))
         self.play(FadeIn(cap2))
@@ -1235,8 +1241,10 @@ class G18_ExampleBaseCircle(SafeScene):
         # c_Ro อยู่ (จุดยึดอยู่ตรง "ยอด" ของวงในแนวตั้ง ขยับแนวนอนล้วนๆ ยังอยู่ในช่วง
         # ความสูงที่วงยังโค้งแคบอยู่) เจอจริงจาก [LAYOUT] log 2026-09-05 -- แก้เพิ่มด้วย
         # การขยับทแยง (UL/UR) ให้สูงพ้นทั้งแนวนอนและแนวตั้งไปพร้อมกัน ปลอดภัยกว่า
-        lR = tag("R = 1.5 in", O + UP * 1.5, UL, PITCH_C, 15, 0.35)
-        lRo = tag("R_o = 1.625 in", O + UP * (1.5 + (Ro - R) * 4), UR, GEAR3, 15, 0.35)
+        # ยังเหลือทับเล็กน้อยกับ c_Ro (เจอจริงจาก [LAYOUT] log 2026-09-05 รอบสาม)
+        # เพิ่ม buff อีกรอบให้พ้นส่วนโค้งแน่นอน
+        lR = tag("R = 1.5 in", O + UP * 1.5, UL, PITCH_C, 15, 0.55)
+        lRo = tag("R_o = 1.625 in", O + UP * (1.5 + (Ro - R) * 4), UR, GEAR3, 15, 0.55)
         self.play(FadeIn(lR), FadeIn(lRo))
         self.wait(0.8)
 
@@ -2092,4 +2100,427 @@ class G33_ExampleDesign13Teeth(SafeScene):
                       font_size=17, color=OK).move_to([0, -3.15, 0])
         fit_width(concl, 12.5)
         self.play(FadeIn(concl, shift=UP * 0.15))
+        self.wait(2.4)
+
+
+# =====================================================================
+# G34 -- หน้า 34: Involute Interference คืออะไร
+# =====================================================================
+class G34_InterferenceDef(SafeScene):
+    def construct(self):
+        self.add(title("Involute Interference คืออะไร", size=26))
+        self.add(page_ref("หน้า 34"))
+
+        cap = caption_top("Interference = ฟันสัมผัสกันต่ำกว่า base circle (นอกช่วง E1E2)", size=20)
+        self.play(FadeIn(cap))
+
+        # แผนภาพช่วงปกติ (ไม่ scale ตามจริง -- เน้นให้เห็น "ลำดับจุด" บนเส้นเดียวกัน)
+        y0 = 1.0
+        line1 = Line(LEFT * 5.5 + UP * y0, RIGHT * 5.5 + UP * y0, color=LOA_C, stroke_width=3)
+        pts_ok = [(-4.5, "E1"), (-2.0, "A"), (0.0, "P"), (2.0, "B"), (4.5, "E2")]
+        ok_dots = VGroup(); ok_lbls = VGroup()
+        for x, name in pts_ok:
+            p = np.array([x, y0, 0])
+            c = BASE_C if name in ("E1", "E2") else (WARN if name in ("A", "B") else WHITE)
+            ok_dots.add(pt(p, c, 0.06))
+            ok_lbls.add(tag(name, p, UP, c, 16, 0.12))
+        lbl_ok = Text("ปกติ (ไม่ interference): A อยู่ระหว่าง E1-P, B อยู่ระหว่าง P-E2",
+                       font_size=16, color=OK).next_to(line1, UP, buff=0.55)
+        self.play(Create(line1), FadeIn(ok_dots), FadeIn(ok_lbls), FadeIn(lbl_ok))
+        self.wait(1.2)
+
+        self.play(FadeOut(cap))
+        cap2 = caption_top("แต่ถ้าเฟือง 2 (ตัวตาม) มีฟันน้อยไป -- addendum circle ยื่นเลย E1 ออกไป", size=18)
+        self.play(FadeIn(cap2))
+
+        y1 = -1.4
+        line2 = Line(LEFT * 5.5 + UP * y1, RIGHT * 5.5 + UP * y1, color=LOA_C, stroke_width=3)
+        # ผิดปกติ: A อยู่เลย E1 ออกไป (ซ้ายกว่า E1) -- นี่คือ interference
+        pts_bad = [(-2.0, "A", WARN), (-1.3, "E1", BASE_C), (0.0, "P", WHITE),
+                   (2.0, "B", WARN), (4.5, "E2", BASE_C)]
+        bad_dots = VGroup(); bad_lbls = VGroup()
+        for x, name, c in pts_bad:
+            p = np.array([x, y1, 0])
+            bad_dots.add(pt(p, c, 0.06))
+            direc = DOWN if name in ("A", "E1") else UP
+            bad_lbls.add(tag(name, p, direc, c, 16, 0.14))
+        overlap = Line(np.array([-2.0, y1, 0]), np.array([-1.3, y1, 0]), color=WARN, stroke_width=8)
+        lbl_bad = Text("A อยู่เลย E1 ออกไป (ซ้ายกว่า) = interference!",
+                        font_size=16, color=WARN).next_to(line2, DOWN, buff=0.55)
+        self.play(Create(line2), FadeIn(bad_dots), FadeIn(bad_lbls))
+        self.play(Create(overlap), FadeIn(lbl_bad))
+        self.wait(1.4)
+
+        self.play(FadeOut(cap2))
+        cap3 = caption_top("เกิดขึ้นจริงเมื่อ: pinion ฟันน้อย (N1=13) ขบกับเฟืองใหญ่ (N2=60) module 3", size=17)
+        self.play(FadeIn(cap3))
+
+        # ตัวเลขจริง (ตรวจแล้วด้วยเลขจริง -- ไม่ใช่แค่ภาพประกอบลอยๆ)
+        phi = 20 * DEGREES
+        N1, N2, m = 13, 60, 3.0
+        R1, R2 = m * N1 / 2, m * N2 / 2
+        a_add = 1.000 * m
+        Ro1, Ro2 = R1 + a_add, R2 + a_add
+        Rb1, Rb2 = R1 * np.cos(phi), R2 * np.cos(phi)
+        C = R1 + R2
+        E1B = np.sqrt(Ro1 ** 2 - Rb1 ** 2)
+        E2A = np.sqrt(Ro2 ** 2 - Rb2 ** 2)
+        E1E2 = C * np.sin(phi)
+
+        nums = VGroup(
+            Text(f"E1B = sqrt(Ro1^2-Rb1^2) = {E1B:.2f} mm", font_size=17, color=BASE_C),
+            Text(f"E2A = sqrt(Ro2^2-Rb2^2) = {E2A:.2f} mm", font_size=17, color=WARN),
+            Text(f"E1E2 = C sin(phi) = {E1E2:.2f} mm", font_size=17, color=GRAYTXT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        for row in nums:
+            fit_width(row, 5.5)
+        nums.arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        nums.to_edge(RIGHT, buff=0.4).shift(UP * 0.3)
+        self.play(FadeOut(cap3))
+        for row in nums:
+            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.6)
+        self.wait(1.0)
+
+        crit = MathTex(rf"E_2A({E2A:.2f}) > E_1E_2({E1E2:.2f})\ \Rightarrow\ \text{{interference}}",
+                        font_size=22, color=WARN)
+        fit_width(crit, 5.5)
+        crit.next_to(nums, DOWN, buff=0.35)
+        box = SurroundingRectangle(crit, color=WARN, buff=0.15)
+        self.play(FadeIn(crit, shift=UP * 0.1), Create(box))
+        self.wait(1.4)
+
+        rule = Text("วิธีเช็คเร็วในข้อสอบ: หา E1B, E2A แล้วเทียบกับ E1E2 = C sin(phi)",
+                     font_size=17, color=OK).move_to([0, -3.15, 0])
+        fit_width(rule, 12.0)
+        self.play(FadeIn(rule, shift=UP * 0.15))
+        self.wait(2.2)
+
+
+# =====================================================================
+# G35 -- หน้า 35: ที่มาสูตร N_min จาก Rack & Pinion Interference
+# =====================================================================
+class G35_NminDerivation(SafeScene):
+    def construct(self):
+        self.add(title("ที่มาสูตร N_min จาก Rack & Pinion", size=25))
+        self.add(page_ref("หน้า 35"))
+
+        cap = caption_top("จุดวิกฤต E = จุดสัมผัสของ line of action กับ base circle ของ pinion", size=19)
+        self.play(FadeIn(cap))
+
+        O = LEFT * 2.6 + DOWN * 1.3
+        R1_r, phi_r = 1.3, 20 * DEGREES
+        Rb1_r = R1_r * np.cos(phi_r)
+        pinion_c = Circle(radius=R1_r, color=PITCH_C, stroke_width=2.5).move_to(O)
+        pinion_base = Circle(radius=Rb1_r, color=BASE_C, stroke_width=3).move_to(O)
+        P = O + UP * R1_r
+        rack_y = P[1]
+        rack_line = Line(LEFT * 6.6 + UP * rack_y, RIGHT * 6.9 + UP * rack_y, color=GEAR3, stroke_width=4)
+        self.play(Create(pinion_c), Create(pinion_base), Create(rack_line))
+        dP = pt(P, WHITE, 0.06)
+        tPp = tag("P", P, UL, WHITE, 18, 0.15)
+        self.play(FadeIn(dP), FadeIn(tPp))
+        self.wait(0.6)
+
+        # เส้น line of action ผ่าน P ทำมุม phi กับแนวราบ (rack pitch line) -- ตรวจด้วย
+        # เลขจริงก่อนใช้: มุม phi ต้องอยู่ "ที่ O" (ระหว่าง OP กับ OE) ไม่ใช่ที่ P เพราะ
+        # Rb=Rcos(phi) นิยามมุมที่ O เสมอ (เหมือนบั๊กที่เจอและแก้แล้วใน G23) ทิศแรก
+        # (sin,-cos) ให้มุมที่ O = 90-phi สลับ Rb กับ PE กัน (ตรวจได้ |O-E|=Rsin(phi)
+        # ผิดจากที่ควรเป็น Rb) ที่ถูกต้องคือ (cos,-sin) -- ตรวจแล้ว |O-E|=Rb, |P-E|=Rsin(phi)
+        d_loa = np.array([np.cos(phi_r), -np.sin(phi_r), 0.0])
+        loa = Line(P - d_loa * 0.6, P + d_loa * 2.6, color=LOA_C, stroke_width=3)
+        E_pt = P + float(np.dot(O - P, d_loa)) * d_loa
+        dE = pt(E_pt, BASE_C, 0.06)
+        tE = tag("E", E_pt, DL, BASE_C, 18, 0.18)
+        cap2 = caption_top("E: จุดสัมผัสของ line of action กับ base circle -- ระยะ PE = R sin(phi)", size=18)
+        self.play(FadeOut(cap)); self.play(FadeIn(cap2))
+        self.play(Create(loa))
+        self.play(FadeIn(dE), FadeIn(tE))
+        seg_PE = seg(P, E_pt, WARN, 4)
+        self.wait(0.8)
+
+        eq1 = MathTex(r"\overline{PE}=R\sin\phi", font_size=26, color=WARN)
+        eq1.to_edge(RIGHT, buff=0.4).shift(UP * 1.8)
+        self.play(FadeIn(eq1, shift=UP * 0.15))
+        self.wait(1.2)
+
+        cap3 = caption_top("addendum ของ rack ที่ตรงกับจุด E พอดี: a' = PE sin(phi)", size=19)
+        self.play(FadeOut(cap2)); self.play(FadeIn(cap3))
+        a_prime_y = E_pt[1]
+        add_line = DashedLine(np.array([-6.6, a_prime_y, 0]), np.array([6.9, a_prime_y, 0]),
+                               color=WARN, stroke_width=2.5)
+        a_prime_lbl = tag("a' (addendum line ที่จุดวิกฤต)", RIGHT * 3.0 + UP * a_prime_y,
+                           DOWN, WARN, 14, 0.15)
+        self.play(Create(add_line), FadeIn(a_prime_lbl))
+        self.wait(1.0)
+
+        eq2 = MathTex(r"a'=\overline{PE}\sin\phi=R\sin^2\phi", font_size=24, color=WARN)
+        eq2.next_to(eq1, DOWN, buff=0.5)
+        self.play(FadeOut(cap3))
+        self.play(FadeIn(eq2, shift=UP * 0.15))
+        self.wait(1.4)
+
+        cap4 = caption_top("เงื่อนไขไม่ interference: addendum จริง a ต้องน้อยกว่า a'", size=20)
+        self.play(FadeIn(cap4))
+        eq3 = MathTex(r"a<a'=R\sin^2\phi", font_size=26, color=OK)
+        eq3.next_to(eq2, DOWN, buff=0.5)
+        box1 = SurroundingRectangle(eq3, color=OK, buff=0.15)
+        self.play(FadeOut(cap4))
+        self.play(FadeIn(eq3, shift=UP * 0.15), Create(box1))
+        self.wait(1.6)
+
+        self.play(FadeOut(VGroup(eq1, eq2, eq3, box1)))
+        cap5 = caption_top("แทน R = mN/2 แล้วจัดรูปหา N", size=21)
+        self.play(FadeIn(cap5))
+        deriv = VGroup(
+            MathTex(r"a<\frac{mN\sin^2\phi}{2}", font_size=26, color=WHITE),
+            MathTex(r"N>\frac{2a}{m\sin^2\phi}", font_size=28, color=OK),
+        ).arrange(DOWN, buff=0.35).move_to(UP * 0.3)
+        for row in deriv:
+            self.play(FadeIn(row, shift=UP * 0.15), run_time=0.7)
+            self.wait(0.6)
+        box2 = SurroundingRectangle(deriv[1], color=OK, buff=0.15)
+        self.play(Create(box2))
+        self.wait(1.2)
+
+        self.play(FadeOut(cap5))
+        cap6 = caption_top("แทน a = km (k=1 full-depth, k=0.8 stub)", size=21)
+        self.play(FadeIn(cap6))
+        final = MathTex(r"N_{min}=\frac{2k}{\sin^2\phi}", font_size=34, color=OK).move_to(DOWN * 1.6)
+        box3 = SurroundingRectangle(final, color=OK, buff=0.2)
+        self.play(FadeOut(cap6))
+        self.play(FadeIn(final, shift=UP * 0.15), Create(box3))
+        self.wait(1.6)
+
+        golden = Text('"ถ้าเฟืองขบกับ rack ได้โดยไม่ interference แล้ว จะขบกับเฟืองอื่นได้ทุกตัว"',
+                       font_size=16, color=WARN).move_to([0, -3.15, 0])
+        fit_width(golden, 12.5)
+        self.play(FadeIn(golden, shift=UP * 0.15))
+        self.wait(2.4)
+
+
+# =====================================================================
+# G36 -- หน้า 36: Undercutting ตอนผลิตด้วย hob
+# =====================================================================
+class G36_Undercutting(SafeScene):
+    def construct(self):
+        self.add(title("Undercutting ตอนผลิตด้วย Hob", size=27))
+        self.add(page_ref("หน้า 36"))
+
+        cap = caption_top("N_min = จำนวนฟันเล็กสุดที่ตัดด้วย hob ได้โดยไม่ undercut", size=20)
+        self.play(FadeIn(cap))
+
+        formula = MathTex(r"N_{min}=\frac{2k}{\sin^2\phi}", font_size=34, color=OK).move_to(UP * 1.5)
+        box = SurroundingRectangle(formula, color=OK, buff=0.2)
+        self.play(FadeIn(formula, shift=UP * 0.15), Create(box))
+        self.wait(1.2)
+
+        table = VGroup(
+            VGroup(Text("ระบบ", font_size=19, color=WHITE),
+                   Text("k", font_size=19, color=WHITE)).arrange(RIGHT, buff=1.2),
+            VGroup(Text("Full-depth", font_size=18, color=PITCH_C),
+                   Text("1.0", font_size=18, color=PITCH_C)).arrange(RIGHT, buff=1.0),
+            VGroup(Text("Stub", font_size=18, color=GEAR3),
+                   Text("0.8", font_size=18, color=GEAR3)).arrange(RIGHT, buff=1.35),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
+        table.next_to(formula, DOWN, buff=0.6)
+        self.play(FadeOut(cap))
+        for row in table:
+            self.play(FadeIn(row, shift=UP * 0.1), run_time=0.5)
+        self.wait(1.4)
+
+        distinguish = VGroup(
+            Text("แยกให้ออก:", font_size=19, color=WHITE),
+            Text("Interference = ปัญหาตอนใช้งาน (เฟืองขบกันแล้วชน)", font_size=17, color=WARN),
+            Text("Undercutting = ผลของ interference ตอนผลิต (มีดกินโคนฟัน)", font_size=17, color=GEAR3),
+            Text("ต้นเหตุเดียวกัน: contact เลย base circle -- คนละสถานการณ์", font_size=16, color=GRAYTXT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        for row in distinguish:
+            fit_width(row, 6.2)
+        distinguish.arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        distinguish.to_edge(RIGHT, buff=0.4).shift(UP * 0.2)
+        cap2 = caption_top("Interference vs Undercutting -- คนละขั้นตอนกัน", size=20)
+        self.play(FadeIn(cap2))
+        for row in distinguish:
+            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.5)
+        self.wait(2.4)
+
+
+# =====================================================================
+# G37 -- หน้า 37: ผลของการเพิ่ม Pressure Angle
+# =====================================================================
+class G37_PressureAngleEffect(SafeScene):
+    def construct(self):
+        self.add(title("ผลของการเพิ่ม Pressure Angle", size=27))
+        self.add(page_ref("หน้า 37"))
+
+        cap = caption_top("phi ใหญ่ขึ้น -> R_b = R cos(phi) เล็กลง -> ฟันโค้งมากขึ้น ตัดฟันน้อยได้", size=18)
+        self.play(FadeIn(cap))
+
+        rows_data = [
+            ("20 deg, full-depth (k=1)", 20, 1.0, "18 ฟัน"),
+            ("25 deg, full-depth (k=1)", 25, 1.0, "12 ฟัน"),
+            ("20 deg, stub (k=0.8)", 20, 0.8, "14 ฟัน"),
+        ]
+        header = VGroup(
+            Text("เงื่อนไข", font_size=17, color=WHITE),
+            Text("N_min", font_size=17, color=WHITE),
+            Text("ใช้จริง", font_size=17, color=WHITE),
+        ).arrange(RIGHT, buff=0.8)
+        rows = VGroup(header)
+        for label, phi_deg, k, used in rows_data:
+            nmin = 2 * k / (np.sin(phi_deg * DEGREES) ** 2)
+            r = VGroup(
+                Text(label, font_size=16, color=GRAYTXT),
+                Text(f"{nmin:.2f}", font_size=16, color=OK),
+                Text(used, font_size=16, color=WARN),
+            ).arrange(RIGHT, buff=0.5)
+            rows.add(r)
+        rows.arrange(DOWN, aligned_edge=LEFT, buff=0.3)
+        rows.move_to(UP * 0.6)
+        self.play(FadeOut(cap))
+        for r in rows:
+            self.play(FadeIn(r, shift=UP * 0.1), run_time=0.5)
+        self.wait(1.6)
+
+        # ---- แผนภาพเทียบ base circle เล็ก/ใหญ่ ---------------------------------
+        cap2 = caption_top("phi มาก -> base circle เล็กลง (เทียบที่ R เท่ากัน)", size=20)
+        self.play(FadeIn(cap2))
+        R_demo = 1.3
+        O1c = LEFT * 3.3 + DOWN * 1.7
+        O2c = RIGHT * 2.0 + DOWN * 1.7
+        c_R1 = Circle(radius=R_demo, color=PITCH_C, stroke_width=2).move_to(O1c)
+        c_Rb1 = Circle(radius=R_demo * np.cos(20 * DEGREES), color=BASE_C, stroke_width=3).move_to(O1c)
+        c_R2 = Circle(radius=R_demo, color=PITCH_C, stroke_width=2).move_to(O2c)
+        c_Rb2 = Circle(radius=R_demo * np.cos(25 * DEGREES), color=BASE_C, stroke_width=3).move_to(O2c)
+        l1 = tag("phi=20 deg", O1c + DOWN * (R_demo + 0.25), DOWN, PITCH_C, 15, 0.08)
+        l2 = tag("phi=25 deg", O2c + DOWN * (R_demo + 0.25), DOWN, PITCH_C, 15, 0.08)
+        self.play(Create(c_R1), Create(c_Rb1), FadeIn(l1))
+        self.play(Create(c_R2), Create(c_Rb2), FadeIn(l2))
+        self.wait(1.4)
+
+        cost = Text("ราคาที่จ่าย: แรงกดตามแนว line of action เอียงมากขึ้น -> แรงเข้าแบริ่งสูงขึ้น",
+                     font_size=17, color=WARN).move_to([0, -3.15, 0])
+        fit_width(cost, 12.5)
+        self.play(FadeOut(cap2))
+        self.play(FadeIn(cost, shift=UP * 0.15))
+        self.wait(2.4)
+
+
+# =====================================================================
+# G38 -- หน้า 38-39: ตัวอย่างใหญ่ (หน่วย mm) -- หา Z และ m_p เต็มขั้นตอน
+# =====================================================================
+class G38_BigExampleMM(SafeScene):
+    def construct(self):
+        self.add(title("ตัวอย่างใหญ่ (หน่วย mm): หา Z และ m_p", size=24))
+        self.add(page_ref("หน้า 38-39"))
+
+        N1, N2, m, phi_deg = 24, 60, 3.0, 20
+        phi = phi_deg * DEGREES
+        R1, R2 = m * N1 / 2, m * N2 / 2
+        a = 1.000 * m
+        Rb1, Rb2 = R1 * np.cos(phi), R2 * np.cos(phi)
+        Ro1, Ro2 = R1 + a, R2 + a
+        C = R1 + R2
+        Z = np.sqrt(Ro1 ** 2 - Rb1 ** 2) + np.sqrt(Ro2 ** 2 - Rb2 ** 2) - C * np.sin(phi)
+        pb = 2 * np.pi * Rb1 / N1
+        mp = Z / pb
+
+        cap = caption_top("โจทย์: pinion module 3, 24 ฟัน ขับเฟือง 60 ฟัน, phi=20 deg, ไม่มี backlash", size=17)
+        self.play(FadeIn(cap))
+
+        fr = cr_wide(shift=np.array([-3.4, -0.15, 0.0]))
+        # ใช้เฟรมภาพเดียวกับ G19/G25 (เพื่อความต่อเนื่อง) แต่แทนที่ตัวเลขจริงในป้าย/
+        # สูตรด้วยชุดตัวเลข mm ของหน้า 38-39 นี้ -- คนละตัวเลขจากตัวอย่างหน้า 25
+        # (นิ้ว) แต่เป็นเฟืองคู่เดียวกันในทางฟิสิกส์ (24T/60T, phi=20, full-depth)
+        O1, O2 = fr["O1"], fr["O2"]
+        base1 = Circle(radius=fr["Rb1"], color=BASE_C, stroke_width=3).move_to(O1)
+        base2 = Circle(radius=fr["Rb2"], color=BASE_C, stroke_width=3).move_to(O2)
+        self.play(Create(base1), Create(base2))
+        self.wait(0.5)
+
+        self.play(FadeOut(cap))
+        cap2 = caption_top("ขั้น 1 -- ต่างจากหน้า 25: ที่นี่ให้แค่ N, m, phi ต้องสร้าง R, Rb, a, Ro, C เอง", size=17)
+        self.play(FadeIn(cap2))
+        self.wait(1.2)
+
+        step_a = Text("ขั้น 2 -- สูตร: R=mN/2, Rb=Rcos(phi), a=1.000m, Ro=R+a, C=R1+R2",
+                       font_size=16, color=WHITE)
+        fit_width(step_a, 5.2)
+        tbl = VGroup(
+            Text("Pinion (24T):", font_size=16, color=GEAR2),
+            MathTex(rf"R_1={R1:.0f},\ R_{{b1}}={Rb1:.3f},\ R_{{o1}}={Ro1:.0f}\text{{ mm}}",
+                    font_size=16, color=GEAR2),
+            Text("Gear (60T):", font_size=16, color=GEAR3),
+            MathTex(rf"R_2={R2:.0f},\ R_{{b2}}={Rb2:.3f},\ R_{{o2}}={Ro2:.0f}\text{{ mm}}",
+                    font_size=16, color=GEAR3),
+            MathTex(rf"C=R_1+R_2={C:.0f}\text{{ mm}}", font_size=17, color=WHITE),
+        )
+        for row in tbl:
+            fit_width(row, 5.2)
+        col = VGroup(step_a, *tbl).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        col.to_edge(RIGHT, buff=0.4).shift(UP * 0.2)
+        self.play(FadeOut(cap2))
+        for row in col:
+            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.5)
+        self.wait(1.4)
+
+        self.play(FadeOut(col))
+        cap3 = caption_top("ขั้น 3 -- แทนค่าหา Z", size=20)
+        self.play(FadeIn(cap3))
+        z_lines = VGroup(
+            MathTex(r"Z=\sqrt{39^2-33.829^2}+\sqrt{93^2-84.572^2}-126\sin20^\circ",
+                    font_size=16, color=WHITE),
+            MathTex(rf"Z=19.406+38.686-43.095=\mathbf{{{Z:.3f}}}\text{{ mm}}",
+                    font_size=18, color=OK),
+        )
+        for row in z_lines:
+            fit_width(row, 6.5)
+        z_lines.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
+        z_lines.move_to([0, -2.5, 0])
+        self.play(FadeIn(z_lines[0], shift=UP * 0.1))
+        self.wait(0.8)
+        self.play(FadeIn(z_lines[1], shift=UP * 0.1))
+        self.wait(1.4)
+
+        self.play(FadeOut(cap3))
+        cap4 = caption_top("ขั้น 3 (ต่อ) -- หา p_b แล้วหา m_p", size=20)
+        self.play(FadeIn(cap4))
+        mp_lines = VGroup(
+            MathTex(rf"p_b=\frac{{2\pi(33.829)}}{{24}}={pb:.4f}\text{{ mm}}", font_size=18, color=WHITE),
+            MathTex(rf"m_p=\frac{{{Z:.3f}}}{{{pb:.4f}}}=\mathbf{{{mp:.3f}}}", font_size=21, color=OK),
+        )
+        for row in mp_lines:
+            fit_width(row, 6.0)
+        mp_lines.arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        mp_lines.next_to(z_lines, DOWN, buff=0.35)
+        box = SurroundingRectangle(mp_lines[1], color=OK, buff=0.15)
+        self.play(FadeIn(mp_lines[0], shift=UP * 0.1))
+        self.wait(0.8)
+        self.play(FadeIn(mp_lines[1], shift=UP * 0.1), Create(box))
+        self.wait(1.6)
+
+        self.play(FadeOut(cap4))
+        cap5 = caption_top("ขั้น 4 -- ตรวจ", size=20)
+        self.play(FadeIn(cap5))
+        checks = VGroup(
+            Text(f"m_p={mp:.3f} > 1.40 -> เดินเรียบ", font_size=17, color=OK),
+            Text(f"N1=24 > 17.09 -> ไม่ undercut", font_size=17, color=OK),
+            Text("เช็คไขว้กับหน้า 25: เฟืองคู่เดียวกัน (24T/60T, phi=20) แค่คนละหน่วย",
+                 font_size=16, color=GRAYTXT),
+            Text(f"m_p={mp:.3f} ตรงกับหน้า 25 (1.693) เพราะ m_p ไม่มีหน่วย",
+                 font_size=16, color=GRAYTXT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.2)
+        for row in checks:
+            fit_width(row, 6.0)
+        checks.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
+        checks.move_to(DOWN * 1.3)
+        self.play(FadeOut(cap5))
+        for row in checks:
+            self.play(FadeIn(row, shift=UP * 0.1), run_time=0.5)
+        self.wait(1.8)
+
+        warn = Text("บนสไลด์จริง p_b/m_p พิมพ์เลขคลาดเคลื่อน (สลับหลัก) -- ค่าที่ถูกคือค่าข้างบนนี้",
+                     font_size=16, color=WARN).move_to([0, -3.15, 0])
+        fit_width(warn, 12.5)
+        self.play(FadeIn(warn, shift=UP * 0.15))
         self.wait(2.4)
