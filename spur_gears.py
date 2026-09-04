@@ -68,6 +68,67 @@ def ang_of(p, center):
     return float(np.arctan2(v[1], v[0]))
 
 
+# ============================================================= G19-G25 frame
+# ที่มา: Claude_Specs/Spur Gear Series Geometry Spec.md ข้อ 5 (แก้ไข 2026-09-05 --
+# เวอร์ชันเดิมของสเปกเขียนทิศ A/B ผิด ยื่นออกนอก E1E2 ตรวจด้วยเลขจริงแล้วพบว่า Z ที่ได้
+# (4.216) ไม่ตรงกับคำตอบในโน้ต (0.6255 in) ที่ถูกต้องคือ A, B อยู่ "ระหว่าง" E1 กับ E2
+CR_PHI = 20 * DEGREES
+CR_N1, CR_N2 = 24, 60                       # pinion / gear จำนวนฟัน (ตัวอย่างหน้า 25)
+CR_R1_IN, CR_R2_IN = 1.5, 3.75              # รัศมีพิตช์จริง (นิ้ว)
+CR_RO1_IN, CR_RO2_IN = 1.625, 3.875         # รัศมี addendum จริง (นิ้ว)
+
+
+def zab_points(fr, Ro1, Ro2):
+    """A = จุดเริ่มสัมผัส (บน addendum circle เฟือง 2/gear), B = จุดสิ้นสุดสัมผัส (บน
+    addendum circle เฟือง 1/pinion) -- ทั้งคู่อยู่ "ระหว่าง" E1 กับ E2 เสมอถ้าไม่มี
+    interference (หน้า 34) ตรวจด้วย assert ว่า |AB| ตรงกับสูตรกล่อง Z พอดี ก่อนคืนค่า"""
+    E1, E2 = fr["E1"], fr["E2"]
+    Rb1, Rb2 = fr["Rb1"], fr["Rb2"]
+    u = (E2 - E1) / np.linalg.norm(E2 - E1)     # ทิศเดียวกับ fr["d"]
+    E1B = float(np.sqrt(max(Ro1 ** 2 - Rb1 ** 2, 0.0)))
+    E2A = float(np.sqrt(max(Ro2 ** 2 - Rb2 ** 2, 0.0)))
+    B = E1 + u * E1B
+    A = E2 - u * E2A
+    E1E2 = float(np.linalg.norm(E2 - E1))
+    Z = E1B + E2A - E1E2
+    assert abs(np.linalg.norm(A - B) - Z) < 1e-6, (np.linalg.norm(A - B), Z)
+    return dict(A=A, B=B, E1B=E1B, E2A=E2A, E1E2=E1E2, Z=Z)
+
+
+def cr_wide(shift=None):
+    """มุมกว้าง (บริบทเต็ม) -- สเกลลงจากตัวเลขจริงหน้า 25 ให้พอดีเฟรม ใช้กับ G19/G25
+    ที่ต้องโชว์เฟืองทั้งคู่เป็นวงกลมเต็ม (ป้ายกำกับยังพูดถึงค่านิ้วจริงเสมอ ไม่ใช่ค่า
+    scaled -- อ่านจาก CR_R1_IN ฯลฯ ตรงๆ เวลาทำสูตร/ตัวเลข)"""
+    if shift is None:
+        shift = np.array([-3.4, -0.15, 0.0])
+    scale = 0.65
+    R1, R2 = CR_R1_IN * scale, CR_R2_IN * scale
+    Ro1, Ro2 = CR_RO1_IN * scale, CR_RO2_IN * scale
+    fr = loa_frame(CR_PHI, R1, R2, sign=1.0)
+    ab = zab_points(fr, Ro1, Ro2)
+    fr.update(ab)
+    fr["Ro1"], fr["Ro2"] = Ro1, Ro2
+    fr["scale"] = scale
+    for k in ("O1", "O2", "P", "E1", "E2", "A", "B"):
+        fr[k] = fr[k] + shift
+    return fr
+
+
+def cr_local(shift=None):
+    """มุมใกล้ (สเกลจริง 1:1 นิ้ว) -- ใช้กับ G20/G21_22/G23 ที่เน้นสามเหลี่ยมมุมฉาก
+    รอบจุด E1/E2/P/A/B โดยตรง ไม่ต้องวาดวงกลมเฟืองทั้งวง (O2 ไกลเกินจะวาดวงเต็มได้พอดี
+    เฟรม แต่ไม่จำเป็น -- ใช้แค่จุด O1,O2,P,E1,E2,A,B ในการวาดเส้น/สามเหลี่ยม)"""
+    if shift is None:
+        shift = np.array([-2.5, -0.3, 0.0])
+    fr = loa_frame(CR_PHI, CR_R1_IN, CR_R2_IN, sign=1.0)
+    ab = zab_points(fr, CR_RO1_IN, CR_RO2_IN)
+    fr.update(ab)
+    fr["Ro1"], fr["Ro2"] = CR_RO1_IN, CR_RO2_IN
+    for k in ("O1", "O2", "P", "E1", "E2", "A", "B"):
+        fr[k] = fr[k] + shift
+    return fr
+
+
 # =====================================================================
 # G01 -- หน้า 1-2: ปกบท + สารบัญ
 # =====================================================================
@@ -1184,3 +1245,447 @@ class G18_ExampleBaseCircle(SafeScene):
         c_Rb = Circle(radius=Rb, color=BASE_C, stroke_width=3).move_to(O)
         self.play(Create(c_Rb))
         self.wait(1.6)
+
+
+# =====================================================================
+# G19 -- หน้า 19: Contact Ratio (m_p) คืออะไร
+# =====================================================================
+class G19_ContactRatioDef(SafeScene):
+    def construct(self):
+        self.add(title("Contact Ratio (m_p) คืออะไร", size=27))
+        self.add(page_ref("หน้า 19"))
+
+        fr = cr_wide()
+        O1, O2, P = fr["O1"], fr["O2"], fr["P"]
+        E1, E2, A, B = fr["E1"], fr["E2"], fr["A"], fr["B"]
+        Rb1, Rb2, Ro1, Ro2 = fr["Rb1"], fr["Rb2"], fr["Ro1"], fr["Ro2"]
+
+        cap = caption_top("ใช้เฟืองคู่เดียวกับตัวอย่างหน้า 25 ตลอดบล็อกนี้ (pinion 24 ฟัน ขับ gear 60 ฟัน)",
+                           size=17)
+        self.play(FadeIn(cap))
+
+        base1 = Circle(radius=Rb1, color=BASE_C, stroke_width=3).move_to(O1)
+        base2 = Circle(radius=Rb2, color=BASE_C, stroke_width=3).move_to(O2)
+        add1 = DashedVMobject(Circle(radius=Ro1, color=GEAR2, stroke_width=2.5).move_to(O1),
+                               num_dashes=30)
+        add2 = DashedVMobject(Circle(radius=Ro2, color=GEAR3, stroke_width=2.5).move_to(O2),
+                               num_dashes=48)
+        self.play(Create(base1), Create(base2))
+        self.play(Create(add1), Create(add2))
+        lb1 = tag("pinion (24T)", O1 + DOWN * (Ro1 + 0.25), DOWN, GEAR2, 15, 0.08)
+        lb2 = tag("gear (60T)", O2 + RIGHT * (Ro2 + 0.2), RIGHT, GEAR3, 15, 0.1)
+        self.play(FadeIn(lb1), FadeIn(lb2))
+        self.wait(0.6)
+
+        loa_ext = Line(E1 - fr["d"] * 0.5, E2 + fr["d"] * 0.5, color=LOA_C, stroke_width=3)
+        self.play(FadeOut(cap))
+        cap2 = caption_top("เส้น line of action เดิม -- คราวนี้สนใจ 'ช่วงที่ฟันสัมผัสกันจริง'",
+                            size=19)
+        self.play(FadeIn(cap2), Create(loa_ext))
+        self.wait(0.5)
+
+        dE1, dE2 = pt(E1, BASE_C, 0.06), pt(E2, BASE_C, 0.06)
+        tE1 = tag("E1", E1, DOWN, BASE_C, 16, 0.14)
+        tE2 = tag("E2", E2, UP, BASE_C, 16, 0.14)
+        self.play(FadeIn(dE1), FadeIn(dE2), FadeIn(tE1), FadeIn(tE2))
+        self.wait(0.5)
+
+        dA, dB = pt(A, WARN, 0.075), pt(B, WARN, 0.075)
+        tA = tag("A (เริ่มสัมผัส)", A, UP, WARN, 14, 0.14)
+        tB = tag("B (สิ้นสุดสัมผัส)", B, DOWN, WARN, 14, 0.14)
+        path = Line(A, B, color=WARN, stroke_width=6)
+        cap3 = caption_top("A ถึง B = ช่วงที่ฟันคู่นี้สัมผัสกันจริง (อยู่ระหว่าง E1, E2 เสมอถ้าไม่ interference)",
+                            size=16)
+        self.play(FadeOut(cap2))
+        self.play(FadeIn(cap3), Create(path), FadeIn(dA), FadeIn(dB), FadeIn(tA), FadeIn(tB))
+        self.wait(0.8)
+
+        dP = pt(P, WHITE, 0.06)
+        tP = tag("P", P, LEFT, WHITE, 16, 0.1)
+        self.play(FadeIn(dP), FadeIn(tP))
+        approach = Line(A, P, color=OK, stroke_width=8)
+        recess = Line(P, B, color="#FFEE58", stroke_width=8)
+        cap4 = caption_top("ก่อนถึง P = angle of approach | หลังผ่าน P = angle of recess", size=18)
+        self.play(FadeOut(cap3))
+        self.play(FadeIn(cap4), Create(approach), Create(recess))
+        self.wait(1.0)
+
+        formula = MathTex(r"m_p=\frac{Z}{p_b},\qquad Z=\overline{AB}",
+                           font_size=28, color=WHITE).to_edge(RIGHT, buff=0.4).shift(UP * 1.7)
+        box = SurroundingRectangle(formula, color=OK, buff=0.18)
+        self.play(FadeOut(cap4))
+        self.play(FadeIn(formula, shift=UP * 0.15), Create(box))
+        self.wait(1.0)
+
+        meaning = Text("ความหมาย: จำนวนคู่ฟันที่ขบกันอยู่โดยเฉลี่ยตลอดการหมุน",
+                        font_size=17, color=GRAYTXT).next_to(formula, DOWN, buff=0.35)
+        fit_width(meaning, 4.3)
+        self.play(FadeIn(meaning, shift=UP * 0.1))
+        self.wait(1.0)
+
+        table = VGroup(
+            Text("m_p > 1    -> ใช้งานได้ (มีฟันขบเสมอ)", font_size=16, color=WHITE),
+            Text("m_p > 1.40 -> เดินเรียบ (เกณฑ์ออกแบบจริง)", font_size=16, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.2).next_to(meaning, DOWN, buff=0.4)
+        for row in table:
+            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.5)
+        self.wait(1.2)
+
+        note = Text("ทำไมหารด้วย p_b ไม่ใช่ p -- เพราะ p_b วัดในระบบเดียวกับ Z (ตาม line of action)",
+                     font_size=17, color=WARN).move_to([0, -3.15, 0])
+        self.play(FadeIn(note, shift=UP * 0.15))
+        self.wait(2.0)
+
+
+# =====================================================================
+# G20 -- หน้า 20: ที่มาของ Z ขั้นที่ 1: นิยามจุด A และ B
+# =====================================================================
+class G20_ZDefinitionAB(SafeScene):
+    def construct(self):
+        self.add(title("ที่มาของ Z ขั้นที่ 1: นิยามจุด A และ B", size=24))
+        self.add(page_ref("หน้า 20"))
+
+        fr = cr_local()
+        A, B, E1, E2, P = fr["A"], fr["B"], fr["E1"], fr["E2"], fr["P"]
+
+        cap = caption_top("บนเส้น line of action เดียวกัน มี 5 จุดเรียงกัน: E1 - A - P - B - E2", size=18)
+        self.play(FadeIn(cap))
+
+        loa = Line(A - (B - A) * 0.9, B + (B - A) * 0.9, color=LOA_C, stroke_width=3)
+        self.play(Create(loa))
+        pts = [(E1, BASE_C, "E1"), (A, WARN, "A"), (P, WHITE, "P"),
+               (B, WARN, "B"), (E2, BASE_C, "E2")]
+        dots = VGroup(); labels = VGroup()
+        for p, c, name in pts:
+            d = pt(p, c, 0.07)
+            direc = UP if p[1] >= P[1] else DOWN
+            lb = tag(name, p, direc, c, 20, 0.18)
+            dots.add(d); labels.add(lb)
+        self.play(LaggedStart(*[FadeIn(d) for d in dots], lag_ratio=0.15))
+        self.play(LaggedStart(*[FadeIn(l) for l in labels], lag_ratio=0.15))
+        self.wait(0.8)
+
+        cap2 = caption_top("A = begin contact -- ตัด addendum circle ของเฟือง 2 (ตัวตาม)", size=18)
+        self.play(FadeOut(cap)); self.play(FadeIn(cap2))
+        self.play(Indicate(dots[1], color=WARN, scale_factor=1.6))
+        self.wait(1.0)
+
+        cap3 = caption_top("B = end contact -- ตัด addendum circle ของเฟือง 1 (ตัวขับ)", size=18)
+        self.play(FadeOut(cap2)); self.play(FadeIn(cap3))
+        self.play(Indicate(dots[3], color=WARN, scale_factor=1.6))
+        self.wait(1.0)
+
+        cap4 = caption_top("มองบนเส้นเดียวกันเป็นเวกเตอร์: AE2 - E2E1 + E1B = AB", size=18)
+        self.play(FadeOut(cap3)); self.play(FadeIn(cap4))
+        eq = MathTex(r"\overline{AE_2}-\overline{E_2E_1}+\overline{E_1B}=\overline{AB}",
+                      font_size=26, color=WHITE).to_edge(RIGHT, buff=0.4).shift(UP * 1.6)
+        fit_width(eq, 4.6)
+        self.play(FadeIn(eq, shift=UP * 0.15))
+        self.wait(1.4)
+
+        result = MathTex(r"Z=E_1B+E_2A-E_1E_2", font_size=28, color=OK).next_to(eq, DOWN, buff=0.5)
+        box = SurroundingRectangle(result, color=OK, buff=0.18)
+        self.play(FadeOut(cap4))
+        self.play(FadeIn(result, shift=UP * 0.15), Create(box))
+        self.wait(1.4)
+
+        mnemonic = Text("จำง่าย: ยื่นออกจาก base circle ทั้งสองข้าง แล้วลบส่วนที่นับซ้ำ (E1E2) ทิ้ง",
+                         font_size=17, color=GRAYTXT).move_to([0, -3.15, 0])
+        fit_width(mnemonic, 11.5)
+        self.play(FadeIn(mnemonic, shift=UP * 0.15))
+        self.wait(2.0)
+
+
+# =====================================================================
+# G21 -- หน้า 21-22: ที่มาของ Z ขั้นที่ 2 -- E1B และ E2A เป็นสามเหลี่ยมมุมฉาก
+# =====================================================================
+class G21_TriangleEnds(SafeScene):
+    def construct(self):
+        self.add(title("ที่มาของ Z ขั้นที่ 2: E1B และ E2A", size=24))
+        self.add(page_ref("หน้า 21-22"))
+
+        fr = cr_local()
+        O1, O2, E1, E2, A, B = fr["O1"], fr["O2"], fr["E1"], fr["E2"], fr["A"], fr["B"]
+
+        cap = caption_top("E1 คือจุดสัมผัสของ line of action กับ base circle ของเฟือง 1 (pinion)", size=18)
+        self.play(FadeIn(cap))
+
+        tri1 = Polygon(O1, E1, B, color=GEAR2, stroke_width=3, fill_opacity=0.12)
+        self.play(FadeIn(tri1))
+        lO1 = tag("O1", O1, LEFT, GEAR2, 20, 0.15)
+        self.play(FadeIn(lO1))
+        self.wait(0.6)
+
+        ra1 = ra_mark(E1, O1 - E1, B - E1, GRAYTXT, 0.2)
+        self.play(Create(ra1))
+        cap2 = caption_top("O1E1 ตั้งฉากกับ line of action เสมอ (นิยามของจุดสัมผัส)", size=18)
+        self.play(FadeOut(cap)); self.play(FadeIn(cap2))
+        self.wait(1.0)
+
+        lbl_Rb1 = tag("R_b1", (O1 + E1) / 2, DOWN, GEAR2, 17, 0.1)
+        lbl_Ro1 = tag("R_o1", (O1 + B) / 2, UP, WARN, 17, 0.12)
+        self.play(FadeIn(lbl_Rb1))
+        self.wait(0.4)
+        self.play(FadeIn(lbl_Ro1))
+        self.wait(0.5)
+
+        cap3 = caption_top("O1B = R_o1 (B อยู่บน addendum circle ของเฟือง 1 พอดี)", size=18)
+        self.play(FadeOut(cap2)); self.play(FadeIn(cap3))
+        self.wait(1.0)
+
+        eq1 = MathTex(r"E_1B=\sqrt{R_{o1}^2-R_{b1}^2}", font_size=26, color=OK)
+        eq1.to_edge(RIGHT, buff=0.4).shift(UP * 1.9)
+        self.play(FadeOut(cap3))
+        self.play(FadeIn(eq1, shift=UP * 0.15))
+        self.wait(1.2)
+
+        cap4 = caption_top("ทำแบบเดียวกันกับเฟือง 2 (gear): สามเหลี่ยม O2-E2-A", size=19)
+        self.play(FadeIn(cap4))
+        tri2 = Polygon(O2, E2, A, color=GEAR3, stroke_width=3, fill_opacity=0.12)
+        self.play(FadeIn(tri2))
+        lO2 = tag("O2", O2, RIGHT, GEAR3, 20, 0.15)
+        self.play(FadeIn(lO2))
+        ra2 = ra_mark(E2, O2 - E2, A - E2, GRAYTXT, 0.2)
+        self.play(Create(ra2))
+        lbl_Rb2 = tag("R_b2", (O2 + E2) / 2, UP, GEAR3, 17, 0.1)
+        lbl_Ro2 = tag("R_o2", (O2 + A) / 2, DOWN, WARN, 17, 0.12)
+        self.play(FadeIn(lbl_Rb2), FadeIn(lbl_Ro2))
+        self.wait(0.8)
+
+        eq2 = MathTex(r"E_2A=\sqrt{R_{o2}^2-R_{b2}^2}", font_size=26, color=OK)
+        eq2.next_to(eq1, DOWN, buff=0.5)
+        self.play(FadeOut(cap4))
+        self.play(FadeIn(eq2, shift=UP * 0.15))
+        self.wait(1.6)
+
+        box = SurroundingRectangle(VGroup(eq1, eq2), color=OK, buff=0.2)
+        self.play(Create(box))
+        self.wait(2.0)
+
+
+# =====================================================================
+# G23 -- หน้า 23: ที่มาของ Z ขั้นที่ 3: E1E2 = C sin(phi)
+# =====================================================================
+class G23_E1E2Formula(SafeScene):
+    def construct(self):
+        self.add(title("ที่มาของ Z ขั้นที่ 3: E1E2 = C sin(phi)", size=24))
+        self.add(page_ref("หน้า 23"))
+
+        fr = cr_local()
+        O1, O2, P, E1, E2 = fr["O1"], fr["O2"], fr["P"], fr["E1"], fr["E2"]
+
+        cap = caption_top("E1P และ E2P คือสองท่อนของ E1E2 -- แยกคำนวณจากสามเหลี่ยม O1-P-E1 และ O2-P-E2",
+                           size=17)
+        self.play(FadeIn(cap))
+
+        loc = DashedLine(O1 + LEFT * 0.3, O2 + RIGHT * 0.3, color=GRAYTXT, stroke_width=2.5)
+        self.play(Create(loc))
+        for p, c, name, direc in [(O1, GEAR2, "O1", LEFT), (O2, GEAR3, "O2", RIGHT), (P, WHITE, "P", DOWN)]:
+            self.play(FadeIn(pt(p, c, 0.07)), FadeIn(tag(name, p, direc, c, 18, 0.14)), run_time=0.4)
+        self.wait(0.5)
+
+        tri1 = Polygon(O1, P, E1, color=GEAR2, stroke_width=3, fill_opacity=0.12)
+        tri2 = Polygon(O2, P, E2, color=GEAR3, stroke_width=3, fill_opacity=0.12)
+        self.play(FadeIn(tri1), FadeIn(tri2))
+        dE1 = pt(E1, BASE_C, 0.06); tE1 = tag("E1", E1, DOWN, BASE_C, 16, 0.14)
+        dE2 = pt(E2, BASE_C, 0.06); tE2 = tag("E2", E2, UP, BASE_C, 16, 0.14)
+        self.play(FadeIn(dE1), FadeIn(tE1), FadeIn(dE2), FadeIn(tE2))
+        self.wait(0.6)
+
+        # มุมที่ O1 (ระหว่าง O1P กับ O1E1) และที่ O2 (ระหว่าง O2P กับ O2E2) คือ phi พอดี
+        # (cos(phi)=Rb/R ตามนิยามฐาน -- ตรวจเลขจริงแล้วว่าไม่ใช่มุมที่ P ซึ่งเป็น 90-phi)
+        ang1 = Angle(Line(O1, P), Line(O1, E1), radius=0.45, color=WARN, stroke_width=3)
+        ang2 = Angle(Line(O2, E2), Line(O2, P), radius=0.45, color=WARN, stroke_width=3)
+        lbl_phi1 = MathTex(r"\phi", font_size=22, color=WARN).move_to(
+            O1 + normalize(normalize(P - O1) + normalize(E1 - O1)) * 0.68)
+        lbl_phi2 = MathTex(r"\phi", font_size=22, color=WARN).move_to(
+            O2 + normalize(normalize(E2 - O2) + normalize(P - O2)) * 0.68)
+        cap2 = caption_top("มุมที่ O1 และที่ O2 (ระหว่างเส้นศูนย์กลางกับรัศมีไปจุดสัมผัส) = pressure angle phi",
+                            size=16)
+        self.play(FadeOut(cap)); self.play(FadeIn(cap2))
+        self.play(Create(ang1), Create(ang2), FadeIn(lbl_phi1), FadeIn(lbl_phi2))
+        self.wait(1.2)
+
+        cap3 = caption_top("E1P = O1P sin(phi)   ,   E2P = O2P sin(phi)", size=19)
+        self.play(FadeOut(cap2)); self.play(FadeIn(cap3))
+        self.wait(1.0)
+
+        deriv = VGroup(
+            MathTex(r"E_1E_2=E_1P+E_2P", font_size=23, color=WHITE),
+            MathTex(r"=O_1P\sin\phi+O_2P\sin\phi", font_size=23, color=WHITE),
+            MathTex(r"=(O_1P+O_2P)\sin\phi", font_size=23, color=WHITE),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.25)
+        deriv.to_edge(RIGHT, buff=0.4).shift(UP * 1.0)
+        self.play(FadeOut(cap3))
+        for row in deriv:
+            self.play(FadeIn(row, shift=UP * 0.12), run_time=0.6)
+            self.wait(0.6)
+
+        result = MathTex(r"E_1E_2=C\sin\phi", font_size=28, color=OK).next_to(deriv, DOWN, buff=0.4)
+        box = SurroundingRectangle(result, color=OK, buff=0.18)
+        note = Text("C = O1P + O2P = R1 + R2 (ระยะศูนย์กลาง)", font_size=15, color=GRAYTXT)
+        note.next_to(result, DOWN, buff=0.25)
+        fit_width(note, 4.4)
+        self.play(FadeIn(result, shift=UP * 0.15), Create(box))
+        self.play(FadeIn(note))
+        self.wait(2.2)
+
+
+# =====================================================================
+# G24 -- หน้า 24: สูตร Z สำเร็จรูป + กรณี Rack & Pinion
+# =====================================================================
+class G24_ZFormulaFinal(SafeScene):
+    def construct(self):
+        self.add(title("สูตร Z สำเร็จรูป + กรณี Rack & Pinion", size=24))
+        self.add(page_ref("หน้า 24"))
+
+        cap = caption_top("รวม 3 ขั้นที่แล้วเข้าด้วยกัน", size=21)
+        self.play(FadeIn(cap))
+
+        formula = MathTex(
+            r"Z=\sqrt{R_{o1}^2-R_{b1}^2}+\sqrt{R_{o2}^2-R_{b2}^2}-C\sin\phi",
+            font_size=28, color=WHITE).move_to(UP * 1.7)
+        fit_width(formula, 10.5)
+        box = SurroundingRectangle(formula, color=OK, buff=0.2)
+        self.play(FadeIn(formula, shift=UP * 0.15), Create(box))
+        self.wait(1.6)
+
+        cap2 = caption_top("กรณี rack & pinion: เฟือง 2 กลายเป็น rack (R2 -> infinity)", size=20)
+        self.play(FadeOut(cap)); self.play(FadeIn(cap2))
+        self.wait(1.0)
+
+        O1 = LEFT * 2.2 + DOWN * 1.4
+        R1_r, phi_r = 1.3, 20 * DEGREES
+        Rb1_r = R1_r * np.cos(phi_r)
+        pinion_c = Circle(radius=R1_r, color=PITCH_C, stroke_width=2.5).move_to(O1)
+        pinion_base = Circle(radius=Rb1_r, color=BASE_C, stroke_width=3).move_to(O1)
+        rack_y = O1[1] + R1_r
+        rack_line = Line(LEFT * 6.6 + UP * rack_y, RIGHT * 6.9 + UP * rack_y, color=GEAR3, stroke_width=4)
+        rack_lbl = tag("rack (pitch line)", RIGHT * 4.0 + UP * rack_y, UP, GEAR3, 16, 0.15)
+        self.play(Create(pinion_c), Create(pinion_base), Create(rack_line), FadeIn(rack_lbl))
+        self.wait(0.8)
+
+        cap3 = caption_top("rack ไม่มี base circle ให้คำนวณ sqrt(Ro^2-Rb^2) -- ใช้ addendum line แทน",
+                            size=18)
+        self.play(FadeOut(cap2)); self.play(FadeIn(cap3))
+        add_y = rack_y + 0.35 * R1_r
+        add_line = DashedLine(LEFT * 6.6 + UP * add_y, RIGHT * 6.9 + UP * add_y, color=WARN, stroke_width=2.5)
+        a_lbl = tag("addendum line (สูง a จาก pitch line)", RIGHT * 3.4 + UP * add_y, UP, WARN, 14, 0.12)
+        self.play(Create(add_line), FadeIn(a_lbl))
+        self.wait(1.2)
+
+        formula2 = MathTex(
+            r"Z=\sqrt{R_o^2-R_b^2}-R\sin\phi+\frac{a}{\sin\phi}",
+            font_size=26, color=OK)
+        formula2.to_edge(RIGHT, buff=0.4).shift(DOWN * 0.3)
+        fit_width(formula2, 4.4)
+        box2 = SurroundingRectangle(formula2, color=OK, buff=0.18)
+        note2 = Text("R, Rb, Ro, a เป็นค่าของ pinion ทั้งหมด", font_size=15, color=GRAYTXT)
+        note2.next_to(formula2, DOWN, buff=0.2)
+        self.play(FadeOut(cap3))
+        self.play(FadeIn(formula2, shift=UP * 0.15), Create(box2))
+        self.play(FadeIn(note2))
+        self.wait(1.6)
+
+        why = Text("พจน์สุดท้ายเปลี่ยนเป็น +a/sin(phi) เพราะช่วงขบด้าน rack ถูกจำกัดด้วยความสูง a",
+                    font_size=17, color=WARN).move_to([0, -3.15, 0])
+        fit_width(why, 12.0)
+        self.play(FadeIn(why, shift=UP * 0.15))
+        self.wait(2.2)
+
+
+# =====================================================================
+# G25 -- หน้า 25: ตัวอย่างเต็ม -- หา Z และ m_p (หน่วยนิ้ว)
+# =====================================================================
+class G25_ExampleZmp(SafeScene):
+    def construct(self):
+        self.add(title("ตัวอย่างเต็ม: หา Z และ m_p", size=27))
+        self.add(page_ref("หน้า 25"))
+
+        fr = cr_wide()
+        O1, O2 = fr["O1"], fr["O2"]
+        Rb1, Rb2, Ro1, Ro2 = fr["Rb1"], fr["Rb2"], fr["Ro1"], fr["Ro2"]
+        A, B, E1, E2 = fr["A"], fr["B"], fr["E1"], fr["E2"]
+
+        Rb1_r = CR_R1_IN * np.cos(CR_PHI)
+        Rb2_r = CR_R2_IN * np.cos(CR_PHI)
+        C_r = CR_R1_IN + CR_R2_IN
+        Z_r = np.sqrt(CR_RO1_IN ** 2 - Rb1_r ** 2) + np.sqrt(CR_RO2_IN ** 2 - Rb2_r ** 2) \
+            - C_r * np.sin(CR_PHI)
+        pb_r = 2 * np.pi * Rb1_r / CR_N1
+        mp_r = Z_r / pb_r
+
+        cap = caption_top("Pinion: N1=24, R1=1.5in, Ro1=1.625in | Gear: N2=60, R2=3.75in, Ro2=3.875in, phi=20°",
+                           size=15)
+        self.play(FadeIn(cap))
+
+        base1 = Circle(radius=Rb1, color=BASE_C, stroke_width=3).move_to(O1)
+        base2 = Circle(radius=Rb2, color=BASE_C, stroke_width=3).move_to(O2)
+        add1 = DashedVMobject(Circle(radius=Ro1, color=GEAR2, stroke_width=2.5).move_to(O1), num_dashes=30)
+        add2 = DashedVMobject(Circle(radius=Ro2, color=GEAR3, stroke_width=2.5).move_to(O2), num_dashes=48)
+        self.play(Create(base1), Create(base2), Create(add1), Create(add2))
+        self.wait(0.5)
+
+        loa_ext = Line(E1 - fr["d"] * 0.5, E2 + fr["d"] * 0.5, color=LOA_C, stroke_width=3)
+        path = Line(A, B, color=WARN, stroke_width=6)
+        self.play(Create(loa_ext), Create(path))
+        self.wait(0.6)
+
+        cap2 = caption_top("ขั้น 1 -- โจทย์ให้ R, Ro ครบแล้ว ต้องหา Rb, C ก่อน", size=19)
+        self.play(FadeOut(cap)); self.play(FadeIn(cap2))
+        self.wait(1.0)
+
+        steps = VGroup(
+            Text("ขั้น 2 -- สูตร:", font_size=18, color=WHITE),
+            MathTex(r"R_{b1}=1.5\cos20^\circ=1.409\text{ in}", font_size=19, color=BASE_C),
+            MathTex(r"R_{b2}=3.75\cos20^\circ=3.524\text{ in}", font_size=19, color=BASE_C),
+            MathTex(r"C=1.5+3.75=5.25\text{ in}", font_size=19, color=WHITE),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        for row in steps:
+            fit_width(row, 4.6)
+        steps.arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        steps.to_edge(RIGHT, buff=0.4).shift(UP * 1.5)
+        self.play(FadeOut(cap2))
+        for row in steps:
+            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.5)
+        self.wait(1.2)
+
+        cap3 = caption_top("ขั้น 3 -- แทนค่าหา Z", size=20)
+        self.play(FadeIn(cap3))
+        z_eq = VGroup(
+            MathTex(r"Z=\sqrt{1.625^2-1.409^2}+\sqrt{3.875^2-3.524^2}-5.25\sin20^\circ",
+                    font_size=17, color=WHITE),
+            MathTex(rf"Z=0.8095+1.6116-1.7956=\mathbf{{{Z_r:.4f}}}\text{{ in}}",
+                    font_size=19, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.2)
+        for row in z_eq:
+            fit_width(row, 6.5)
+        z_eq.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
+        z_eq.move_to([0, -2.55, 0])
+        self.play(FadeIn(z_eq[0], shift=UP * 0.1))
+        self.wait(0.8)
+        self.play(FadeIn(z_eq[1], shift=UP * 0.1))
+        self.wait(1.4)
+
+        self.play(FadeOut(cap3))
+        cap4 = caption_top("ขั้น 3 (ต่อ) -- หา p_b แล้วหา m_p", size=20)
+        self.play(FadeIn(cap4))
+        mp_eq = VGroup(
+            MathTex(rf"p_b=\frac{{2\pi(1.409)}}{{24}}={pb_r:.4f}\text{{ in}}", font_size=19, color=WHITE),
+            MathTex(rf"m_p=\frac{{{Z_r:.4f}}}{{{pb_r:.4f}}}=\mathbf{{{mp_r:.2f}}}", font_size=22, color=OK),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        for row in mp_eq:
+            fit_width(row, 6.0)
+        mp_eq.arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        mp_eq.next_to(z_eq, DOWN, buff=0.35)
+        box = SurroundingRectangle(mp_eq[1], color=OK, buff=0.15)
+        self.play(FadeIn(mp_eq[0], shift=UP * 0.1))
+        self.wait(0.8)
+        self.play(FadeIn(mp_eq[1], shift=UP * 0.1), Create(box))
+        self.wait(1.6)
+
+        self.play(FadeOut(cap4))
+        concl = Text(f"ขั้น 4 -- ตรวจ: m_p={mp_r:.2f} > 1.40 -> เดินเรียบ ผ่านเกณฑ์",
+                     font_size=18, color=OK).move_to([0, -3.15, 0])
+        self.play(FadeIn(concl, shift=UP * 0.15))
+        self.wait(2.4)
