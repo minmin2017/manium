@@ -29,19 +29,23 @@ BODY = "#141414"                       # unseen plastic
 def make_cubie(ix, iy, iz):
     c = Cube(side_length=CUBIE, fill_opacity=1, fill_color=BODY,
               stroke_width=1.5, stroke_color=BLACK)
-    # Cube.generate_points order: IN, OUT, LEFT, RIGHT, UP, DOWN
+    # Cube.generate_points order: IN, OUT, LEFT, RIGHT, UP, DOWN.
+    # Verified empirically (draft render, phi=65deg/theta=-50deg camera):
+    # OUT renders at the visual top, DOWN renders lower-left-visible,
+    # RIGHT renders lower-right-visible -- so map colors here (not the
+    # face-index names) to land on the classic white-top/green/red look.
     if iz == -1:
-        c[0].set_fill(B_COL, 1)
+        c[0].set_fill(D_COL, 1)   # IN -> yellow (opposite of white)
     if iz == 1:
-        c[1].set_fill(F_COL, 1)
+        c[1].set_fill(U_COL, 1)   # OUT -> white (visible top)
     if ix == -1:
         c[2].set_fill(L_COL, 1)
     if ix == 1:
-        c[3].set_fill(R_COL, 1)
+        c[3].set_fill(R_COL, 1)   # RIGHT -> red (visible)
     if iy == 1:
-        c[4].set_fill(U_COL, 1)
+        c[4].set_fill(B_COL, 1)   # UP -> blue (opposite of green)
     if iy == -1:
-        c[5].set_fill(D_COL, 1)
+        c[5].set_fill(F_COL, 1)   # DOWN -> green (visible)
     c.move_to(np.array([ix, iy, iz]) * UNIT)
     return c
 
