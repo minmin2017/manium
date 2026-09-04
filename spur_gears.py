@@ -233,7 +233,9 @@ class G07_KennedyPitchPoint(SafeScene):
         self.wait(0.6)
 
         dP = pt(P, WHITE, 0.09)
-        tP = tag("P", P, RIGHT, WHITE, 26, 0.30)
+        # P อยู่บนเส้น loc แนวนอนพอดี -- ป้ายเดิมชี้ RIGHT (ขนานกับเส้น) ทำให้กรอบ
+        # ข้อความทับ DashedLine เอง (เจอจริงจาก [LAYOUT] log) เปลี่ยนเป็น UP ให้ตั้งฉาก
+        tP = tag("P", P, UP, WHITE, 26, 0.30)
         self.play(FadeIn(dP), Flash(P, color=WHITE, flash_radius=0.4), FadeIn(tP))
         self.wait(0.6)
 
@@ -295,7 +297,10 @@ class G08_ConjugateProfiles(SafeScene):
 
         loc = DashedLine(O1 + LEFT * 0.6, O2 + RIGHT * 0.6, color=GRAYTXT, stroke_width=2.5)
         dP = pt(P, WHITE, 0.09)
-        tPl = tag("P (นิ่งตลอดเวลา)", P, DOWN, WHITE, 20, 0.16)
+        # ป้ายเดิมชี้ DOWN ทับกับเส้น n_line เส้นที่ 3 (off=(0.15,-0.95,..) ก็พุ่งลงจาก P
+        # เกือบทางเดียวกัน) -- เจอจริงจาก [LAYOUT] log 2026-09-05 เปลี่ยนเป็น LEFT
+        # (ไม่มีเส้นไหนใน offsets ทั้ง 3 พุ่งไปทาง LEFT เลย จึงว่างแน่นอน)
+        tPl = tag("P (นิ่งตลอดเวลา)", P, LEFT, WHITE, 20, 0.2)
         cap = caption_top("เพื่อให้เคลื่อนที่เรียบ contact normal ต้องผ่านจุด P เสมอ", size=22)
         self.play(FadeIn(cap))
         self.play(Create(loc), FadeIn(dP), FadeIn(tPl))
@@ -312,9 +317,13 @@ class G08_ConjugateProfiles(SafeScene):
             direction = (Q - P) / np.linalg.norm(Q - P)
             n_line = Line(P, Q + direction * 0.75, color=c, stroke_width=3.5)
             dQ = pt(Q, c, 0.07)
-            tQ = tag(lb, Q, direction, c, 18, 0.18)
+            # ป้ายเดิมชี้ทิศเดียวกับ n_line เอง (ขนานกับเส้นที่ยื่นออกไปอีก 0.75) ทำให้
+            # กรอบข้อความทับเส้นตัวเอง (เจอจริงจาก [LAYOUT] log: 't2' ทับ Line) --
+            # เปลี่ยนเป็นทิศตั้งฉาก (perp) แทน ให้ป้ายห่างจากเส้นออกด้านข้าง
+            lbl_perp = np.array([-direction[1], direction[0], 0.0])
+            tQ = tag(lb, Q, lbl_perp, c, 18, 0.28)
             # ขีดสั้นตั้งฉากที่ Q แทนผิวสัมผัสสองชิ้น ณ ขณะนั้น (สัมผัสกันที่ Q)
-            perp = np.array([-direction[1], direction[0], 0]) * 0.28
+            perp = lbl_perp * 0.28
             flank = Line(Q - perp, Q + perp, color=GRAYTXT, stroke_width=3)
             grp = VGroup(n_line, dQ, tQ, flank)
             groups.add(grp)
@@ -741,7 +750,9 @@ class G12_ToothThickness(SafeScene):
         last_formula = MathTex(
             r"t_A=2R_A\!\left(\frac{t_B}{2R_B}-\tan\phi_A+\phi_A+\tan\phi_B-\phi_B\right)",
             font_size=22, color=OK)
-        fit_width(last_formula, 6.8)
+        # 6.8 เดิม (to_edge(RIGHT,buff=0.35)) ทำให้ขอบซ้ายของกล่องยื่นมาใกล้ป้าย t_A ทางซ้าย
+        # ของภาพมากเกินไป (เจอจริงจาก [LAYOUT] log: t_A ทับ SurroundingRectangle) แคบลง
+        fit_width(last_formula, 5.3)
         deriv = VGroup(
             MathTex(r"\delta_A=\frac{t_A}{2R_A}=\frac{t_b}{2R_b}-\theta_A",
                     font_size=26, color=WHITE),
@@ -809,10 +820,15 @@ class G13_LineOfAction(SafeScene):
         # ป้าย E1/E2: ชี้ออกจาก P ไปตามแนวเส้น line of action เอง (ไม่ใช่ซ้าย/ขวาตรงๆ)
         # เพราะ E1, E2 อยู่ใกล้ P มาก (ใกล้กว่ารัศมีวงเล็บมุม phi ที่จะวาดทีหลัง) --
         # ป้ายทิศอื่นจะเข้าไปอยู่ในบริเวณที่ Angle(vert, loa) กวาดผ่านพอดี
-        dir_E1 = (E1 - P) / np.linalg.norm(E1 - P)
-        dir_E2 = (E2 - P) / np.linalg.norm(E2 - P)
-        tE1 = tag("E1", E1, dir_E1, BASE_C, 18, 0.22)
-        tE2 = tag("E2", E2, dir_E2, BASE_C, 18, 0.22)
+        # ป้ายเดิมชี้ทิศ E-P (ทิศ line of action) ซึ่งไม่ใช่ทิศออกจากวงกลมของเฟือง
+        # แต่ละตัว -- E1/E2 เป็นจุดสัมผัสอยู่บน/ใกล้ base+pitch circle ของตัวเองพอดี
+        # (ช่องว่างระหว่าง Rb กับ R แคบมาก) เจอจริงจาก [LAYOUT] log: 'E2' ทับ Circle
+        # แก้โดยชี้ป้ายตามแนวรัศมีออกจากศูนย์กลางของแต่ละเฟืองแทน รับประกันว่าห่างออก
+        # จากวงกลมทั้งชุด (base+pitch) ของเฟืองนั้นเสมอ
+        dir_E1 = (E1 - O1) / np.linalg.norm(E1 - O1)
+        dir_E2 = (E2 - O2) / np.linalg.norm(E2 - O2)
+        tE1 = tag("E1", E1, dir_E1, BASE_C, 18, 0.35)
+        tE2 = tag("E2", E2, dir_E2, BASE_C, 18, 0.35)
         self.play(FadeIn(dE1), FadeIn(dE2), FadeIn(tE1), FadeIn(tE2))
         self.wait(0.8)
 
@@ -868,11 +884,14 @@ class G14_GearVocabulary(SafeScene):
         self.play(FadeIn(legend, shift=RIGHT * 0.2))
         self.wait(1.0)
 
-        # addendum/dedendum เป็นระยะรัศมี
-        a_seg = seg(O + UP * R, O + UP * Ro, GEAR3, 5)
-        b_seg = seg(O + DOWN * Ri, O + DOWN * R, GRAYTXT, 5)
-        a_lbl = tag("a (addendum)", O + UP * (R + Ro) / 2, LEFT, GEAR3, 16, 0.15)
-        b_lbl = tag("b (dedendum)", O + DOWN * (R + Ri) / 2, LEFT, GRAYTXT, 16, 0.15)
+        # addendum/dedendum เป็นระยะรัศมี -- เดิมวัดแนวตั้ง (UP/DOWN) แล้วป้ายชี้ LEFT
+        # ซึ่งกวาดย้อนกลับข้ามวงกลม R_o ที่ยอดสุด/R,R_b ที่ก้นสุด (เจอจริงจาก [LAYOUT]
+        # log: a/b ทับ Circle) เปลี่ยนไปวัดแนวนอน (RIGHT/LEFT) แล้วป้ายชี้ตั้งฉาก
+        # (UP/DOWN) แทน -- อยู่ในช่องว่างระหว่างวงแหวนพอดี ไม่กวาดข้ามเส้นรอบวงไหนเลย
+        a_seg = seg(O + RIGHT * R, O + RIGHT * Ro, GEAR3, 5)
+        b_seg = seg(O + LEFT * Ri, O + LEFT * R, GRAYTXT, 5)
+        a_lbl = tag("a (addendum)", O + RIGHT * (R + Ro) / 2, UP, GEAR3, 16, 0.15)
+        b_lbl = tag("b (dedendum)", O + LEFT * (R + Ri) / 2, DOWN, GRAYTXT, 16, 0.15)
         cap2 = caption_top("addendum a = R_o - R (ฟันยื่นสูง) | dedendum b = R - R_i (โคนฟันลึก)", size=19)
         self.play(FadeOut(cap))
         self.play(FadeIn(cap2))
@@ -899,7 +918,11 @@ class G15_MainFormulas(SafeScene):
         self.add(page_ref("หน้า 15"))
 
         N = 20
-        p_len = 1.2
+        # p_len=1.2 เดิมให้ R=1.2*20/(2pi)=3.82 -- ใหญ่เกินไป วงกลมพุ่งพ้นทั้งโซน
+        # title/caption บนและขอบล่างเฟรม (เจอจริงจาก [LAYOUT] log 2026-09-05: title/
+        # caption ทับ Circle x2 + ป้าย 'N=20 ตำแหน่งฟัน' หลุดขอบล่าง) ลดลงเหลือ 0.55
+        # ให้ R=1.75 พอดีเฟรม (ใช้ค่าเดียวกับ G16 เพื่อความต่อเนื่อง)
+        p_len = 0.55
         R = p_len * N / TAU
         O = LEFT * 2.0
 
@@ -925,8 +948,13 @@ class G15_MainFormulas(SafeScene):
         a1 = TAU / N
         seg_arc = Arc(radius=R, start_angle=a0, angle=a1, arc_center=O, color=WARN,
                       stroke_width=6)
-        p_lbl = tag("p (circular pitch)", O + R * np.array([np.cos(a1 / 2), np.sin(a1 / 2), 0]),
-                    UP, WARN, 16, 0.18)
+        # จุดยึดอยู่ใกล้มุม 9 องศา (แทบไม่มีความชันจากแนวราบ) -- ป้ายชี้ UP เดิมเกือบขนาน
+        # กับเส้นสัมผัสวงกลมตรงนั้น ยื่นย้อนเข้าไปทับ seg_arc (เจอจริงจาก [LAYOUT] log)
+        # เปลี่ยนเป็นทิศรัศมีออกจากศูนย์กลาง O แทน รับประกันว่าห่างจาก circ/seg_arc เสมอ
+        _p_mid_ang = a1 / 2
+        _p_radial = np.array([np.cos(_p_mid_ang), np.sin(_p_mid_ang), 0.0])
+        p_lbl = tag("p (circular pitch)", O + (R + 0.05) * _p_radial,
+                    _p_radial, WARN, 15, 0.25)
         cap2 = caption_top("แต่ละช่วงกินระยะ p (ตามส่วนโค้ง) -- มี N ช่วงรอบวง", size=20)
         self.play(FadeOut(cap))
         self.play(FadeIn(cap2))
@@ -963,7 +991,10 @@ class G16_GeometryOverview(SafeScene):
         self.add(page_ref("หน้า 16 -- ใช้เป็นภาพอ้างอิง"))
 
         N = 20
-        p_len = 1.2
+        # เดิม p_len=1.2 -> R=3.82, Ro=4.5 -- ใหญ่เกินเฟรมมาก (เจอจริงจาก [LAYOUT] log
+        # 2026-09-05: title/caption/Arc ทับ Circle หลายจุด) ลดเหลือ 0.55 ให้ตรงกับ G15
+        # (ต่อเนื่องกันด้วย ตามกฎ §21 ข้อ 2 ของ manim-teaching-video)
+        p_len = 0.55
         R = p_len * N / TAU
         a, b = 0.18 * R, 0.22 * R
         Ro, Ri = R + a, R - b
@@ -992,16 +1023,26 @@ class G16_GeometryOverview(SafeScene):
         p_a0, p_a1 = 0, TAU / N
         p_arc = Arc(radius=R + 0.35, start_angle=p_a0, angle=p_a1, arc_center=O,
                     color=GRAYTXT, stroke_width=2)
-        p_lbl = tag("p", O + (R + 0.55) * np.array([np.cos(p_a1 / 2), np.sin(p_a1 / 2), 0]),
-                    UP, GRAYTXT, 18, 0.1)
-        t_lbl = tag("t (ความหนาฟัน)", O + R * np.array([1, 0, 0]), RIGHT, WARN, 16, 0.15)
+        # เดิม p_lbl ชี้ UP จากจุดใกล้มุม 9 องศา (เกือบขนานเส้นสัมผัสวงกลมตรงนั้น) และ
+        # t_lbl ชี้ RIGHT จากจุดขวาสุดของวง R เข้าไปทับวง R_o/p_arc ที่ใหญ่กว่า (เจอจริง
+        # จาก [LAYOUT] log: 't(ความหนาฟัน)' ทับ Circle/Arc + ทับป้าย legend) --
+        # เปลี่ยนทั้งคู่เป็นทิศรัศมีออกจากศูนย์กลาง O และย้าย t_lbl ไปมุมว่างระหว่างฟัน
+        _p_mid = p_a1 / 2
+        _p_rad = np.array([np.cos(_p_mid), np.sin(_p_mid), 0.0])
+        p_lbl = tag("p", O + (R + 0.6) * _p_rad, _p_rad, GRAYTXT, 18, 0.15)
+        _t_ang = -32 * DEGREES
+        _t_rad = np.array([np.cos(_t_ang), np.sin(_t_ang), 0.0])
+        t_lbl = tag("t (ความหนาฟัน)", O + R * _t_rad, _t_rad, WARN, 14, 0.45)
         self.play(Create(p_arc), FadeIn(p_lbl), FadeIn(t_lbl))
         self.wait(0.8)
 
-        a_seg = seg(O + UP * R, O + UP * Ro, GEAR3, 4)
-        b_seg = seg(O + DOWN * Ri, O + DOWN * R, GRAYTXT, 4)
-        a_lbl = tag("a", O + UP * (R + Ro) / 2, LEFT, GEAR3, 16, 0.1)
-        b_lbl = tag("b", O + DOWN * (R + Ri) / 2, LEFT, GRAYTXT, 16, 0.1)
+        # a_seg/b_seg เดิมวัดแนวตั้ง (UP/DOWN) แล้วป้ายชี้ LEFT กวาดย้อนข้ามวง R_o/R_i
+        # (บั๊กเดียวกับที่เจอใน G14 -- แก้เชิงรุกที่นี่ด้วยแม้ log ไม่ได้ชี้จุดนี้ตรงๆ
+        # เพราะโค้งเดียวกันเป๊ะ) เปลี่ยนเป็นแนวนอน (RIGHT/LEFT) + ป้ายชี้ตั้งฉาก (UP/DOWN)
+        a_seg = seg(O + RIGHT * R, O + RIGHT * Ro, GEAR3, 4)
+        b_seg = seg(O + LEFT * Ri, O + LEFT * R, GRAYTXT, 4)
+        a_lbl = tag("a", O + RIGHT * (R + Ro) / 2, UP, GEAR3, 16, 0.1)
+        b_lbl = tag("b", O + LEFT * (R + Ri) / 2, DOWN, GRAYTXT, 16, 0.1)
         self.play(Create(a_seg), Create(b_seg), FadeIn(a_lbl), FadeIn(b_lbl))
         self.wait(1.6)
 
@@ -1036,6 +1077,9 @@ class G17_BasePitch(SafeScene):
         # ---- ตัวอย่าง: N=8, R=2in หา p --------------------------------------
         cap2 = caption_top("ตัวอย่าง: เฟือง 8 ฟัน, R = 2 นิ้ว -- หา circular pitch", size=21)
         self.play(FadeOut(cap))
+        # เอากรอบสูตร p_b ออกก่อน -- เดิมค้างอยู่ทั้งคลิปแล้วไปทับ step1 ของคอลัมน์
+        # ตัวอย่างด้านขวา (เจอจริงจาก [LAYOUT] log 2026-09-05: step1 ทับ SurroundingRectangle)
+        self.play(FadeOut(formula), FadeOut(box))
         self.play(FadeIn(cap2))
 
         N, R = 8, 2.0
@@ -1064,6 +1108,10 @@ class G17_BasePitch(SafeScene):
                                 font_size=20, color=OK)).arrange(RIGHT, buff=0.2)
         step4 = Text("ขั้น 4 -- ตรวจ: เส้นรอบวง = 2 pi(2) = 12.57 in / 8 ฟัน = 1.571 in/ฟัน (ตรง)",
                       font_size=18, color=OK)
+        # step1/step4 เป็นบรรทัดยาวไม่มี fit_width มาก่อน ทำให้คอลัมน์ทั้งก้อนกว้างเกิน
+        # ขอบซ้ายยื่นไปทับ circ/formula ด้านซ้าย (เจอจริงจาก [LAYOUT] log 2026-09-05)
+        fit_width(step1, 5.2)
+        fit_width(step4, 5.2)
         col = VGroup(step1, step2, step3, step4).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
         col.to_edge(RIGHT, buff=0.5).shift(UP * 0.3)
         for row in col:
@@ -1086,15 +1134,20 @@ class G18_ExampleBaseCircle(SafeScene):
         a = Ro - R
         m_check = 2 * R / N
 
-        O = LEFT * 3.3 + DOWN * 0.3
+        # เดิม LEFT*3.3 -- วง c_Ro (รัศมีขยาย 2.0) ขอบขวาอยู่ที่ x=-1.3 ใกล้คอลัมน์
+        # ขั้นตอนด้านขวามากไป ขยับซ้ายเพิ่มให้มีระยะกันชนมากขึ้น
+        O = LEFT * 4.0 + DOWN * 0.3
         cap = caption_top("โจทย์: N=24, phi=20°, R=1.5in, R_o=1.625in -- หา (ก) R_b (ข) a", size=19)
         self.play(FadeIn(cap))
 
         c_R = Circle(radius=1.5, color=PITCH_C, stroke_width=3).move_to(O)
         c_Ro = Circle(radius=1.5 + (Ro - R) * 4, color=GEAR3, stroke_width=3).move_to(O)  # ขยาย a ให้เห็นชัด
         self.play(Create(c_R), Create(c_Ro))
-        lR = tag("R = 1.5 in", O + UP * 1.5, UP, PITCH_C, 17, 0.12)
-        lRo = tag("R_o = 1.625 in", O + UP * (1.5 + (Ro - R) * 4), UP, GEAR3, 17, 0.28)
+        # ป้ายเดิมชี้ UP จากจุดเดียวกับที่ a_seg (เส้นแนวตั้ง) จะเริ่มต้น/สิ้นสุดพอดี --
+        # กรอบข้อความเลยทับเส้นที่วาดทีหลัง (เจอจริงจาก [LAYOUT] log: 'R=1.5in' ทับ Line)
+        # แก้โดยให้สองป้ายชี้คนละด้าน (LEFT/RIGHT) แทน หลบแนวตั้งที่ a_seg จะใช้
+        lR = tag("R = 1.5 in", O + UP * 1.5, LEFT, PITCH_C, 17, 0.2)
+        lRo = tag("R_o = 1.625 in", O + UP * (1.5 + (Ro - R) * 4), RIGHT, GEAR3, 17, 0.25)
         self.play(FadeIn(lR), FadeIn(lRo))
         self.wait(0.8)
 
@@ -1105,16 +1158,23 @@ class G18_ExampleBaseCircle(SafeScene):
         self.play(Create(a_seg))
         self.wait(0.8)
 
+        step_a = Text("ขั้น 2 -- สูตร: R_b = R cos(phi), a = R_o - R", font_size=19, color=WHITE)
+        step_d = Text(f"ขั้น 4 -- ตรวจ: R_b < R เสมอ (cos phi<1) และ a ~ m = 2R/N = {m_check:.3f} "
+                       "-> ตรงพอดี = full-depth มาตรฐาน", font_size=17, color=OK)
+        # เดิม fit_width เรียกทีหลัง .arrange()+.to_edge() -- scale() ของ manim ย่อรอบ
+        # จุดศูนย์กลางตัวเอง ทำให้ตำแหน่งที่ arrange/to_edge คำนวณไว้ (จากความกว้างเดิม
+        # ก่อนย่อ) ไม่ตรงกับขนาดจริงหลังย่อ = ซ้ายขวาเยื้องกัน (เจอจริงจาก [LAYOUT] log:
+        # ขั้น2/ขั้น4 ทับ Circle ทั้งที่ fit_width ก็มีอยู่แล้ว) แก้โดยย่อ "ก่อน" arrange เสมอ
+        fit_width(step_a, 5.0)
+        fit_width(step_d, 5.0)
         steps = VGroup(
-            Text("ขั้น 2 -- สูตร: R_b = R cos(phi), a = R_o - R", font_size=19, color=WHITE),
+            step_a,
             MathTex(r"R_b=1.5\cos20^\circ=1.5(0.93969)=1.409\text{ in}",
                     font_size=21, color=BASE_C),
             MathTex(r"a=1.625-1.5=0.125\text{ in}", font_size=21, color=GEAR3),
-            Text(f"ขั้น 4 -- ตรวจ: R_b < R เสมอ (cos phi<1) และ a ~ m = 2R/N = {m_check:.3f} "
-                 "-> ตรงพอดี = full-depth มาตรฐาน", font_size=17, color=OK),
+            step_d,
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
         steps.to_edge(RIGHT, buff=0.4).shift(UP * 0.3)
-        fit_width(steps[3], 5.8)
         self.play(FadeOut(cap2))
         for row in steps:
             self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.6)

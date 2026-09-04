@@ -219,9 +219,10 @@ class G05A_PointsAndLines(SafeScene):
         # --- line of centers ------------------------------------------------
         cap4 = caption_top("ลากเส้นเชื่อมสองแกนหมุน = line of centers", size=23)
         loc = DashedLine(A, B, color=C_LOC, stroke_width=3, dash_length=0.13)
-        # แปะป้ายใกล้ A (t=0.15) แทนกึ่งกลาง -- กึ่งกลางเส้นอยู่ในระดับเดียวกับที่
-        # เส้น B-S (วาดทีหลังในคลิปนี้) พาดผ่าน ทำให้ป้ายที่ค้างอยู่ทั้งคลิปไปทับกัน
-        t_loc = tag("line of centers", A + (B - A) * 0.15, RIGHT, C_LOC, 19, 0.22)
+        # แปะป้ายใกล้ B (t=0.72) แทนกึ่งกลางหรือใกล้ A -- ทั้งสองจุดนั้นมีเส้น/จุดอื่น
+        # (l_AR, dots ต่างๆ) มาพาดทับป้ายที่ค้างอยู่ทั้งคลิป (เจอจริงจาก [LAYOUT] log
+        # 2026-09-05: ทับทั้ง Dot และ DashedLine) -- buff ก็เพิ่มเป็น 0.5 กันชนเผื่อ
+        t_loc = tag("line of centers", A + (B - A) * 0.72, RIGHT, C_LOC, 17, 0.5)
         self.play(FadeOut(cap3))
         self.play(FadeIn(cap4), Create(loc), FadeIn(t_loc))
         self.wait(0.8)
@@ -327,7 +328,9 @@ class G05A_PointsAndLines(SafeScene):
         # ทิศของป้าย AR: ตั้งฉากกับเส้น A-R เอง (ไม่ใช่ UP ซึ่งเกือบขนานกับเส้นนั้น)
         _ar_perp = np.array([(R - A)[1], -(R - A)[0], 0.0])
         _ar_perp = _ar_perp / np.linalg.norm(_ar_perp)
-        t_AR = tag("AR", A + (R - A) * 0.45, _ar_perp, C_AR, 20, 0.22)
+        # 0.45 (กึ่งกลาง A-R) เคยชนกับป้าย "AQ" ที่ค้างอยู่ใกล้ (A+Q)/2 -- ขยับเข้าใกล้ R
+        # มากขึ้น (0.68) + เพิ่ม buff กันชน (เจอจริงจาก [LAYOUT] log 2026-09-05: ทับกัน 14%)
+        t_AR = tag("AR", A + (R - A) * 0.68, _ar_perp, C_AR, 20, 0.34)
         raR = ra_mark(R, A - R, Q - R, C_AR)
         self.play(FadeOut(cap13))
         self.play(FadeIn(cap14), Create(l_AR), FadeIn(t_AR))
@@ -456,7 +459,9 @@ class G05B_SimilarTriangles(SafeScene):
 
         # ขั้น 3 — มุมที่ A ในสามเหลี่ยมรูปทรง
         cap = self.swap_cap(cap, "ขั้น 3: ใน A-R-Q มุมที่ Q คือ α → มุมที่ A ต้องเป็น 90° − α", size=22)
-        ang2 = Angle(s2["ab"], s2["ac"], radius=0.44, color=WARN, stroke_width=4)
+        # radius เดิม 0.44 > buff ป้ายชื่อจุดยอด (upright_tri ใช้ 0.30) -- ทำให้ส่วนโค้ง
+        # มุมไปทับป้าย "A" ได้ (เจอจริงจาก [LAYOUT] log 2026-09-05) ลดเหลือ 0.24 ให้ต่ำกว่า buff
+        ang2 = Angle(s2["ab"], s2["ac"], radius=0.24, color=WARN, stroke_width=4)
         lb2a = MathTex(r"90^\circ-\alpha", font_size=24, color=WARN).next_to(
             v2["a"], UR, buff=0.30)
         self.play(Create(ang2), FadeIn(lb2a))
@@ -464,7 +469,8 @@ class G05B_SimilarTriangles(SafeScene):
 
         # ขั้น 4 — มุมที่ Q ในสามเหลี่ยมความเร็ว: ได้ 90 - alpha เหมือนกัน
         cap = self.swap_cap(cap, "ขั้น 4: v_Q2 ตั้งฉากกับ AQ → มุมที่ Q ในรูปความเร็วก็ 90° − α", size=22)
-        ang1 = Angle(s1["ab"], s1["ac"], radius=0.44, color=WARN, stroke_width=4)
+        # เหตุผลเดียวกับ ang2 ข้างบน -- ลด radius ให้ต่ำกว่า buff ป้ายชื่อจุดยอด (0.30)
+        ang1 = Angle(s1["ab"], s1["ac"], radius=0.24, color=WARN, stroke_width=4)
         lb1a = MathTex(r"90^\circ-\alpha", font_size=24, color=WARN).next_to(
             v1["a"], UR, buff=0.30)
         self.play(Create(ang1), FadeIn(lb1a))
@@ -597,8 +603,11 @@ class G06_PitchPoint(SafeScene):
             pt(A, C_AQ, 0.08), pt(B, C_BQ, 0.08),
             pt(R, C_AR, 0.07), pt(S, C_BS, 0.07), pt(P, C_VN, 0.09),
             tag("A", A, UP, C_AQ, 24), tag("B", B, DOWN, C_BQ, 24),
-            tag("R", R, DL, C_AR, 20, 0.24), tag("S", S, UR, C_BS, 20, 0.10),
-            tag("P", P, DR, C_VN, 24, 0.14),
+            # R และ P อยู่ห่างกันแค่ ~0.5 หน่วย (ใกล้กันมาก) -- เดิมใช้ DL/DR ทับกัน 32%
+            # (เจอจริงจาก [LAYOUT] log 2026-09-05) แก้โดยชี้ป้ายออกไปคนละทาง "ตามแนวเส้น
+            # normal เอง" (-UN สำหรับ R, +UN สำหรับ P) ซึ่งเป็นทิศที่ห่างจากอีกจุดมากที่สุด
+            tag("R", R, -UN, C_AR, 20, 0.4), tag("S", S, UR, C_BS, 20, 0.10),
+            tag("P", P, UN, C_VN, 24, 0.4),
             tag("AR", A + (R - A) * 0.45, _ar_perp6, C_AR, 20, 0.22),
             tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 21, 0.12),
             ra_mark(R, A - R, Q - R, C_AR),
