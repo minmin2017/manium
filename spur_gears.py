@@ -1717,3 +1717,379 @@ class G25_ExampleZmp(SafeScene):
                      font_size=18, color=OK).move_to([0, -3.15, 0])
         self.play(FadeIn(concl, shift=UP * 0.15))
         self.wait(2.4)
+
+
+# =====================================================================
+# G26 -- หน้า 26: เงื่อนไขที่เฟืองสองตัวจะขบกันได้ + Module
+# =====================================================================
+class G26_MeshingCondition(SafeScene):
+    def construct(self):
+        self.add(title("เงื่อนไขที่เฟืองสองตัวขบกันได้ + Module", size=25))
+        self.add(page_ref("หน้า 26"))
+
+        cap = caption_top("ลองเอาเฟือง 2 คู่มาขบกัน -- คู่หนึ่งฟันขนาดเท่ากัน อีกคู่ไม่เท่ากัน", size=19)
+        self.play(FadeIn(cap))
+
+        # คู่บน: p เท่ากัน (ขบกันได้)
+        g1a = gear_shape(0.7, 14, GEAR2).move_to(LEFT * 2.2 + UP * 1.3)
+        g1b = gear_shape(0.7, 14, GEAR3).move_to(g1a.get_center() + RIGHT * 1.5)
+        ok_lbl = tag("p เท่ากัน -> ขบได้", g1a.get_center() + LEFT * 1.1, LEFT, OK, 16, 0.15)
+        # คู่ล่าง: p ไม่เท่ากัน (ฟันคนละขนาด -- ขบไม่สนิท)
+        g2a = gear_shape(0.7, 10, GEAR2).move_to(LEFT * 2.2 + DOWN * 1.3)
+        g2b = gear_shape(0.9, 22, WARN).move_to(g2a.get_center() + RIGHT * 1.7)
+        bad_lbl = tag("p ไม่เท่ากัน -> ขบไม่สนิท", g2a.get_center() + LEFT * 1.1, LEFT, WARN, 16, 0.15)
+        self.play(FadeIn(g1a, shift=UP * 0.2), FadeIn(g1b, shift=UP * 0.2), FadeIn(ok_lbl))
+        self.play(FadeIn(g2a, shift=DOWN * 0.2), FadeIn(g2b, shift=DOWN * 0.2), FadeIn(bad_lbl))
+        spin(g1a, 1.6); spin(g1b, -1.6)
+        spin(g2a, 1.4); spin(g2b, -1.4 * (10 / 22))
+        self.wait(1.6)
+        g1a.clear_updaters(); g1b.clear_updaters()
+        g2a.clear_updaters(); g2b.clear_updaters()
+        self.play(FadeOut(cap))
+
+        cond = VGroup(
+            Text("เฟืองตรง 2 ตัวจะขบกันได้ถูกต้อง ก็ต่อเมื่อ:", font_size=20, color=WHITE),
+            Text("มี circular pitch (p) เท่ากัน -- เงื่อนไขหลัก", font_size=18, color=OK),
+            Text("1) center distance ถูกต้อง: C = R1 + R2 (ไม่มี backlash)", font_size=17, color=GRAYTXT),
+            Text("2) ไม่เกิด interference: N > N_min = 2a/(m sin^2 phi)", font_size=17, color=GRAYTXT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        cond.to_edge(RIGHT, buff=0.4).shift(UP * 0.3)
+        cap2 = caption_top("สรุปเป็นเงื่อนไขทางการ", size=20)
+        self.play(FadeIn(cap2))
+        for row in cond:
+            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.6)
+        self.wait(1.6)
+
+        self.play(FadeOut(cap2), FadeOut(cond))
+        module_formula = MathTex(r"m=\frac{D}{N},\qquad D=2R\ \ (\text{pitch diameter})",
+                                  font_size=28, color=WHITE).move_to(UP * 1.5)
+        fit_width(module_formula, 9.0)
+        box = SurroundingRectangle(module_formula, color=OK, buff=0.2)
+        cap3 = caption_top("Module = 'ขนาดของฟัน'", size=22)
+        self.play(FadeIn(cap3))
+        self.play(FadeIn(module_formula, shift=UP * 0.15), Create(box))
+        self.wait(1.4)
+
+        why = Text("ทำไม 'pitch เท่ากัน' ถึงเป็นเงื่อนไขหลัก: p = pi m",
+                    font_size=19, color=WHITE).move_to(DOWN * 0.6)
+        why2 = Text("-> pitch เท่ากัน = module เท่ากัน = ฟันขนาดเดียวกัน",
+                     font_size=19, color=OK).next_to(why, DOWN, buff=0.25)
+        why3 = Text("ฟันคนละขนาดขบกันไม่ลง เหมือนเอาน็อตคนละเกลียวมาขัน",
+                     font_size=17, color=GRAYTXT).next_to(why2, DOWN, buff=0.25)
+        self.play(FadeOut(cap3))
+        self.play(FadeIn(why, shift=UP * 0.1))
+        self.wait(0.6)
+        self.play(FadeIn(why2, shift=UP * 0.1))
+        self.wait(0.6)
+        self.play(FadeIn(why3, shift=UP * 0.1))
+        self.wait(2.0)
+
+
+# =====================================================================
+# G27 -- หน้า 27: แนวคิดการผลิตเฟือง
+# =====================================================================
+class G27_ManufacturingConcept(SafeScene):
+    def construct(self):
+        self.add(title("แนวคิดการผลิตเฟือง", size=28))
+        self.add(page_ref("หน้า 27"))
+
+        cap = caption_top("แนวคิดพื้นฐาน: ใช้มีดตัดรูปร่างเหมือนเฟือง ไปตัดเฟืองอีกตัวหนึ่ง", size=20)
+        self.play(FadeIn(cap))
+
+        blank = Circle(radius=1.3, color=GRAYTXT, stroke_width=3).move_to(LEFT * 2.6)
+        blank_lbl = tag("gear blank", blank.get_center() + DOWN * 1.55, DOWN, GRAYTXT, 16, 0.1)
+        cutter = gear_shape(0.55, 10, WARN).move_to(LEFT * 2.6 + RIGHT * 1.85)
+        cutter_lbl = tag("มีดตัด (rack/gear)", cutter.get_center() + UP * 0.85, UP, WARN, 16, 0.1)
+        self.play(Create(blank), FadeIn(blank_lbl))
+        self.play(FadeIn(cutter, shift=LEFT * 0.2), FadeIn(cutter_lbl))
+        self.wait(1.2)
+
+        table = VGroup(
+            Text("วิธี", font_size=18, color=WHITE),
+            Text("มีดตัดรูปร่างเหมือน", font_size=18, color=WHITE),
+            Text("ตัดเฟืองในได้ไหม", font_size=18, color=WHITE),
+        ).arrange(RIGHT, buff=0.6)
+        row1 = VGroup(
+            Text("Hobbing", font_size=18, color=PITCH_C),
+            Text("rack", font_size=18, color=PITCH_C),
+            Text("ไม่ได้", font_size=18, color=WARN),
+        ).arrange(RIGHT, buff=0.9)
+        row2 = VGroup(
+            Text("Fellows method", font_size=18, color=GEAR3),
+            Text("เฟือง", font_size=18, color=GEAR3),
+            Text("ได้ (internal gear)", font_size=18, color=OK),
+        ).arrange(RIGHT, buff=0.55)
+        tbl = VGroup(table, row1, row2).arrange(DOWN, aligned_edge=LEFT, buff=0.35)
+        tbl.to_edge(RIGHT, buff=0.5).shift(UP * 0.2)
+        cap2 = caption_top("2 วิธีหลักในการตัดเฟือง", size=21)
+        self.play(FadeOut(cap))
+        self.play(FadeIn(cap2))
+        self.play(FadeIn(tbl, shift=RIGHT * 0.2))
+        self.wait(2.4)
+
+
+# =====================================================================
+# G28 -- หน้า 28: Gear Rack และหลักการ hob
+# =====================================================================
+class G28_RackAndHob(SafeScene):
+    def construct(self):
+        self.add(title("Gear Rack และหลักการ Hob", size=27))
+        self.add(page_ref("หน้า 28"))
+
+        cap = caption_top("Rack = เฟืองที่ R_b = infinity -- อินโวลูทกลายเป็นเส้นตรง", size=21)
+        self.play(FadeIn(cap))
+
+        O = LEFT * 2.4 + DOWN * 1.5
+        R1_r, phi_r = 1.3, 20 * DEGREES
+        Rb1_r = R1_r * np.cos(phi_r)
+        pinion_c = Circle(radius=R1_r, color=PITCH_C, stroke_width=2.5).move_to(O)
+        pinion_base = Circle(radius=Rb1_r, color=BASE_C, stroke_width=3).move_to(O)
+        rack_y = O[1] + R1_r
+        rack_line = Line(LEFT * 6.6 + UP * rack_y, RIGHT * 6.9 + UP * rack_y, color=GEAR3, stroke_width=4)
+        rack_lbl = tag("rack (มีดตัด / hob)", RIGHT * 3.6 + UP * rack_y, UP, GEAR3, 16, 0.15)
+        self.play(Create(pinion_c), Create(pinion_base), Create(rack_line), FadeIn(rack_lbl))
+        self.wait(1.0)
+
+        note = Text("ผลิตมีดตัด (hob) หน้าตัดตรงได้ง่ายและแม่นยำมาก", font_size=18, color=OK)
+        note.move_to([0, -3.15, 0])
+        self.play(FadeIn(note, shift=UP * 0.15))
+        self.wait(1.2)
+
+        self.play(FadeOut(cap), FadeOut(note))
+        cap2 = caption_top("ผลที่ตามมาเวลาใช้ hob ตัดเฟือง", size=21)
+        self.play(FadeIn(cap2))
+
+        table = VGroup(
+            Text("Circular pitch p  = pitch ของ rack (มีด)", font_size=17, color=WHITE),
+            Text("Dedendum b  = addendum ของ rack", font_size=17, color=GEAR3),
+            Text("Addendum a  = R_o - R -> ขึ้นกับขนาด gear blank", font_size=17, color=WARN),
+            Text("R = pN/(2 pi) -> กำหนดโดยความเร็วหมุนที่จูนกับ hob", font_size=17, color=PITCH_C),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.25)
+        for row in table:
+            fit_width(row, 6.0)
+        table.arrange(DOWN, aligned_edge=LEFT, buff=0.25)
+        table.to_edge(RIGHT, buff=0.4).shift(UP * 0.2)
+        for row in table:
+            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.6)
+        self.wait(2.4)
+
+
+# =====================================================================
+# G29 -- หน้า 29-30: ภาพวิธี Hobbing และ Fellows shaping
+# =====================================================================
+class G29_HobbingFellows(SafeScene):
+    def construct(self):
+        self.add(title("กระบวนการ Hobbing และ Fellows Shaping", size=25))
+        self.add(page_ref("หน้า 29-30"))
+
+        cap = caption_top("Hobbing -- hob (สกรูมีฟัน) หมุนกินเนื้อชิ้นงานทีละนิด", size=20)
+        self.play(FadeIn(cap))
+
+        blank1 = Circle(radius=1.1, color=GRAYTXT, stroke_width=3).move_to(LEFT * 2.8 + UP * 1.2)
+        hob = gear_shape(0.45, 8, WARN).move_to(blank1.get_center() + RIGHT * 1.55)
+        hob_lbl = tag("hob (หมุน+เลื่อน)", hob.get_center() + UP * 0.75, UP, WARN, 15, 0.1)
+        blank1_lbl = tag("gear blank (หมุนช้าตาม)", blank1.get_center() + DOWN * 1.35, DOWN, GRAYTXT, 15, 0.1)
+        self.play(Create(blank1), FadeIn(blank1_lbl))
+        self.play(FadeIn(hob, shift=LEFT * 0.15), FadeIn(hob_lbl))
+        spin(blank1, 0.5); spin(hob, -0.5 * (1.1 / 0.45))
+        self.wait(1.8)
+        blank1.clear_updaters(); hob.clear_updaters()
+
+        self.play(FadeOut(cap))
+        cap2 = caption_top("Fellows shaping -- ใช้เฟืองมีดชักขึ้น-ลง สลับกับหมุนทีละนิด", size=20)
+        self.play(FadeIn(cap2))
+
+        blank2 = Circle(radius=1.1, color=GRAYTXT, stroke_width=3).move_to(LEFT * 2.8 + DOWN * 1.2)
+        shaper = gear_shape(0.65, 12, OK).move_to(blank2.get_center() + RIGHT * 1.75)
+        shaper_lbl = tag("shaper cutter (ชักขึ้น-ลง)", shaper.get_center() + UP * 0.95, UP, OK, 15, 0.1)
+        blank2_lbl = tag("gear blank", blank2.get_center() + DOWN * 1.35, DOWN, GRAYTXT, 15, 0.1)
+        self.play(Create(blank2), FadeIn(blank2_lbl))
+        self.play(FadeIn(shaper, shift=LEFT * 0.15), FadeIn(shaper_lbl))
+        spin(blank2, 0.4); spin(shaper, -0.4 * (1.1 / 0.65))
+        self.wait(1.6)
+        blank2.clear_updaters(); shaper.clear_updaters()
+
+        note = Text("ข้อดี Fellows: ใช้มีดรูปเฟือง (ไม่ใช่ rack) จึงตัด internal gear ได้",
+                     font_size=17, color=OK).move_to([0, -3.15, 0])
+        self.play(FadeIn(note, shift=UP * 0.15))
+        self.wait(2.0)
+
+
+# =====================================================================
+# G31 -- หน้า 31: สัดส่วนฟันมาตรฐาน (British vs German)
+# =====================================================================
+class G31_StandardProportions(SafeScene):
+    def construct(self):
+        self.add(title("สัดส่วนฟันมาตรฐาน", size=28))
+        self.add(page_ref("หน้า 31"))
+
+        cap = caption_top("4 พารามิเตอร์ที่กำหนดรูป/ขนาดฟัน", size=21)
+        self.play(FadeIn(cap))
+
+        headers = VGroup(
+            Text("พารามิเตอร์", font_size=18, color=WHITE),
+            Text("British", font_size=18, color=PITCH_C),
+            Text("German", font_size=18, color=GEAR3),
+        ).arrange(RIGHT, buff=1.1)
+        rows_txt = [
+            ("Module m", "m", "m"),
+            ("Addendum a", "1.000 m", "1.000 m"),
+            ("Dedendum b", "1.250 m", "1.157-1.167 m"),
+            ("Pressure angle phi", "20 deg", "20 deg"),
+        ]
+        rows = VGroup()
+        for name, br, ge in rows_txt:
+            r = VGroup(
+                Text(name, font_size=17, color=GRAYTXT),
+                Text(br, font_size=17, color=PITCH_C),
+                Text(ge, font_size=17, color=GEAR3),
+            ).arrange(RIGHT, buff=0.5)
+            rows.add(r)
+        tbl = VGroup(headers, *rows).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
+        tbl.move_to(UP * 0.5)
+        self.play(FadeOut(cap))
+        for r in tbl:
+            self.play(FadeIn(r, shift=UP * 0.1), run_time=0.5)
+        self.wait(1.4)
+
+        formula = MathTex(r"m=\frac{D}{N}=\frac{p}{\pi},\qquad t=\frac{p}{2}",
+                           font_size=24, color=OK).next_to(tbl, DOWN, buff=0.5)
+        fit_width(formula, 8.0)
+        self.play(FadeIn(formula, shift=UP * 0.15))
+        self.wait(1.2)
+
+        why = Text("ทำไม b > a: ต้องเผื่อ clearance ที่โคนฟัน (b - a = 0.25m แบบ British)",
+                    font_size=17, color=WARN).move_to([0, -3.15, 0])
+        fit_width(why, 12.0)
+        self.play(FadeIn(why, shift=UP * 0.15))
+        self.wait(2.2)
+
+
+# =====================================================================
+# G32 -- หน้า 32: ระบบวัดขนาดฟัน US vs Metric
+# =====================================================================
+class G32_USvsMetric(SafeScene):
+    def construct(self):
+        self.add(title("ระบบวัดขนาดฟัน: US vs Metric", size=27))
+        self.add(page_ref("หน้า 32"))
+
+        cap = caption_top("สองระบบเป็นส่วนกลับกัน (reciprocal) -- กับดักข้อสอบยอดฮิต", size=20)
+        self.play(FadeIn(cap))
+
+        us_col = VGroup(
+            Text("U.S. -- Diametral Pitch", font_size=20, color=PITCH_C),
+            MathTex(r"P_d=\frac{N}{D}\ \ (\text{inch}^{-1})", font_size=24, color=PITCH_C),
+            Text("P_d มาก -> ฟันเล็ก", font_size=17, color=GRAYTXT),
+        ).arrange(DOWN, buff=0.3).move_to(LEFT * 3.2)
+        metric_col = VGroup(
+            Text("Metric -- Module", font_size=20, color=GEAR3),
+            MathTex(r"m=\frac{D}{N}\ \ (\text{mm})", font_size=24, color=GEAR3),
+            Text("m มาก -> ฟันใหญ่", font_size=17, color=GRAYTXT),
+        ).arrange(DOWN, buff=0.3).move_to(RIGHT * 3.2)
+        self.play(FadeOut(cap))
+        self.play(FadeIn(us_col, shift=UP * 0.15))
+        self.wait(0.8)
+        self.play(FadeIn(metric_col, shift=UP * 0.15))
+        self.wait(1.2)
+
+        formula = MathTex(r"m=\frac{1}{P_d}", font_size=32, color=OK).move_to(DOWN * 1.6)
+        box = SurroundingRectangle(formula, color=OK, buff=0.2)
+        self.play(FadeIn(formula, shift=UP * 0.15), Create(box))
+        self.wait(1.4)
+
+        trap = Text("กับดัก: โจทย์อเมริกันชอบให้ '5 Pitch' มา = P_d=5 -> D=N/5 นิ้ว",
+                     font_size=17, color=WARN).move_to([0, -3.15, 0])
+        fit_width(trap, 12.0)
+        self.play(FadeIn(trap, shift=UP * 0.15))
+        self.wait(2.2)
+
+
+# =====================================================================
+# G33 -- หน้า 33: ตัวอย่างออกแบบเฟือง 13 ฟัน module 3
+# =====================================================================
+class G33_ExampleDesign13Teeth(SafeScene):
+    def construct(self):
+        self.add(title("ตัวอย่าง: ออกแบบเฟือง 13 ฟัน Module 3", size=25))
+        self.add(page_ref("หน้า 33"))
+
+        N, m, phi_deg = 13, 3.0, 20
+        phi = phi_deg * DEGREES
+        a, b = 1.000 * m, 1.250 * m
+        p = np.pi * m
+        t = p / 2
+        R = m * N / 2
+        Ro = R + a
+        Ri = R - b
+        Rb = R * np.cos(phi)
+        D_blank = 2 * Ro
+
+        cap = caption_top("โจทย์: 13 ฟัน module 3, British standard -- หาสัดส่วนทั้งหมด", size=18)
+        self.play(FadeIn(cap))
+
+        O = LEFT * 3.4 + DOWN * 0.2
+        s = 0.35  # สเกลย่อวาด (ตัวเลขจริงหน่วย mm ใหญ่กว่าจอ)
+        c_Ro = Circle(radius=Ro * s, color=GEAR3, stroke_width=2.5).move_to(O)
+        c_R = Circle(radius=R * s, color=PITCH_C, stroke_width=3).move_to(O)
+        c_Rb = Circle(radius=Rb * s, color=BASE_C, stroke_width=2.5).move_to(O)
+        c_Ri = Circle(radius=Ri * s, color=GRAYTXT, stroke_width=2.5).move_to(O)
+        self.play(Create(c_Ro), Create(c_R), Create(c_Rb), Create(c_Ri))
+        self.wait(0.8)
+
+        given = Text("British: a=1.000m, b=1.250m, phi=20 deg", font_size=16, color=GRAYTXT)
+        given.next_to(O, DOWN, buff=Ro * s + 0.4)
+        self.play(FadeOut(cap))
+        cap2 = caption_top("ขั้น 1 -- ดึงค่ามาตรฐานออกมาก่อน (British)", size=20)
+        self.play(FadeIn(cap2), FadeIn(given))
+        self.wait(1.0)
+
+        table = VGroup(
+            Text(f"(ก) t = p/2 = {t:.3f} mm", font_size=17, color=WHITE),
+            Text(f"(ข) R = mN/2 = {R:.1f} mm", font_size=17, color=PITCH_C),
+            Text(f"(ค) gear blank D = 2R_o = {D_blank:.1f} mm", font_size=17, color=GEAR3),
+            Text(f"(ง) R_i = R - b = {Ri:.2f} mm", font_size=17, color=GRAYTXT),
+            Text(f"(จ) R_b = R cos(phi) = {Rb:.3f} mm", font_size=17, color=BASE_C),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        for row in table:
+            fit_width(row, 5.2)
+        table.arrange(DOWN, aligned_edge=LEFT, buff=0.22)
+        table.to_edge(RIGHT, buff=0.4).shift(UP * 0.3)
+        self.play(FadeOut(cap2))
+        cap3 = caption_top("ขั้น 2-3 -- สูตร + แทนค่าทีละข้อ", size=20)
+        self.play(FadeIn(cap3))
+        for row in table:
+            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.6)
+        self.wait(1.4)
+
+        self.play(FadeOut(cap3), FadeOut(given))
+        order = MathTex(
+            rf"R_i({Ri:.2f}) < R_b({Rb:.2f}) < R({R:.1f}) < R_o({Ro:.1f})",
+            font_size=22, color=OK)
+        fit_width(order, 10.5)
+        order.move_to(UP * 1.6)
+        cap4 = caption_top("ขั้น 4 -- ตรวจ: ลำดับรัศมีถูกต้อง", size=20)
+        self.play(FadeIn(cap4))
+        self.play(FadeIn(order, shift=UP * 0.15))
+        self.wait(1.4)
+
+        # ---- กับดัก: undercut check ------------------------------------------
+        self.play(FadeOut(cap4))
+        Nmin = 2 * 1.0 / (np.sin(phi) ** 2)
+        cap5 = caption_top(f"กับดัก: N=13 แต่ full-depth phi=20 ต้องการ N_min = {Nmin:.1f}", size=19)
+        self.play(FadeIn(cap5))
+        warn_txt = VGroup(
+            Text(f"13 < {Nmin:.1f} -> เฟืองนี้จะถูก undercut ตอนตัดด้วย hob!",
+                 font_size=19, color=WARN),
+            Text("ฟันจะคอดที่โคน อ่อนแอ", font_size=17, color=WARN),
+            Text("ทางแก้: เพิ่ม phi เป็น 25 deg (N_min=11.2 ผ่าน) หรือใช้ profile shift",
+                 font_size=16, color=GRAYTXT),
+        ).arrange(DOWN, buff=0.2)
+        fit_width(warn_txt, 10.5)
+        warn_txt.move_to(DOWN * 0.8)
+        self.play(FadeIn(warn_txt, shift=UP * 0.15))
+        self.wait(1.6)
+
+        concl = Text("ถ้าข้อสอบถามว่า 'ผลิตได้ไหม' -> ตอบ 'ผลิตได้แต่จะ undercut' ไม่ใช่แค่เลข",
+                      font_size=17, color=OK).move_to([0, -3.15, 0])
+        fit_width(concl, 12.5)
+        self.play(FadeIn(concl, shift=UP * 0.15))
+        self.wait(2.4)
