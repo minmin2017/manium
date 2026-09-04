@@ -408,7 +408,11 @@ class HC04_BasicCylinderControl(SafeScene):
 
         cap1 = caption_top("ซ้าย: ดันทางเดียวด้วยแรงดันน้ำมัน — ถอยกลับด้วยสปริง/แรงภายนอก")
         self.play(FadeIn(cap1), run_time=0.6)
-        dotsL, animsL = flow_dots([pL["P"], pL["A"], *elbow_pts(pL["A"], pcL["p"])[1:]],
+        # start the flow slightly above P's own port-glyph label (buff=0.05,
+        # dot radius=0.06 -> t=0 dot would otherwise sit on top of the label,
+        # caught by [LAYOUT] on the 2026-09-04 draft render)
+        dotsL, animsL = flow_dots([pL["P"] + np.array([0, 0.15, 0]), pL["A"],
+                                   *elbow_pts(pL["A"], pcL["p"])[1:]],
                                   SUPPLY, n=3, run_time=1.3)
         self.play(LaggedStart(*animsL, lag_ratio=0.25))
         self.play(FadeOut(dotsL), run_time=0.3)
@@ -575,7 +579,10 @@ class HC06_DrillingMachineApplication(SafeScene):
         pipeR_A = pipe(elbow_pts(pvR["A"], pcR["he"]))
         tankUL, tpUL = tank_symbol([1.9, 0.9, 0])
         drainUL = pipe(elbow_pts(unload_p["left"], tpUL["top"], via="x"))
-        lblR = Text("Double-pump (hi-lo)", font_size=12, color=GRAYTXT).move_to([3.8, 0.15, 0])
+        # NOTE: originally at (3.8, 0.15) which sits right on lineToValve's
+        # horizontal jog + vR's top edge -- moved clear below the whole zone
+        # ([LAYOUT] flagged 4 overlaps against that Line/VMobject cluster).
+        lblR = Text("Double-pump (hi-lo)", font_size=12, color=GRAYTXT).move_to([3.8, -2.55, 0])
         zoneR = VGroup(pumpHi, pumpLo, lblHi, lblLo, unload, lineHi, lineLo, lineJoin, vR,
                        lineToValve, cylR, pipeR_A, tankUL, drainUL, lblR)
 
@@ -694,9 +701,14 @@ class HC08_CylinderLocking(SafeScene):
         pcvL, portsL = pilot_check_valve_symbol([-1.7, -0.1, 0], angle=0, pilot_angle=-PI / 2)
         pcvR, portsR = pilot_check_valve_symbol([1.7, -0.1, 0], angle=PI, pilot_angle=-PI / 2)
 
-        lineA1 = pipe(elbow_pts(pv["A"], portsL["in"], via="y", frac=0.6))
+        # frac lowered 0.6->0.35: A and P share the valve's left-side x
+        # (same for B/T on the right), so the old mid_y=0.6 jog dropped the
+        # vertical leg straight through P's/T's own port-glyph label before
+        # turning sideways ([LAYOUT] caught this on the draft render).
+        # frac=0.35 keeps the horizontal jog above the P/T label band.
+        lineA1 = pipe(elbow_pts(pv["A"], portsL["in"], via="y", frac=0.35))
         lineA2 = pipe(elbow_pts(portsL["out"], pc["he"], via="y", frac=0.5))
-        lineB1 = pipe(elbow_pts(pv["B"], portsR["in"], via="y", frac=0.6))
+        lineB1 = pipe(elbow_pts(pv["B"], portsR["in"], via="y", frac=0.35))
         lineB2 = pipe(elbow_pts(portsR["out"], pc["re"], via="y", frac=0.5))
         # cross-pilot: left valve's pilot comes from the RIGHT (RE) line;
         # right valve's pilot comes from the LEFT (HE) line
@@ -766,8 +778,11 @@ class HC09_ReciprocatingCircuit(SafeScene):
         reliefT, rpT = pc_valve_box([2.4, 0.5, 0], kind="relief")
         lineP = pipe(elbow_pts(rpP["right"], pv["P"], via="y"))
         lineT = pipe(elbow_pts(pv["T"], rpT["left"], via="y"))
-        pipeA = pipe(elbow_pts(pv["A"], pc["he"], via="y", frac=0.7))
-        pipeB = pipe(elbow_pts(pv["B"], pc["re"], via="y", frac=0.55))
+        # frac lowered (0.7/0.55 -> 0.25): same P/T-label-crossing bug as
+        # HC08's lineA1/lineB1 -- A and P (B and T) share x, old fracs
+        # dropped the vertical leg through P's/T's port-glyph label.
+        pipeA = pipe(elbow_pts(pv["A"], pc["he"], via="y", frac=0.25))
+        pipeB = pipe(elbow_pts(pv["B"], pc["re"], via="y", frac=0.25))
 
         limL = Triangle(color=WARN, fill_color=WARN, fill_opacity=1, stroke_width=0)
         limL.scale(0.1).rotate(PI / 2).move_to([-1.7, -1.5, 0])
@@ -912,7 +927,11 @@ class HC11_TandemCenter(SafeScene):
         pipeB1 = pipe(elbow_pts(pv1["B"], pc1["re"], via="y", frac=0.45))
         pipeA2 = pipe(elbow_pts(pv2["A"], pc2["he"], via="y", frac=0.6))
         pipeB2 = pipe(elbow_pts(pv2["B"], pc2["re"], via="y", frac=0.45))
-        lbl_pump = Text("จากปั๊ม", font_size=13, color=SUPPLY).next_to(pv1["P"], DOWN, buff=0.22)
+        # shifted left of straight-down from P: the flow-dots path below
+        # starts directly under P, and a bare next_to(DOWN) put this label
+        # right in that path's way ([LAYOUT] caught it against both the
+        # static stub and the moving flow dots on the draft render).
+        lbl_pump = Text("จากปั๊ม", font_size=13, color=SUPPLY).next_to(pv1["P"], DOWN, buff=0.22).shift(LEFT * 0.5)
         lbl_tank = Text("กลับถัง", font_size=13, color=RETURN).next_to(pv2["T"], DOWN, buff=0.22)
         lbl_v1 = Text("วาล์ว 1 (ใกล้ปั๊ม)", font_size=12, color=GRAYTXT).next_to(v1, UP, buff=0.15)
         lbl_v2 = Text("วาล์ว 2", font_size=12, color=GRAYTXT).next_to(v2, UP, buff=0.15)
@@ -930,8 +949,10 @@ class HC11_TandemCenter(SafeScene):
         cap1 = caption_top("Tandem center: วาล์ว 1 อยู่กลาง — P ไหลผ่านตรงไปหาวาล์ว 2 ได้ฟรี")
         self.play(FadeIn(cap1), run_time=0.7)
         self.play(Create(path_tandem), run_time=0.6)
-        dots1, anims1 = flow_dots([pv1["P"] - np.array([0, 0.3, 0]), pv1["P"], pv1["T"], pv2["P"]],
-                                  SUPPLY, n=3, run_time=1.6)
+        # pv1["P"] waypoint nudged +0.1y clear of P's own port-glyph label
+        # (dot radius 0.06 > label's buff 0.05 from that exact point).
+        dots1, anims1 = flow_dots([pv1["P"] - np.array([0, 0.3, 0]), pv1["P"] + np.array([0, 0.1, 0]),
+                                   pv1["T"], pv2["P"]], SUPPLY, n=3, run_time=1.6)
         self.play(LaggedStart(*anims1, lag_ratio=0.25))
         self.play(FadeOut(dots1), run_time=0.3)
         self.wait(0.5)
@@ -939,7 +960,9 @@ class HC11_TandemCenter(SafeScene):
 
         cap2 = caption_top("ผลคือ 2 กระบอกสูบทำงานอิสระต่อกัน แต่ใช้ปั๊มตัวเดียวร่วมกัน — ไม่ต้องมี 2 ปั๊ม")
         self.play(FadeIn(cap2), run_time=0.8)
-        dots2, anims2 = flow_dots([pv2["P"], pv2["A"], pc2["he"]], SUPPLY, n=3, run_time=1.3)
+        # same P-label nudge as pv1 above, applied to pv2's own P glyph.
+        dots2, anims2 = flow_dots([pv2["P"] + np.array([0, 0.15, 0]), pv2["A"], pc2["he"]],
+                                  SUPPLY, n=3, run_time=1.3)
         self.play(LaggedStart(*anims2, lag_ratio=0.25))
         self.play(FadeOut(dots2), run_time=0.3)
         self.play(FadeOut(cap2), run_time=0.3)
@@ -955,7 +978,10 @@ class HC11_TandemCenter(SafeScene):
 
         cap4 = caption_top("...flow ถูกบล็อกตั้งแต่วาล์ว 1 ทันที — ไปไม่ถึงวาล์ว 2 เลย ต่างจาก tandem ชัดเจน")
         self.play(FadeIn(cap4), run_time=0.8)
-        dotsX, animsX = flow_dots([pv1["P"] - np.array([0, 0.3, 0]), pv1["P"]], BLOCKED, n=2, run_time=0.8)
+        # endpoint nudged +0.1y clear of P's own port-glyph label, same as
+        # anims1/anims2 above -- dot still lands right on block1's X mark.
+        dotsX, animsX = flow_dots([pv1["P"] - np.array([0, 0.3, 0]), pv1["P"] + np.array([0, 0.1, 0])],
+                                  BLOCKED, n=2, run_time=0.8)
         self.play(LaggedStart(*animsX, lag_ratio=0.3))
         self.play(FadeOut(dotsX), run_time=0.3)
         self.wait(1.3)
