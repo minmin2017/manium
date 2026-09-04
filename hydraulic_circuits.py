@@ -628,7 +628,12 @@ class HC07_CounterbalanceApplication(SafeScene):
     applied to a real cylinder, per the note: 'ทฤษฎีจาก W06 หน้า 20')."""
 
     def construct(self):
-        ttl = title("Counterbalance Valve Application")
+        # shortened from "Counterbalance Valve Application" (33 chars) --
+        # confirmed via zoomed frame at native 1080p that it ran into
+        # page_ref's corner badge (skill sec.20: long titles + page_ref
+        # collide; the automated [LAYOUT] linter missed this one, caught
+        # by Gemini review + manual pixel zoom instead).
+        ttl = title("Counterbalance Valve")
         pref = page_ref("หน้า 6 · Hydraulic Circuit Design")
         self.play(FadeIn(ttl), FadeIn(pref), run_time=0.7)
 
@@ -1029,12 +1034,20 @@ class HC12_MotorControl(SafeScene):
         fcvT, fcvTp = pc_valve_box([-1.8, 1.3, 0], kind="flowcontrol")
         chkT, chkTp = check_valve_symbol([-1.8, 1.85, 0], angle=0, size=0.3)
         motorT, mpT = rotor_symbol([0.7, 1.3, 0], angle=0, r=0.32, color=OK, filled=False)
-        lineT1 = pipe(elbow_pts(pvT["A"], fcvTp["left"], via="y", frac=0.5))
+        # frac raised 0.5->0.9: the default mid_y sat only ~0.065 below vT's
+        # own top edge, so the horizontal jog visually hugged/rode the box's
+        # top border instead of reading as a clean internal path (caught by
+        # Gemini review + confirmed by zooming the native-1080p frame).
+        # frac=0.9 pulls that jog down near the box's vertical center.
+        lineT1 = pipe(elbow_pts(pvT["A"], fcvTp["left"], via="y", frac=0.9))
         lineT2 = pipe([fcvTp["right"], mpT["a"]])
         bypass1 = pipe(elbow_pts(fcvTp["left"], chkTp["in"], via="y"))
         bypass2 = pipe(elbow_pts(chkTp["out"], fcvTp["right"], via="y"))
+        # shifted right 0.3 (was centered at -1.7): its left edge crept to
+        # within a few pixels of vT's own "T" port-glyph label -- confirmed
+        # by zooming the native-1080p frame (Gemini also flagged this).
         lblT = Text("บน: FCV ปรับได้ + check bypass — ปรับความเร็วได้ทางเดียว",
-                    font_size=13, color=GRAYTXT).move_to([-1.7, 0.55, 0])
+                    font_size=13, color=GRAYTXT).move_to([-1.4, 0.55, 0])
         zoneT = VGroup(vT, fcvT, chkT, motorT, lineT1, lineT2, bypass1, bypass2, lblT)
 
         # ---- BOTTOM: 4-check bridge — motor spins one direction always ----
@@ -1042,8 +1055,10 @@ class HC12_MotorControl(SafeScene):
         bridge, bnode = bridge_rectifier([-1.8, -1.75, 0], size=1.1)
         fcvB, fcvBp = pc_valve_box([0.2, -1.75, 0], kind="flowcontrol")
         motorB, mpB = rotor_symbol([2.6, -1.75, 0], angle=0, r=0.32, color=OK, filled=False)
-        lineB1 = pipe(elbow_pts(pvB["A"], bnode["left"], via="y"))
-        lineB2 = pipe(elbow_pts(pvB["B"], bnode["right"], via="y"))
+        # same top-edge-hugging fix as lineT1 above (default frac=0.5 put
+        # the jog ~0.015 below vB's top edge -- even tighter).
+        lineB1 = pipe(elbow_pts(pvB["A"], bnode["left"], via="y", frac=0.9))
+        lineB2 = pipe(elbow_pts(pvB["B"], bnode["right"], via="y", frac=0.9))
         lineB3 = pipe([bnode["top"], fcvBp["left"]])
         lineB4 = pipe([fcvBp["right"], mpB["a"]])
         lineB5 = pipe(elbow_pts(mpB["b"], bnode["bot"], via="y"))
@@ -1122,14 +1137,20 @@ class HC13_HydrostaticTransmission(SafeScene):
         top_line = pipe([pp["b"], mp["b"]], width=3)
         bot_line = pipe([pp["a"], mp["a"]], width=3)
 
-        relief1, r1p = pc_valve_box([-2.3, 0.3, 0], kind="relief", label=False)
+        # both relief valves dropped 0.15 lower (0.3 -> 0.15): at the
+        # original height their spring_zigzag's own top edge (cy+h/2+0.09+
+        # amp = 0.705) sat almost exactly ON the pump-motor header line
+        # (y=0.7) -- Gemini review + a native-1080p zoom confirmed the
+        # spring visibly crossed the header. 0.15 lower clears it with a
+        # real gap. Bottom stub + label shifted down to match.
+        relief1, r1p = pc_valve_box([-2.3, 0.15, 0], kind="relief", label=False)
         relief1_top = pipe([[-2.3, 0.7, 0], r1p["top"]])
-        relief1_bot = pipe([r1p["bottom"], [-2.3, -0.1, 0]])
-        relief1_lbl = Text("Overload", font_size=11, color=GRAYTXT).move_to([-2.3, -0.85, 0])
-        relief2, r2p = pc_valve_box([0.6, 0.3, 0], kind="relief", label=False)
+        relief1_bot = pipe([r1p["bottom"], [-2.3, -0.25, 0]])
+        relief1_lbl = Text("Overload", font_size=11, color=GRAYTXT).move_to([-2.3, -1.0, 0])
+        relief2, r2p = pc_valve_box([0.6, 0.15, 0], kind="relief", label=False)
         relief2_top = pipe([[0.6, 0.7, 0], r2p["top"]])
-        relief2_bot = pipe([r2p["bottom"], [0.6, -0.1, 0]])
-        relief2_lbl = Text("Overload", font_size=11, color=GRAYTXT).move_to([0.6, -0.85, 0])
+        relief2_bot = pipe([r2p["bottom"], [0.6, -0.25, 0]])
+        relief2_lbl = Text("Overload", font_size=11, color=GRAYTXT).move_to([0.6, -1.0, 0])
 
         rep_pump, repp = rotor_symbol([-0.9, -2.5, 0], angle=PI / 2, r=0.26, color=SUPPLY, filled=True)
         rep_lbl = Text("Replenishing pump", font_size=11, color=GRAYTXT).move_to([-0.9, -2.85, 0])
