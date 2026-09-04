@@ -776,8 +776,14 @@ class HC09_ReciprocatingCircuit(SafeScene):
         piston = pc["piston"]
         reliefP, rpP = pc_valve_box([-2.4, 0.5, 0], kind="relief")
         reliefT, rpT = pc_valve_box([2.4, 0.5, 0], kind="relief")
-        lineP = pipe(elbow_pts(rpP["right"], pv["P"], via="y"))
-        lineT = pipe(elbow_pts(pv["T"], rpT["left"], via="y"))
+        # The actual [LAYOUT] culprit (not pipeA/pipeB below): these two
+        # connectors' final approach leg runs vertically straight into P/T
+        # at their own x -- default frac=0.5 put that leg's lower end right
+        # in the P/T port-glyph label's zone. frac near the PORT end (0.9
+        # for lineP since its 2nd point is P; 0.1 for lineT since its 1st
+        # point is T) shrinks that leg so it stays above the label band.
+        lineP = pipe(elbow_pts(rpP["right"], pv["P"], via="y", frac=0.9))
+        lineT = pipe(elbow_pts(pv["T"], rpT["left"], via="y", frac=0.1))
         # frac lowered (0.7/0.55 -> 0.25): same P/T-label-crossing bug as
         # HC08's lineA1/lineB1 -- A and P (B and T) share x, old fracs
         # dropped the vertical leg through P's/T's port-glyph label.
@@ -949,10 +955,18 @@ class HC11_TandemCenter(SafeScene):
         cap1 = caption_top("Tandem center: วาล์ว 1 อยู่กลาง — P ไหลผ่านตรงไปหาวาล์ว 2 ได้ฟรี")
         self.play(FadeIn(cap1), run_time=0.7)
         self.play(Create(path_tandem), run_time=0.6)
-        # pv1["P"] waypoint nudged +0.1y clear of P's own port-glyph label
-        # (dot radius 0.06 > label's buff 0.05 from that exact point).
-        dots1, anims1 = flow_dots([pv1["P"] - np.array([0, 0.3, 0]), pv1["P"] + np.array([0, 0.1, 0]),
-                                   pv1["T"], pv2["P"]], SUPPLY, n=3, run_time=1.6)
+        # A straight vertical approach from below P still transits P's own
+        # port-glyph label (a small y-nudge on the P waypoint doesn't help
+        # -- the SEGMENT from below still crosses through the label's zone
+        # on the way up). Jog sideways (x+0.3) while below/level with the
+        # label, THEN rise, THEN jog back onto the port from above --
+        # this never puts the path inside the label's x-column while its
+        # y is anywhere near the label's height.
+        p1_lo = pv1["P"] + np.array([0.3, -0.3, 0])
+        p1_hi = pv1["P"] + np.array([0.3, 0.15, 0])
+        p1_in = pv1["P"] + np.array([0, 0.15, 0])
+        dots1, anims1 = flow_dots([p1_lo, p1_hi, p1_in, pv1["T"], pv2["P"]],
+                                  SUPPLY, n=3, run_time=1.6)
         self.play(LaggedStart(*anims1, lag_ratio=0.25))
         self.play(FadeOut(dots1), run_time=0.3)
         self.wait(0.5)
@@ -960,8 +974,10 @@ class HC11_TandemCenter(SafeScene):
 
         cap2 = caption_top("ผลคือ 2 กระบอกสูบทำงานอิสระต่อกัน แต่ใช้ปั๊มตัวเดียวร่วมกัน — ไม่ต้องมี 2 ปั๊ม")
         self.play(FadeIn(cap2), run_time=0.8)
-        # same P-label nudge as pv1 above, applied to pv2's own P glyph.
-        dots2, anims2 = flow_dots([pv2["P"] + np.array([0, 0.15, 0]), pv2["A"], pc2["he"]],
+        # a 0.15 nudge above P still measured a residual overlap on the
+        # previous render (label bbox likely taller than assumed) --
+        # doubled to 0.3 for real margin.
+        dots2, anims2 = flow_dots([pv2["P"] + np.array([0, 0.3, 0]), pv2["A"], pc2["he"]],
                                   SUPPLY, n=3, run_time=1.3)
         self.play(LaggedStart(*anims2, lag_ratio=0.25))
         self.play(FadeOut(dots2), run_time=0.3)
@@ -978,10 +994,10 @@ class HC11_TandemCenter(SafeScene):
 
         cap4 = caption_top("...flow ถูกบล็อกตั้งแต่วาล์ว 1 ทันที — ไปไม่ถึงวาล์ว 2 เลย ต่างจาก tandem ชัดเจน")
         self.play(FadeIn(cap4), run_time=0.8)
-        # endpoint nudged +0.1y clear of P's own port-glyph label, same as
-        # anims1/anims2 above -- dot still lands right on block1's X mark.
-        dotsX, animsX = flow_dots([pv1["P"] - np.array([0, 0.3, 0]), pv1["P"] + np.array([0, 0.1, 0])],
-                                  BLOCKED, n=2, run_time=0.8)
+        # same sideways-jog fix as anims1 above (straight vertical approach
+        # from below still transits P's label zone) -- dot still ends up
+        # right at/on block1's X mark, just approached from the side.
+        dotsX, animsX = flow_dots([p1_lo, p1_hi, p1_in], BLOCKED, n=2, run_time=0.8)
         self.play(LaggedStart(*animsX, lag_ratio=0.3))
         self.play(FadeOut(dotsX), run_time=0.3)
         self.wait(1.3)
