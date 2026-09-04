@@ -114,7 +114,7 @@ class NN01_WhatIsANeuralNetwork(SafeScene):
         for grp in pulse_groups:
             self.play(*[Indicate(d, color=WHITE, scale_factor=1.6) for d in grp], run_time=0.5)
         self.wait(0.5)
-        self.play(FadeOut(cap3), run_time=0.4)
+        self.play(FadeOut(cap3), FadeOut(in_tag), FadeOut(hid_tag), FadeOut(out_tag), run_time=0.4)
 
         # ---- segment 4: how it learns ----
         cap4 = caption_top("เรียนรู้ = ปรับ weight ให้ทำนายแม่นขึ้นเรื่อยๆ")
@@ -146,6 +146,6 @@ class NN01_WhatIsANeuralNetwork(SafeScene):
 
         self.play(
             FadeOut(VGroup(L_in, L_hid, L_hid2, L_out, edges1, edges2, edges3,
-                            in_tag, hid_tag, out_tag, pred_row, actual_row, close_note, heading)),
+                            pred_row, actual_row, close_note, heading)),
             run_time=0.8,
         )
