@@ -1051,11 +1051,10 @@ class G17_BasePitch(SafeScene):
         self.play(FadeIn(given))
         self.wait(0.6)
 
-        steps = VGroup(
-            Text("ขั้น 1 -- โจทย์ให้: N=8, R=2 in หา p", font_size=19, color=WHITE),
-            MathTex(r"\text{ขั้น 2 -- สูตร: } R=\frac{pN}{2\pi}", font_size=19, color=WHITE),
-        )
         # ขั้น 2 มีคำไทยปนสูตร -> แยกเป็น Text + MathTex คนละก้อน กัน LaTeX พัง
+        # (เดิมมี steps=VGroup(...) ที่ยัด Thai เข้าไปใน MathTex \text{} ตรงๆ ทิ้งไว้
+        # เป็นโค้ดตาย แต่ Python ยัง evaluate ตอน construct() ทำให้ LaTeX compile พังบน
+        # cloud runner แม้จะไม่เคยถูกใช้แสดงผลจริงเลยก็ตาม -- ลบทิ้ง ใช้ step1-4 ด้านล่างแทน)
         step2 = VGroup(Text("ขั้น 2 -- สูตร:", font_size=19, color=WHITE),
                         MathTex(r"R=\frac{pN}{2\pi}", font_size=22, color=WHITE)
                         ).arrange(RIGHT, buff=0.2)
