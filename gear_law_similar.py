@@ -173,7 +173,7 @@ def small_angle(line1, line2, **kwargs):
     other_angle ให้เองถ้าเกิน π การันตีว่าได้มุมที่ ≤180° เสมอ ไม่ว่าพารามิเตอร์
     เรขาคณิตจะเปลี่ยนไปทางไหนในอนาคต"""
     kwargs.pop("other_angle", None)
-    probe = small_angle(line1, line2, **kwargs)
+    probe = Angle(line1, line2, **kwargs)
     if probe.angle_value > np.pi:
         return Angle(line1, line2, other_angle=True, **kwargs)
     return probe
@@ -436,10 +436,16 @@ class G05A_PointsAndLines(SafeScene):
         # DR (-45°) เกือบขนานกับเส้น normal ที่ผ่าน P เอง (U ~ -42.24°) เจอจริงจาก
         # Gemini frame review 2026-09-05: เส้น contact normal พาดผ่านตัวอักษร "P"
         # เหมือนที่เคยเจอกับ "Q" (§ ด้านบน) แก้ด้วยวิธีเดียวกัน: gap_dir() เลี่ยงทั้ง
-        # แกนเส้น normal (±U, ครอบคลุมทิศไป Q/R/S/l_QP ซึ่งเรียงเส้นเดียวกันหมด)
-        # และแกนตั้งฉาก (±perp(U), ครอบคลุมทิศไป E/F ซึ่งเรียงเส้นเดียวกันกับ P ด้วย)
+        # แกนเส้น normal (±U, ครอบคลุมทิศไป Q/R/S/l_QP ซึ่งเรียงเส้นเดียวกันหมด),
+        # แกนตั้งฉาก (±perp(U), ครอบคลุมทิศไป E/F ซึ่งเรียงเส้นเดียวกันกับ P ด้วย),
+        # และลูกศร a_v2/a_v3 (Q->E, Q->F) ที่ไม่ได้อยู่บนแกนใดเลยแต่ผ่านใกล้ P
+        # (เจอจริงจากรอบ re-render ถัดมา: 'P' ยังทับ Arrow อยู่ -- ชุดแรกลืมนับ
+        # ลูกศรทั้งสองเพราะไม่ได้ผ่าน P ตรงๆ)
         _perpUN_P = np.array([-UN[1], UN[0], 0.0])
-        _tPdir = gap_dir(P, [P + UN, P - UN, P + _perpUN_P, P - _perpUN_P])
+        _cpQE_P = closest_point_on_segment(P, Q, E)
+        _cpQF_P = closest_point_on_segment(P, Q, F)
+        _tPdir = gap_dir(P, [P + UN, P - UN, P + _perpUN_P, P - _perpUN_P,
+                              _cpQE_P, _cpQF_P, Q])
         dP, tP = pt(P, C_VN, 0.10), tag("P", P, _tPdir, C_VN, 26, 0.20)
         self.play(FadeOut(cap11))
         self.play(FadeIn(cap12), Create(pr_F))
