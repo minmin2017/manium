@@ -1408,7 +1408,14 @@ class G20_ZDefinitionAB(SafeScene):
         cap = caption_top("บนเส้น line of action เดียวกัน มี 5 จุดเรียงกัน: E1 - A - P - B - E2", size=18)
         self.play(FadeIn(cap))
 
-        loa = Line(A - (B - A) * 0.9, B + (B - A) * 0.9, color=LOA_C, stroke_width=3)
+        # Extrapolating from A/B (Line(A-(B-A)*0.9, B+(B-A)*0.9)) undershoots E2 by a
+        # visible gap -- A and B sit well INSIDE E1/E2 on this line (order is E1-A-P-B-
+        # E2), and the extra 0.9x(B-A) hop from B doesn't reach anywhere close to E2
+        # (confirmed real defect, human review 2026-09-05: verified E2's own t-coordinate
+        # vs the old endpoint's t-coordinate on the line -- ~0.42 units short). Anchor the
+        # line directly to E1/E2 (using the frame's own unit direction fr["d"]) with a
+        # small overshoot margin instead, so it actually reaches both tangent points.
+        loa = Line(E1 - fr["d"] * 0.35, E2 + fr["d"] * 0.35, color=LOA_C, stroke_width=3)
         self.play(Create(loa))
         # E1 กับ A อยู่ใกล้กันมาก (~0.17 หน่วย) เช่นเดียวกับ P กับ B (~0.28 หน่วย) --
         # ทิศ UP/DOWN ตามความสูงเทียบกับ P เดิมทำให้ป้ายที่อยู่กลุ่มเดียวกันชนกันเอง/
@@ -1416,7 +1423,16 @@ class G20_ZDefinitionAB(SafeScene):
         # (E1,A) ไปด้านหนึ่งของเส้น, (P,B) ไปอีกด้าน แล้วถ่างระยะ (buff) ต่างกันในกลุ่ม
         # เดียวกันเพื่อไม่ให้ซ้อนกัน -- E2 อยู่ห่างจากกลุ่มอื่นมากอยู่แล้วใช้ UP ธรรมดาได้
         perp = np.array([-fr["d"][1], fr["d"][0], 0.0])
-        pts = [(E1, BASE_C, "E1", -perp, 0.14), (A, WARN, "A", -perp, 0.5),
+        # A's label previously used the SAME side as E1 (-perp) with a big buff (0.5) to
+        # dodge E1's own label -- but since A and E1 differ only ALONG the line (perp
+        # component of A-E1 is exactly zero, they're collinear), pushing A's label out
+        # along -perp just floats it into the same empty patch E1's label already
+        # occupies, reading as "next to E1" rather than "next to A" (confirmed real
+        # defect, human review 2026-09-05). Fix: put A's label on the OTHER side (perp,
+        # same side as P/B) with a small buff so it hugs its own dot -- opposite side
+        # from E1 means it can't be confused with E1's label, and A is far enough from
+        # P (~0.33 units) that a small buff doesn't collide with P's label either.
+        pts = [(E1, BASE_C, "E1", -perp, 0.14), (A, WARN, "A", perp, 0.18),
                (P, WHITE, "P", perp, 0.14), (B, WARN, "B", perp, 0.5),
                (E2, BASE_C, "E2", UP, 0.16)]
         dots = VGroup(); labels = VGroup()
@@ -1547,7 +1563,13 @@ class G23_E1E2Formula(SafeScene):
         # (เจอจริงจาก [LAYOUT] log 2026-09-05: ทับ DashedLine ทั้งคู่) เปลี่ยนเป็นตั้งฉาก
         # (UP/DOWN) แทน -- เลือกฝั่งที่หลบสามเหลี่ยม tri1/tri2 ที่จะวาดทีหลังด้วย (tri1
         # อยู่ใต้ O1, tri2 อยู่เหนือ-ซ้าย O2 ตรวจจากตำแหน่งจริงของ E1/E2/P แล้ว)
-        for p, c, name, direc in [(O1, GEAR2, "O1", UP), (O2, GEAR3, "O2", DOWN), (P, WHITE, "P", DOWN)]:
+        # P's label was DOWN -- the P->E1 segment (drawn a few lines below as seg_PE/
+        # tri1's edge) leaves P heading almost straight down (only ~20 deg off vertical,
+        # tilted slightly left), so a DOWN-offset label sits right in that segment's path
+        # (confirmed real defect, human review 2026-09-05). UP is clear of both tri1's
+        # wedge at P (its O1-P/P-E1 edges span 180-250 deg) and tri2's wedge at P (its
+        # P-O2/P-E2 edges span 0-70 deg), and clear of the horizontal loc line too.
+        for p, c, name, direc in [(O1, GEAR2, "O1", UP), (O2, GEAR3, "O2", DOWN), (P, WHITE, "P", UP)]:
             self.play(FadeIn(pt(p, c, 0.07)), FadeIn(tag(name, p, direc, c, 18, 0.14)), run_time=0.4)
         self.wait(0.5)
 
@@ -1561,7 +1583,13 @@ class G23_E1E2Formula(SafeScene):
 
         # มุมที่ O1 (ระหว่าง O1P กับ O1E1) และที่ O2 (ระหว่าง O2P กับ O2E2) คือ phi พอดี
         # (cos(phi)=Rb/R ตามนิยามฐาน -- ตรวจเลขจริงแล้วว่าไม่ใช่มุมที่ P ซึ่งเป็น 90-phi)
-        ang1 = Angle(Line(O1, P), Line(O1, E1), radius=0.45, color=WARN, stroke_width=3)
+        # Angle(Line(O1,P), Line(O1,E1)) in this argument order draws the CCW sweep from
+        # O1P's direction (0 deg) to O1E1's direction (-20 deg, i.e. 340 deg going CCW) --
+        # the reflex angle, not the acute 20 deg pressure angle (confirmed real defect,
+        # human review 2026-09-05: verified via Angle.get_value() = 340 deg exactly).
+        # ang2 below already has the correct order (Line(O2,E2), Line(O2,P) -> +20 deg);
+        # swap ang1's argument order to match that same convention.
+        ang1 = Angle(Line(O1, E1), Line(O1, P), radius=0.45, color=WARN, stroke_width=3)
         ang2 = Angle(Line(O2, E2), Line(O2, P), radius=0.45, color=WARN, stroke_width=3)
         lbl_phi1 = MathTex(r"\phi", font_size=22, color=WARN).move_to(
             O1 + normalize(normalize(P - O1) + normalize(E1 - O1)) * 0.68)
@@ -1684,7 +1712,13 @@ class G25_ExampleZmp(SafeScene):
         # เกือบชิดกับที่ที่สมการ z_eq ต้องวาง -- Z-equation เลยไปทับส่วนโค้งวงกลม
         # โดยตรง (เจอจริงจาก Gemini frame review 2026-09-05 -- ไม่ถูกจับโดย [LAYOUT]
         # linter) ลด scale ลงเหลือ 0.5 ให้มีที่ว่างด้านล่างมากขึ้น
-        fr = cr_wide(scale=0.5)
+        # ตรวจซ้ำ 2026-09-05 (รอบ human review ที่ 2): scale=0.5 เพียงอย่างเดียวเหลือ
+        # ช่องว่างจริงแค่ ~0.18 หน่วยระหว่างขอบบนของ z_eq กับจุดต่ำสุดของวง add2 สีส้ม
+        # (คำนวณตรวจด้วยพิกัดจริง ไม่ใช่กะด้วยตา) -- แคบพอที่จะดูเหมือนทับกันในเฟรมจริง
+        # เลื่อน shift ของคู่เฟืองขึ้นอีก 0.25 หน่วย (ไม่แตะตำแหน่ง z_eq/mp_eq/concl เลย)
+        # ให้ช่องว่างเหลือ ~0.43 หน่วย -- ตรวจแล้วขอบบนสุดของวง (y สูงสุด) ยังห่างจาก
+        # cap/cap2 โซนบนพอ (~0.53 หน่วย เหลือเผื่อ)
+        fr = cr_wide(scale=0.5, shift=np.array([-3.4, 0.10, 0.0]))
         O1, O2 = fr["O1"], fr["O2"]
         Rb1, Rb2, Ro1, Ro2 = fr["Rb1"], fr["Rb2"], fr["Ro1"], fr["Ro2"]
         A, B, E1, E2 = fr["A"], fr["B"], fr["E1"], fr["E2"]
@@ -2012,6 +2046,15 @@ class G31_StandardProportions(SafeScene):
             rows.add(r)
         tbl = VGroup(headers, *rows).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
         tbl.move_to(UP * 0.5)
+        # Each row's 3 cells are arranged independently (buff=0.5, no shared per-column
+        # x), so a row's German-cell x depends entirely on how wide THAT row's own name+
+        # British cells are. "Module m" has by far the shortest name/British text of the
+        # 4 rows, so its German cell landed at x=-0.28 -- far left of where the other 3
+        # rows' German cells settled (x=0.70-1.11), i.e. right next to its own British
+        # value instead of under the German column (confirmed real defect, human review
+        # 2026-09-05, verified via get_left()[0] on each row's cells). Snap it to the
+        # same x as the next row's (Addendum) German cell so it reads as one column.
+        rows[0][2].align_to(rows[1][2], LEFT)
         self.play(FadeOut(cap))
         for r in tbl:
             self.play(FadeIn(r, shift=UP * 0.1), run_time=0.5)
@@ -2324,7 +2367,14 @@ class G35_NminDerivation(SafeScene):
         self.wait(1.0)
 
         eq2 = MathTex(r"a'=\overline{PE}\sin\phi=R\sin^2\phi", font_size=24, color=WARN)
-        eq2.next_to(eq1, DOWN, buff=0.5)
+        # eq2 is wider than eq1 -- next_to() with no aligned_edge centers eq2 on eq1's
+        # x-center, so eq2 (being wider) overflows past eq1's own right edge and past
+        # the 1920px frame's right border, clipping the trailing \phi (confirmed real
+        # defect, human review 2026-09-05: eq2 right edge landed 0.126 units past
+        # config.frame_x_radius=7.111). Fix: align eq2's RIGHT edge to eq1's right edge
+        # instead of centering, so it inherits eq1's own frame-edge margin (0.4) and
+        # never overflows regardless of its own width.
+        eq2.next_to(eq1, DOWN, buff=0.5, aligned_edge=RIGHT)
         self.play(FadeOut(cap3))
         self.play(FadeIn(eq2, shift=UP * 0.15))
         self.wait(1.4)
