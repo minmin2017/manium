@@ -233,7 +233,12 @@ class G05A_PointsAndLines(SafeScene):
         arc2 = body_arc(-1, ARC2_R)
         arc3 = body_arc(+1, ARC3_R)
         lb2 = tag("ชิ้นที่ 2", arc2.point_from_proportion(0.06), LEFT, C_BODY, 20)
-        lb3 = tag("ชิ้นที่ 3", arc3.point_from_proportion(0.94), RIGHT, C_BODY, 20)
+        # RIGHT เดิมพาป้ายข้ามเส้น line of centers (loc อยู่ที่ x=OFF[0], จุดยึด
+        # ของ arc3 ที่มุมนี้อยู่ทางซ้ายของ loc ไปแล้วเพราะ PHI ใหม่ชันกว่าเดิมมาก
+        # (42° เทียบ 20°) -- เจอจริงจาก [LAYOUT] log 2026-09-05 rebuild
+        # (ทับ DashedLine) เปลี่ยนเป็น LEFT (ทิศออกจากศูนย์กลางส่วนโค้งเอง ตรงข้าม
+        # กับ loc แน่นอน)
+        lb3 = tag("ชิ้นที่ 3", arc3.point_from_proportion(0.94), LEFT, C_BODY, 20)
         self.play(Create(arc2), Create(arc3), FadeIn(lb2), FadeIn(lb3), run_time=1.4)
         self.wait(0.6)
 
@@ -269,7 +274,11 @@ class G05A_PointsAndLines(SafeScene):
 
         # --- Q ---------------------------------------------------------------
         cap5 = caption_top("จุด Q คือจุดที่ผิวสองชิ้นแตะกัน", size=23)
-        dQ, tQ = pt(Q, WHITE, 0.09), tag("Q", Q, UL, WHITE, 26, 0.12)
+        # UL (135°) เดิมเกือบขนานกับเส้น normal ที่ยื่นออกจาก Q ไปทาง -UN (137.76°
+        # ที่ PHI ใหม่=42.24° -- ที่ PHI เดิม=20° ทิศ -UN อยู่แค่ ~160° ไม่ชนกับ UL)
+        # เจอจริงจาก [LAYOUT] log 2026-09-05 rebuild ('Q' ทับ Line) เปลี่ยนเป็น UP
+        # (90°) ซึ่งห่างจากทั้ง -UN (137.76°) และ +UN (317.76°) อย่างน้อย ~48°
+        dQ, tQ = pt(Q, WHITE, 0.09), tag("Q", Q, UP, WHITE, 26, 0.12)
         self.play(FadeOut(cap4))
         self.play(FadeIn(cap5), FadeIn(dQ), FadeIn(tQ), Flash(Q, color=WHITE))
         self.wait(0.7)
@@ -300,7 +309,13 @@ class G05A_PointsAndLines(SafeScene):
         a_v2 = Arrow(Q, E, buff=0, color=C_VQ2, stroke_width=5,
                      max_tip_length_to_length_ratio=0.13)
         t_v2 = MathTex("v_{Q_2}", font_size=26, color=C_VQ2).next_to(a_v2.get_center(), DL, buff=0.10)
-        dE, tE = pt(E, C_VQ2, 0.075), tag("E", E, normalize(E - P), C_VQ2, 24, 0.16)
+        # E, P, F เรียงเส้นตรงเดียวกันจริง (ตรวจจากตารางที่ยืนยันแล้ว: (E-P) กับ
+        # (F-P) ทิศเดียวกันเป๊ะ) -- ทิศ normalize(E-P) เดิมจึงขนานกับเส้นประ pr_E
+        # (E->P) เอง เกือบแน่นอนที่จะชน เจอจริงจาก [LAYOUT] log 2026-09-05 rebuild
+        # ('E' ทับ DashedLine) แก้ด้วยทิศตั้งฉากกับ (E-P) แทน (_perp_cw ที่มีอยู่แล้ว
+        # ในไฟล์) เลือกฝั่งที่ออกห่างจากกลุ่มจุด Q/R/P (ซึ่งอยู่ทางซ้ายของ E)
+        _dEP = normalize(_perp_cw(E - P))
+        dE, tE = pt(E, C_VQ2, 0.075), tag("E", E, _dEP, C_VQ2, 24, 0.16)
         ra2 = ra_mark(Q, A - Q, E - Q, C_VQ2)
         self.play(FadeOut(cap7))
         self.play(FadeIn(cap8), GrowArrow(a_v2), FadeIn(t_v2), Create(ra2))
@@ -329,7 +344,12 @@ class G05A_PointsAndLines(SafeScene):
         # 2026-09-05 -- ไม่ถูกจับโดย [LAYOUT] linter อัตโนมัติ) เปลี่ยนเป็น DR (ทิศตาม
         # แขน a_v3 เอง ไปทาง F/B ซึ่งอยู่คนละฝั่งกับ A)
         t_v3 = MathTex("v_{Q_3}", font_size=26, color=C_VQ3).next_to(a_v3.get_center(), DR, buff=0.12)
-        dF, tF = pt(F, C_VQ3, 0.075), tag("F", F, normalize(F - P), C_VQ3, 24, 0.16)
+        # ปัญหาเดียวกับ E ข้างบน (F,P,E เรียงเส้นตรงเดียวกัน -> normalize(F-P) ก็
+        # ขนานกับเส้นประ pr_F ของตัวเอง) แก้เชิงรุกด้วยทิศตั้งฉากเดียวกัน แม้ยังไม่
+        # เคยถูก linter จับได้ตรงๆ ในเช็คพอยต์ที่ผ่านมา (F มีระยะยาวกว่า E จาก P
+        # ป้ายเลยรอดไปได้ในบางเฟรม แต่ความเสี่ยงเชิงโครงสร้างเหมือนกันทุกประการ)
+        _dFP = normalize(_perp_cw(F - P))
+        dF, tF = pt(F, C_VQ3, 0.075), tag("F", F, _dFP, C_VQ3, 24, 0.16)
         ra3 = ra_mark(Q, B - Q, F - Q, C_VQ3)
         self.play(FadeOut(cap9))
         self.play(FadeIn(cap10), GrowArrow(a_v3), FadeIn(t_v3), Create(ra3))
