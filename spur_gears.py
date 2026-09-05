@@ -1314,61 +1314,70 @@ class G19_ContactRatioDef(SafeScene):
         self.wait(0.6)
 
         loa_ext = Line(E1 - fr["d"] * 0.5, E2 + fr["d"] * 0.5, color=LOA_C, stroke_width=3)
+        path = Line(A, B, color=WARN, stroke_width=7)
         self.play(FadeOut(cap))
-        cap2 = caption_top("เส้น line of action เดิม -- คราวนี้สนใจ 'ช่วงที่ฟันสัมผัสกันจริง'",
-                            size=19)
+        cap2 = caption_top("เส้น line of action เดิม -- ตรงกลางมีช่วงเล็ก ๆ ที่ฟันสัมผัสกันจริง",
+                            size=18)
         self.play(FadeIn(cap2), Create(loa_ext))
         self.wait(0.5)
+        self.play(Create(path))
+        self.wait(0.6)
 
-        dE1, dE2 = pt(E1, BASE_C, 0.06), pt(E2, BASE_C, 0.06)
-        tE1 = tag("E1", E1, DOWN, BASE_C, 16, 0.14)
-        tE2 = tag("E2", E2, UP, BASE_C, 16, 0.14)
-        self.play(FadeIn(dE1), FadeIn(dE2), FadeIn(tE1), FadeIn(tE2))
-        self.wait(0.5)
-
-        dA, dB = pt(A, WARN, 0.075), pt(B, WARN, 0.075)
-        tA = tag("A (เริ่มสัมผัส)", A, UP, WARN, 14, 0.14)
-        tB = tag("B (สิ้นสุดสัมผัส)", B, DOWN, WARN, 14, 0.14)
-        path = Line(A, B, color=WARN, stroke_width=6)
-        cap3 = caption_top("A ถึง B = ช่วงที่ฟันคู่นี้สัมผัสกันจริง (อยู่ระหว่าง E1, E2 เสมอถ้าไม่ interference)",
-                            size=16)
+        # จุด E1/E2/A/B/P ทั้งหมดอยู่ในช่วงแคบมาก (สเกลลงมาก) ใส่ป้ายกำกับทุกจุดตรงนี้
+        # จะชนกันหมด (เจอจริงจาก [LAYOUT] log 2026-09-05: 29 จุดต้องแก้ ส่วนใหญ่คือจุด
+        # เหล่านี้ทับวงกลม/กันเอง) -- ย้ายไปอธิบายลำดับจุดในแผนภาพช่วยความจำแบบง่าย
+        # (ไม่ยึดสเกลจริง) ด้านล่างแทน คล้ายที่ทำสำเร็จแล้วใน G34
         self.play(FadeOut(cap2))
-        self.play(FadeIn(cap3), Create(path), FadeIn(dA), FadeIn(dB), FadeIn(tA), FadeIn(tB))
-        self.wait(0.8)
+        cap3 = caption_top("ลำดับจุดบนเส้นนี้ (แผนภาพช่วยจำ ไม่ยึดสเกลจริง)", size=19)
+        self.play(FadeIn(cap3))
 
-        dP = pt(P, WHITE, 0.06)
-        tP = tag("P", P, LEFT, WHITE, 16, 0.1)
-        self.play(FadeIn(dP), FadeIn(tP))
-        approach = Line(A, P, color=OK, stroke_width=8)
-        recess = Line(P, B, color="#FFEE58", stroke_width=8)
-        cap4 = caption_top("ก่อนถึง P = angle of approach | หลังผ่าน P = angle of recess", size=18)
+        y0 = -1.9
+        schem = Line(LEFT * 5.0 + UP * y0, RIGHT * 5.0 + UP * y0, color=GRAYTXT, stroke_width=2)
+        pts_schem = [(-3.6, "E1", BASE_C), (-1.6, "A", WARN), (0.0, "P", WHITE),
+                     (1.6, "B", WARN), (3.6, "E2", BASE_C)]
+        sdots = VGroup(); slbls = VGroup()
+        for x, name, c in pts_schem:
+            p = np.array([x, y0, 0])
+            sdots.add(pt(p, c, 0.06))
+            slbls.add(tag(name, p, UP, c, 17, 0.12))
+        self.play(Create(schem), FadeIn(sdots), FadeIn(slbls))
+        seg_ab = Line(np.array([-1.6, y0, 0]), np.array([1.6, y0, 0]), color=WARN, stroke_width=7)
+        self.play(Create(seg_ab))
+        note_schem = Text("A-B (ช่วงสัมผัสจริง) ซ้อนอยู่ใน E1-E2 เสมอถ้าไม่ interference",
+                           font_size=15, color=GRAYTXT).next_to(schem, DOWN, buff=0.3)
+        self.play(FadeIn(note_schem))
+        self.wait(1.4)
+
+        cap4 = caption_top("ก่อนถึง P (A->P) = angle of approach | หลัง P (P->B) = angle of recess", size=17)
         self.play(FadeOut(cap3))
-        self.play(FadeIn(cap4), Create(approach), Create(recess))
-        self.wait(1.0)
+        self.play(FadeIn(cap4))
+        self.wait(1.2)
 
-        formula = MathTex(r"m_p=\frac{Z}{p_b},\qquad Z=\overline{AB}",
-                           font_size=28, color=WHITE).to_edge(RIGHT, buff=0.4).shift(UP * 1.7)
-        box = SurroundingRectangle(formula, color=OK, buff=0.18)
-        self.play(FadeOut(cap4))
-        self.play(FadeIn(formula, shift=UP * 0.15), Create(box))
-        self.wait(1.0)
+        self.play(FadeOut(VGroup(cap4, schem, sdots, slbls, seg_ab, note_schem)))
 
+        formula = MathTex(r"m_p=\frac{Z}{p_b},\qquad Z=\overline{AB}", font_size=26, color=WHITE)
+        fit_width(formula, 5.3)
         meaning = Text("ความหมาย: จำนวนคู่ฟันที่ขบกันอยู่โดยเฉลี่ยตลอดการหมุน",
-                        font_size=17, color=GRAYTXT).next_to(formula, DOWN, buff=0.35)
-        fit_width(meaning, 4.3)
+                        font_size=16, color=GRAYTXT)
+        fit_width(meaning, 5.3)
+        row1 = Text("m_p > 1     -> ใช้งานได้ (มีฟันขบเสมอ)", font_size=15, color=WHITE)
+        row2 = Text("m_p > 1.40 -> เดินเรียบ (เกณฑ์ออกแบบจริง)", font_size=15, color=OK)
+        fit_width(row1, 5.3)
+        fit_width(row2, 5.3)
+        panel = VGroup(formula, meaning, row1, row2).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
+        panel.to_edge(RIGHT, buff=0.6).shift(UP * 0.3)
+        box = SurroundingRectangle(formula, color=OK, buff=0.18)
+        self.play(FadeIn(formula, shift=UP * 0.15), Create(box))
+        self.wait(0.8)
         self.play(FadeIn(meaning, shift=UP * 0.1))
-        self.wait(1.0)
-
-        table = VGroup(
-            Text("m_p > 1    -> ใช้งานได้ (มีฟันขบเสมอ)", font_size=16, color=WHITE),
-            Text("m_p > 1.40 -> เดินเรียบ (เกณฑ์ออกแบบจริง)", font_size=16, color=OK),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.2).next_to(meaning, DOWN, buff=0.4)
-        for row in table:
-            self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.5)
+        self.wait(0.8)
+        self.play(FadeIn(row1, shift=RIGHT * 0.15), run_time=0.5)
+        self.play(FadeIn(row2, shift=RIGHT * 0.15), run_time=0.5)
         self.wait(1.2)
 
         note = Text("ทำไมหารด้วย p_b ไม่ใช่ p -- เพราะ p_b วัดในระบบเดียวกับ Z (ตาม line of action)",
                      font_size=17, color=WARN).move_to([0, -3.15, 0])
+        fit_width(note, 12.5)
         self.play(FadeIn(note, shift=UP * 0.15))
         self.wait(2.0)
 
@@ -1389,13 +1398,19 @@ class G20_ZDefinitionAB(SafeScene):
 
         loa = Line(A - (B - A) * 0.9, B + (B - A) * 0.9, color=LOA_C, stroke_width=3)
         self.play(Create(loa))
-        pts = [(E1, BASE_C, "E1"), (A, WARN, "A"), (P, WHITE, "P"),
-               (B, WARN, "B"), (E2, BASE_C, "E2")]
+        # E1 กับ A อยู่ใกล้กันมาก (~0.17 หน่วย) เช่นเดียวกับ P กับ B (~0.28 หน่วย) --
+        # ทิศ UP/DOWN ตามความสูงเทียบกับ P เดิมทำให้ป้ายที่อยู่กลุ่มเดียวกันชนกันเอง/
+        # ชนจุดอื่น (เจอจริงจาก [LAYOUT] log 2026-09-05: 3 จุดต้องแก้) แก้โดยจัดกลุ่ม
+        # (E1,A) ไปด้านหนึ่งของเส้น, (P,B) ไปอีกด้าน แล้วถ่างระยะ (buff) ต่างกันในกลุ่ม
+        # เดียวกันเพื่อไม่ให้ซ้อนกัน -- E2 อยู่ห่างจากกลุ่มอื่นมากอยู่แล้วใช้ UP ธรรมดาได้
+        perp = np.array([-fr["d"][1], fr["d"][0], 0.0])
+        pts = [(E1, BASE_C, "E1", -perp, 0.14), (A, WARN, "A", -perp, 0.5),
+               (P, WHITE, "P", perp, 0.14), (B, WARN, "B", perp, 0.5),
+               (E2, BASE_C, "E2", UP, 0.16)]
         dots = VGroup(); labels = VGroup()
-        for p, c, name in pts:
+        for p, c, name, direc, bf in pts:
             d = pt(p, c, 0.07)
-            direc = UP if p[1] >= P[1] else DOWN
-            lb = tag(name, p, direc, c, 20, 0.18)
+            lb = tag(name, p, direc, c, 19, bf)
             dots.add(d); labels.add(lb)
         self.play(LaggedStart(*[FadeIn(d) for d in dots], lag_ratio=0.15))
         self.play(LaggedStart(*[FadeIn(l) for l in labels], lag_ratio=0.15))
@@ -1516,7 +1531,11 @@ class G23_E1E2Formula(SafeScene):
 
         loc = DashedLine(O1 + LEFT * 0.3, O2 + RIGHT * 0.3, color=GRAYTXT, stroke_width=2.5)
         self.play(Create(loc))
-        for p, c, name, direc in [(O1, GEAR2, "O1", LEFT), (O2, GEAR3, "O2", RIGHT), (P, WHITE, "P", DOWN)]:
+        # O1/O2 นั่งอยู่ "บน" เส้น loc แนวนอนพอดี -- ทิศเดิม LEFT/RIGHT จึงขนานเส้นนั้น
+        # (เจอจริงจาก [LAYOUT] log 2026-09-05: ทับ DashedLine ทั้งคู่) เปลี่ยนเป็นตั้งฉาก
+        # (UP/DOWN) แทน -- เลือกฝั่งที่หลบสามเหลี่ยม tri1/tri2 ที่จะวาดทีหลังด้วย (tri1
+        # อยู่ใต้ O1, tri2 อยู่เหนือ-ซ้าย O2 ตรวจจากตำแหน่งจริงของ E1/E2/P แล้ว)
+        for p, c, name, direc in [(O1, GEAR2, "O1", UP), (O2, GEAR3, "O2", DOWN), (P, WHITE, "P", DOWN)]:
             self.play(FadeIn(pt(p, c, 0.07)), FadeIn(tag(name, p, direc, c, 18, 0.14)), run_time=0.4)
         self.wait(0.5)
 
@@ -1546,22 +1565,29 @@ class G23_E1E2Formula(SafeScene):
         self.play(FadeOut(cap2)); self.play(FadeIn(cap3))
         self.wait(1.0)
 
-        deriv = VGroup(
+        deriv_rows = [
             MathTex(r"E_1E_2=E_1P+E_2P", font_size=23, color=WHITE),
             MathTex(r"=O_1P\sin\phi+O_2P\sin\phi", font_size=23, color=WHITE),
             MathTex(r"=(O_1P+O_2P)\sin\phi", font_size=23, color=WHITE),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.25)
-        deriv.to_edge(RIGHT, buff=0.4).shift(UP * 1.0)
+        ]
+        # fit_width ทุกแถว "ก่อน" arrange เสมอ (บทเรียนจาก G17/G18 -- scale() ย่อรอบ
+        # จุดศูนย์กลางตัวเอง ถ้าย่อทีหลังตำแหน่งที่ arrange/to_edge คำนวณไว้จะไม่ตรง)
+        for row in deriv_rows:
+            fit_width(row, 3.8)
+        deriv = VGroup(*deriv_rows).arrange(DOWN, aligned_edge=LEFT, buff=0.25)
+        deriv.to_edge(RIGHT, buff=0.5).shift(UP * 1.0)
         self.play(FadeOut(cap3))
         for row in deriv:
             self.play(FadeIn(row, shift=UP * 0.12), run_time=0.6)
             self.wait(0.6)
 
-        result = MathTex(r"E_1E_2=C\sin\phi", font_size=28, color=OK).next_to(deriv, DOWN, buff=0.4)
+        result = MathTex(r"E_1E_2=C\sin\phi", font_size=26, color=OK)
+        fit_width(result, 3.8)
+        result.next_to(deriv, DOWN, buff=0.4)
         box = SurroundingRectangle(result, color=OK, buff=0.18)
-        note = Text("C = O1P + O2P = R1 + R2 (ระยะศูนย์กลาง)", font_size=15, color=GRAYTXT)
+        note = Text("C = O1P + O2P = R1 + R2", font_size=14, color=GRAYTXT)
+        fit_width(note, 3.6)
         note.next_to(result, DOWN, buff=0.25)
-        fit_width(note, 4.4)
         self.play(FadeIn(result, shift=UP * 0.15), Create(box))
         self.play(FadeIn(note))
         self.wait(2.2)
@@ -1587,7 +1613,11 @@ class G24_ZFormulaFinal(SafeScene):
         self.wait(1.6)
 
         cap2 = caption_top("กรณี rack & pinion: เฟือง 2 กลายเป็น rack (R2 -> infinity)", size=20)
-        self.play(FadeOut(cap)); self.play(FadeIn(cap2))
+        self.play(FadeOut(cap))
+        # เอากรอบสูตรรวมออกก่อน -- เดิมค้างอยู่ทั้งคลิปแล้วไปทับป้าย "rack (pitch line)"
+        # ที่กำลังจะโผล่ (เจอจริงจาก [LAYOUT] log 2026-09-05) ใช้แนวเดียวกับที่แก้ G17/G24
+        self.play(FadeOut(formula), FadeOut(box))
+        self.play(FadeIn(cap2))
         self.wait(1.0)
 
         O1 = LEFT * 2.2 + DOWN * 1.4
