@@ -1327,7 +1327,11 @@ class G19_ContactRatioDef(SafeScene):
         # จะชนกันหมด (เจอจริงจาก [LAYOUT] log 2026-09-05: 29 จุดต้องแก้ ส่วนใหญ่คือจุด
         # เหล่านี้ทับวงกลม/กันเอง) -- ย้ายไปอธิบายลำดับจุดในแผนภาพช่วยความจำแบบง่าย
         # (ไม่ยึดสเกลจริง) ด้านล่างแทน คล้ายที่ทำสำเร็จแล้วใน G34
+        # -- รอบแรกลืมเอาแผนภาพเฟืองจริง (base1/base2/add1/add2/lb1/lb2/loa_ext/path)
+        # ออกก่อนสลับไปแผนภาพช่วยจำ ทำให้ทั้งสองแผนภาพซ้อนทับกันเต็มๆ (เจอจริงจาก
+        # [LAYOUT] log รอบสอง: ยังเหลือ 12 จุด ส่วนใหญ่คือป้าย/ข้อความทับวงกลมเดิม)
         self.play(FadeOut(cap2))
+        self.play(FadeOut(VGroup(base1, base2, add1, add2, lb1, lb2, loa_ext, path)))
         cap3 = caption_top("ลำดับจุดบนเส้นนี้ (แผนภาพช่วยจำ ไม่ยึดสเกลจริง)", size=19)
         self.play(FadeIn(cap3))
 
@@ -1784,6 +1788,10 @@ class G26_MeshingCondition(SafeScene):
         g1a.clear_updaters(); g1b.clear_updaters()
         g2a.clear_updaters(); g2b.clear_updaters()
         self.play(FadeOut(cap))
+        # เดิมไม่เคยเอาเฟืองภาพประกอบ 4 ตัว + ป้ายออกเลย ทำให้ข้อความ "ทำไม..."/
+        # "ฟันคนละขนาด..." ที่โผล่ทีหลัง (อยู่กลางจอ) ไปทับฟันเฟือง (Polygon) ที่ยัง
+        # ค้างอยู่ (เจอจริงจาก [LAYOUT] log 2026-09-05: 8 จุดต้องแก้)
+        self.play(FadeOut(VGroup(g1a, g1b, g2a, g2b, ok_lbl, bad_lbl)))
 
         cond = VGroup(
             Text("เฟืองตรง 2 ตัวจะขบกันได้ถูกต้อง ก็ต่อเมื่อ:", font_size=20, color=WHITE),
@@ -1893,7 +1901,10 @@ class G28_RackAndHob(SafeScene):
         self.play(FadeIn(note, shift=UP * 0.15))
         self.wait(1.2)
 
+        # rack_lbl ค้างอยู่ทางขวาไปชนตาราง (to_edge RIGHT) ที่กำลังจะโผล่พอดี (เจอจริง
+        # จาก [LAYOUT] log 2026-09-05: ทับกัน 92%) เอาแผนภาพ rack/pinion ออกให้หมด
         self.play(FadeOut(cap), FadeOut(note))
+        self.play(FadeOut(VGroup(pinion_c, pinion_base, rack_line, rack_lbl)))
         cap2 = caption_top("ผลที่ตามมาเวลาใช้ hob ตัดเฟือง", size=21)
         self.play(FadeIn(cap2))
 
@@ -1933,7 +1944,11 @@ class G29_HobbingFellows(SafeScene):
         self.wait(1.8)
         blank1.clear_updaters(); hob.clear_updaters()
 
+        # blank1/hob/ป้ายชุดแรกไม่เคยถูกเอาออก -- blank1_lbl (ใต้ blank1 ที่ UP*1.2)
+        # ตกลงมาอยู่เกือบชิดขอบบนของ blank2 (ที่ DOWN*1.2) พอดี (เจอจริงจาก [LAYOUT]
+        # log 2026-09-05: 'gear blank(หมุนช้าตาม)' ทับ Circle)
         self.play(FadeOut(cap))
+        self.play(FadeOut(VGroup(blank1, hob, blank1_lbl, hob_lbl)))
         cap2 = caption_top("Fellows shaping -- ใช้เฟืองมีดชักขึ้น-ลง สลับกับหมุนทีละนิด", size=20)
         self.play(FadeIn(cap2))
 
@@ -2065,7 +2080,12 @@ class G33_ExampleDesign13Teeth(SafeScene):
         self.play(FadeIn(cap))
 
         O = LEFT * 3.4 + DOWN * 0.2
-        s = 0.35  # สเกลย่อวาด (ตัวเลขจริงหน่วย mm ใหญ่กว่าจอ)
+        # s=0.35 เดิมผิดพลาดร้ายแรง -- Ro=22.5mm*0.35=7.875 หน่วย ใหญ่กว่าครึ่งความ
+        # กว้างเฟรมทั้งหมด (7.11)! ทำให้แทบทุกคำบรรยาย/ป้ายบนจอไปทับเส้นรอบวงหมด และ
+        # "given" (next_to ด้วย buff=Ro*s+0.4) หลุดขอบล่างไปไกลมาก (เจอจริงจาก [LAYOUT]
+        # log 2026-09-05: 12 จุดต้องแก้ แทบทุกจุดคือคำบรรยายทับ Circle + หลุดขอบล่าง)
+        # ลดลงเหลือ 0.14 ให้ Ro*s=3.15 พอดีเฟรม
+        s = 0.14
         c_Ro = Circle(radius=Ro * s, color=GEAR3, stroke_width=2.5).move_to(O)
         c_R = Circle(radius=R * s, color=PITCH_C, stroke_width=3).move_to(O)
         c_Rb = Circle(radius=Rb * s, color=BASE_C, stroke_width=2.5).move_to(O)
@@ -2358,6 +2378,11 @@ class G36_Undercutting(SafeScene):
             self.play(FadeIn(row, shift=UP * 0.1), run_time=0.5)
         self.wait(1.4)
 
+        # formula/box/table ไม่เคยถูกเอาออก -- "แยกให้ออก:" ไปทับกรอบสูตร และตัวเลข
+        # k (1.0/0.8) ไปทับข้อความ distinguish ที่โผล่ทีหลัง (เจอจริงจาก [LAYOUT] log
+        # 2026-09-05: 4 จุดต้องแก้ รวมทับกันสูงสุด 94%)
+        self.play(FadeOut(VGroup(formula, box, table)))
+
         distinguish = VGroup(
             Text("แยกให้ออก:", font_size=19, color=WHITE),
             Text("Interference = ปัญหาตอนใช้งาน (เฟืองขบกันแล้วชน)", font_size=17, color=WARN),
@@ -2367,7 +2392,7 @@ class G36_Undercutting(SafeScene):
         for row in distinguish:
             fit_width(row, 6.2)
         distinguish.arrange(DOWN, aligned_edge=LEFT, buff=0.22)
-        distinguish.to_edge(RIGHT, buff=0.4).shift(UP * 0.2)
+        distinguish.move_to(UP * 0.2)
         cap2 = caption_top("Interference vs Undercutting -- คนละขั้นตอนกัน", size=20)
         self.play(FadeIn(cap2))
         for row in distinguish:
@@ -2413,11 +2438,16 @@ class G37_PressureAngleEffect(SafeScene):
         self.wait(1.6)
 
         # ---- แผนภาพเทียบ base circle เล็ก/ใหญ่ ---------------------------------
+        # เอาตารางออกก่อน (เผื่อที่ + กันไม่ให้ขอบบนวงกลมไปทับขอบล่างตาราง)
+        self.play(FadeOut(rows))
         cap2 = caption_top("phi มาก -> base circle เล็กลง (เทียบที่ R เท่ากัน)", size=20)
         self.play(FadeIn(cap2))
         R_demo = 1.3
-        O1c = LEFT * 3.3 + DOWN * 1.7
-        O2c = RIGHT * 2.0 + DOWN * 1.7
+        # เดิม DOWN*1.7 ทำให้ป้าย l1/l2 (DOWN*(R_demo+0.25) ต่อจากนั้นอีก) เกือบชน
+        # CAP_Y (-3.15) พอดี (เจอจริงจาก [LAYOUT] log 2026-09-05: ทับข้อความ 'cost' 58%)
+        # ขยับวงกลมขึ้นให้มีระยะห่างเผื่อมากขึ้น
+        O1c = LEFT * 3.3 + DOWN * 1.1
+        O2c = RIGHT * 2.0 + DOWN * 1.1
         c_R1 = Circle(radius=R_demo, color=PITCH_C, stroke_width=2).move_to(O1c)
         c_Rb1 = Circle(radius=R_demo * np.cos(20 * DEGREES), color=BASE_C, stroke_width=3).move_to(O1c)
         c_R2 = Circle(radius=R_demo, color=PITCH_C, stroke_width=2).move_to(O2c)
@@ -2490,6 +2520,10 @@ class G38_BigExampleMM(SafeScene):
         col = VGroup(step_a, *tbl).arrange(DOWN, aligned_edge=LEFT, buff=0.22)
         col.to_edge(RIGHT, buff=0.4).shift(UP * 0.2)
         self.play(FadeOut(cap2))
+        # base1/base2 ไม่เคยถูกเอาออกเลยตลอดคลิป -- ข้อความ/สูตรที่ทยอยโผล่ทีหลังเกือบ
+        # ทั้งหมดไปทับวงกลมที่ยังค้างอยู่ (เจอจริงจาก [LAYOUT] log 2026-09-05: 8 จุด)
+        # หน้าที่ของวงกลมคือแค่ "เตือนภาพ" ว่าเป็นเฟืองคู่เดิม -- พอเข้าสูตรจริงเอาออกได้
+        self.play(FadeOut(base1), FadeOut(base2))
         for row in col:
             self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.5)
         self.wait(1.4)
