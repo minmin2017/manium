@@ -2084,8 +2084,11 @@ class G33_ExampleDesign13Teeth(SafeScene):
         # กว้างเฟรมทั้งหมด (7.11)! ทำให้แทบทุกคำบรรยาย/ป้ายบนจอไปทับเส้นรอบวงหมด และ
         # "given" (next_to ด้วย buff=Ro*s+0.4) หลุดขอบล่างไปไกลมาก (เจอจริงจาก [LAYOUT]
         # log 2026-09-05: 12 จุดต้องแก้ แทบทุกจุดคือคำบรรยายทับ Circle + หลุดขอบล่าง)
-        # ลดลงเหลือ 0.14 ให้ Ro*s=3.15 พอดีเฟรม
-        s = 0.14
+        # ลดเหลือ 0.14 (Ro*s=3.15) ยังไม่พอ -- วงบนสุดยังสูงถึง y=-0.2+3.15=2.95 ซึ่ง
+        # เกินโซน caption_top (2.72) เจอจริงจาก [LAYOUT] log 2026-09-05 (รอบที่สอง
+        # หลังลด scale): cap/cap2/cap3 ตอนต้นคลิปยังทับวงกลมอยู่ (ก่อนถึงจุดที่เพิ่ง
+        # เพิ่ม FadeOut ไว้ทีหลัง) ลดอีกครั้งเป็น 0.1 -> Ro*s=2.25, สูงสุด=2.05 พ้นแน่นอน
+        s = 0.1
         c_Ro = Circle(radius=Ro * s, color=GEAR3, stroke_width=2.5).move_to(O)
         c_R = Circle(radius=R * s, color=PITCH_C, stroke_width=3).move_to(O)
         c_Rb = Circle(radius=Rb * s, color=BASE_C, stroke_width=2.5).move_to(O)
