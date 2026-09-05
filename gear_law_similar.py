@@ -351,9 +351,11 @@ class G05A_PointsAndLines(SafeScene):
         cap15 = caption_top("จาก B ลากฉากลงเส้น normal — เท้าของฉากคือจุด S", size=22)
         l_BS = seg(B, S, C_BS, 5)
         dS, tS = pt(S, C_BS, 0.075), tag("S", S, UR, C_BS, 20, 0.10)
-        # buff เดิม 0.12 แคบไป -- ขอบซ้ายของป้าย "B" เกือบชิดเส้นประ line of centers
-        # (เจอจริงจาก Gemini frame review 2026-09-05, ไม่ถูกจับโดย [LAYOUT] linter)
-        t_BS = tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 22, 0.32)
+        # buff เพิ่มเป็น 0.32 ไม่พอ -- คำนวณดูแล้วจุดยึด (กึ่งกลาง B-S) อยู่ที่ x=-3.43
+        # ซึ่ง "ทางขวา" ของเส้น loc (x=-3.93 คงที่ตลอดแนว) ทิศ LEFT เดิมจึงพาป้ายข้าม
+        # เส้น loc เสมอไม่ว่า buff จะเท่าไหร่ (เจอจริงจาก [LAYOUT] log 2026-09-05 ซ้ำ
+        # หลังแก้รอบแรก) แก้ทิศเป็น RIGHT แทน (ตรงข้าม ห่างจาก loc แน่นอน)
+        t_BS = tag("BS", B + (S - B) * 0.50, RIGHT, C_BS, 22, 0.2)
         raS = ra_mark(S, B - S, Q - S, C_BS)
         self.play(FadeOut(cap14))
         self.play(FadeIn(cap15), Create(l_BS), FadeIn(t_BS))
@@ -640,7 +642,10 @@ class G06_PitchPoint(SafeScene):
             tag("P", P, np.array([np.cos(35 * DEGREES), np.sin(35 * DEGREES), 0.0]),
                 C_VN, 24, 0.5),
             tag("AR", A + (R - A) * 0.45, _ar_perp6, C_AR, 20, 0.22),
-            tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 21, 0.12),
+            # เหมือน bug ที่เจอใน G05A (LEFT พาป้ายข้ามเส้น loc เสมอเพราะจุดยึดอยู่
+            # ทางขวาของ loc อยู่แล้ว) แก้เชิงรุกที่นี่ด้วยแม้ยังไม่เคยถูก Gemini/linter
+            # จับได้ตรงๆ ในซีนนี้ -- จุด B, S เดียวกัน ความเสี่ยงเดียวกัน
+            tag("BS", B + (S - B) * 0.50, RIGHT, C_BS, 21, 0.12),
             ra_mark(R, A - R, Q - R, C_AR),
             ra_mark(S, B - S, Q - S, C_BS),
         )
