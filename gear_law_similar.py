@@ -222,7 +222,10 @@ class G05A_PointsAndLines(SafeScene):
         # แปะป้ายใกล้ B (t=0.72) แทนกึ่งกลางหรือใกล้ A -- ทั้งสองจุดนั้นมีเส้น/จุดอื่น
         # (l_AR, dots ต่างๆ) มาพาดทับป้ายที่ค้างอยู่ทั้งคลิป (เจอจริงจาก [LAYOUT] log
         # 2026-09-05: ทับทั้ง Dot และ DashedLine) -- buff ก็เพิ่มเป็น 0.5 กันชนเผื่อ
-        t_loc = tag("line of centers", A + (B - A) * 0.72, RIGHT, C_LOC, 17, 0.5)
+        # 0.72 (ใกล้ B) ตอนนี้ไปชนป้าย "BS" ที่เพิ่งย้ายมาทาง RIGHT ใกล้ B เหมือนกัน
+        # (เจอจริงจาก [LAYOUT] log 2026-09-05: 'lineofcenters'<->'BS' ทับกัน 47%)
+        # ย้ายไปใกล้ A แทน (t=0.28, ไกลจากทั้งคลัสเตอร์ B/S/R/Q ตรงกลาง-ล่าง)
+        t_loc = tag("line of centers", A + (B - A) * 0.28, RIGHT, C_LOC, 17, 0.5)
         self.play(FadeOut(cap3))
         self.play(FadeIn(cap4), Create(loc), FadeIn(t_loc))
         self.wait(0.8)
