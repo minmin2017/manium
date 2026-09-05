@@ -458,10 +458,24 @@ class G05A_PointsAndLines(SafeScene):
         # (ทีละ 1°) เทียบกับทุกอย่างที่ยังอยู่บนจอตอนนี้ (l_BQ, l_AQ, n_line, a_v2,
         # a_v3, dE, dF, dQ, loc, pr_E, pr_F) พร้อมเผื่อ safety margin 0.10 หน่วย
         # (กันปัญหา font-metric ต่างเครื่องแบบเดียวกับที่เพิ่งเจอ) -- ช่วงสะอาดคือ
-        # 242-251° เลือกกึ่งกลาง 246° (ลง-ซ้ายเล็กน้อย ตรงข้ามกลุ่ม Q/E/F/BQ ที่
-        # อยู่ทางขึ้น-ขวาของ P เกือบทั้งหมด)
-        _P_LABEL_DIR = np.array([np.cos(246 * DEGREES), np.sin(246 * DEGREES), 0.0])
-        dP, tP = pt(P, C_VN, 0.10), tag("P", P, _P_LABEL_DIR, C_VN, 26, 0.20)
+        # 242-251° เลือกกึ่งกลาง 246° -- **แก้ครั้งแรกด้วยฟอนต์ผิด**: เครื่องนี้ไม่มี
+        # ฟอนต์ Loma ติดตั้งจริง (ตรวจแล้วผ่าน .NET InstalledFontCollection) เลย
+        # ตกลงไปที่ Leelawadee UI (fallback ของ mlib.py) ตอนคำนวณทิศ 246° -- แต่
+        # cloud container ใช้ Loma จริง (workflow ตั้ง MANIM_THAI_FONT=Loma) ซึ่ง
+        # ตัว "P" กว้างกว่า Leelawadee UI ~25% (วัดจริง: 0.155 หน่วย vs 0.193 หน่วย
+        # ที่ font_size เดียวกัน) พอเทียบกับ [LAYOUT] log จริงจาก cloud (ยังเจอ 'P'
+        # ทับ Line 10 จุดที่ 246°) เป็นหลักฐานตรงว่าฟอนต์ผิดจริง -- แก้โดยดาวน์โหลด
+        # Loma.ttf ตัวจริงมาติดตั้งเป็น per-user font บนเครื่องนี้ (ไม่ต้อง admin:
+        # AddFontResource + คีย์ registry HKCU\...\Fonts) แล้วสแกนมุมใหม่ทั้ง 360°
+        # ด้วย MANIM_THAI_FONT=Loma จริง เทียบกับทุกอย่างที่อยู่บนจอตอนนี้เหมือนเดิม
+        # (l_BQ, l_AQ, n_line, a_v2, a_v3, dE, dF, dQ, loc, pr_E, pr_F, l_QP) --
+        # ได้ทิศ 284° (เกือบตรงลงเล็กน้อยเอียงขวา) buff=0.25 ให้ margin ~0.095
+        # หน่วย (มากกว่าที่เคยได้จากฟอนต์ผิดที่ 246°) จุดนี้แน่นเพราะ E/F/Q/BQ/AQ/
+        # normal ล้อมรอบ P เกือบทุกทิศจริงๆ (ธรรมชาติของจุดที่มีเส้นโครงหลายเส้น
+        # มาบรรจบ) จึง margin สูงสุดที่หาได้จริงอยู่แค่ ~0.10 หน่วยไม่ว่าจะเลือก buff
+        # เท่าไหร่ -- ยังมากกว่าความคลาดเคลื่อนจาก font metric ที่เจอจริง (~0.03-0.05)
+        _P_LABEL_DIR = np.array([np.cos(284 * DEGREES), np.sin(284 * DEGREES), 0.0])
+        dP, tP = pt(P, C_VN, 0.10), tag("P", P, _P_LABEL_DIR, C_VN, 26, 0.25)
         self.play(FadeOut(cap11))
         self.play(FadeIn(cap12), Create(pr_F))
         self.play(FadeIn(dP), FadeIn(tP), Flash(P, color=C_VN, flash_radius=0.45))
