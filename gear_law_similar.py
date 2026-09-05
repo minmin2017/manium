@@ -304,7 +304,12 @@ class G05A_PointsAndLines(SafeScene):
         # ทั้ง 8 ทิศพร้อมกัน -- ได้ช่องว่าง 90° เต็ม (เผื่อคลาดเคลื่อนได้มาก)
         _perpUN = np.array([-UN[1], UN[0], 0.0])
         _tQdir = gap_dir(Q, [A, B, E, F, Q + UN, Q - UN, Q + _perpUN, Q - _perpUN])
-        dQ, tQ = pt(Q, WHITE, 0.09), tag("Q", Q, _tQdir, WHITE, 26, 0.22)
+        # buff เพิ่มเป็น 0.4 (จาก 0.22) -- ทิศ 182.7° นี้คือช่องว่างเชิงมุมกว้างสุด
+        # ที่เป็นไปได้แล้ว (90° เต็ม จาก gap_dir) แต่ arc2/arc3 เป็นเส้นโค้งจริง
+        # ไม่ใช่เส้นตรง โค้งเข้าใกล้ป้ายทีละนิดตามระยะ (sagitta) จึงยังชนอยู่นิดหน่อย
+        # ที่ buff เดิม (เจอจริงจาก [LAYOUT] log: เหลือแค่ 5/14 จุด จากเดิมหลักสิบ) --
+        # ขยับ buff ออกไปอีกแทนที่จะหมุนทิศ (ทิศนี้ดีที่สุดแล้วเชิงมุม)
+        dQ, tQ = pt(Q, WHITE, 0.09), tag("Q", Q, _tQdir, WHITE, 26, 0.40)
         self.play(FadeOut(cap4))
         self.play(FadeIn(cap5), FadeIn(dQ), FadeIn(tQ), Flash(Q, color=WHITE))
         self.wait(0.7)
