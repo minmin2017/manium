@@ -128,6 +128,17 @@ def tag(txt, p, direction, color=WHITE, size=24, buff=0.16):
     return Text(txt, font_size=size, color=color).next_to(p, direction, buff=buff)
 
 
+def closest_point_on_segment(p, a, b):
+    """จุดบนส่วนเส้นตรง a-b ที่ใกล้ p ที่สุด -- ใช้คู่กับ gap_dir() หาทิศเลี่ยงเส้น
+    ที่ไม่ได้ผ่านจุด anchor โดยตรง (เช่น เลี่ยงเส้น BQ จากจุดกึ่งกลางลูกศร a_v2
+    ซึ่งไม่ใช่ปลายทั้งสองของ BQ)"""
+    a = np.asarray(a, float)
+    b = np.asarray(b, float)
+    ab = b - a
+    t = float(np.clip(np.dot(np.asarray(p, float) - a, ab) / np.dot(ab, ab), 0.0, 1.0))
+    return a + t * ab
+
+
 def gap_dir(point, avoid_points):
     """หาทิศจาก point ที่ "ห่างจากทุกทิศในลิสต์ avoid_points มากที่สุด" (ช่องว่าง
     เชิงมุมกว้างสุด) -- ใช้ตอนจุดหนึ่งมีเส้น/ลูกศรหลายเส้นมาบรรจบพร้อมกัน (เช่น Q
@@ -148,6 +159,24 @@ def gap_dir(point, avoid_points):
             best_gap, best_mid = gap, (a + b) / 2
     rad = (best_mid % 360.0) * DEGREES
     return np.array([np.cos(rad), np.sin(rad), 0.0])
+
+
+def small_angle(line1, line2, **kwargs):
+    """แทน Angle() ตรงๆ -- Angle() ของ manim กวาดทวนเข็มนาฬิกาจาก line1 ไป line2
+    เสมอ (ดู source: angle_fin = angle_2-angle_1 ถ้า angle_2>angle_1 ไม่งั้นกวาด
+    รอบไกล 2π-(angle_1-angle_2)) ถ้าลำดับสองเส้น+ทิศทางที่ได้จากพารามิเตอร์เรขาคณิต
+    ปัจจุบันบังเอิญทำให้การกวาดแบบนี้ไปทางไกล จะได้มุม reflex (>180°) แทนมุมเล็กที่
+    ตั้งใจจะโชว์ -- เจอจริงจาก Gemini frame review 2026-09-05 rebuild: ได้วงกลม
+    เกือบเต็ม ~270-310° ล้อมจุด Q (G05B) และจุด P (G06) แทนมุมเล็กๆ ที่ตั้งใจ
+    (ตัวเรขาคณิตเดิมที่ PHI=20° ไม่เจอปัญหานี้ แต่ PHI=42° ใหม่ทำให้ลำดับมุมของ
+    line1/line2 กลับด้าน) ฟังก์ชันนี้เช็ค angle_value หลังสร้างแล้วสลับ
+    other_angle ให้เองถ้าเกิน π การันตีว่าได้มุมที่ ≤180° เสมอ ไม่ว่าพารามิเตอร์
+    เรขาคณิตจะเปลี่ยนไปทางไหนในอนาคต"""
+    kwargs.pop("other_angle", None)
+    probe = small_angle(line1, line2, **kwargs)
+    if probe.angle_value > np.pi:
+        return Angle(line1, line2, other_angle=True, **kwargs)
+    return probe
 
 
 def ra_mark(corner, d1, d2, color=GRAYTXT, size=0.22):
@@ -339,7 +368,13 @@ class G05A_PointsAndLines(SafeScene):
         cap8 = caption_top("ความเร็วของ Q บนชิ้นที่ 2 ตั้งฉากกับ AQ · ปลายลูกศรคือจุด E", size=22)
         a_v2 = Arrow(Q, E, buff=0, color=C_VQ2, stroke_width=5,
                      max_tip_length_to_length_ratio=0.13)
-        t_v2 = MathTex("v_{Q_2}", font_size=26, color=C_VQ2).next_to(a_v2.get_center(), DL, buff=0.10)
+        # DL เดิมพาป้ายเข้าใกล้เส้น BQ (มุมมองจากจุดกึ่งกลางลูกศร เส้น AQ กว้างมุม
+        # 86-165° และเส้น BQ กว้างมุม 165-273° -- DL(225°) อยู่ในช่วงหลัง พอดี) เจอ
+        # จริงจาก Gemini frame review 2026-09-05: เส้น BQ ตัดผ่านป้าย v_Q2 ใช้
+        # gap_dir() หาช่องว่างที่เลี่ยงช่วงมุมของทั้งสองเส้นพร้อมกัน
+        _cpBQ = closest_point_on_segment(a_v2.get_center(), B, Q)
+        _tv2dir = gap_dir(a_v2.get_center(), [A, Q, B, _cpBQ, E])
+        t_v2 = MathTex("v_{Q_2}", font_size=26, color=C_VQ2).next_to(a_v2.get_center(), _tv2dir, buff=0.10)
         # E, P, F เรียงเส้นตรงเดียวกันจริง -- ไม่ใช่บังเอิญ แต่เป็นผลพีชคณิตที่
         # หลีกเลี่ยงไม่ได้ของสูตร (dot(E-P,U)=dot(F-P,U)=0 เสมอ เพราะ E และ F ต่าง
         # ก็ฉายตั้งฉากลงเส้น normal ที่จุด P เดียวกันโดยนิยาม) ผลคือ P อยู่ที่มุม
@@ -398,7 +433,14 @@ class G05A_PointsAndLines(SafeScene):
 
         cap12 = caption_top("ลากฉากจาก F ลงเส้น normal — ตกที่จุดเดิม!", size=23)
         pr_F = DashedLine(F, P, color=C_TAN, stroke_width=3, dash_length=0.10)
-        dP, tP = pt(P, C_VN, 0.10), tag("P", P, DR, C_VN, 26, 0.13)
+        # DR (-45°) เกือบขนานกับเส้น normal ที่ผ่าน P เอง (U ~ -42.24°) เจอจริงจาก
+        # Gemini frame review 2026-09-05: เส้น contact normal พาดผ่านตัวอักษร "P"
+        # เหมือนที่เคยเจอกับ "Q" (§ ด้านบน) แก้ด้วยวิธีเดียวกัน: gap_dir() เลี่ยงทั้ง
+        # แกนเส้น normal (±U, ครอบคลุมทิศไป Q/R/S/l_QP ซึ่งเรียงเส้นเดียวกันหมด)
+        # และแกนตั้งฉาก (±perp(U), ครอบคลุมทิศไป E/F ซึ่งเรียงเส้นเดียวกันกับ P ด้วย)
+        _perpUN_P = np.array([-UN[1], UN[0], 0.0])
+        _tPdir = gap_dir(P, [P + UN, P - UN, P + _perpUN_P, P - _perpUN_P])
+        dP, tP = pt(P, C_VN, 0.10), tag("P", P, _tPdir, C_VN, 26, 0.20)
         self.play(FadeOut(cap11))
         self.play(FadeIn(cap12), Create(pr_F))
         self.play(FadeIn(dP), FadeIn(tP), Flash(P, color=C_VN, flash_radius=0.45))
@@ -558,7 +600,7 @@ class G05B_SimilarTriangles(SafeScene):
 
         # ขั้น 2 — นิยาม alpha บนรูปจริง
         cap = self.swap_cap(cap, "ขั้น 2: ให้ α = มุมระหว่างแขน AQ กับเส้น normal", size=23)
-        ang_a = Angle(Line(Q, R), Line(Q, A), radius=0.48, color=WARN, stroke_width=4)
+        ang_a = small_angle(Line(Q, R), Line(Q, A), radius=0.48, color=WARN, stroke_width=4)
         lb_a = MathTex(r"\alpha", font_size=30, color=WARN).move_to(
             Q + normalize(normalize(R - Q) + normalize(A - Q)) * 0.72)
         self.play(Create(ang_a), FadeIn(lb_a))
@@ -568,7 +610,7 @@ class G05B_SimilarTriangles(SafeScene):
         cap = self.swap_cap(cap, "ขั้น 3: ใน A-R-Q มุมที่ Q คือ α → มุมที่ A ต้องเป็น 90° − α", size=22)
         # radius เดิม 0.44 > buff ป้ายชื่อจุดยอด (upright_tri ใช้ 0.30) -- ทำให้ส่วนโค้ง
         # มุมไปทับป้าย "A" ได้ (เจอจริงจาก [LAYOUT] log 2026-09-05) ลดเหลือ 0.24 ให้ต่ำกว่า buff
-        ang2 = Angle(s2["ab"], s2["ac"], radius=0.24, color=WARN, stroke_width=4)
+        ang2 = small_angle(s2["ab"], s2["ac"], radius=0.24, color=WARN, stroke_width=4)
         lb2a = MathTex(r"90^\circ-\alpha", font_size=24, color=WARN).next_to(
             v2["a"], UR, buff=0.30)
         self.play(Create(ang2), FadeIn(lb2a))
@@ -577,7 +619,7 @@ class G05B_SimilarTriangles(SafeScene):
         # ขั้น 4 — มุมที่ Q ในสามเหลี่ยมความเร็ว: ได้ 90 - alpha เหมือนกัน
         cap = self.swap_cap(cap, "ขั้น 4: v_Q2 ตั้งฉากกับ AQ → มุมที่ Q ในรูปความเร็วก็ 90° − α", size=22)
         # เหตุผลเดียวกับ ang2 ข้างบน -- ลด radius ให้ต่ำกว่า buff ป้ายชื่อจุดยอด (0.30)
-        ang1 = Angle(s1["ab"], s1["ac"], radius=0.24, color=WARN, stroke_width=4)
+        ang1 = small_angle(s1["ab"], s1["ac"], radius=0.24, color=WARN, stroke_width=4)
         lb1a = MathTex(r"90^\circ-\alpha", font_size=24, color=WARN).next_to(
             v1["a"], UR, buff=0.30)
         self.play(Create(ang1), FadeIn(lb1a))
@@ -637,7 +679,7 @@ class G05B_SimilarTriangles(SafeScene):
         # เหตุผลเดียวกับคู่แรก แค่เปลี่ยนจาก alpha เป็น beta
         cap = self.swap_cap(cap, "เหตุผลเดียวกับคู่แรก: ให้ β = มุมระหว่างแขน BQ กับเส้น normal", size=22)
         self.play(FadeOut(note4))
-        ang_b = Angle(Line(Q, B), Line(Q, S), radius=0.48, color=WARN, stroke_width=4)
+        ang_b = small_angle(Line(Q, B), Line(Q, S), radius=0.48, color=WARN, stroke_width=4)
         lb_b = MathTex(r"\beta", font_size=30, color=WARN).move_to(
             Q + normalize(normalize(B - Q) + normalize(S - Q)) * 0.78)
         self.play(Create(ang_b), FadeIn(lb_b))
@@ -646,8 +688,8 @@ class G05B_SimilarTriangles(SafeScene):
         cap = self.swap_cap(cap, "มุมฉากที่ P และที่ S · อีกมุมเป็น 90° − β ทั้งคู่ → คล้ายกัน", size=22)
         rb1 = ra_mark(v3["b"], v3["a"] - v3["b"], v3["c"] - v3["b"], C_VN, 0.24)
         rb2 = ra_mark(v4["b"], v4["a"] - v4["b"], v4["c"] - v4["b"], C_BS, 0.24)
-        ang3 = Angle(s3["ab"], s3["ac"], radius=0.44, color=WARN, stroke_width=4)
-        ang4 = Angle(s4["ab"], s4["ac"], radius=0.44, color=WARN, stroke_width=4)
+        ang3 = small_angle(s3["ab"], s3["ac"], radius=0.44, color=WARN, stroke_width=4)
+        ang4 = small_angle(s4["ab"], s4["ac"], radius=0.44, color=WARN, stroke_width=4)
         self.play(Create(rb1), Create(rb2))
         self.play(Create(ang3), Create(ang4))
         self.wait(2.0)
@@ -772,8 +814,8 @@ class G06_PitchPoint(SafeScene):
         self.wait(1.2)
 
         cap = self.swap_cap(cap, "เส้นตรงตัดกัน → มุมตรงข้ามเท่ากันเสมอ", size=23)
-        ap1 = Angle(Line(P, A), Line(P, R), radius=0.40, color=WARN, stroke_width=4)
-        ap2 = Angle(Line(P, S), Line(P, B), radius=0.40, color=WARN, stroke_width=4)
+        ap1 = small_angle(Line(P, A), Line(P, R), radius=0.40, color=WARN, stroke_width=4)
+        ap2 = small_angle(Line(P, S), Line(P, B), radius=0.40, color=WARN, stroke_width=4)
         self.play(Create(ap1), Create(ap2))
         self.wait(1.8)
 
@@ -781,26 +823,22 @@ class G06_PitchPoint(SafeScene):
         self.play(Indicate(VGroup(rr, rs, ap1, ap2), color=OK, scale_factor=1.1))
         self.wait(1.4)
 
-        # สามเหลี่ยม A-R-P (และ B-S-P) เป็นทรง "บาง" มาก -- ด้าน R-P (และ S-P) สั้นกว่า
-        # อีกสองด้านมาก (ตรวจด้วยเลขจริง: A-R=1.35, A-P=1.44, R-P=0.49 หน่วย) ทำให้หลัง
-        # upright_tri() ยกออกมาวางใหม่ จุดยอด R กับ P (S กับ P) ยังอยู่ใกล้กันเกินกว่า
-        # buff เริ่มต้น (0.30) ของป้ายชื่อจะกันชนไหว (เจอจริงจาก [LAYOUT] log 2026-09-05:
-        # 'R'<->'P' ทับกัน 32% ซ้ำสองรอบ) แก้โดยดันป้าย R/P (S/P) ออกจากกันเพิ่มเติมตาม
-        # แนวตั้งฉากกับเส้น R-P (S-P) ของตัวเอง หลังสร้าง g1/g2 เสร็จ
-        def _separate_labels(vg, v, key_b, key_c, dist=0.3):
-            lb, lc = vg[4][1], vg[4][2]
-            d = v[key_c] - v[key_b]
-            n = np.linalg.norm(d)
-            perp = np.array([-d[1], d[0], 0.0]) / n if n > 1e-9 else np.array([0.0, 1.0, 0.0])
-            lb.shift(-perp * dist)
-            lc.shift(perp * dist)
-
+        # 2026-09-05 rebuild: สามเหลี่ยม A-R-P (และ B-S-P) เดิม (ตัวเลขเก่า) เป็นทรง
+        # "บาง" มาก -- ด้าน R-P (และ S-P) สั้นกว่าอีกสองด้านมาก (A-R=1.35, A-P=1.44,
+        # R-P=0.49 หน่วย) ต้องมี _separate_labels() ดันป้าย R/P แยกจากกันเพิ่ม
+        # ด้วยมือ -- ตัวเลขจริงจากตารางที่ยืนยันแล้วให้สัดส่วนที่ต่างออกไปมาก:
+        # |A-R|=1.74, |A-P|=2.35, |R-P|=1.58 (ตรวจด้วยเลขจริง) -- ไม่บางอีกต่อไป
+        # (R-P ใกล้เคียงกับอีกสองด้าน ไม่ใช่เสี้ยวเล็กๆเหมือนก่อน) buff เริ่มต้นของ
+        # upright_tri() (0.30) พอแล้วโดยไม่ต้องดันเพิ่ม -- เจอจริงว่าถ้ายังใช้
+        # _separate_labels() แบบเดิมกับสัดส่วนใหม่นี้ การดัน dist=0.3 คงที่ (ไม่ได้
+        # ปรับตามขนาดจริง) จะ "ดันเกิน" ทำให้ป้าย R ลอยไปไกลผิดที่ ส่วนป้าย P ไปทับ
+        # ตำแหน่งจุดยอด R แทน (เจอจริงจาก Gemini frame review: จุดยอดขวาล่างของ
+        # สามเหลี่ยมมีป้าย "P" ซ้อนแทนที่จะเป็น "R" ส่วน "R" ตัวจริงลอยไปอยู่ผิดที่)
+        # เอา _separate_labels() ออก ปล่อยให้ upright_tri() จัดป้ายเองตามปกติ
         g1, v1u, _ = upright_tri(A, R, P, ("A", "R", "P"),
                                (C_AR, C_AQ, C_TAN), [3.0, 1.45, 0], 1.15)
-        _separate_labels(g1, v1u, "b", "c")
         g2, v2u, _ = upright_tri(B, S, P, ("B", "S", "P"),
                                (C_BS, C_BQ, C_TAN), [3.0, -0.35, 0], 1.15)
-        _separate_labels(g2, v2u, "b", "c")
         self.play(FadeOut(t_APR), FadeOut(t_BPS))
         self.play(FadeIn(g1, shift=RIGHT * 0.3), run_time=1.0)
         self.play(FadeIn(g2, shift=RIGHT * 0.3), run_time=1.0)
