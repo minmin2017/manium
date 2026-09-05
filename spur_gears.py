@@ -95,13 +95,12 @@ def zab_points(fr, Ro1, Ro2):
     return dict(A=A, B=B, E1B=E1B, E2A=E2A, E1E2=E1E2, Z=Z)
 
 
-def cr_wide(shift=None):
+def cr_wide(shift=None, scale=0.65):
     """มุมกว้าง (บริบทเต็ม) -- สเกลลงจากตัวเลขจริงหน้า 25 ให้พอดีเฟรม ใช้กับ G19/G25
     ที่ต้องโชว์เฟืองทั้งคู่เป็นวงกลมเต็ม (ป้ายกำกับยังพูดถึงค่านิ้วจริงเสมอ ไม่ใช่ค่า
     scaled -- อ่านจาก CR_R1_IN ฯลฯ ตรงๆ เวลาทำสูตร/ตัวเลข)"""
     if shift is None:
         shift = np.array([-3.4, -0.15, 0.0])
-    scale = 0.65
     R1, R2 = CR_R1_IN * scale, CR_R2_IN * scale
     Ro1, Ro2 = CR_RO1_IN * scale, CR_RO2_IN * scale
     fr = loa_frame(CR_PHI, R1, R2, sign=1.0)
@@ -675,7 +674,10 @@ class G11_Involutometry(SafeScene):
         self.wait(0.4)
 
         dC = pt(C_pt, BASE_C, 0.07)
-        tC = tag("C", C_pt, LEFT, BASE_C, 20, 0.12)
+        # C_pt อยู่ "บน" base circle พอดี (จุดสัมผัส) -- ทิศ LEFT เดิมไม่ใช่ทิศรัศมีออก
+        # จากวงกลมเสมอไป ทำให้ป้ายไปทับเส้นรอบวง (เจอจริงจาก Gemini frame review
+        # 2026-09-05 -- ไม่ถูกจับโดย [LAYOUT] linter) เปลี่ยนเป็นทิศรัศมีออกจาก O จริงๆ
+        tC = tag("C", C_pt, normalize(C_pt - O), BASE_C, 20, 0.2)
         line_OC = seg(O, C_pt, BASE_C, 3)
         line_CA = seg(C_pt, A_pt, WARN, 4)
         cap3 = caption_top("C = จุดสัมผัสของเส้นสัมผัส CA กับ base circle (มุมฉากที่ C)", size=20)
@@ -715,8 +717,14 @@ class G11_Involutometry(SafeScene):
 
         ang_theta = Angle(Line(O, B_pt), Line(O, C_pt), radius=0.42, color=OK, stroke_width=3,
                           other_angle=False)
+        # ทิศ bisector ของ B_pt/C_pt (จากศูนย์ O) อยู่ใกล้แนวเส้น line_OA (O ไป A_pt)
+        # มากเกินไป ทำให้เส้นสีเทานั้นลากผ่านตัวอักษร theta_A พอดี (เจอจริงจาก Gemini
+        # frame review 2026-09-05 -- ไม่ถูกจับโดย [LAYOUT] linter) ดันป้ายออกด้านข้าง
+        # (ตั้งฉากกับทิศ bisector) เพิ่มอีกนิด ให้พ้นแนวเส้น O-A
+        _theta_dir = normalize(normalize(B_pt - O) + normalize(C_pt - O))
+        _theta_perp = np.array([-_theta_dir[1], _theta_dir[0], 0.0])
         lbl_theta = MathTex(r"\theta_A", font_size=22, color=OK).move_to(
-            O + normalize(normalize(B_pt - O) + normalize(C_pt - O)) * 0.62)
+            O + _theta_dir * 0.62 + _theta_perp * 0.22)
         self.play(Create(ang_theta), FadeIn(lbl_theta))
         self.wait(1.0)
 
@@ -1672,7 +1680,11 @@ class G25_ExampleZmp(SafeScene):
         self.add(title("ตัวอย่างเต็ม: หา Z และ m_p", size=27))
         self.add(page_ref("หน้า 25"))
 
-        fr = cr_wide()
+        # scale เดิม (0.65 ค่า default) ทำให้เฟือง gear ใหญ่จนขอบล่างของวง (y=-2.67)
+        # เกือบชิดกับที่ที่สมการ z_eq ต้องวาง -- Z-equation เลยไปทับส่วนโค้งวงกลม
+        # โดยตรง (เจอจริงจาก Gemini frame review 2026-09-05 -- ไม่ถูกจับโดย [LAYOUT]
+        # linter) ลด scale ลงเหลือ 0.5 ให้มีที่ว่างด้านล่างมากขึ้น
+        fr = cr_wide(scale=0.5)
         O1, O2 = fr["O1"], fr["O2"]
         Rb1, Rb2, Ro1, Ro2 = fr["Rb1"], fr["Rb2"], fr["Ro1"], fr["Ro2"]
         A, B, E1, E2 = fr["A"], fr["B"], fr["E1"], fr["E2"]

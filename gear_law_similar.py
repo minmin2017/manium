@@ -285,7 +285,10 @@ class G05A_PointsAndLines(SafeScene):
         cap10 = caption_top("ความเร็วของ Q บนชิ้นที่ 3 ตั้งฉากกับ BQ · ปลายลูกศรคือจุด F", size=22)
         a_v3 = Arrow(Q, F, buff=0, color=C_VQ3, stroke_width=5,
                      max_tip_length_to_length_ratio=0.13)
-        t_v3 = MathTex("v_{Q_3}", font_size=26, color=C_VQ3).next_to(a_v3.get_center(), UL, buff=0.10)
+        # UL เดิมพาป้ายไปทับ "AQ" ที่ยังค้างอยู่ใกล้ Q (เจอจริงจาก Gemini frame review
+        # 2026-09-05 -- ไม่ถูกจับโดย [LAYOUT] linter อัตโนมัติ) เปลี่ยนเป็น DR (ทิศตาม
+        # แขน a_v3 เอง ไปทาง F/B ซึ่งอยู่คนละฝั่งกับ A)
+        t_v3 = MathTex("v_{Q_3}", font_size=26, color=C_VQ3).next_to(a_v3.get_center(), DR, buff=0.12)
         dF, tF = pt(F, C_VQ3, 0.075), tag("F", F, normalize(F - P), C_VQ3, 24, 0.16)
         ra3 = ra_mark(Q, B - Q, F - Q, C_VQ3)
         self.play(FadeOut(cap9))
@@ -348,7 +351,9 @@ class G05A_PointsAndLines(SafeScene):
         cap15 = caption_top("จาก B ลากฉากลงเส้น normal — เท้าของฉากคือจุด S", size=22)
         l_BS = seg(B, S, C_BS, 5)
         dS, tS = pt(S, C_BS, 0.075), tag("S", S, UR, C_BS, 20, 0.10)
-        t_BS = tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 22, 0.12)
+        # buff เดิม 0.12 แคบไป -- ขอบซ้ายของป้าย "B" เกือบชิดเส้นประ line of centers
+        # (เจอจริงจาก Gemini frame review 2026-09-05, ไม่ถูกจับโดย [LAYOUT] linter)
+        t_BS = tag("BS", B + (S - B) * 0.50, LEFT, C_BS, 22, 0.32)
         raS = ra_mark(S, B - S, Q - S, C_BS)
         self.play(FadeOut(cap14))
         self.play(FadeIn(cap15), Create(l_BS), FadeIn(t_BS))
