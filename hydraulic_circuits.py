@@ -490,15 +490,17 @@ class HC05_OpenClosedCenter(SafeScene):
 
         cap1 = caption_top("ซ้าย: วาล์วอยู่กลาง (ไม่ทำงาน) — ปั๊ม variable ปรับตัวเองให้ไหลน้อยลงพอดี")
         self.play(FadeIn(cap1), run_time=0.7)
-        dotsL, animsL = flow_dots([ppL["b"], pvL["P"]], SUPPLY, n=2, run_time=1.0)
+        dotsL, animsL = flow_dots(elbow_pts(ppL["b"], pvL["P"]), SUPPLY, n=2, run_time=1.0)
         self.play(LaggedStart(*animsL, lag_ratio=0.3))
         self.play(FadeOut(dotsL), run_time=0.3)
         self.play(FadeOut(cap1), run_time=0.3)
 
         cap2 = caption_top("ขวา: วาล์วอยู่กลาง — ปั๊ม fixed ยังไหลเท่าเดิม น้ำมันส่วนเกินต้องมีทางไป")
         self.play(FadeIn(cap2), run_time=0.7)
-        dotsR, animsR = flow_dots([ppR["b"], relief_p["top"], relief_p["bottom"],
-                                   [2.3, 1.2, 0], ptR["top"]], WARN, n=4, run_time=1.8)
+        dotsR, animsR = flow_dots([
+            ppR["b"] + np.array([0, 0.15, 0]), [4.5, ppR["b"][1] + 0.15, 0], relief_p["top"],
+            relief_p["bottom"], *elbow_pts(relief_p["bottom"], [2.3, 1.2, 0], via="x")[1:],
+            ptR["top"]], WARN, n=4, run_time=1.8)
         self.play(LaggedStart(*animsR, lag_ratio=0.22))
         self.play(FadeOut(dotsR), run_time=0.3)
         self.play(FadeOut(cap2), run_time=0.3)
@@ -590,17 +592,21 @@ class HC06_DrillingMachineApplication(SafeScene):
         cap2 = caption_top("ขวา: อีกทางเลือก — ปั๊ม 2 ตัววิ่งพร้อมกันตอนความดันต่ำ (เร็ว เพราะ flow รวมมาก)")
         self.play(FadeIn(cap2), run_time=0.7)
         dotsR, animsR = flow_dots([pHi["b"], unload_p["top"], unload_p["bottom"],
-                                   [3.0, 1.3, 0], junction, pvR["P"]], HI_FLOW, n=3, run_time=1.6)
-        dotsR2, animsR2 = flow_dots([pLo["b"], junction, pvR["P"]], SUPPLY, n=2, run_time=1.4)
+                                   [3.0, 1.3, 0], junction,
+                                   *elbow_pts(junction, pvR["P"], via="y")[1:]], HI_FLOW, n=3, run_time=1.6)
+        dotsR2, animsR2 = flow_dots([pLo["b"], *elbow_pts(pLo["b"], junction, via="y")[1:],
+                                     *elbow_pts(junction, pvR["P"], via="y")[1:]], SUPPLY, n=2, run_time=1.4)
         self.play(LaggedStart(*animsR, *animsR2, lag_ratio=0.2))
         self.play(FadeOut(dotsR), FadeOut(dotsR2), run_time=0.3)
         self.play(FadeOut(cap2), run_time=0.3)
 
         cap3 = caption_top("พอความดันขึ้น (ชนงาน/เจาะจริง) — unloading valve ตัด pump ตัว hi-flow ออกอัตโนมัติ")
         self.play(FadeIn(cap3), run_time=0.8)
-        dotsCut, animsCut = flow_dots([pHi["b"], unload_p["top"], unload_p["left"], tpUL["top"]],
+        dotsCut, animsCut = flow_dots([pHi["b"], unload_p["top"], unload_p["left"],
+                                       *elbow_pts(unload_p["left"], tpUL["top"], via="x")[1:]],
                                       WARN, n=3, run_time=1.3)
-        dotsLo2, animsLo2 = flow_dots([pLo["b"], junction, pvR["P"]], SUPPLY, n=2, run_time=1.3)
+        dotsLo2, animsLo2 = flow_dots([pLo["b"], *elbow_pts(pLo["b"], junction, via="y")[1:],
+                                       *elbow_pts(junction, pvR["P"], via="y")[1:]], SUPPLY, n=2, run_time=1.3)
         self.play(LaggedStart(*animsCut, *animsLo2, lag_ratio=0.2))
         self.play(FadeOut(dotsCut), FadeOut(dotsLo2), run_time=0.3)
         self.play(FadeOut(cap3), run_time=0.3)
@@ -658,14 +664,17 @@ class HC07_CounterbalanceApplication(SafeScene):
 
         cap1 = caption_top("ยก (retract): น้ำมันเข้า rod-end ผ่าน check ในตัว counterbalance ได้อิสระ")
         self.play(FadeIn(cap1), run_time=0.7)
-        dots1, anims1 = flow_dots([pv["B"], cbp["left"], cbp["right"], pc["rod"]], SUPPLY, n=3, run_time=1.5)
+        dots1, anims1 = flow_dots(
+            [pv["B"], *elbow_pts(pv["B"], cbp["left"], via="y", frac=0.4)[1:],
+             cbp["right"], *elbow_pts(cbp["right"], pc["rod"], via="x")[1:]],
+            SUPPLY, n=3, run_time=1.5)
         self.play(LaggedStart(*anims1, lag_ratio=0.25))
         self.play(FadeOut(dots1), run_time=0.3)
         self.play(FadeOut(cap1), run_time=0.3)
 
         cap2 = caption_top("ลง (extend): ปั๊มดันเข้า cap-end (บน) — แรงดันนี้แยกไปตามเส้นไพลอต (สีส้ม)")
         self.play(FadeIn(cap2), run_time=0.7)
-        dots2, anims2 = flow_dots([pv["A"], pc["cap"]], SUPPLY, n=2, run_time=1.0)
+        dots2, anims2 = flow_dots(elbow_pts(pv["A"], pc["cap"], via="y", frac=0.75), SUPPLY, n=2, run_time=1.0)
         dots2p, anims2p = flow_dots([pilot_tap_pt, cbp["top"]], PILOT, n=2, run_time=1.0)
         self.play(LaggedStart(*anims2, *anims2p, lag_ratio=0.25))
         self.play(FadeOut(dots2), FadeOut(dots2p), run_time=0.3)
@@ -673,7 +682,10 @@ class HC07_CounterbalanceApplication(SafeScene):
 
         cap3 = caption_top("ไพลอตชนะสปริง เปิด throttle — น้ำมัน rod-end ไหลออกได้แบบมีแรงต้าน (คุมความเร็วลง)")
         self.play(FadeIn(cap3), run_time=0.8)
-        dots3, anims3 = flow_dots([pc["rod"], cbp["right"], cbp["left"], pv["B"]], WARN, n=3, run_time=1.8)
+        dots3, anims3 = flow_dots(
+            [pc["rod"], *elbow_pts(cbp["right"], pc["rod"], via="x")[::-1][1:],
+             cbp["left"], *elbow_pts(pv["B"], cbp["left"], via="y", frac=0.4)[::-1][1:]],
+            WARN, n=3, run_time=1.8)
         self.play(LaggedStart(*anims3, lag_ratio=0.25))
         self.play(FadeOut(dots3), run_time=0.3)
         self.play(FadeOut(cap3), run_time=0.3)
@@ -742,7 +754,10 @@ class HC08_CylinderLocking(SafeScene):
         cap2 = caption_top("สั่งยืดออก: P→A ปกติ + สัญญาณไพลอต (จากฝั่ง B) บังคับเปิด check ฝั่งซ้าย")
         self.play(FadeIn(cap2), run_time=0.8)
         self.play(Create(pilotL), Create(pilotL2), Create(pilotL3), run_time=0.9)
-        dotsA, animsA = flow_dots([pv["A"], portsL["in"], portsL["out"], pc["he"]], SUPPLY, n=3, run_time=1.4)
+        dotsA, animsA = flow_dots(
+            [pv["A"], *elbow_pts(pv["A"], portsL["in"], via="y", frac=0.35)[1:],
+             portsL["out"], *elbow_pts(portsL["out"], pc["he"], via="y", frac=0.5)[1:]],
+            SUPPLY, n=3, run_time=1.4)
         self.play(LaggedStart(*animsA, lag_ratio=0.25))
         self.play(FadeOut(dotsA), FadeOut(pilotL), FadeOut(pilotL2), FadeOut(pilotL3), run_time=0.4)
         self.play(FadeOut(cap2), run_time=0.3)
@@ -750,7 +765,10 @@ class HC08_CylinderLocking(SafeScene):
         cap3 = caption_top("สั่งหดกลับ: P→B ปกติ + สัญญาณไพลอต (จากฝั่ง A) บังคับเปิด check ฝั่งขวา")
         self.play(FadeIn(cap3), run_time=0.8)
         self.play(Create(pilotR), Create(pilotR2), Create(pilotR3), run_time=0.9)
-        dotsB, animsB = flow_dots([pv["B"], portsR["in"], portsR["out"], pc["re"]], SUPPLY, n=3, run_time=1.4)
+        dotsB, animsB = flow_dots(
+            [pv["B"], *elbow_pts(pv["B"], portsR["in"], via="y", frac=0.35)[1:],
+             portsR["out"], *elbow_pts(portsR["out"], pc["re"], via="y", frac=0.5)[1:]],
+            SUPPLY, n=3, run_time=1.4)
         self.play(LaggedStart(*animsB, lag_ratio=0.25))
         self.play(FadeOut(dotsB), FadeOut(pilotR), FadeOut(pilotR2), FadeOut(pilotR3), run_time=0.4)
         self.play(FadeOut(cap3), run_time=0.3)
@@ -817,7 +835,7 @@ class HC09_ReciprocatingCircuit(SafeScene):
 
         cap1 = caption_top("ยืดออก: P→A จนลูกสูบชนปลายขวา — trip limit ขวา ส่งไพลอตสลับวาล์วเอง")
         self.play(FadeIn(cap1), run_time=0.7)
-        dotsA, animsA = flow_dots([pv["A"], pc["he"]], SUPPLY, n=2, run_time=1.0)
+        dotsA, animsA = flow_dots(elbow_pts(pv["A"], pc["he"], via="y", frac=0.25), SUPPLY, n=2, run_time=1.0)
         self.play(LaggedStart(*animsA, lag_ratio=0.3), piston.animate.move_to([1.35, -1.2, 0]),
                   run_time=2.0, rate_func=linear)
         self.play(FadeOut(dotsA), run_time=0.2)
@@ -826,7 +844,7 @@ class HC09_ReciprocatingCircuit(SafeScene):
 
         cap2 = caption_top("วาล์วสลับอัตโนมัติ: P→B แทน — ลูกสูบวิ่งกลับ จนชนปลายซ้าย สลับอีกครั้ง")
         self.play(FadeIn(cap2), run_time=0.7)
-        dotsB, animsB = flow_dots([pv["B"], pc["re"]], SUPPLY, n=2, run_time=1.0)
+        dotsB, animsB = flow_dots(elbow_pts(pv["B"], pc["re"], via="y", frac=0.25), SUPPLY, n=2, run_time=1.0)
         self.play(LaggedStart(*animsB, lag_ratio=0.3), piston.animate.move_to([-1.35, -1.2, 0]),
                   run_time=2.0, rate_func=linear)
         self.play(FadeOut(dotsB), run_time=0.2)
@@ -887,7 +905,9 @@ class HC10_SequencingCircuit(SafeScene):
         cap1 = caption_top("แรงดันยังต่ำ (cyl1 กำลังวิ่ง): น้ำมันเลือกทางต้านน้อยกว่า — ไหลเข้า cyl1 อย่างเดียว")
         self.play(FadeIn(cap1), run_time=0.7)
         self.play(FadeIn(block_mark), run_time=0.3)
-        dots1, anims1 = flow_dots([pv["A"], t_junction, pc1["he"]], SUPPLY, n=3, run_time=1.4)
+        dots1, anims1 = flow_dots(
+            [pv["A"], *elbow_pts(pv["A"], t_junction, via="y", frac=0.6)[1:], pc1["he"]],
+            SUPPLY, n=3, run_time=1.4)
         self.play(LaggedStart(*anims1, lag_ratio=0.25))
         self.play(FadeOut(dots1), run_time=0.3)
         self.play(FadeOut(cap1), run_time=0.3)
@@ -1076,23 +1096,28 @@ class HC12_MotorControl(SafeScene):
 
         cap1 = caption_top("บน: ปรับความเร็วได้ทางเดียว — อีกทางไหลอิสระผ่าน check bypass เต็มที่")
         self.play(FadeIn(cap1), run_time=0.7)
-        dotsT, animsT = flow_dots([pvT["A"], fcvTp["left"], fcvTp["right"], mpT["a"]], SUPPLY, n=3, run_time=1.5)
+        dotsT, animsT = flow_dots(
+            [pvT["A"], *elbow_pts(pvT["A"], fcvTp["left"], via="y", frac=0.9)[1:],
+             fcvTp["right"], mpT["a"]],
+            SUPPLY, n=3, run_time=1.5)
         self.play(LaggedStart(*animsT, lag_ratio=0.25))
         self.play(FadeOut(dotsT), run_time=0.3)
         self.play(FadeOut(cap1), run_time=0.3)
 
         cap2 = caption_top("ล่าง: วาล์วสั่ง P→A — สะพานส่งน้ำมันเข้ามอเตอร์จากขั้วบนเสมอ (หมุนตามลูกศร)")
         self.play(FadeIn(cap2), run_time=0.8)
-        dotsB1, animsB1 = flow_dots([pvB["A"], bnode["left"], bnode["top"], fcvBp["left"],
-                                    fcvBp["right"], mpB["a"]], SUPPLY, n=4, run_time=1.8)
+        dotsB1, animsB1 = flow_dots(
+            [pvB["A"], *elbow_pts(pvB["A"], bnode["left"], via="y", frac=0.9)[1:],
+             bnode["top"], fcvBp["left"], fcvBp["right"], mpB["a"]], SUPPLY, n=4, run_time=1.8)
         self.play(LaggedStart(*animsB1, lag_ratio=0.2), Create(rot_arrow))
         self.play(FadeOut(dotsB1), run_time=0.3)
         self.play(FadeOut(cap2), run_time=0.3)
 
         cap3 = caption_top("สลับวาล์ว: P→B แทน — สะพานยังส่งน้ำมันเข้ามอเตอร์จากขั้วบนเดิม หมุน 'ทิศเดิม' ไม่เปลี่ยน")
         self.play(FadeIn(cap3), run_time=0.8)
-        dotsB2, animsB2 = flow_dots([pvB["B"], bnode["right"], bnode["top"], fcvBp["left"],
-                                    fcvBp["right"], mpB["a"]], SUPPLY, n=4, run_time=1.8)
+        dotsB2, animsB2 = flow_dots(
+            [pvB["B"], *elbow_pts(pvB["B"], bnode["right"], via="y", frac=0.9)[1:],
+             bnode["top"], fcvBp["left"], fcvBp["right"], mpB["a"]], SUPPLY, n=4, run_time=1.8)
         self.play(LaggedStart(*animsB2, lag_ratio=0.2))
         self.play(FadeOut(dotsB2), run_time=0.3)
         self.play(FadeOut(cap3), run_time=0.3)
@@ -1206,8 +1231,10 @@ class HC13_HydrostaticTransmission(SafeScene):
         self.play(FadeIn(stage4, shift=UP * 0.3), run_time=1.0)
         cap4 = caption_top("Replenishing pump เติมชดเชยน้ำมันรั่ว — check valve คู่เลือกฝั่งที่ความดันต่ำกว่าเอง")
         self.play(FadeIn(cap4), run_time=0.8)
-        dots4, anims4 = flow_dots([repp["b"], chkAp["in"], chkAp["out"], [-1.5, -0.1, 0]],
-                                  SUPPLY, n=2, run_time=1.3)
+        dots4, anims4 = flow_dots(
+            [repp["b"], *elbow_pts(repp["b"], chkAp["in"], via="y")[1:],
+             chkAp["out"], [-1.6, -0.1, 0]],
+            SUPPLY, n=2, run_time=1.3)
         self.play(LaggedStart(*anims4, lag_ratio=0.3))
         self.play(FadeOut(dots4), run_time=0.3)
         self.play(FadeOut(cap4), run_time=0.3)
