@@ -2118,7 +2118,12 @@ class G33_ExampleDesign13Teeth(SafeScene):
             self.play(FadeIn(row, shift=RIGHT * 0.15), run_time=0.6)
         self.wait(1.4)
 
+        # c_Ro/c_R/c_Rb/c_Ri ไม่เคยถูกเอาออกทั้งคลิป -- แทบทุกคำบรรยาย/สูตรที่โผล่
+        # ทีหลัง (กลางจอ, กว้างเต็ม fit_width 10.5) ไปทับวงกลมที่ยังค้างอยู่ทางซ้าย
+        # (เจอจริงจาก [LAYOUT] log 2026-09-05 ซ้ำสองรอบ แม้ลด scale ลงแล้วก็ตาม)
+        # วงกลมทำหน้าที่ตั้งโจทย์เสร็จแล้วตอนนี้ เอาออกได้เลย
         self.play(FadeOut(cap3), FadeOut(given))
+        self.play(FadeOut(VGroup(c_Ro, c_R, c_Rb, c_Ri)))
         order = MathTex(
             rf"R_i({Ri:.2f}) < R_b({Rb:.2f}) < R({R:.1f}) < R_o({Ro:.1f})",
             font_size=22, color=OK)
