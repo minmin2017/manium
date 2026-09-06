@@ -404,11 +404,8 @@ class HowEngineWorks(SafeScene):
 
         # ── BEAT 3: Compression Stroke (จังหวะที่ 2: อัด) ────────────────────
         cap2 = caption_top("จังหวะที่ 2: อัด (Compression) — วาล์วปิดสนิท ลูกสูบเลื่อนขึ้นอัดไอดีจนร้อนจัด", color=C_COMPRESS)
-        self.play(
-            FadeOut(cap1),
-            FadeIn(cap2, shift=DOWN * 0.15),
-            run_time=0.8
-        )
+        self.play(FadeOut(cap1), run_time=0.3)
+        self.play(FadeIn(cap2, shift=DOWN * 0.15), run_time=0.6)
 
         def upd_compress(_m):
             th = theta_trk.get_value()
@@ -433,9 +430,9 @@ class HowEngineWorks(SafeScene):
             fill_opacity=0.95, stroke_width=2
         ).move_to(spark_tip)
 
+        self.play(FadeOut(cap2), run_time=0.3)
         # Flash rule: highlight spark plug when mentioned in caption
         self.play(
-            FadeOut(cap2),
             FadeIn(cap3, shift=DOWN * 0.15),
             Indicate(eng["spark_plug"], color=WARN, scale_factor=1.2),
             FadeIn(burst),
@@ -480,9 +477,9 @@ class HowEngineWorks(SafeScene):
             color=C_VALVE, stroke_width=5
         )
 
+        self.play(FadeOut(cap3), run_time=0.3)
         # Exhaust valve opening + highlight
         self.play(
-            FadeOut(cap3),
             FadeIn(cap4, shift=DOWN * 0.15),
             Flash(eng["hinge_ex"] + [-0.14, 0, 0], color=WARN, flash_radius=0.35, line_length=0.18),
             Transform(eng["valve_ex"], v_ex_open),
@@ -582,11 +579,13 @@ class HowEngineWorks(SafeScene):
         self.wait(1.5)
 
         cap_4cyl_2 = caption_top("สูบเดี่ยวสร้างแรงขับแค่ 1 ใน 4 จังหวะ (มีแรงแค่ 25% ของเวลา)", color=GRAYTXT)
-        self.play(FadeOut(cap_4cyl_1), FadeIn(cap_4cyl_2, shift=DOWN * 0.15), run_time=0.8)
+        self.play(FadeOut(cap_4cyl_1), run_time=0.3)
+        self.play(FadeIn(cap_4cyl_2, shift=DOWN * 0.15), run_time=0.6)
         self.wait(1.8)
 
         cap_4cyl_3 = caption_top("เครื่องยนต์ 4 สูบ จุดระเบิดสลับกัน → จะมีสูบส่งกำลังขับตลอดเวลา เพลาจึงหมุนเรียบ!", color=OK)
-        self.play(FadeOut(cap_4cyl_2), FadeIn(cap_4cyl_3, shift=DOWN * 0.15), run_time=0.8)
+        self.play(FadeOut(cap_4cyl_2), run_time=0.3)
+        self.play(FadeIn(cap_4cyl_3, shift=DOWN * 0.15), run_time=0.6)
 
         # Animate continuous rotation of 4 cylinders (2 full engine cycles = 8 * PI)
         theta_4cyl = ValueTracker(0.0)
