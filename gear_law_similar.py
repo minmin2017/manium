@@ -747,10 +747,12 @@ class G05B_SimilarTriangles(SafeScene):
         cap = self.swap_cap(cap, "สรุปสัดส่วนมุมทั้งหมด — ครึ่งวงกลม 180° แบ่ง 3 ส่วน", size=21)
         ALPHA_RAD = float(np.arccos(np.clip(np.dot(normalize(R - Q), normalize(A - Q)), -1, 1)))
         REM_RAD = PI - ALPHA_RAD - PI / 2
-        # y=-3.05 (ไม่ใช่ -3.55) กันชนขอบล่างเฟรม (frame bottom = -4) และเผื่อระยะห่างจาก
-        # g2 (สามเหลี่ยมที่ดึงออกมา อยู่ที่ [2.2,-1.35] สูง 1.30 -> ขอบล่างจริงคือ y=-2.00)
-        SEMI_C = np.array([2.2, -3.05, 0.0])
-        SEMI_R = 0.85
+        # ปรับจาก y=-3.05/R=0.85 -- agy frame review จริง (2026-09-06) จับได้ว่ายอดครึ่งวงกลม
+        # (จุด apex ที่ SEMI_C) ไปชนป้ายชื่อจุดยอด "Q" ของ g2 (สามเหลี่ยมที่ดึงออกมา อยู่ที่
+        # [2.2,-1.35] สูง 1.30 -- ป้ายชื่อจุดยอดยื่นออกจากตัวสามเหลี่ยมได้ไกลกว่าที่คาด) ซูม
+        # เฟรมยืนยันจริงแล้ว -- ขยับลงอีก + หดรัศมีอีกหน่อยให้มีระยะห่างจริง ไม่ใช่แค่กะดู
+        SEMI_C = np.array([2.2, -3.35, 0.0])
+        SEMI_R = 0.65
         w_alpha = AnnularSector(inner_radius=0, outer_radius=SEMI_R, start_angle=0,
                                  angle=ALPHA_RAD, color=WARN, fill_opacity=0.55,
                                  stroke_width=2).move_arc_center_to(SEMI_C)
