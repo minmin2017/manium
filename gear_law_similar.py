@@ -704,8 +704,13 @@ class G05B_SimilarTriangles(SafeScene):
         self.play(Create(ra_qe), FadeIn(lb90))
         self.wait(1.6)
 
+        # ขั้น 4b/4c เดิมเขียน "180° − (α + 90°) = 90° − α" (3 พจน์ในวงเล็บ) -- agy review
+        # จริง (2026-09-06, ดูสกิล §32 addendum): ต้องกระจายลบในหัวกลางอากาศ แถมขั้น 3 เพิ่ง
+        # สอนแบบ "บวกกันได้ 90°" (complementary) แต่ขั้นนี้สลับไป "บวกกันได้ 180°" แบบไม่เตือน
+        # ก่อน -- ตัด parenthesis ทิ้ง เปลี่ยนเป็น "มุมฉากกินไป 90° เหลืออีก 90° แบ่ง 2 ปีก"
+        # อยู่ในกรอบ complementary (90°) เดิมตลอด ไม่มีวงเล็บ ไม่ต้องทำพีชคณิต
         cap = self.swap_cap(cap,
-            "ขั้น 4b: R–Q–P เป็นเส้นตรงเดียวกัน → สองฝั่งของ Q รวมกันได้ 180° เสมอ",
+            "ขั้น 4b: R–Q–P เป็นเส้นตรงเดียวกัน (180°) — มุมฉากตรงกลางกินไปแล้ว 90°",
             size=21)
         flash_line = Line(R, P, color=C_DEMO, stroke_width=6)
         self.play(Create(flash_line))
@@ -714,7 +719,7 @@ class G05B_SimilarTriangles(SafeScene):
         self.play(FadeOut(flash_line))
 
         cap = self.swap_cap(cap,
-            "ขั้น 4c: เหลือมุม QE กับ QP = 180° − (α + 90°) = 90° − α",
+            "ขั้น 4c: เหลืออีก 90° แบ่งให้ 2 ปีก — ปีกซ้ายคือ α → ปีกขวาต้องเป็น 90° − α",
             size=21)
         ang_demo = small_angle(Line(Q, E), Line(Q, P), radius=0.42, color=C_DEMO, stroke_width=4)
         # ป้ายชิดเส้น QP เกินไปตอนวางกลางเส้นแบ่งครึ่งมุม (มุมนี้แคบแค่ 27.3° -- บัคเดียวกับ
@@ -735,6 +740,50 @@ class G05B_SimilarTriangles(SafeScene):
         self.play(Create(ang1), FadeIn(lb1a))
         self.play(Indicate(VGroup(ang_demo, lb_demo, ang1, lb1a), color=OK, scale_factor=1.0))
         self.wait(1.4)
+
+        # ---- ครึ่งวงกลมสัดส่วน (Min's idea 2026-09-06, ดูสกิล §33) — agy review แนะนำว่า
+        # ห้ามทำแยกลอยๆ จากจุด Q (จะเกิด split-attention) ให้ "โผล่ออกมาจาก Q" แทน --
+        # ทำผ่าน TransformFromCopy จากมาร์กจริงที่ Q เอง (ang_a/ra_qe/ang_demo) ไม่ใช่วาดใหม่
+        cap = self.swap_cap(cap, "สรุปสัดส่วนมุมทั้งหมด — ครึ่งวงกลม 180° แบ่ง 3 ส่วน", size=21)
+        ALPHA_RAD = float(np.arccos(np.clip(np.dot(normalize(R - Q), normalize(A - Q)), -1, 1)))
+        REM_RAD = PI - ALPHA_RAD - PI / 2
+        # y=-3.05 (ไม่ใช่ -3.55) กันชนขอบล่างเฟรม (frame bottom = -4) และเผื่อระยะห่างจาก
+        # g2 (สามเหลี่ยมที่ดึงออกมา อยู่ที่ [2.2,-1.35] สูง 1.30 -> ขอบล่างจริงคือ y=-2.00)
+        SEMI_C = np.array([2.2, -3.05, 0.0])
+        SEMI_R = 0.85
+        w_alpha = AnnularSector(inner_radius=0, outer_radius=SEMI_R, start_angle=0,
+                                 angle=ALPHA_RAD, color=WARN, fill_opacity=0.55,
+                                 stroke_width=2).move_arc_center_to(SEMI_C)
+        w_90 = AnnularSector(inner_radius=0, outer_radius=SEMI_R, start_angle=ALPHA_RAD,
+                              angle=PI / 2, color=C_DEMO, fill_opacity=0.55,
+                              stroke_width=2).move_arc_center_to(SEMI_C)
+        w_rem = AnnularSector(inner_radius=0, outer_radius=SEMI_R,
+                               start_angle=ALPHA_RAD + PI / 2, angle=REM_RAD, color=WARN,
+                               fill_opacity=0.55, stroke_width=2).move_arc_center_to(SEMI_C)
+        diam = Line(SEMI_C + LEFT * SEMI_R, SEMI_C + RIGHT * SEMI_R, color=GRAYTXT,
+                    stroke_width=3)
+        lb180 = MathTex(r"180^\circ", font_size=22, color=GRAYTXT).next_to(diam, DOWN, buff=0.12)
+
+        def wedge_label(txt, mid_angle, color, size=22, extra=0.0):
+            d = np.array([np.cos(mid_angle), np.sin(mid_angle), 0.0])
+            return MathTex(txt, font_size=size, color=color).move_to(
+                SEMI_C + d * (SEMI_R + 0.32 + extra))
+
+        lbw_alpha = wedge_label(r"\alpha", ALPHA_RAD / 2, WARN)
+        lbw_90 = wedge_label(r"90^\circ", ALPHA_RAD + PI / 4, C_DEMO)
+        lbw_rem = wedge_label(r"90^\circ-\alpha", ALPHA_RAD + PI / 2 + REM_RAD / 2, WARN,
+                               size=20, extra=0.12)
+
+        self.play(FadeIn(diam), FadeIn(lb180))
+        self.play(TransformFromCopy(ang_a, w_alpha), FadeIn(lbw_alpha))
+        self.wait(0.6)
+        self.play(TransformFromCopy(ra_qe, w_90), FadeIn(lbw_90))
+        self.wait(0.6)
+        self.play(TransformFromCopy(ang_demo, w_rem), FadeIn(lbw_rem))
+        self.wait(2.0)
+        self.play(FadeOut(w_alpha), FadeOut(w_90), FadeOut(w_rem), FadeOut(diam),
+                  FadeOut(lb180), FadeOut(lbw_alpha), FadeOut(lbw_90), FadeOut(lbw_rem))
+
         self.play(FadeOut(ra_qe), FadeOut(lb90), FadeOut(ang_demo), FadeOut(lb_demo))
 
         # ขั้น 5 — สรุป AA
