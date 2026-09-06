@@ -335,29 +335,26 @@ class V8Engine3D(SafeThreeDScene):
 
         # ── BEAT 2: Brief Labeling Pass (1-1.5s) ──────────────────────────────
         # Standing house-style rule: first appearance of multi-part model gets labeled
+        # Bank labels deliberately NOT shown here -- in this 3/4 view each bank's 4
+        # cylinders smear ~1.55 units diagonally across the screen (measured), so the two
+        # banks interleave and read as ONE zigzag row; a "left bank"/"right bank" arrow
+        # pointing into that smear points at nothing a viewer can distinguish. The banks
+        # are named in BEAT 3 instead, from the near-end-on camera where each bank
+        # collapses to a single clean arm (measured depth spread 0.33) and the V is real.
         lbl_crank  = self.hud(Text("เพลาข้อเหวี่ยง (Crankshaft)", font_size=16, color=METAL).move_to([0, -2.70, 0]))
-        lbl_left   = self.hud(Text("แบงค์ซ้าย (Left Bank)", font_size=16, color=C_LEFT).move_to([-4.65, 1.20, 0]))
-        lbl_right  = self.hud(Text("แบงค์ขวา (Right Bank)", font_size=16, color=C_RIGHT).move_to([4.65, 1.20, 0]))
         lbl_piston = self.hud(Text("ลูกสูบ (Piston)", font_size=16, color=WHITE).move_to([-4.45, -0.40, 0]))
         lbl_rod    = self.hud(Text("ก้านสูบ (Connecting Rod)", font_size=16, color=WHITE).move_to([4.45, -0.40, 0]))
 
         arr_crank  = self.hud(Arrow([0, -2.42, 0], [0, -1.80, 0], color=METAL, stroke_width=2.0, tip_length=0.14))
-        arr_left   = self.hud(Arrow([-3.40, 1.20, 0], [-1.80, 0.82, 0], color=C_LEFT, stroke_width=2.0, tip_length=0.14))
-        arr_right  = self.hud(Arrow([3.40, 1.20, 0], [1.80, 0.82, 0], color=C_RIGHT, stroke_width=2.0, tip_length=0.14))
         arr_piston = self.hud(Arrow([-3.35, -0.40, 0], [-1.35, -0.15, 0], color=WHITE, stroke_width=2.0, tip_length=0.14))
         arr_rod    = self.hud(Arrow([3.15, -0.40, 0], [0.85, -0.48, 0], color=WHITE, stroke_width=2.0, tip_length=0.14))
 
-        labels_hud = VGroup(
-            lbl_crank, lbl_left, lbl_right, lbl_piston, lbl_rod,
-            arr_crank, arr_left, arr_right, arr_piston, arr_rod
-        )
+        labels_hud = VGroup(lbl_crank, lbl_piston, lbl_rod, arr_crank, arr_piston, arr_rod)
 
         # Flash the mentioned elements rule in the same play call
         self.play(
             FadeIn(labels_hud),
             Indicate(engine["crank_main"], color=WARN, scale_factor=1.06),
-            Indicate(engine["left_bank"], color=C_LEFT, scale_factor=1.04),
-            Indicate(engine["right_bank"], color=C_RIGHT, scale_factor=1.04),
             Indicate(engine["pistons"][1], color=WARN, scale_factor=1.08),
             Indicate(engine["rods"][2], color=WHITE, scale_factor=1.08),
             run_time=1.3
@@ -367,21 +364,63 @@ class V8Engine3D(SafeThreeDScene):
         # Fade labels out together before continuing
         self.play(FadeOut(labels_hud), run_time=0.5)
 
-        # ── BEAT 3: Explain the V-angle (90 degrees) ──────────────────────────
-        # Sequential caption swap to prevent layout linter overlap
+        # ── BEAT 3: Explain the V-angle (90 degrees) — END-ON REVEAL ──────────
+        # The original version made the "90 degrees" claim while the ambient rotation left
+        # the camera at a 3/4 angle. Measured: at phi=65/theta=-55 each bank smears 1.55
+        # units across the screen, so the two banks interleave into one zigzag and the V
+        # never actually reads -- the claim is asserted but never shown. Fix: swing the
+        # camera to look almost straight down the crankshaft (phi=88, theta=-83), where
+        # each bank collapses to a single arm (spread 0.33) and the apparent angle between
+        # the bank axes is 89.6 deg -- a textbook V -- then draw the angle itself rather
+        # than only stating it (skill sec.32: animate the claim, don't just caption it).
+        self.stop_ambient_camera_rotation()
         self.play(FadeOut(cap1), run_time=0.3)
-        cap2 = self.hud(caption_top("แบงค์กระบอกสูบ 2 ฝั่ง ทำมุมกัน 90 องศา", color=WHITE, size=21))
+        cap2 = self.hud(caption_top("มองจากหัวเครื่อง — แบงค์ 2 ฝั่งทำมุมกัน 90 องศา เป็นรูปตัว V", color=WHITE, size=21))
+        self.play(FadeIn(cap2, shift=DOWN * 0.15), run_time=0.5)
+        self.move_camera(phi=88 * DEGREES, theta=-83 * DEGREES, run_time=2.0)
+        self.wait(0.4)
 
+        # V-angle guides, drawn in the XZ plane at the front face of the engine so they sit
+        # in front of the model from this camera rather than buried inside it.
+        v_apex = np.array([0.0, -1.95, Z_CRANK])
+        guide_L = line3(v_apex, v_apex + 1.95 * U_LEFT,  color=C_LEFT,  thickness=0.030)
+        guide_R = line3(v_apex, v_apex + 1.95 * U_RIGHT, color=C_RIGHT, thickness=0.030)
+
+        # Arc built in the XY plane then rotated about +X into the XZ plane: a point at
+        # XY-angle a maps to direction (cos a, 0, sin a), so 45deg -> U_RIGHT and
+        # 135deg -> U_LEFT exactly. about_point=ORIGIN because an Arc's centroid is not
+        # its arc center -- rotating about the default center would skew it off the apex.
+        v_arc = Arc(radius=0.92, start_angle=45 * DEGREES, angle=90 * DEGREES,
+                    color=WARN, stroke_width=4)
+        v_arc.rotate(90 * DEGREES, axis=RIGHT, about_point=ORIGIN).shift(v_apex)
+
+        # Angle label lives in world space on the V's bisector (straight up from the apex),
+        # rotated to face the camera. Registered via world_text() so SafeThreeDScene's
+        # fixed-in-frame check whitelists it instead of warning.
+        lbl_v = MathTex(r"90^\circ", color=WARN, font_size=34)
+        lbl_v.rotate(90 * DEGREES, axis=RIGHT).move_to(v_apex + np.array([0.0, 0.0, 1.34]))
+        self.world_text(lbl_v)
+
+        lbl_bank_L = self.hud(Text("แบงค์ซ้าย (Left Bank)", font_size=17, color=C_LEFT).move_to([-4.30, 1.35, 0]))
+        lbl_bank_R = self.hud(Text("แบงค์ขวา (Right Bank)", font_size=17, color=C_RIGHT).move_to([4.30, 1.35, 0]))
+
+        self.play(Create(guide_L), Create(guide_R), run_time=1.0)
+        self.play(Create(v_arc), FadeIn(lbl_v), run_time=0.9)
         self.play(
-            FadeIn(cap2, shift=DOWN * 0.15),
+            FadeIn(lbl_bank_L, shift=RIGHT * 0.2),
             Indicate(engine["left_bank"], color=C_LEFT, scale_factor=1.06),
-            run_time=1.2
+            run_time=1.0
         )
         self.play(
+            FadeIn(lbl_bank_R, shift=LEFT * 0.2),
             Indicate(engine["right_bank"], color=C_RIGHT, scale_factor=1.06),
-            run_time=1.2
+            run_time=1.0
         )
-        self.wait(2.0)
+        self.wait(1.8)
+        self.play(
+            FadeOut(guide_L), FadeOut(guide_R), FadeOut(v_arc), FadeOut(lbl_v),
+            FadeOut(lbl_bank_L), FadeOut(lbl_bank_R), run_time=0.6
+        )
 
         # ── BEAT 4: Firing-Order Sequence (Main Payoff) ───────────────────────
         # Stop ambient rotation before firing sequence so viewer isn't distracted
