@@ -685,14 +685,47 @@ class G05B_SimilarTriangles(SafeScene):
         self.play(Create(ang2), FadeIn(lb2a))
         self.wait(2.0)
 
-        # ขั้น 4 — มุมที่ Q ในสามเหลี่ยมความเร็ว: ได้ 90 - alpha เหมือนกัน
-        cap = self.swap_cap(cap, "ขั้น 4: v_Q2 ตั้งฉากกับ AQ → มุมที่ Q ในรูปความเร็วก็ 90° − α", size=22)
+        # ขั้น 4 — ทำไม v_Q2 ⊥ AQ ถึงกลายเป็นมุม 90° − α จริงๆ (Min ขอ 2026-09-06: มุมที่ไม่
+        # obvious ต้องสาธิตด้วย animation จริงที่จุด Q บนไดอะแกรมต้นฉบับ ไม่ใช่แค่บอกลอยๆ
+        # ดูสกิล manim-teaching-video §31-32 -- แบ่งเส้นตรง R-Q-P (180°) ทีละชิ้น: α (มีอยู่
+        # แล้วจากขั้น 2) + 90° (ใหม่ QA-QE) + ส่วนที่เหลือ (=90°-α) ยืนยันเลขจริงแล้วว่า
+        # angle(QR,QA)=62.7°, angle(QA,QE)=90.0° เป๊ะ, angle(QP,QE)=27.3°=90°-62.7° ตรงกัน
+        cap = self.swap_cap(cap,
+            "ขั้น 4a: v_Q2 (=QE) ตั้งฉากกับ AQ เสมอ — สมบัติความเร็วของจุดที่หมุนรอบ A",
+            size=21)
+        ra_qe = ra_mark(Q, A - Q, E - Q, WARN, 0.32)
+        lb90 = MathTex(r"90^\circ", font_size=24, color=WARN).move_to(
+            Q + normalize(normalize(A - Q) + normalize(E - Q)) * 0.58)
+        self.play(Create(ra_qe), FadeIn(lb90))
+        self.wait(1.6)
+
+        cap = self.swap_cap(cap,
+            "ขั้น 4b: R–Q–P เป็นเส้นตรงเดียวกัน → สองฝั่งของ Q รวมกันได้ 180° เสมอ",
+            size=21)
+        flash_line = Line(R, P, color=WARN, stroke_width=6)
+        self.play(Create(flash_line))
+        self.play(Indicate(flash_line, color=WARN, scale_factor=1.0))
+        self.wait(1.0)
+        self.play(FadeOut(flash_line))
+
+        cap = self.swap_cap(cap,
+            "ขั้น 4c: เหลือมุม QE กับ QP = 180° − (α + 90°) = 90° − α",
+            size=21)
+        ang_demo = small_angle(Line(Q, E), Line(Q, P), radius=0.42, color=WARN, stroke_width=4)
+        lb_demo = MathTex(r"90^\circ-\alpha", font_size=26, color=WARN).move_to(
+            Q + normalize(normalize(E - Q) + normalize(P - Q)) * 0.95)
+        self.play(Create(ang_demo), FadeIn(lb_demo))
+        self.wait(1.8)
+
+        cap = self.swap_cap(cap, "ขั้น 4: มุมที่ Q ในรูปความเร็วก็เป็น 90° − α เหมือนกัน", size=22)
         # เหตุผลเดียวกับ ang2 ข้างบน -- ลด radius ให้ต่ำกว่า buff ป้ายชื่อจุดยอด (0.30)
         ang1 = small_angle(s1["ab"], s1["ac"], radius=0.24, color=WARN, stroke_width=4)
         lb1a = MathTex(r"90^\circ-\alpha", font_size=24, color=WARN).next_to(
             v1["a"], UR, buff=0.30)
         self.play(Create(ang1), FadeIn(lb1a))
-        self.wait(2.2)
+        self.play(Indicate(VGroup(ang_demo, lb_demo, ang1, lb1a), color=OK, scale_factor=1.0))
+        self.wait(1.4)
+        self.play(FadeOut(ra_qe), FadeOut(lb90), FadeOut(ang_demo), FadeOut(lb_demo))
 
         # ขั้น 5 — สรุป AA
         cap = self.swap_cap(cap, "มุมฉากตรงกัน + อีกมุมตรงกัน = คล้ายกันแน่นอน (แบบ มุม-มุม)", size=22)
