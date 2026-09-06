@@ -690,11 +690,16 @@ class G05B_SimilarTriangles(SafeScene):
         # ดูสกิล manim-teaching-video §31-32 -- แบ่งเส้นตรง R-Q-P (180°) ทีละชิ้น: α (มีอยู่
         # แล้วจากขั้น 2) + 90° (ใหม่ QA-QE) + ส่วนที่เหลือ (=90°-α) ยืนยันเลขจริงแล้วว่า
         # angle(QR,QA)=62.7°, angle(QA,QE)=90.0° เป๊ะ, angle(QP,QE)=27.3°=90°-62.7° ตรงกัน
+        # สีเขียว (C_DEMO) แทน WARN สำหรับของใหม่ 3 ชิ้นนี้โดยเฉพาะ -- เจอจาก Gemini/agy
+        # frame review จริง (2026-09-06): ra_qe ใช้ WARN สีเดียวกับ arc ของ α ที่อยู่ติดกัน
+        # ทำให้สายตามอง "ไหลต่อกัน" เป็นส่วนโค้งเดียว จน agy อ่านมุมผิดเป็น ~63° (=ค่า α เป๊ะ
+        # ไม่ใช่ 90° ที่ตั้งใจ) -- สีเขียวแยกให้เห็นชัดว่าเป็นคนละมุมกับ α/90°-α ที่ให้มาแล้ว
+        C_DEMO = "#66BB6A"
         cap = self.swap_cap(cap,
             "ขั้น 4a: v_Q2 (=QE) ตั้งฉากกับ AQ เสมอ — สมบัติความเร็วของจุดที่หมุนรอบ A",
             size=21)
-        ra_qe = ra_mark(Q, A - Q, E - Q, WARN, 0.32)
-        lb90 = MathTex(r"90^\circ", font_size=24, color=WARN).move_to(
+        ra_qe = ra_mark(Q, A - Q, E - Q, C_DEMO, 0.32)
+        lb90 = MathTex(r"90^\circ", font_size=24, color=C_DEMO).move_to(
             Q + normalize(normalize(A - Q) + normalize(E - Q)) * 0.58)
         self.play(Create(ra_qe), FadeIn(lb90))
         self.wait(1.6)
@@ -702,18 +707,23 @@ class G05B_SimilarTriangles(SafeScene):
         cap = self.swap_cap(cap,
             "ขั้น 4b: R–Q–P เป็นเส้นตรงเดียวกัน → สองฝั่งของ Q รวมกันได้ 180° เสมอ",
             size=21)
-        flash_line = Line(R, P, color=WARN, stroke_width=6)
+        flash_line = Line(R, P, color=C_DEMO, stroke_width=6)
         self.play(Create(flash_line))
-        self.play(Indicate(flash_line, color=WARN, scale_factor=1.0))
+        self.play(Indicate(flash_line, color=C_DEMO, scale_factor=1.0))
         self.wait(1.0)
         self.play(FadeOut(flash_line))
 
         cap = self.swap_cap(cap,
             "ขั้น 4c: เหลือมุม QE กับ QP = 180° − (α + 90°) = 90° − α",
             size=21)
-        ang_demo = small_angle(Line(Q, E), Line(Q, P), radius=0.42, color=WARN, stroke_width=4)
-        lb_demo = MathTex(r"90^\circ-\alpha", font_size=26, color=WARN).move_to(
-            Q + normalize(normalize(E - Q) + normalize(P - Q)) * 0.95)
+        ang_demo = small_angle(Line(Q, E), Line(Q, P), radius=0.42, color=C_DEMO, stroke_width=4)
+        # ป้ายชิดเส้น QP เกินไปตอนวางกลางเส้นแบ่งครึ่งมุม (มุมนี้แคบแค่ 27.3° -- บัคเดียวกับ
+        # §29 Bug 2) -- ยืนยันจริงจากการซูมเฟรม 2026-09-06: ตัวหนังสือทับเส้น QP พอดี
+        # แก้ด้วยรัศมีที่ไกลขึ้น (0.95->1.35) + ฟอนต์เล็กลง (26->20) + ขยับตั้งฉากออกจากเส้น QP
+        qp_dir = normalize(P - Q)
+        qp_perp = np.array([-qp_dir[1], qp_dir[0], 0.0])  # ทิศตั้งฉากออกจาก QP ไปทาง QE
+        lb_demo = MathTex(r"90^\circ-\alpha", font_size=20, color=C_DEMO).move_to(
+            Q + normalize(normalize(E - Q) + normalize(P - Q)) * 1.35 + qp_perp * 0.16)
         self.play(Create(ang_demo), FadeIn(lb_demo))
         self.wait(1.8)
 
