@@ -28,6 +28,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Every workflow_dispatch run starts a brand-new container with an empty media/
+      # directory, so manim's own content-hash partial-movie-file cache (see the
+      # manim-teaching-video skill sec.13/28) never carries over between runs -- every
+      # animation gets re-rendered from scratch even when only one line of a long scene
+      # changed. Restoring/saving media/ here lets that existing cache actually persist:
+      # unchanged animations (same hash) get skipped, only the edited ones re-render.
+      # Split restore+save (not the combined action) so a NEW cache entry is always saved
+      # even when an older one was restored -- a single fixed key can only be written once.
+      - name: Restore manim render cache
+        uses: actions/cache/restore@v4
+        with:
+          path: media
+          key: manim-cache-${{ github.event.inputs.scene_file }}-${{ github.event.inputs.quality }}-${{ github.event.inputs.fps }}-${{ github.run_id }}
+          restore-keys: |
+            manim-cache-${{ github.event.inputs.scene_file }}-${{ github.event.inputs.quality }}-${{ github.event.inputs.fps }}-
+
       - name: Thai fonts (image already has manim + full LaTeX)
         run: |
           apt-get update
@@ -44,6 +60,13 @@ jobs:
           SCENES="${SCENES//,/ }"
           manim -q${{ github.event.inputs.quality }} --fps ${{ github.event.inputs.fps }} \
             "${{ github.event.inputs.scene_file }}" $SCENES
+
+      - name: Save manim render cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: media
+          key: manim-cache-${{ github.event.inputs.scene_file }}-${{ github.event.inputs.quality }}-${{ github.event.inputs.fps }}-${{ github.run_id }}
 
       - name: Collect outputs
         shell: bash
