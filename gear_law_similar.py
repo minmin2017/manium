@@ -223,17 +223,23 @@ def ground(p, up=True):
     return VGroup(base, ticks)
 
 
-def upright_tri(pa, pb, pc, names, colors, center, height):
+def upright_tri(pa, pb, pc, names, colors, center, height, rotate=True):
     """
-    ยกสามเหลี่ยมออกมาวางใหม่ให้ 'ตั้งตรง': ด้าน pa->pb นอนเป็นแนวนอน
+    ยกสามเหลี่ยมออกมาวางใหม่ (แค่ scale+translate ให้พอดีกรอบ, มุมเดิมไม่เปลี่ยน
+    เพราะเป็นการแปลงแบบ similarity เสมอ): ถ้า rotate=True (ค่าเริ่มต้น เดิม)
+    หมุนให้ด้าน pa->pb นอนเป็นแนวนอนด้วย -- ถ้า rotate=False คงองศาเดิมจากรูป
+    ต้นฉบับไว้ (Min ขอ 2026-09-06: ให้ตรงกับที่เห็นในรูปรวม จะได้เทียบง่าย)
     คืน (group, dict ของจุดยอดที่ตำแหน่งใหม่, dict ของด้าน)
     colors = (สี pa->pb, สี pa->pc, สี pb->pc)
     """
     pa, pb, pc = (np.asarray(x, float) for x in (pa, pb, pc))
-    th = np.arctan2(*(pb - pa)[1::-1])
-    rot = np.array([[np.cos(-th), -np.sin(-th)], [np.sin(-th), np.cos(-th)]])
-    loc = [rot @ (p - pa)[:2] for p in (pa, pb, pc)]
-    loc = [np.array([v[0], v[1], 0.0]) for v in loc]
+    if rotate:
+        th = np.arctan2(*(pb - pa)[1::-1])
+        rot = np.array([[np.cos(-th), -np.sin(-th)], [np.sin(-th), np.cos(-th)]])
+        loc = [rot @ (p - pa)[:2] for p in (pa, pb, pc)]
+        loc = [np.array([v[0], v[1], 0.0]) for v in loc]
+    else:
+        loc = [p.copy() for p in (pa, pb, pc)]
     ctr = (np.min(loc, axis=0) + np.max(loc, axis=0)) / 2
     ext = np.max(loc, axis=0) - np.min(loc, axis=0)
     k = height / max(ext[1], 1e-6)
@@ -613,7 +619,7 @@ class G05B_SimilarTriangles(SafeScene):
         self.wait(0.7)
 
         g1, v1, s1 = upright_tri(Q, P, E, ("Q", "P", "E"),
-                                 (C_VN, C_VQ2, C_TAN), [2.2, 1.35, 0], 1.30)
+                                 (C_VN, C_VQ2, C_TAN), [2.2, 1.35, 0], 1.30, rotate=False)
         # FadeOut+FadeIn แทน TransformFromCopy — Polygon (1 ชิ้น) กับกลุ่มที่มี
         # เส้น 3 เส้น+จุด 3 จุด+ป้าย 3 ป้าย (9 ชิ้น) โครงสร้างไม่ตรงกัน manim จะ
         # จับคู่แบบเบี้ยว ทำให้ป้ายกลายเป็นรูปเปื้อนวิ่งผ่านตำแหน่งเดิมกลางอากาศ
@@ -637,7 +643,7 @@ class G05B_SimilarTriangles(SafeScene):
         self.wait(0.7)
 
         g2, v2, s2 = upright_tri(A, R, Q, ("A", "R", "Q"),
-                                 (C_AR, C_AQ, C_TAN), [2.2, -1.35, 0], 1.30)
+                                 (C_AR, C_AQ, C_TAN), [2.2, -1.35, 0], 1.30, rotate=False)
         self.play(FadeOut(tri2_in))
         self.play(FadeIn(g2, shift=RIGHT * 0.3), run_time=1.0)
         note2 = VGroup(
@@ -713,7 +719,7 @@ class G05B_SimilarTriangles(SafeScene):
         self.play(FadeIn(tri3_in))
         self.wait(0.6)
         g3, v3, s3 = upright_tri(Q, P, F, ("Q", "P", "F"),
-                                 (C_VN, C_VQ3, C_TAN), [2.2, 1.35, 0], 1.30)
+                                 (C_VN, C_VQ3, C_TAN), [2.2, 1.35, 0], 1.30, rotate=False)
         self.play(FadeOut(tri3_in))
         self.play(FadeIn(g3, shift=RIGHT * 0.3), run_time=1.0)
         note3 = VGroup(
@@ -729,7 +735,7 @@ class G05B_SimilarTriangles(SafeScene):
         self.play(FadeOut(tri3_in), FadeIn(tri4_in))
         self.wait(0.6)
         g4, v4, s4 = upright_tri(B, S, Q, ("B", "S", "Q"),
-                                 (C_BS, C_BQ, C_TAN), [2.2, -1.35, 0], 1.30)
+                                 (C_BS, C_BQ, C_TAN), [2.2, -1.35, 0], 1.30, rotate=False)
         self.play(FadeOut(tri4_in))
         self.play(FadeIn(g4, shift=RIGHT * 0.3), run_time=1.0)
         note4 = VGroup(
