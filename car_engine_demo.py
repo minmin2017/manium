@@ -22,6 +22,10 @@ C_ROD       = "#ECEFF1"   # ก้านสูบ (โลหะสีสว่�
 C_CRANK     = "#455A64"   # จานเพลาข้อเหวี่ยง
 C_VALVE     = "#B0BEC5"   # วาล์ว
 
+C_BLUE_MC   = ManimColor(C_INTAKE)
+C_ORANGE_MC = ManimColor(C_COMPRESS)
+
+
 
 def slider_crank(theta, r=0.42, L=1.26, crank_center=ORIGIN):
     """
@@ -406,15 +410,11 @@ class HowEngineWorks(SafeScene):
             run_time=0.8
         )
 
-        # Rising pressure/heat visual channel: dots change color blue -> warm orange continuously
-        c_blue = ManimColor(C_INTAKE)
-        c_orange = ManimColor(C_COMPRESS)
-
         def upd_compress(_m):
             th = theta_trk.get_value()
             eng["update"](th, in_open_frac=0.0, ex_open_frac=0.0)
             frac = np.clip((th - PI) / PI, 0.0, 1.0)
-            col = interpolate_color(c_blue, c_orange, frac)
+            col = interpolate_color(C_BLUE_MC, C_ORANGE_MC, frac)
             for d in eng["dots"]:
                 d.set_color(col)
 
@@ -460,7 +460,7 @@ class HowEngineWorks(SafeScene):
             eng["update"](th, in_open_frac=0.0, ex_open_frac=0.0)
 
         eng["piston"].add_updater(upd_power)
-        self.play(theta_trk.animate.set_value(3 * PI), run_time=1.1, rate_func=ease_out_sine)
+        self.play(theta_trk.animate.set_value(3 * PI), run_time=1.1, rate_func=linear)
         eng["piston"].remove_updater(upd_power)
         self.wait(1.0)
 
@@ -602,7 +602,7 @@ class HowEngineWorks(SafeScene):
                     d_col = C_INTAKE
                 elif PI <= eff_th < 2 * PI:
                     frac = (eff_th - PI) / PI
-                    d_col = interpolate_color(c_blue, c_orange, frac)
+                    d_col = interpolate_color(C_BLUE_MC, C_ORANGE_MC, frac)
                 elif 2 * PI <= eff_th < 3 * PI:
                     d_col = C_POWER
                 else:
