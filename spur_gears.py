@@ -382,12 +382,12 @@ class G07B_ICMethod(SafeScene):
         self.play(Create(c1), Create(c2))
 
         loa = Line(P - loa_dir * 1.8, P + loa_dir * 1.8, color=LOA_C, stroke_width=3)
-        t_loa = tag("Line of Action (Common Normal)", P + loa_dir * 1.8, UR, LOA_C, 15, 0.15)
+        t_loa = tag("Line of Action", P + loa_dir * 1.8, UL, LOA_C, 16, 0.18)
 
         dP = pt(P, WHITE, 0.09)
         tP = tag("P", P, UR, WHITE, 24, 0.45)
         self.play(Create(loa), FadeIn(t_loa))
-        self.play(FadeIn(dP), Flash(P, color=WHITE, flash_radius=0.4), FadeIn(tP))
+        self.play(FadeIn(dP), Flash(P, color=WHITE, flash_radius=0.35, line_length=0.18), FadeIn(tP))
         self.wait(0.6)
 
         # -------------------------------------------------------------
@@ -412,8 +412,8 @@ class G07B_ICMethod(SafeScene):
         cap3 = caption_top("จุดหมุนของแต่ละชิ้นเทียบกับโครงคือ IC ทันที: IC12 = A และ IC13 = B", size=20)
         self.play(FadeIn(cap3))
 
-        lA_ic = Text("A = IC12", font_size=20, color=GEAR2).next_to(O1, DOWN, buff=0.25)
-        lB_ic = Text("B = IC13", font_size=20, color=GEAR3).next_to(O2, DOWN, buff=0.25)
+        lA_ic = Text("A = IC12", font_size=19, color=GEAR2).next_to(O1, DOWN, buff=0.25)
+        lB_ic = Text("B = IC13", font_size=19, color=GEAR3).next_to(O2, DOWN, buff=0.25)
         self.play(
             Indicate(dA, color=GEAR2, scale_factor=1.4),
             Transform(lA, lA_ic),
@@ -429,7 +429,7 @@ class G07B_ICMethod(SafeScene):
         # -------------------------------------------------------------
         # BEAT 4: Locate IC23 by Intersecting Two Rules
         # -------------------------------------------------------------
-        self.play(FadeOut(ic_card))
+        self.play(FadeOut(ic_card), FadeOut(t_loa))
 
         # (a) Sliding contact rule
         self.play(FadeOut(cap3))
@@ -468,19 +468,19 @@ class G07B_ICMethod(SafeScene):
             run_time=1.0
         )
         self.play(
-            Flash(P, color=WARN, flash_radius=0.5),
+            Flash(P, color=WARN, flash_radius=0.35, line_length=0.18),
             FadeOut(pulse_loa), FadeOut(pulse_loc),
             run_time=0.6
         )
 
-        tP_ic = tag("P = IC23", P, UR, WARN, 22, 0.45)
-        self.play(Transform(tP, tP_ic))
+        card_ic23 = Text("จุดตัด = IC23 = P", font_size=20, color=WARN).move_to([4.35, -0.2, 0])
+        self.play(FadeIn(card_ic23, shift=UP * 0.1), Indicate(dP, color=WARN, scale_factor=1.5))
         self.wait(1.2)
 
         # -------------------------------------------------------------
         # BEAT 5: THE CLIMAX (The Velocity Derivation of Gear Ratio)
         # -------------------------------------------------------------
-        self.play(FadeOut(rule_a), FadeOut(rule_b), FadeOut(t_loa))
+        self.play(FadeOut(rule_a), FadeOut(rule_b), FadeOut(card_ic23), FadeOut(tP))
         self.play(loa.animate.set_stroke(opacity=0.25))
 
         self.play(FadeOut(cap4c))
@@ -529,7 +529,7 @@ class G07B_ICMethod(SafeScene):
             FadeOut(lbl_v3),
             run_time=1.2
         )
-        self.play(Flash(P + UP * 0.7, color=WHITE, flash_radius=0.55, line_length=0.25), run_time=0.6)
+        self.play(Flash(P + UP * 0.7, color=WHITE, flash_radius=0.4, line_length=0.2), run_time=0.6)
 
         v_merged = Arrow(P, P + UP * 1.35, color=OK, buff=0, stroke_width=6, max_tip_length_to_length_ratio=0.2)
         lbl_merged = MathTex(r"v_P", font_size=24, color=OK).move_to([P[0], 1.6, 0])
@@ -562,7 +562,8 @@ class G07B_ICMethod(SafeScene):
         self.play(
             FadeOut(rot2), FadeOut(rot2_lbl),
             FadeOut(rot3), FadeOut(rot3_lbl),
-            FadeOut(v_merged), FadeOut(lbl_merged)
+            FadeOut(v_merged), FadeOut(lbl_merged),
+            FadeOut(lA), FadeOut(lB)
         )
 
         self.play(FadeOut(cap5_comp))
@@ -619,7 +620,7 @@ class G07B_ICMethod(SafeScene):
         self.play(
             FadeIn(lbl_readout), FadeIn(ap_row), FadeIn(bp_row), FadeIn(ratio_row),
             FadeIn(line_ap), FadeIn(line_bp), FadeIn(dot_p_live),
-            FadeOut(dP), FadeOut(tP)
+            FadeOut(dP)
         )
         self.wait(0.8)
 
@@ -637,7 +638,7 @@ class G07B_ICMethod(SafeScene):
         self.play(FadeOut(cap6_nudge))
         cap6_involute = caption_top("ฟันรูป Involute ถูกเลือกใช้เพราะรักษาจุด P ให้นิ่งสนิท -> อัตราทดคงที่สมบูรณ์!", size=20)
         self.play(FadeIn(cap6_involute))
-        self.play(Indicate(box_eq, color=OK, scale_factor=1.15), Flash(P, color=OK, flash_radius=0.45))
+        self.play(Indicate(box_eq, color=OK, scale_factor=1.15), Flash(P, color=OK, flash_radius=0.35, line_length=0.18))
         self.wait(2.2)
 
         # -------------------------------------------------------------
@@ -652,7 +653,7 @@ class G07B_ICMethod(SafeScene):
             FadeOut(ap_row), FadeOut(bp_row), FadeOut(ratio_row),
             FadeOut(dot_p_live), FadeOut(eq_group)
         )
-        self.play(FadeIn(dP), FadeIn(tP))
+        self.play(FadeIn(dP), FadeIn(tP), FadeIn(lA), FadeIn(lB))
 
         self.play(FadeOut(cap6_involute))
         cap7_roll = caption_top("ที่จุดพิตช์ P: ผิวฟันกลิ้งบนกันสนิทโดยไม่มีการไถล (v_slide = 0) เหมือนลูกกลิ้ง", size=20)
@@ -670,7 +671,7 @@ class G07B_ICMethod(SafeScene):
         cap7_slide = caption_top("นอกจุด P: ผิวฟันจะเกิดการไถลสัมพัทธ์ (v_slide != 0) ซึ่งทำให้เกิดการสึกหรอ", size=20)
         self.play(FadeIn(cap7_slide))
 
-        self.play(loa.animate.set_stroke(opacity=0.85))
+        self.play(loa.animate.set_stroke(opacity=0.85), FadeOut(tick1), FadeOut(tick2))
         Q_pt = P + loa_dir * 0.95
         dQ = pt(Q_pt, WARN, 0.08)
         lbl_Q = tag("Q", Q_pt, LEFT, WARN, 20, 0.18)
