@@ -594,10 +594,10 @@ class DCMotor3D(SafeThreeDScene):
         motor["shaft"].add_updater(upd_motor_fail)
 
         # Damped oscillation around dead point pi/2
-        self.play(th_tracker.animate.set_value(np.pi / 2 + 32 * DEGREES), run_time=0.9, rate_func=ease_out_sine)
-        self.play(th_tracker.animate.set_value(np.pi / 2 - 20 * DEGREES), run_time=0.9, rate_func=ease_in_out_sine)
-        self.play(th_tracker.animate.set_value(np.pi / 2 + 10 * DEGREES), run_time=0.8, rate_func=ease_in_out_sine)
-        self.play(th_tracker.animate.set_value(np.pi / 2), run_time=0.8, rate_func=ease_in_out_sine)
+        self.play(th_tracker.animate.set_value(np.pi / 2 + 32 * DEGREES), run_time=0.9, rate_func=smooth)
+        self.play(th_tracker.animate.set_value(np.pi / 2 - 20 * DEGREES), run_time=0.9, rate_func=smooth)
+        self.play(th_tracker.animate.set_value(np.pi / 2 + 10 * DEGREES), run_time=0.8, rate_func=smooth)
+        self.play(th_tracker.animate.set_value(np.pi / 2), run_time=0.8, rate_func=smooth)
 
         motor["shaft"].remove_updater(upd_motor_fail)
 
