@@ -21,12 +21,13 @@ import numpy as np
 C_N_POLE   = "#E53935"   # ขั้วเหนือ N (แดง)
 C_S_POLE   = "#1E88E5"   # ขั้วใต้ S (น้ำเงิน)
 C_FIELD    = FIELD       # สนามแม่เหล็ก B (#42A5F5 ฟ้าสว่าง)
-C_CURRENT  = CURRENT     # กระแส I (#FFB300 เหลืองอำพัน)
-C_FORCE    = FORCE       # แรง F (#66BB6A เขียวสว่าง)
+C_CURRENT  = "#FFEA00"   # กระแส I (เหลืองสว่างสดใส เห็นชัดเจน)
+C_FORCE    = "#00E676"   # แรง F (เขียวนีออนสว่างสดใส ชัดเจนทุกมุม)
 C_TORQUE   = TORQUE      # ทอร์ก tau (#AB47BC ม่วง)
 C_METAL    = METAL       # โครงสร้างโลหะ / เพลา (#90A4AE เทาโลหะ)
 C_BRUSH    = "#37474F"   # แปรงถ่านคาร์บอน (เทาดำเข้ม)
-C_COPPER   = "#FFA726"   # ทองแดง / ซีกคอมมิวเทเตอร์ (ส้มทองแดง)
+C_WIRE     = "#D84315"   # ลวดทองแดงเข้ม (ตัดกับลูกศรกระแสสีเหลือง)
+C_COMM     = "#FFA726"   # ซีกคอมมิวเทเตอร์ (ส้มทองเหลือง)
 C_BAT_POS  = "#EF5350"   # ขั้วบวก / สายไฟบวก
 C_BAT_NEG  = "#42A5F5"   # ขั้วลบ / สายไฟลบ
 
@@ -220,51 +221,54 @@ def build_dc_motor():
     w_neg1 = line3([0.0, y_bat, z_bat_neg], [0.0, y_bat, -R_COMM - 0.52], color=C_BAT_NEG, thickness=0.025)
 
     arr_supply = arrow3([-1.00, y_bat, -0.65], [-1.00, y_bat, 0.25], color=C_CURRENT,
-                        thickness=0.030, height=0.22)
+                        thickness=0.032, height=0.22)
 
     battery_group = VGroup(bat_plate_pos, bat_plate_neg, lbl_plus, lbl_minus,
                            w_pos1, w_pos2, w_pos3, w_neg1, arr_supply)
     static_mobs.add(battery_group)
 
     # 6. Moving Armature Loop (Rectangular wire on shaft)
-    wire_cond1 = line3([R_ARM, Y_ARM_F, 0], [R_ARM, Y_ARM_B, 0], color=C_COPPER, thickness=0.060)
-    wire_cond2 = line3([-R_ARM, Y_ARM_F, 0], [-R_ARM, Y_ARM_B, 0], color=C_COPPER, thickness=0.060)
-    wire_back  = line3([R_ARM, Y_ARM_B, 0], [-R_ARM, Y_ARM_B, 0], color=C_COPPER, thickness=0.050)
-    wire_lead1 = line3([R_ARM, Y_ARM_F, 0], [0, Y_COMM, R_COMM], color=C_COPPER, thickness=0.040)
-    wire_lead2 = line3([-R_ARM, Y_ARM_F, 0], [0, Y_COMM, -R_COMM], color=C_COPPER, thickness=0.040)
+    # Added FIRST so current and force arrows draw in front of wires
+    wire_cond1 = line3([R_ARM, Y_ARM_F, 0], [R_ARM, Y_ARM_B, 0], color=C_WIRE, thickness=0.050)
+    wire_cond2 = line3([-R_ARM, Y_ARM_F, 0], [-R_ARM, Y_ARM_B, 0], color=C_WIRE, thickness=0.050)
+    wire_back  = line3([R_ARM, Y_ARM_B, 0], [-R_ARM, Y_ARM_B, 0], color=C_WIRE, thickness=0.045)
+    wire_lead1 = line3([R_ARM, Y_ARM_F, 0], [0, Y_COMM, R_COMM], color=C_WIRE, thickness=0.035)
+    wire_lead2 = line3([-R_ARM, Y_ARM_F, 0], [0, Y_COMM, -R_COMM], color=C_WIRE, thickness=0.035)
 
     loop_group = VGroup(wire_cond1, wire_cond2, wire_back, wire_lead1, wire_lead2)
     moving_mobs.add(loop_group)
 
     # 7. Moving Commutator Half-Rings (Segments 1 & 2)
-    seg1_f = VMobject(color=C_COPPER, stroke_width=5)
-    seg1_b = VMobject(color=C_COPPER, stroke_width=3, stroke_opacity=0.7)
-    seg2_f = VMobject(color=C_COPPER, stroke_width=5)
-    seg2_b = VMobject(color=C_COPPER, stroke_width=3, stroke_opacity=0.7)
-    gap_edge1a = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COPPER, thickness=0.02)
-    gap_edge1b = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COPPER, thickness=0.02)
-    gap_edge2a = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COPPER, thickness=0.02)
-    gap_edge2b = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COPPER, thickness=0.02)
+    seg1_f = VMobject(color=C_COMM, stroke_width=5)
+    seg1_b = VMobject(color=C_COMM, stroke_width=3, stroke_opacity=0.7)
+    seg2_f = VMobject(color=C_COMM, stroke_width=5)
+    seg2_b = VMobject(color=C_COMM, stroke_width=3, stroke_opacity=0.7)
+    gap_edge1a = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COMM, thickness=0.02)
+    gap_edge1b = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COMM, thickness=0.02)
+    gap_edge2a = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COMM, thickness=0.02)
+    gap_edge2b = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COMM, thickness=0.02)
 
     comm_group = VGroup(seg1_f, seg1_b, seg2_f, seg2_b,
                         gap_edge1a, gap_edge1b, gap_edge2a, gap_edge2b)
     moving_mobs.add(comm_group)
 
     # 8. Moving Current-Direction Arrows ON the Long Conductors
-    curr_arr1 = arrow3([R_ARM, -0.35, 0], [R_ARM, 0.35, 0], color=C_CURRENT, thickness=0.038, height=0.24)
-    curr_arr2 = arrow3([-R_ARM, 0.35, 0], [-R_ARM, -0.35, 0], color=C_CURRENT, thickness=0.038, height=0.24)
+    # Added AFTER loop wires so they draw in front
+    curr_arr1 = arrow3([R_ARM, -0.40, 0], [R_ARM, 0.40, 0], color=C_CURRENT, thickness=0.048, height=0.30)
+    curr_arr2 = arrow3([-R_ARM, 0.40, 0], [-R_ARM, -0.40, 0], color=C_CURRENT, thickness=0.048, height=0.30)
     moving_mobs.add(curr_arr1, curr_arr2)
 
-    # 9. Moving Force Arrows ON the Long Conductors
-    force_arr1 = arrow3([R_ARM, 0, 0], [R_ARM, 0, -1.10], color=C_FORCE, thickness=0.042, height=0.26)
-    force_arr2 = arrow3([-R_ARM, 0, 0], [-R_ARM, 0, 1.10], color=C_FORCE, thickness=0.042, height=0.26)
+    # 9. Moving Force Arrows ON the Conductors
+    # Bold bright green vectors
+    force_arr1 = arrow3([R_ARM, 0, 0], [R_ARM, 0, -1.15], color=C_FORCE, thickness=0.052, height=0.32)
+    force_arr2 = arrow3([-R_ARM, 0, 0], [-R_ARM, 0, 1.15], color=C_FORCE, thickness=0.052, height=0.32)
     moving_mobs.add(force_arr1, force_arr2)
 
     # 10. Commutator Flash / Sparks at Brushes
-    spark_top = Dot([0.0, Y_COMM, R_COMM], radius=0.15, color=YELLOW)
-    spark_bot = Dot([0.0, Y_COMM, -R_COMM], radius=0.15, color=YELLOW)
-    spark_top_halo = Circle(radius=0.30, color=WARN, stroke_width=3).rotate(90 * DEGREES, axis=RIGHT).move_to([0.0, Y_COMM, R_COMM])
-    spark_bot_halo = Circle(radius=0.30, color=WARN, stroke_width=3).rotate(90 * DEGREES, axis=RIGHT).move_to([0.0, Y_COMM, -R_COMM])
+    spark_top = Dot([0.0, Y_COMM, R_COMM], radius=0.16, color=YELLOW)
+    spark_bot = Dot([0.0, Y_COMM, -R_COMM], radius=0.16, color=YELLOW)
+    spark_top_halo = Circle(radius=0.32, color=WARN, stroke_width=3.5).rotate(90 * DEGREES, axis=RIGHT).move_to([0.0, Y_COMM, R_COMM])
+    spark_bot_halo = Circle(radius=0.32, color=WARN, stroke_width=3.5).rotate(90 * DEGREES, axis=RIGHT).move_to([0.0, Y_COMM, -R_COMM])
     spark_top.set_opacity(0.0)
     spark_bot.set_opacity(0.0)
     spark_top_halo.set_stroke(opacity=0.0)
@@ -273,7 +277,8 @@ def build_dc_motor():
     moving_mobs.add(spark_group)
 
     # ── Update Function ──────────────────────────────────────────────────────
-    def update_motor(theta_val, commutator_on=True, show_forces=True, force_opacity=1.0, flash_intensity=0.0):
+    def update_motor(theta_val, commutator_on=True, show_forces=True, show_current=True,
+                     force_opacity=1.0, current_opacity=1.0, flash_intensity=0.0):
         """
         Update positions of all moving parts from master rotation angle theta_val.
         - theta_val = 0: Conductor 1 at +X, Conductor 2 at -X (max torque position)
@@ -342,7 +347,7 @@ def build_dc_motor():
             dir1 = +1
             dir2 = -1
 
-        arr_len = 0.35
+        arr_len = 0.40
         if dir1 == +1:
             curr_arr1.put_start_and_end_on([x1, -arr_len, z1], [x1, arr_len, z1])
         else:
@@ -353,12 +358,15 @@ def build_dc_motor():
         else:
             curr_arr2.put_start_and_end_on([x2, arr_len, z2], [x2, -arr_len, z2])
 
-        f_len = 1.05
+        f_len = 1.15
         fz1 = -dir1 * f_len
         fz2 = -dir2 * f_len
 
         force_arr1.put_start_and_end_on([x1, 0.0, z1], [x1, 0.0, z1 + fz1])
         force_arr2.put_start_and_end_on([x2, 0.0, z2], [x2, 0.0, z2 + fz2])
+
+        curr_arr1.set_opacity(current_opacity if show_current else 0.0)
+        curr_arr2.set_opacity(current_opacity if show_current else 0.0)
 
         force_arr1.set_opacity(force_opacity if show_forces else 0.0)
         force_arr2.set_opacity(force_opacity if show_forces else 0.0)
@@ -374,7 +382,7 @@ def build_dc_motor():
             spark_top_halo.set_stroke(opacity=0.0)
             spark_bot_halo.set_stroke(opacity=0.0)
 
-    update_motor(0.0)
+    update_motor(0.0, commutator_on=True, show_forces=False, show_current=False)
 
     return {
         "static": static_mobs,
@@ -430,9 +438,6 @@ class DCMotor3D(SafeThreeDScene):
         # Register 3D world labels with SafeThreeDScene layout checker
         self.world_text(motor["lbl_n"], motor["lbl_s"], motor["lbl_plus"], motor["lbl_minus"])
 
-        # Initially hide force arrows during establish shot
-        motor["update"](0.0, commutator_on=True, show_forces=False)
-
         self.play(
             FadeIn(main_title, shift=DOWN * 0.15),
             FadeIn(cap_a, shift=DOWN * 0.15),
@@ -449,11 +454,11 @@ class DCMotor3D(SafeThreeDScene):
         lbl_pole = self.hud(Text("ขั้วแม่เหล็ก N / S", font_size=16, color=WHITE).move_to([-5.05, 1.70, 0]))
         arr_pole = self.hud(Arrow([-3.85, 1.70, 0], [-2.35, 1.45, 0], color=WHITE, stroke_width=2.0, tip_length=0.14))
 
-        lbl_loop = self.hud(Text("ขดลวดอาร์เมเจอร์", font_size=16, color=C_COPPER).move_to([-5.05, 0.40, 0]))
-        arr_loop = self.hud(Arrow([-3.75, 0.40, 0], [-1.45, 0.35, 0], color=C_COPPER, stroke_width=2.0, tip_length=0.14))
+        lbl_loop = self.hud(Text("ขดลวดอาร์เมเจอร์", font_size=16, color=C_COMM).move_to([-5.05, 0.40, 0]))
+        arr_loop = self.hud(Arrow([-3.75, 0.40, 0], [-1.45, 0.35, 0], color=C_COMM, stroke_width=2.0, tip_length=0.14))
 
-        lbl_comm = self.hud(Text("คอมมิวเทเตอร์", font_size=16, color=C_COPPER).move_to([-5.05, -0.90, 0]))
-        arr_comm = self.hud(Arrow([-3.90, -0.90, 0], [-0.85, -1.25, 0], color=C_COPPER, stroke_width=2.0, tip_length=0.14))
+        lbl_comm = self.hud(Text("คอมมิวเทเตอร์", font_size=16, color=C_COMM).move_to([-5.05, -0.90, 0]))
+        arr_comm = self.hud(Arrow([-3.90, -0.90, 0], [-0.85, -1.25, 0], color=C_COMM, stroke_width=2.0, tip_length=0.14))
 
         lbl_shaft = self.hud(Text("เพลา (Shaft)", font_size=16, color=C_METAL).move_to([5.05, 1.70, 0]))
         arr_shaft = self.hud(Arrow([4.15, 1.70, 0], [1.85, 1.45, 0], color=C_METAL, stroke_width=2.0, tip_length=0.14))
@@ -472,9 +477,9 @@ class DCMotor3D(SafeThreeDScene):
             FadeIn(labels_hud),
             Indicate(motor["pole_n"], color=C_N_POLE, scale_factor=1.05),
             Indicate(motor["pole_s"], color=C_S_POLE, scale_factor=1.05),
-            Indicate(motor["loop"], color=C_COPPER, scale_factor=1.06),
+            Indicate(motor["loop"], color=C_COMM, scale_factor=1.06),
             Indicate(motor["shaft"], color=WHITE, scale_factor=1.06),
-            Indicate(motor["comm"], color=C_COPPER, scale_factor=1.08),
+            Indicate(motor["comm"], color=C_COMM, scale_factor=1.08),
             Indicate(motor["brushes"], color=WHITE, scale_factor=1.08),
             Indicate(motor["battery"], color=C_BAT_POS, scale_factor=1.05),
             run_time=1.4
@@ -498,16 +503,29 @@ class DCMotor3D(SafeThreeDScene):
         ))
         self.play(FadeIn(cap_b1, shift=DOWN * 0.15), run_time=0.5)
 
-        # Conductor 1 (+X): current +Y -> force -Z (pushed down)
-        motor["update"](0.0, commutator_on=True, show_forces=True, force_opacity=0.0)
+        # Labels for current and force in 3D world
+        lbl_i1 = Text("I", font_size=24, color=C_CURRENT).move_to([R_ARM + 0.32, 0.15, 0.25]).rotate(90 * DEGREES, axis=RIGHT)
+        lbl_f1 = Text("F", font_size=24, color=C_FORCE).move_to([R_ARM + 0.32, 0.0, -1.25]).rotate(90 * DEGREES, axis=RIGHT)
+        lbl_i2 = Text("I", font_size=24, color=C_CURRENT).move_to([-R_ARM - 0.32, -0.15, -0.25]).rotate(90 * DEGREES, axis=RIGHT)
+        lbl_f2 = Text("F", font_size=24, color=C_FORCE).move_to([-R_ARM - 0.32, 0.0, 1.25]).rotate(90 * DEGREES, axis=RIGHT)
+        self.world_text(lbl_i1, lbl_f1, lbl_i2, lbl_f2)
+
+        # 1. Conductor 1 (+X): current +Y -> force -Z (pushed down)
+        motor["update"](0.0, commutator_on=True, show_forces=True, show_current=True,
+                        force_opacity=1.0, current_opacity=1.0)
+        motor["curr2"].set_opacity(0.0)
+        motor["force2"].set_opacity(0.0)
+
         self.play(
             Indicate(motor["cond1"], color=C_CURRENT, scale_factor=1.08),
-            FadeIn(motor["curr1"]),
-            run_time=0.8
+            motor["curr1"].animate.set_opacity(1.0),
+            FadeIn(lbl_i1),
+            run_time=0.9
         )
         self.play(
-            FadeIn(motor["force1"]),
-            run_time=0.8
+            motor["force1"].animate.set_opacity(1.0),
+            FadeIn(lbl_f1),
+            run_time=0.9
         )
         self.wait(1.5)
 
@@ -519,11 +537,13 @@ class DCMotor3D(SafeThreeDScene):
         self.play(FadeIn(cap_b2, shift=DOWN * 0.15), run_time=0.5)
         self.wait(1.4)
 
-        # Conductor 2 (-X): current -Y -> force +Z (pushed up)
+        # 2. Conductor 2 (-X): current -Y -> force +Z (pushed up)
         self.play(
             Indicate(motor["cond2"], color=C_CURRENT, scale_factor=1.08),
-            FadeIn(motor["curr2"]),
-            FadeIn(motor["force2"]),
+            motor["curr2"].animate.set_opacity(1.0),
+            motor["force2"].animate.set_opacity(1.0),
+            FadeIn(lbl_i2),
+            FadeIn(lbl_f2),
             run_time=1.0
         )
 
@@ -540,12 +560,21 @@ class DCMotor3D(SafeThreeDScene):
         torque_arc.rotate(90 * DEGREES, axis=RIGHT).move_to([0, 0.4, 0])
         self.play(Create(torque_arc), run_time=0.9)
         self.wait(2.0)
-        self.play(FadeOut(torque_arc), run_time=0.5)
+        self.play(
+            FadeOut(torque_arc),
+            FadeOut(lbl_i1), FadeOut(lbl_f1),
+            FadeOut(lbl_i2), FadeOut(lbl_f2),
+            run_time=0.5
+        )
 
         # ── SHOT C: Dead Point & The Problem (Failure without Commutator) ─────
         # Lock camera looking straight down shaft axis Y (end-on view: phi=89.9, theta=-90)
         self.move_camera(phi=89.9 * DEGREES, theta=-90 * DEGREES, run_time=1.5)
         self.wait(0.3)
+
+        # Make sure both force arrows and current arrows are visible at theta = 0
+        motor["update"](0.0, commutator_on=True, show_forces=True, show_current=True,
+                        force_opacity=1.0, current_opacity=1.0)
 
         # VERIFICATION FRAME BEAT: Max torque position in end-on view
         # Screen horizontal = X (field points right, N left, S right)
@@ -556,7 +585,7 @@ class DCMotor3D(SafeThreeDScene):
             size=19, color=WHITE
         ))
         self.play(FadeIn(cap_c1, shift=DOWN * 0.15), run_time=0.5)
-        self.wait(2.5)  # Steady frame for verification
+        self.wait(2.5)  # Steady frame for verification!
 
         # Rotate loop to Dead Point (theta = pi/2: conductors at top +Z and bottom -Z)
         self.play(FadeOut(cap_c1), run_time=0.3)
@@ -571,11 +600,14 @@ class DCMotor3D(SafeThreeDScene):
 
         def upd_motor_normal(_m):
             th = th_tracker.get_value()
-            motor["update"](th, commutator_on=True, show_forces=True)
+            motor["update"](th, commutator_on=True, show_forces=True, show_current=True,
+                            force_opacity=1.0, current_opacity=1.0)
 
         motor["shaft"].add_updater(upd_motor_normal)
         self.play(th_tracker.animate.set_value(np.pi / 2), run_time=2.4, rate_func=smooth)
         motor["shaft"].remove_updater(upd_motor_normal)
+        motor["update"](np.pi / 2, commutator_on=True, show_forces=True, show_current=True,
+                        force_opacity=1.0, current_opacity=1.0)
         self.wait(2.0)
 
         # Show failure case: What happens WITHOUT a commutator?
@@ -589,7 +621,8 @@ class DCMotor3D(SafeThreeDScene):
         # Animate overshoot and damped rocking oscillation (stall)
         def upd_motor_fail(_m):
             th = th_tracker.get_value()
-            motor["update"](th, commutator_on=False, show_forces=True)
+            motor["update"](th, commutator_on=False, show_forces=True, show_current=True,
+                            force_opacity=1.0, current_opacity=1.0)
 
         motor["shaft"].add_updater(upd_motor_fail)
 
@@ -600,6 +633,8 @@ class DCMotor3D(SafeThreeDScene):
         self.play(th_tracker.animate.set_value(np.pi / 2), run_time=0.8, rate_func=smooth)
 
         motor["shaft"].remove_updater(upd_motor_fail)
+        motor["update"](np.pi / 2, commutator_on=False, show_forces=True, show_current=True,
+                        force_opacity=1.0, current_opacity=1.0)
 
         self.play(FadeOut(cap_c3), run_time=0.3)
         cap_c4 = self.hud(caption_top(
@@ -620,7 +655,7 @@ class DCMotor3D(SafeThreeDScene):
 
         # Highlight commutator segments, insulating gap, and brushes
         self.play(
-            Indicate(motor["comm"], color=WARN, scale_factor=1.12),
+            Indicate(motor["comm"], color=YELLOW, scale_factor=1.12),
             Indicate(motor["brushes"], color=WHITE, scale_factor=1.10),
             run_time=1.4
         )
@@ -628,7 +663,8 @@ class DCMotor3D(SafeThreeDScene):
 
         # Reset loop to just before dead point (45 degrees before pi/2)
         th_tracker.set_value(np.pi / 4)
-        motor["update"](np.pi / 4, commutator_on=True, show_forces=True)
+        motor["update"](np.pi / 4, commutator_on=True, show_forces=True, show_current=True,
+                        force_opacity=1.0, current_opacity=1.0)
         self.wait(0.6)
 
         # Rotate slowly through the dead point
@@ -637,7 +673,8 @@ class DCMotor3D(SafeThreeDScene):
             th = th_tracker.get_value()
             diff = abs(th - np.pi / 2)
             flash = float(np.exp(- (diff / 0.08)**2)) if diff < 0.15 else 0.0
-            motor["update"](th, commutator_on=True, show_forces=True, flash_intensity=flash)
+            motor["update"](th, commutator_on=True, show_forces=True, show_current=True,
+                            force_opacity=1.0, current_opacity=1.0, flash_intensity=flash)
 
         motor["shaft"].add_updater(upd_motor_flip)
 
@@ -654,6 +691,8 @@ class DCMotor3D(SafeThreeDScene):
         # Step 2: continue forward past dead point with positive driving torque
         self.play(th_tracker.animate.set_value(np.pi), run_time=2.4, rate_func=smooth)
         motor["shaft"].remove_updater(upd_motor_flip)
+        motor["update"](np.pi, commutator_on=True, show_forces=True, show_current=True,
+                        force_opacity=1.0, current_opacity=1.0)
         self.wait(2.0)
 
         # ── SHOT E: Continuous Running + Summary Card ────────────────────────
@@ -674,7 +713,8 @@ class DCMotor3D(SafeThreeDScene):
             phase = (th - np.pi / 2) % np.pi
             flash_dist = min(phase, np.pi - phase)
             flash = float(np.exp(- (flash_dist / 0.09)**2)) if flash_dist < 0.18 else 0.0
-            motor["update"](th, commutator_on=True, show_forces=True, flash_intensity=flash)
+            motor["update"](th, commutator_on=True, show_forces=True, show_current=True,
+                            force_opacity=1.0, current_opacity=1.0, flash_intensity=flash)
 
         motor["shaft"].add_updater(upd_motor_spin)
 
