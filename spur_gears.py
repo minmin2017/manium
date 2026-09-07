@@ -348,6 +348,347 @@ class G07_KennedyPitchPoint(SafeScene):
 
 
 # =====================================================================
+# G07B -- หน้า 7: Instant Centre Method (Remake of G07)
+# =====================================================================
+class G07B_ICMethod(SafeScene):
+    def construct(self):
+        self.add(title("Instant Centre Method -- Gear Ratio Derivation", size=24))
+        self.add(page_ref("หน้า 7"))
+
+        # Geometry
+        R1, R2 = 1.6, 1.05
+        O1 = LEFT * 1.8
+        O2 = O1 + RIGHT * (R1 + R2)
+        P = O1 + RIGHT * R1
+        phi = 20 * DEGREES
+        loa_dir = np.array([np.sin(phi), np.cos(phi), 0.0])
+
+        # -------------------------------------------------------------
+        # BEAT 1: Setup
+        # -------------------------------------------------------------
+        cap1 = caption_top("เฟือง 2 (ชิ้นขับ) ขบกับเฟือง 3 (ชิ้นตาม) สัมผัสกันที่จุดพิตช์ P", size=21)
+        self.play(FadeIn(cap1))
+
+        c1 = Circle(radius=R1, color=GEAR2, stroke_width=4).move_to(O1)
+        c2 = Circle(radius=R2, color=GEAR3, stroke_width=4).move_to(O2)
+        loc = DashedLine(O1 + LEFT * 0.6, O2 + RIGHT * 0.6, color=GRAYTXT, stroke_width=2.5)
+
+        dA = pt(O1, GEAR2, 0.08)
+        dB = pt(O2, GEAR3, 0.08)
+        lA = tag("A", O1, DOWN, GEAR2, 22, 0.25)
+        lB = tag("B", O2, DOWN, GEAR3, 22, 0.25)
+
+        self.play(Create(loc), FadeIn(dA), FadeIn(lA), FadeIn(dB), FadeIn(lB))
+        self.play(Create(c1), Create(c2))
+
+        loa = Line(P - loa_dir * 1.8, P + loa_dir * 1.8, color=LOA_C, stroke_width=3)
+        t_loa = tag("Line of Action (Common Normal)", P + loa_dir * 1.8, UR, LOA_C, 15, 0.15)
+
+        dP = pt(P, WHITE, 0.09)
+        tP = tag("P", P, UR, WHITE, 24, 0.45)
+        self.play(Create(loa), FadeIn(t_loa))
+        self.play(FadeIn(dP), Flash(P, color=WHITE, flash_radius=0.4), FadeIn(tP))
+        self.wait(0.6)
+
+        # -------------------------------------------------------------
+        # BEAT 2: Count the Instant Centres
+        # -------------------------------------------------------------
+        self.play(FadeOut(cap1))
+        cap2 = caption_top("ระบบมี 3 ชิ้นส่วน: โครง(1), เฟืองขับ(2), เฟืองตาม(3) -> มี IC ทั้งหมด 3 จุด", size=20)
+        self.play(FadeIn(cap2))
+
+        ic_card = VGroup(
+            Text("จำนวน Instant Centres (IC)", font_size=20, color=WHITE),
+            MathTex(r"N = \frac{n(n-1)}{2} = \frac{3(3-1)}{2} = 3", font_size=23, color=OK),
+            MathTex(r"\implies IC_{12},\quad IC_{13},\quad IC_{23}", font_size=23, color=WHITE),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.22).move_to([4.35, 1.0, 0])
+        self.play(FadeIn(ic_card, shift=LEFT * 0.2))
+        self.wait(1.5)
+
+        # -------------------------------------------------------------
+        # BEAT 3: The Two Free Ones (IC12 = A, IC13 = B)
+        # -------------------------------------------------------------
+        self.play(FadeOut(cap2))
+        cap3 = caption_top("จุดหมุนของแต่ละชิ้นเทียบกับโครงคือ IC ทันที: IC12 = A และ IC13 = B", size=20)
+        self.play(FadeIn(cap3))
+
+        lA_ic = Text("A = IC12", font_size=20, color=GEAR2).next_to(O1, DOWN, buff=0.25)
+        lB_ic = Text("B = IC13", font_size=20, color=GEAR3).next_to(O2, DOWN, buff=0.25)
+        self.play(
+            Indicate(dA, color=GEAR2, scale_factor=1.4),
+            Transform(lA, lA_ic),
+            run_time=0.8
+        )
+        self.play(
+            Indicate(dB, color=GEAR3, scale_factor=1.4),
+            Transform(lB, lB_ic),
+            run_time=0.8
+        )
+        self.wait(1.2)
+
+        # -------------------------------------------------------------
+        # BEAT 4: Locate IC23 by Intersecting Two Rules
+        # -------------------------------------------------------------
+        self.play(FadeOut(ic_card))
+
+        # (a) Sliding contact rule
+        self.play(FadeOut(cap3))
+        cap4a = caption_top("1. กฎสัมผัสแบบไถล: จุด IC23 ต้องอยู่บนแนวเส้นตั้งฉากร่วม (Common Normal)", size=20)
+        self.play(FadeIn(cap4a))
+
+        rule_a = VGroup(
+            Text("1. กฎสัมผัสแบบไถล", font_size=19, color=LOA_C),
+            Text("IC23 อยู่บน Common Normal", font_size=17, color=GRAYTXT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.12).move_to([4.35, 1.8, 0])
+        self.play(FadeIn(rule_a, shift=LEFT * 0.2), Indicate(loa, color=LOA_C, scale_factor=1.08))
+        self.wait(1.2)
+
+        # (b) Kennedy's theorem
+        self.play(FadeOut(cap4a))
+        cap4b = caption_top("2. ทฤษฎีของ Kennedy: จุด IC12, IC13, IC23 ต้องอยู่บนเส้นตรงเดียวกัน", size=20)
+        self.play(FadeIn(cap4b))
+
+        rule_b = VGroup(
+            Text("2. ทฤษฎีของ Kennedy", font_size=19, color=OK),
+            Text("IC23 อยู่บน Line of Centers", font_size=17, color=GRAYTXT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.12).move_to([4.35, 0.7, 0])
+        self.play(FadeIn(rule_b, shift=LEFT * 0.2), Indicate(loc, color=OK, scale_factor=1.08))
+        self.wait(1.2)
+
+        # Convergence & Intersection at P
+        self.play(FadeOut(cap4b))
+        cap4c = caption_top("ทั้งสองเงื่อนไขตัดกันที่จุดเดียวพอดี -> จุดศูนย์กลางการหมุนชั่วขณะ IC23 = P", size=20)
+        self.play(FadeIn(cap4c))
+
+        pulse_loa = Line(P - loa_dir * 1.2, P + loa_dir * 1.2, color=LOA_C, stroke_width=6)
+        pulse_loc = Line(O1 + RIGHT * 0.4, O2 + LEFT * 0.4, color=OK, stroke_width=6)
+        self.play(
+            Transform(pulse_loa, Dot(P, color=WARN, radius=0.12)),
+            Transform(pulse_loc, Dot(P, color=WARN, radius=0.12)),
+            run_time=1.0
+        )
+        self.play(
+            Flash(P, color=WARN, flash_radius=0.5),
+            FadeOut(pulse_loa), FadeOut(pulse_loc),
+            run_time=0.6
+        )
+
+        tP_ic = tag("P = IC23", P, UR, WARN, 22, 0.45)
+        self.play(Transform(tP, tP_ic))
+        self.wait(1.2)
+
+        # -------------------------------------------------------------
+        # BEAT 5: THE CLIMAX (The Velocity Derivation of Gear Ratio)
+        # -------------------------------------------------------------
+        self.play(FadeOut(rule_a), FadeOut(rule_b), FadeOut(t_loa))
+        self.play(loa.animate.set_stroke(opacity=0.25))
+
+        self.play(FadeOut(cap4c))
+        cap5_def = caption_top("นิยาม IC: IC23 คือจุดที่ชิ้น 2 กับชิ้น 3 มีความเร็วเท่ากันพอดี (ไม่มีการไถลสัมพัทธ์)", size=20)
+        self.play(FadeIn(cap5_def))
+
+        rot2 = CurvedArrow(O1 + RIGHT * 0.65, O1 + UP * 0.65, color=GEAR2, angle=TAU / 4)
+        rot2_lbl = MathTex(r"\omega_2 \text{ (CCW)}", font_size=19, color=GEAR2).next_to(rot2, UL, buff=0.08)
+        rot3 = CurvedArrow(O2 + LEFT * 0.5, O2 + UP * 0.5, color=GEAR3, angle=-TAU / 4)
+        rot3_lbl = MathTex(r"\omega_3 \text{ (CW)}", font_size=19, color=GEAR3).next_to(rot3, UR, buff=0.08)
+        self.play(Create(rot2), FadeIn(rot2_lbl), Create(rot3), FadeIn(rot3_lbl))
+        self.wait(1.5)
+
+        # Velocity from Gear 2 (CCW -> UP)
+        self.play(FadeOut(cap5_def))
+        cap5_v2 = caption_top("คิดจากเฟือง 2 (หมุนทวนเข็ม): จุด P หมุนรอบ A -> v_P = omega2 · AP (ทิศชี้ขึ้น)", size=20)
+        self.play(FadeIn(cap5_v2))
+
+        off = 0.14
+        v2_start = P + LEFT * off
+        v2_arrow = Arrow(v2_start, v2_start + UP * 1.35, color=GEAR2, buff=0, stroke_width=5, max_tip_length_to_length_ratio=0.2)
+        lbl_v2 = MathTex(r"v_P = \omega_2 \cdot AP", font_size=21, color=GEAR2).move_to([-0.4, 1.8, 0])
+        self.play(GrowArrow(v2_arrow), FadeIn(lbl_v2))
+        self.wait(1.5)
+
+        # Velocity from Gear 3 (CW -> UP)
+        self.play(FadeOut(cap5_v2))
+        cap5_v3 = caption_top("คิดจากเฟือง 3 (หมุนตามเข็ม): จุด P หมุนรอบ B -> v_P = omega3 · BP (ทิศชี้ขึ้นเช่นกัน!)", size=20)
+        self.play(FadeIn(cap5_v3))
+
+        v3_start = P + RIGHT * off
+        v3_arrow = Arrow(v3_start, v3_start + UP * 1.35, color=GEAR3, buff=0, stroke_width=5, max_tip_length_to_length_ratio=0.2)
+        lbl_v3 = MathTex(r"v_P = \omega_3 \cdot BP", font_size=21, color=GEAR3).move_to([1.2, 1.8, 0])
+        self.play(GrowArrow(v3_arrow), FadeIn(lbl_v3))
+        self.wait(1.8)
+
+        # Sliding together and coinciding
+        self.play(FadeOut(cap5_v3))
+        cap5_merge = caption_top("เพราะ P คือ IC23 ความเร็วทั้งสองต้องเท่ากันพอดี: เวกเตอร์เลื่อนมาทับกันสนิท!", size=20)
+        self.play(FadeIn(cap5_merge))
+
+        self.play(
+            v2_arrow.animate.shift(RIGHT * off),
+            v3_arrow.animate.shift(LEFT * off),
+            FadeOut(lbl_v2),
+            FadeOut(lbl_v3),
+            run_time=1.2
+        )
+        self.play(Flash(P + UP * 0.7, color=WHITE, flash_radius=0.55, line_length=0.25), run_time=0.6)
+
+        v_merged = Arrow(P, P + UP * 1.35, color=OK, buff=0, stroke_width=6, max_tip_length_to_length_ratio=0.2)
+        lbl_merged = MathTex(r"v_P", font_size=24, color=OK).move_to([P[0], 1.6, 0])
+        self.play(FadeIn(v_merged), FadeIn(lbl_merged), FadeOut(v2_arrow), FadeOut(v3_arrow), run_time=0.4)
+        self.wait(1.5)
+
+        # Algebra
+        self.play(FadeOut(cap5_merge))
+        cap5_alg = caption_top("ความเร็วเท่ากัน -> จับสมการทั้งสองเท่ากันทันที", size=21)
+        self.play(FadeIn(cap5_alg))
+
+        eq1 = MathTex(r"\omega_2 \cdot AP = \omega_3 \cdot BP", font_size=26, color=WHITE).move_to([4.35, 1.2, 0])
+        self.play(Write(eq1))
+        self.wait(1.0)
+
+        eq2 = MathTex(r"\frac{\omega_2}{\omega_3} = \frac{BP}{AP}", font_size=32, color=OK).move_to([4.35, 0.2, 0])
+        box_eq = SurroundingRectangle(eq2, color=OK, buff=0.18, stroke_width=2.5)
+        self.play(Write(eq2), Create(box_eq))
+        self.wait(1.2)
+
+        # Compare with similar triangles
+        self.play(FadeOut(cap5_alg))
+        cap5_comp = caption_top("ได้ผลลัพธ์เดียวกับวิธีสามเหลี่ยมคล้ายใน 3 บรรทัด! (นี่คือพลังของวิธี IC)", size=21)
+        self.play(FadeIn(cap5_comp))
+        self.wait(2.2)
+
+        # -------------------------------------------------------------
+        # BEAT 6: Why P Must Not Move
+        # -------------------------------------------------------------
+        self.play(
+            FadeOut(rot2), FadeOut(rot2_lbl),
+            FadeOut(rot3), FadeOut(rot3_lbl),
+            FadeOut(v_merged), FadeOut(lbl_merged)
+        )
+
+        self.play(FadeOut(cap5_comp))
+        cap6_why = caption_top("อัตราทดขึ้นกับตำแหน่งจุด P บน line of centers (ระยะ AP และ BP)", size=20)
+        self.play(FadeIn(cap6_why))
+
+        eq_group = VGroup(eq2, box_eq)
+        self.play(eq_group.animate.move_to([4.35, 1.5, 0]), FadeOut(eq1))
+
+        p_track = ValueTracker(0.0)
+        dim_y = -0.55
+
+        line_ap = Line([O1[0], dim_y, 0], [P[0], dim_y, 0], color=GEAR2, stroke_width=4)
+        line_bp = Line([P[0], dim_y, 0], [O2[0], dim_y, 0], color=GEAR3, stroke_width=4)
+        dot_p_live = Dot([P[0], 0, 0], color=WHITE, radius=0.09)
+
+        line_ap.add_updater(lambda m: m.put_start_and_end_on([O1[0], dim_y, 0], [P[0] + p_track.get_value(), dim_y, 0]))
+        line_bp.add_updater(lambda m: m.put_start_and_end_on([P[0] + p_track.get_value(), dim_y, 0], [O2[0], dim_y, 0]))
+        dot_p_live.add_updater(lambda m: m.move_to([P[0] + p_track.get_value(), 0, 0]))
+
+        lbl_readout = Text("ค่าอัตราทดขณะจุด P เลื่อน:", font_size=19, color=WHITE).move_to([4.35, 0.65, 0])
+        ap_txt = Text("AP =", font_size=18, color=GEAR2)
+        bp_txt = Text("BP =", font_size=18, color=GEAR3)
+        ratio_txt = Text("Ratio =", font_size=19, color=WHITE)
+
+        ap_num = DecimalNumber(1.60, num_decimal_places=2, font_size=22, color=GEAR2)
+        bp_num = DecimalNumber(1.05, num_decimal_places=2, font_size=22, color=GEAR3)
+        ratio_num = DecimalNumber(0.66, num_decimal_places=2, font_size=24, color=OK)
+
+        ap_row = VGroup(ap_txt, ap_num).arrange(RIGHT, buff=0.15).move_to([4.35, 0.15, 0])
+        bp_row = VGroup(bp_txt, bp_num).arrange(RIGHT, buff=0.15).move_to([4.35, -0.35, 0])
+        ratio_row = VGroup(ratio_txt, ratio_num).arrange(RIGHT, buff=0.15).move_to([4.35, -0.90, 0])
+
+        def update_nums(mob):
+            dx = p_track.get_value()
+            ap_val = 1.60 + dx
+            bp_val = 1.05 - dx
+            ap_num.set_value(ap_val)
+            bp_num.set_value(bp_val)
+            r_val = max(0.01, bp_val / max(0.01, ap_val))
+            ratio_num.set_value(r_val)
+            ap_num.next_to(ap_txt, RIGHT, buff=0.15)
+            bp_num.next_to(bp_txt, RIGHT, buff=0.15)
+            ratio_num.next_to(ratio_txt, RIGHT, buff=0.15)
+            if abs(dx) > 0.04:
+                ratio_num.set_color(WARN)
+                dot_p_live.set_color(WARN)
+            else:
+                ratio_num.set_color(OK)
+                dot_p_live.set_color(WHITE)
+
+        ratio_row.add_updater(update_nums)
+
+        self.play(
+            FadeIn(lbl_readout), FadeIn(ap_row), FadeIn(bp_row), FadeIn(ratio_row),
+            FadeIn(line_ap), FadeIn(line_bp), FadeIn(dot_p_live),
+            FadeOut(dP), FadeOut(tP)
+        )
+        self.wait(0.8)
+
+        self.play(FadeOut(cap6_why))
+        cap6_nudge = caption_top("ถ้าจุด P เคลื่อนที่ไปมา -> อัตราทดจะแกว่งตลอดเวลา -> เกิดการสั่นสะเทือนและเสียงดัง!", size=20)
+        self.play(FadeIn(cap6_nudge))
+
+        self.play(p_track.animate.set_value(0.28), run_time=1.4)
+        self.wait(0.4)
+        self.play(p_track.animate.set_value(-0.28), run_time=1.8)
+        self.wait(0.4)
+        self.play(p_track.animate.set_value(0.0), run_time=1.2)
+        self.wait(0.6)
+
+        self.play(FadeOut(cap6_nudge))
+        cap6_involute = caption_top("ฟันรูป Involute ถูกเลือกใช้เพราะรักษาจุด P ให้นิ่งสนิท -> อัตราทดคงที่สมบูรณ์!", size=20)
+        self.play(FadeIn(cap6_involute))
+        self.play(Indicate(box_eq, color=OK, scale_factor=1.15), Flash(P, color=OK, flash_radius=0.45))
+        self.wait(2.2)
+
+        # -------------------------------------------------------------
+        # BEAT 7: Short Closer (Rolling at P, Sliding Away from P)
+        # -------------------------------------------------------------
+        line_ap.clear_updaters()
+        line_bp.clear_updaters()
+        dot_p_live.clear_updaters()
+        ratio_row.clear_updaters()
+        self.play(
+            FadeOut(line_ap), FadeOut(line_bp), FadeOut(lbl_readout),
+            FadeOut(ap_row), FadeOut(bp_row), FadeOut(ratio_row),
+            FadeOut(dot_p_live), FadeOut(eq_group)
+        )
+        self.play(FadeIn(dP), FadeIn(tP))
+
+        self.play(FadeOut(cap6_involute))
+        cap7_roll = caption_top("ที่จุดพิตช์ P: ผิวฟันกลิ้งบนกันสนิทโดยไม่มีการไถล (v_slide = 0) เหมือนลูกกลิ้ง", size=20)
+        self.play(FadeIn(cap7_roll))
+
+        tick1 = Line(O1, O1 + UP * R1, color=GEAR2, stroke_width=3)
+        tick2 = Line(O2, O2 + UP * R2, color=GEAR3, stroke_width=3)
+        self.play(Create(tick1), Create(tick2))
+        spin(VGroup(tick1), -1.6)
+        spin(VGroup(tick2), 1.6 * (R1 / R2))
+        self.wait(2.0)
+        tick1.clear_updaters(); tick2.clear_updaters()
+
+        self.play(FadeOut(cap7_roll))
+        cap7_slide = caption_top("นอกจุด P: ผิวฟันจะเกิดการไถลสัมพัทธ์ (v_slide != 0) ซึ่งทำให้เกิดการสึกหรอ", size=20)
+        self.play(FadeIn(cap7_slide))
+
+        self.play(loa.animate.set_stroke(opacity=0.85))
+        Q_pt = P + loa_dir * 0.95
+        dQ = pt(Q_pt, WARN, 0.08)
+        lbl_Q = tag("Q", Q_pt, LEFT, WARN, 20, 0.18)
+        v_slide_arrow = Arrow(Q_pt, Q_pt + loa_dir * 0.5, color=WARN, buff=0, stroke_width=4, max_tip_length_to_length_ratio=0.25)
+        q_card = VGroup(
+            Text("จุดสัมผัสนอกจุด P:", font_size=19, color=WARN),
+            Text("ผิวฟันจะเกิดการไถลสัมพัทธ์ (v_slide != 0)", font_size=17, color=WHITE),
+            Text("-> เป็นจุดกำเนิดการสึกหรอของฟันเฟือง", font_size=16, color=GRAYTXT),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.15).move_to([4.35, 0.8, 0])
+
+        self.play(FadeIn(dQ), FadeIn(lbl_Q), GrowArrow(v_slide_arrow), FadeIn(q_card, shift=LEFT * 0.2))
+        self.wait(2.5)
+
+        self.fade_out_all(run_time=1.0)
+        self.wait(0.5)
+
+
+# =====================================================================
 # G08 -- หน้า 8: Conjugate profiles
 # =====================================================================
 class G08_ConjugateProfiles(SafeScene):
