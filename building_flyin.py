@@ -134,7 +134,7 @@ def pick_window_color(rng: np.random.Generator) -> str:
         return WIN_WARM_2
 
 
-def make_window_grid(xs, ys, zs, plane, w, h, rng, offset_dist=0.015):
+def make_window_grid(xs, ys, zs, plane, w, h, rng, offset_dist=0.08):
     """Generates a list of flat window polygons on a facade plane."""
     windows = []
     if plane == "-Y":
