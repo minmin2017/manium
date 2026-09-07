@@ -31,150 +31,61 @@ C_COMM     = "#FFA726"   # ซีกคอมมิวเทเตอร์ (ส
 C_BAT_POS  = "#EF5350"   # ขั้วบวก / สายไฟบวก
 C_BAT_NEG  = "#42A5F5"   # ขั้วลบ / สายไฟลบ
 
+Y_AXIS = np.array([0.0, 1.0, 0.0])
+
 # ── Geometric Constants ──────────────────────────────────────────────────────
 R_ARM       = 1.25       # รัศมีขดลวดอาร์เมเจอร์
 L_ARM       = 2.70       # ความยาวขดลวดตามแกน Y
 Y_ARM_F     = -1.35      # ปลายหน้าขดลวด
 Y_ARM_B     =  1.35      # ปลายหลังขดลวด
 
-R_COMM      = 0.40       # รัศมีซีกคอมมิวเทเตอร์
-Y_COMM      = -1.90      # ตำแหน่งกึ่งกลางคอมมิวเทเตอร์บนแกน Y
-GAP_ANG     = 22.0 * DEGREES  # มุมช่องว่างฉนวนระหว่างสองซีก
+R_CORE      = 0.80       # รัศมีแกนอาร์เมเจอร์
+L_CORE      = 2.50       # ความยาวแกนอาร์เมเจอร์ตามแกน Y
 
-R_POLE_IN   = 1.60       # รัศมีผิวด้านในขั้วแม่เหล็ก (โค้งเว้าเข้าหาแกน)
+R_COMM      = 0.40       # รัศมีซีกคอมมิวเทเตอร์
+L_COMM      = 0.45       # ความยาวคอมมิวเทเตอร์ตามแกน Y
+Y_COMM      = -1.90      # ตำแหน่งกึ่งกลางคอมมิวเทเตอร์บนแกน Y
+GAP_ANG     = 18.0 * DEGREES  # มุมช่องว่างฉนวนระหว่างสองซีก
+
 Y_POLE_MIN  = -1.35
 Y_POLE_MAX  =  1.35
 
 Y_SHAFT_MIN = -3.00
 Y_SHAFT_MAX =  2.30
 
+# Solid mesh resolution: (10, 10) as required by cloud benchmark constraint
+CYL_RES     = (10, 10)
+
 
 def build_dc_motor():
     """
-    Build detailed 3D DC Motor model:
-    - 2 curved pole shoes (N at -X, S at +X) with N/S labels
+    Build solid 3D DC Motor model:
+    - 2 solid pole blocks (N at -X, S at +X) with N/S labels
+    - Solid yoke / base frame
     - 9 static parallel magnetic field arrows pointing in +X
-    - Shaft along Y with 2 end bearing pedestals and base rails
-    - Commutator: 2 split half-rings on shaft at Y = -1.90 with insulating gap
-    - 2 fixed carbon brushes pressing on commutator at +Z and -Z
-    - DC battery source at Y = -1.90, Z = -1.45 with wires & supply current arrow
-    - Rectangular armature loop rotating on shaft
-    - Current direction arrows on the two long conductors
-    - Force arrows on the conductors
+    - Shaft along Y (solid Cylinder)
+    - Armature core along Y (solid Cylinder, translucent during physics beats)
+    - Commutator: 2 half-cylinders at Y = -1.90 with visible insulating gap
+    - 2 carbon brushes pressing on commutator at +Z and -Z (solid Prisms)
+    - DC battery source at Y = -1.90, Z = -1.85 (solid Prism) with wires & supply current arrow
+    - Rectangular armature coil rotating on shaft (solid thin Cylinders)
+    - Current direction arrows on conductors (offset outside cylinder silhouette)
+    - Force arrows on conductors (offset outside cylinder silhouette)
     - Brush spark glow bursts
     """
-    static_mobs = VGroup()
-    moving_mobs = VGroup()
+    # 1. Base / Yoke frame (Solid Prism)
+    base_frame = Prism(dimensions=[5.10, 4.40, 0.30]).move_to([0.0, -0.30, -1.60]).set_fill("#263238", 1).set_stroke(width=0)
 
-    # 1. Shaft and Bearings
-    shaft = line3([0, Y_SHAFT_MIN, 0], [0, Y_SHAFT_MAX, 0], color=C_METAL, thickness=0.055)
-    static_mobs.add(shaft)
+    # 2. Pole Pieces (N at -X, S at +X - Solid Prisms)
+    pole_n_body = Prism(dimensions=[1.00, 2.70, 2.90]).move_to([-2.05, 0.0, 0.0]).set_fill(C_N_POLE, 1).set_stroke(width=0)
+    lbl_n = Text("N", font_size=32, color=WHITE).move_to([-2.05, -1.37, 0.0]).rotate(90 * DEGREES, axis=RIGHT)
+    lbl_n.set_z_index(20)
+    pole_n_group = VGroup(pole_n_body, lbl_n)
 
-    # Bearings at front and rear
-    y_bearings = [-2.60, 1.95]
-    for y_b in y_bearings:
-        b_ring = Circle(radius=0.28, color=C_METAL, stroke_width=2.5)
-        b_ring.rotate(90 * DEGREES, axis=RIGHT).move_to([0, y_b, 0])
-        leg_l = line3([0, y_b, -0.28], [-0.55, y_b, -1.20], color=C_METAL, thickness=0.035)
-        leg_r = line3([0, y_b, -0.28], [ 0.55, y_b, -1.20], color=C_METAL, thickness=0.035)
-        foot  = line3([-0.65, y_b, -1.20], [0.65, y_b, -1.20], color=C_METAL, thickness=0.045)
-        static_mobs.add(b_ring, leg_l, leg_r, foot)
-
-    # Base rails
-    rail_l = line3([-0.65, -2.75, -1.20], [-0.65, 2.10, -1.20], color=C_METAL, thickness=0.030)
-    rail_r = line3([ 0.65, -2.75, -1.20], [ 0.65, 2.10, -1.20], color=C_METAL, thickness=0.030)
-    static_mobs.add(rail_l, rail_r)
-
-    # 2. Curved Pole Shoes (N at -X, S at +X)
-    # N Pole (Red, -X side)
-    n_pts_in_f = [
-        np.array([R_POLE_IN * np.cos(a), Y_POLE_MIN, R_POLE_IN * np.sin(a)])
-        for a in np.linspace(145 * DEGREES, 215 * DEGREES, 16)
-    ]
-    n_pts_in_b = [
-        np.array([R_POLE_IN * np.cos(a), Y_POLE_MAX, R_POLE_IN * np.sin(a)])
-        for a in np.linspace(145 * DEGREES, 215 * DEGREES, 16)
-    ]
-    arc_n_f = VMobject(color=C_N_POLE, stroke_width=3).set_points_smoothly(n_pts_in_f)
-    arc_n_b = VMobject(color=C_N_POLE, stroke_width=2, stroke_opacity=0.6).set_points_smoothly(n_pts_in_b)
-
-    x_back_n = -2.60
-    z_top_n  = R_POLE_IN * np.sin(145 * DEGREES)   # ~ +0.918
-    z_bot_n  = R_POLE_IN * np.sin(215 * DEGREES)   # ~ -0.918
-    x_tip_top_n = R_POLE_IN * np.cos(145 * DEGREES) # ~ -1.31
-    x_tip_bot_n = R_POLE_IN * np.cos(215 * DEGREES) # ~ -1.31
-
-    n_face_f = Polygon(
-        [x_tip_top_n, Y_POLE_MIN, z_top_n],
-        [x_back_n,    Y_POLE_MIN, z_top_n],
-        [x_back_n,    Y_POLE_MIN, z_bot_n],
-        [x_tip_bot_n, Y_POLE_MIN, z_bot_n],
-        *[np.array([R_POLE_IN * np.cos(a), Y_POLE_MIN, R_POLE_IN * np.sin(a)])
-          for a in np.linspace(215 * DEGREES, 145 * DEGREES, 12)],
-        color=C_N_POLE, fill_color=C_N_POLE, fill_opacity=0.35, stroke_width=2.5
-    )
-    n_face_b = Polygon(
-        [x_tip_top_n, Y_POLE_MAX, z_top_n],
-        [x_back_n,    Y_POLE_MAX, z_top_n],
-        [x_back_n,    Y_POLE_MAX, z_bot_n],
-        [x_tip_bot_n, Y_POLE_MAX, z_bot_n],
-        color=C_N_POLE, stroke_width=1.5, stroke_opacity=0.45, fill_opacity=0.0
-    )
-    edge_n1 = line3([x_back_n, Y_POLE_MIN, z_top_n], [x_back_n, Y_POLE_MAX, z_top_n], color=C_N_POLE, thickness=0.02)
-    edge_n2 = line3([x_back_n, Y_POLE_MIN, z_bot_n], [x_back_n, Y_POLE_MAX, z_bot_n], color=C_N_POLE, thickness=0.02)
-    edge_n3 = line3([x_tip_top_n, Y_POLE_MIN, z_top_n], [x_tip_top_n, Y_POLE_MAX, z_top_n], color=C_N_POLE, thickness=0.02)
-    edge_n4 = line3([x_tip_bot_n, Y_POLE_MIN, z_bot_n], [x_tip_bot_n, Y_POLE_MAX, z_bot_n], color=C_N_POLE, thickness=0.02)
-
-    lbl_n = Text("N", font_size=32, color=WHITE).move_to([-2.05, Y_POLE_MIN - 0.02, 0.0])
-    lbl_n.rotate(90 * DEGREES, axis=RIGHT)
-
-    pole_n_group = VGroup(arc_n_f, arc_n_b, n_face_f, n_face_b, edge_n1, edge_n2, edge_n3, edge_n4, lbl_n)
-    static_mobs.add(pole_n_group)
-
-    # S Pole (Blue, +X side)
-    s_pts_in_f = [
-        np.array([R_POLE_IN * np.cos(a), Y_POLE_MIN, R_POLE_IN * np.sin(a)])
-        for a in np.linspace(-35 * DEGREES, 35 * DEGREES, 16)
-    ]
-    s_pts_in_b = [
-        np.array([R_POLE_IN * np.cos(a), Y_POLE_MAX, R_POLE_IN * np.sin(a)])
-        for a in np.linspace(-35 * DEGREES, 35 * DEGREES, 16)
-    ]
-    arc_s_f = VMobject(color=C_S_POLE, stroke_width=3).set_points_smoothly(s_pts_in_f)
-    arc_s_b = VMobject(color=C_S_POLE, stroke_width=2, stroke_opacity=0.6).set_points_smoothly(s_pts_in_b)
-
-    x_back_s = 2.60
-    z_top_s  = R_POLE_IN * np.sin(35 * DEGREES)    # ~ +0.918
-    z_bot_s  = R_POLE_IN * np.sin(-35 * DEGREES)   # ~ -0.918
-    x_tip_top_s = R_POLE_IN * np.cos(35 * DEGREES)  # ~ +1.31
-    x_tip_bot_s = R_POLE_IN * np.cos(-35 * DEGREES) # ~ +1.31
-
-    s_face_f = Polygon(
-        [x_tip_top_s, Y_POLE_MIN, z_top_s],
-        [x_back_s,    Y_POLE_MIN, z_top_s],
-        [x_back_s,    Y_POLE_MIN, z_bot_s],
-        [x_tip_bot_s, Y_POLE_MIN, z_bot_s],
-        *[np.array([R_POLE_IN * np.cos(a), Y_POLE_MIN, R_POLE_IN * np.sin(a)])
-          for a in np.linspace(-35 * DEGREES, 35 * DEGREES, 12)],
-        color=C_S_POLE, fill_color=C_S_POLE, fill_opacity=0.35, stroke_width=2.5
-    )
-    s_face_b = Polygon(
-        [x_tip_top_s, Y_POLE_MAX, z_top_s],
-        [x_back_s,    Y_POLE_MAX, z_top_s],
-        [x_back_s,    Y_POLE_MAX, z_bot_s],
-        [x_tip_bot_s, Y_POLE_MAX, z_bot_s],
-        color=C_S_POLE, stroke_width=1.5, stroke_opacity=0.45, fill_opacity=0.0
-    )
-    edge_s1 = line3([x_back_s, Y_POLE_MIN, z_top_s], [x_back_s, Y_POLE_MAX, z_top_s], color=C_S_POLE, thickness=0.02)
-    edge_s2 = line3([x_back_s, Y_POLE_MIN, z_bot_s], [x_back_s, Y_POLE_MAX, z_bot_s], color=C_S_POLE, thickness=0.02)
-    edge_s3 = line3([x_tip_top_s, Y_POLE_MIN, z_top_s], [x_tip_top_s, Y_POLE_MAX, z_top_s], color=C_S_POLE, thickness=0.02)
-    edge_s4 = line3([x_tip_bot_s, Y_POLE_MIN, z_bot_s], [x_tip_bot_s, Y_POLE_MAX, z_bot_s], color=C_S_POLE, thickness=0.02)
-
-    lbl_s = Text("S", font_size=32, color=WHITE).move_to([2.05, Y_POLE_MIN - 0.02, 0.0])
-    lbl_s.rotate(90 * DEGREES, axis=RIGHT)
-
-    pole_s_group = VGroup(arc_s_f, arc_s_b, s_face_f, s_face_b, edge_s1, edge_s2, edge_s3, edge_s4, lbl_s)
-    static_mobs.add(pole_s_group)
+    pole_s_body = Prism(dimensions=[1.00, 2.70, 2.90]).move_to([ 2.05, 0.0, 0.0]).set_fill(C_S_POLE, 1).set_stroke(width=0)
+    lbl_s = Text("S", font_size=32, color=WHITE).move_to([ 2.05, -1.37, 0.0]).rotate(90 * DEGREES, axis=RIGHT)
+    lbl_s.set_z_index(20)
+    pole_s_group = VGroup(pole_s_body, lbl_s)
 
     # 3. Magnetic Field Lines (Static geometry! Drawn ONCE)
     field_lines = VGroup()
@@ -182,89 +93,138 @@ def build_dc_motor():
     zs_field = [-0.55, 0.0, 0.55]
     for yf in ys_field:
         for zf in zs_field:
-            arr_fld = arrow3([-1.22, yf, zf], [1.22, yf, zf], color=C_FIELD,
+            arr_fld = arrow3([-1.45, yf, zf], [1.45, yf, zf], color=C_FIELD,
                              thickness=0.016, height=0.18, opacity=0.45)
             field_lines.add(arr_fld)
-    static_mobs.add(field_lines)
+    field_lines.set_z_index(10)
 
-    # 4. Brushes (Fixed in space at Y = Y_COMM = -1.90)
-    brush_top = Rectangle(
-        width=0.22, height=0.34, color=C_METAL,
-        fill_color=C_BRUSH, fill_opacity=0.92, stroke_width=2.0
-    ).rotate(90 * DEGREES, axis=RIGHT).move_to([0.0, Y_COMM, R_COMM + 0.17])
-    holder_top = line3([0.0, Y_COMM, R_COMM + 0.34], [0.0, Y_COMM, R_COMM + 0.52], color=C_METAL, thickness=0.035)
+    # 4. Brushes (Solid Prisms fixed in space at Y = Y_COMM = -1.90)
+    brush_top = Prism(dimensions=[0.22, 0.26, 0.30]).move_to([0.0, Y_COMM, R_COMM + 0.15]).set_fill(C_BRUSH, 1).set_stroke(width=0)
+    holder_top = Prism(dimensions=[0.14, 0.16, 0.20]).move_to([0.0, Y_COMM, R_COMM + 0.30 + 0.10]).set_fill(C_METAL, 1).set_stroke(width=0)
 
-    brush_bot = Rectangle(
-        width=0.22, height=0.34, color=C_METAL,
-        fill_color=C_BRUSH, fill_opacity=0.92, stroke_width=2.0
-    ).rotate(90 * DEGREES, axis=RIGHT).move_to([0.0, Y_COMM, -R_COMM - 0.17])
-    holder_bot = line3([0.0, Y_COMM, -R_COMM - 0.34], [0.0, Y_COMM, -R_COMM - 0.52], color=C_METAL, thickness=0.035)
+    brush_bot = Prism(dimensions=[0.22, 0.26, 0.30]).move_to([0.0, Y_COMM, -R_COMM - 0.15]).set_fill(C_BRUSH, 1).set_stroke(width=0)
+    holder_bot = Prism(dimensions=[0.14, 0.16, 0.20]).move_to([0.0, Y_COMM, -R_COMM - 0.30 - 0.10]).set_fill(C_METAL, 1).set_stroke(width=0)
 
     brushes_group = VGroup(brush_top, holder_top, brush_bot, holder_bot)
-    static_mobs.add(brushes_group)
+    brushes_group.set_z_index(5)
 
-    # 5. DC Battery Source & Supply Wires
-    y_bat = Y_COMM
-    z_bat_pos = -1.35
-    z_bat_neg = -1.48
+    # 5. DC Battery Source & Supply Wires (Solid Prism + lines)
+    bat_body = Prism(dimensions=[0.75, 0.35, 0.35]).move_to([0.0, Y_COMM, -1.85]).set_fill("#263238", 1).set_stroke(width=0)
+    bat_pos = Prism(dimensions=[0.16, 0.16, 0.12]).move_to([-0.20, Y_COMM, -1.62]).set_fill(C_BAT_POS, 1).set_stroke(width=0)
+    bat_neg = Prism(dimensions=[0.16, 0.16, 0.12]).move_to([ 0.20, Y_COMM, -1.62]).set_fill(C_BAT_NEG, 1).set_stroke(width=0)
 
-    bat_plate_pos = line3([-0.30, y_bat, z_bat_pos], [0.30, y_bat, z_bat_pos], color=C_BAT_POS, thickness=0.035)
-    bat_plate_neg = line3([-0.18, y_bat, z_bat_neg], [0.18, y_bat, z_bat_neg], color=C_BAT_NEG, thickness=0.065)
+    lbl_plus = Text("+", font_size=20, color=WHITE).move_to([-0.20, Y_COMM - 0.19, -1.62]).rotate(90 * DEGREES, axis=RIGHT)
+    lbl_minus = Text("-", font_size=22, color=WHITE).move_to([ 0.20, Y_COMM - 0.19, -1.62]).rotate(90 * DEGREES, axis=RIGHT)
+    lbl_plus.set_z_index(30)
+    lbl_minus.set_z_index(30)
 
-    lbl_plus = Text("+", font_size=18, color=C_BAT_POS).move_to([-0.45, y_bat - 0.02, z_bat_pos]).rotate(90 * DEGREES, axis=RIGHT)
-    lbl_minus = Text("-", font_size=20, color=C_BAT_NEG).move_to([-0.45, y_bat - 0.02, z_bat_neg]).rotate(90 * DEGREES, axis=RIGHT)
+    w_pos1 = line3([-0.20, Y_COMM, -1.56], [-1.15, Y_COMM, -1.56], color=C_BAT_POS, thickness=0.030)
+    w_pos2 = line3([-1.15, Y_COMM, -1.56], [-1.15, Y_COMM, R_COMM + 0.40], color=C_BAT_POS, thickness=0.030)
+    w_pos3 = line3([-1.15, Y_COMM, R_COMM + 0.40], [0.0, Y_COMM, R_COMM + 0.40], color=C_BAT_POS, thickness=0.030)
 
-    w_pos1 = line3([-0.30, y_bat, z_bat_pos], [-1.00, y_bat, z_bat_pos], color=C_BAT_POS, thickness=0.025)
-    w_pos2 = line3([-1.00, y_bat, z_bat_pos], [-1.00, y_bat, R_COMM + 0.52], color=C_BAT_POS, thickness=0.025)
-    w_pos3 = line3([-1.00, y_bat, R_COMM + 0.52], [0.0, y_bat, R_COMM + 0.52], color=C_BAT_POS, thickness=0.025)
+    w_neg1 = line3([0.20, Y_COMM, -1.56], [0.0, Y_COMM, -1.56], color=C_BAT_NEG, thickness=0.030)
+    w_neg2 = line3([0.0, Y_COMM, -1.56], [0.0, Y_COMM, -R_COMM - 0.40], color=C_BAT_NEG, thickness=0.030)
 
-    w_neg1 = line3([0.0, y_bat, z_bat_neg], [0.0, y_bat, -R_COMM - 0.52], color=C_BAT_NEG, thickness=0.025)
-
-    arr_supply = arrow3([-1.00, y_bat, -0.65], [-1.00, y_bat, 0.25], color=C_CURRENT,
+    arr_supply = arrow3([-1.15, Y_COMM, -0.70], [-1.15, Y_COMM, 0.20], color=C_CURRENT,
                         thickness=0.032, height=0.22)
+    arr_supply.set_z_index(30)
 
-    battery_group = VGroup(bat_plate_pos, bat_plate_neg, lbl_plus, lbl_minus,
-                           w_pos1, w_pos2, w_pos3, w_neg1, arr_supply)
-    static_mobs.add(battery_group)
+    battery_group = VGroup(bat_body, bat_pos, bat_neg, lbl_plus, lbl_minus,
+                           w_pos1, w_pos2, w_pos3, w_neg1, w_neg2, arr_supply)
+    battery_group.set_z_index(5)
 
-    # 6. Moving Armature Loop (Rectangular wire on shaft)
-    # Added FIRST so current and force arrows draw in front of wires
-    wire_cond1 = line3([R_ARM, Y_ARM_F, 0], [R_ARM, Y_ARM_B, 0], color=C_WIRE, thickness=0.050)
-    wire_cond2 = line3([-R_ARM, Y_ARM_F, 0], [-R_ARM, Y_ARM_B, 0], color=C_WIRE, thickness=0.050)
-    wire_back  = line3([R_ARM, Y_ARM_B, 0], [-R_ARM, Y_ARM_B, 0], color=C_WIRE, thickness=0.045)
-    wire_lead1 = line3([R_ARM, Y_ARM_F, 0], [0, Y_COMM, R_COMM], color=C_WIRE, thickness=0.035)
-    wire_lead2 = line3([-R_ARM, Y_ARM_F, 0], [0, Y_COMM, -R_COMM], color=C_WIRE, thickness=0.035)
+    static_mobs = VGroup(base_frame, pole_n_group, pole_s_group, field_lines, brushes_group, battery_group)
 
-    loop_group = VGroup(wire_cond1, wire_cond2, wire_back, wire_lead1, wire_lead2)
-    moving_mobs.add(loop_group)
+    # 6. Moving Rotor Assembly:
+    # a. Shaft (Solid Cylinder along Y)
+    shaft_len = Y_SHAFT_MAX - Y_SHAFT_MIN
+    shaft_center_y = (Y_SHAFT_MAX + Y_SHAFT_MIN) / 2
+    shaft = Cylinder(
+        radius=0.10, height=shaft_len, direction=Y_AXIS,
+        resolution=CYL_RES
+    ).move_to([0.0, shaft_center_y, 0.0]).set_fill(C_METAL, 1).set_stroke(width=0)
+    shaft.set_z_index(3)
 
-    # 7. Moving Commutator Half-Rings (Segments 1 & 2)
-    seg1_f = VMobject(color=C_COMM, stroke_width=5)
-    seg1_b = VMobject(color=C_COMM, stroke_width=3, stroke_opacity=0.7)
-    seg2_f = VMobject(color=C_COMM, stroke_width=5)
-    seg2_b = VMobject(color=C_COMM, stroke_width=3, stroke_opacity=0.7)
-    gap_edge1a = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COMM, thickness=0.02)
-    gap_edge1b = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COMM, thickness=0.02)
-    gap_edge2a = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COMM, thickness=0.02)
-    gap_edge2b = line3([0, Y_COMM - 0.12, 0], [0, Y_COMM + 0.12, 0], color=C_COMM, thickness=0.02)
+    # b. Armature Core (Solid Cylinder along Y, opacity animated between shots)
+    armature_core = Cylinder(
+        radius=R_CORE, height=L_CORE, direction=Y_AXIS,
+        resolution=CYL_RES
+    ).move_to([0.0, 0.0, 0.0]).set_fill(GREY_B, 1).set_stroke(width=0)
+    armature_core.set_z_index(2)
 
-    comm_group = VGroup(seg1_f, seg1_b, seg2_f, seg2_b,
-                        gap_edge1a, gap_edge1b, gap_edge2a, gap_edge2b)
-    moving_mobs.add(comm_group)
+    # c. Armature Coil (Solid thin Cylinders)
+    cond1 = Cylinder(
+        radius=0.06, height=L_ARM, direction=Y_AXIS,
+        resolution=CYL_RES
+    ).move_to([R_ARM, 0.0, 0.0]).set_fill(C_WIRE, 1).set_stroke(width=0)
 
-    # 8. Moving Current-Direction Arrows ON the Long Conductors
-    # Added AFTER loop wires so they draw in front
-    curr_arr1 = arrow3([R_ARM, -0.40, 0], [R_ARM, 0.40, 0], color=C_CURRENT, thickness=0.048, height=0.30)
-    curr_arr2 = arrow3([-R_ARM, 0.40, 0], [-R_ARM, -0.40, 0], color=C_CURRENT, thickness=0.048, height=0.30)
-    moving_mobs.add(curr_arr1, curr_arr2)
+    cond2 = Cylinder(
+        radius=0.06, height=L_ARM, direction=Y_AXIS,
+        resolution=CYL_RES
+    ).move_to([-R_ARM, 0.0, 0.0]).set_fill(C_WIRE, 1).set_stroke(width=0)
 
-    # 9. Moving Force Arrows ON the Conductors
-    # Bold bright green vectors
-    force_arr1 = arrow3([R_ARM, 0, 0], [R_ARM, 0, -1.15], color=C_FORCE, thickness=0.052, height=0.32)
-    force_arr2 = arrow3([-R_ARM, 0, 0], [-R_ARM, 0, 1.15], color=C_FORCE, thickness=0.052, height=0.32)
-    moving_mobs.add(force_arr1, force_arr2)
+    turn_back = Cylinder(
+        radius=0.06, height=2 * R_ARM, direction=np.array([1.0, 0.0, 0.0]),
+        resolution=CYL_RES
+    ).move_to([0.0, Y_ARM_B, 0.0]).set_fill(C_WIRE, 1).set_stroke(width=0)
 
-    # 10. Commutator Flash / Sparks at Brushes
+    p_lead1_start = np.array([R_ARM, Y_ARM_F, 0.0])
+    p_lead1_end   = np.array([0.0, Y_COMM, R_COMM])
+    v_lead1 = p_lead1_end - p_lead1_start
+    h_lead1 = np.linalg.norm(v_lead1)
+    lead1 = Cylinder(
+        radius=0.05, height=h_lead1, direction=v_lead1 / h_lead1,
+        resolution=CYL_RES, show_ends=True
+    ).move_to((p_lead1_start + p_lead1_end) / 2).set_fill(C_WIRE, 1).set_stroke(width=0)
+
+    p_lead2_start = np.array([-R_ARM, Y_ARM_F, 0.0])
+    p_lead2_end   = np.array([0.0, Y_COMM, -R_COMM])
+    v_lead2 = p_lead2_end - p_lead2_start
+    h_lead2 = np.linalg.norm(v_lead2)
+    lead2 = Cylinder(
+        radius=0.05, height=h_lead2, direction=v_lead2 / h_lead2,
+        resolution=CYL_RES, show_ends=True
+    ).move_to((p_lead2_start + p_lead2_end) / 2).set_fill(C_WIRE, 1).set_stroke(width=0)
+
+    loop_group = VGroup(cond1, cond2, turn_back, lead1, lead2)
+    loop_group.set_z_index(15)
+
+    # d. Commutator: Two half-cylinders with visible insulating gap
+    half_gap = GAP_ANG / 2
+    seg1 = Cylinder(
+        radius=R_COMM, height=L_COMM, direction=Y_AXIS,
+        v_range=[np.pi / 2 + half_gap, 3 * np.pi / 2 - half_gap],
+        resolution=CYL_RES, show_ends=False
+    ).move_to([0.0, Y_COMM, 0.0]).set_fill(C_COMM, 1).set_stroke(width=0)
+
+    seg2 = Cylinder(
+        radius=R_COMM, height=L_COMM, direction=Y_AXIS,
+        v_range=[-np.pi / 2 + half_gap, np.pi / 2 - half_gap],
+        resolution=CYL_RES, show_ends=False
+    ).move_to([0.0, Y_COMM, 0.0]).set_fill(C_COMM, 1).set_stroke(width=0)
+
+    comm_insulator = Cylinder(
+        radius=R_COMM - 0.02, height=L_COMM, direction=Y_AXIS,
+        resolution=CYL_RES
+    ).move_to([0.0, Y_COMM, 0.0]).set_fill("#212121", 1).set_stroke(width=0)
+
+    comm_group = VGroup(seg1, seg2, comm_insulator)
+    comm_group.set_z_index(5)
+
+    rotor_group = VGroup(shaft, armature_core, loop_group, comm_group)
+
+    # 7. Moving Current & Force Arrows (Offset outside conductor cylinder)
+    curr_arr1 = arrow3([R_ARM + 0.10, -0.40, 0], [R_ARM + 0.10, 0.40, 0], color=C_CURRENT, thickness=0.048, height=0.30)
+    curr_arr2 = arrow3([-R_ARM - 0.10, 0.40, 0], [-R_ARM - 0.10, -0.40, 0], color=C_CURRENT, thickness=0.048, height=0.30)
+    curr_arr1.set_z_index(50)
+    curr_arr2.set_z_index(50)
+
+    force_arr1 = arrow3([R_ARM, 0, -0.07], [R_ARM, 0, -1.22], color=C_FORCE, thickness=0.052, height=0.32)
+    force_arr2 = arrow3([-R_ARM, 0, 0.07], [-R_ARM, 0, 1.22], color=C_FORCE, thickness=0.052, height=0.32)
+    force_arr1.set_z_index(60)
+    force_arr2.set_z_index(60)
+
+    # 8. Commutator Flash / Sparks at Brushes
     spark_top = Dot([0.0, Y_COMM, R_COMM], radius=0.16, color=YELLOW)
     spark_bot = Dot([0.0, Y_COMM, -R_COMM], radius=0.16, color=YELLOW)
     spark_top_halo = Circle(radius=0.32, color=WARN, stroke_width=3.5).rotate(90 * DEGREES, axis=RIGHT).move_to([0.0, Y_COMM, R_COMM])
@@ -274,63 +234,28 @@ def build_dc_motor():
     spark_top_halo.set_stroke(opacity=0.0)
     spark_bot_halo.set_stroke(opacity=0.0)
     spark_group = VGroup(spark_top, spark_bot, spark_top_halo, spark_bot_halo)
-    moving_mobs.add(spark_group)
+    spark_group.set_z_index(70)
 
-    # ── Update Function ──────────────────────────────────────────────────────
+    moving_mobs = VGroup(rotor_group, curr_arr1, curr_arr2, force_arr1, force_arr2, spark_group)
+
+    # ── Master Update Function ───────────────────────────────────────────────
+    current_theta = [0.0]
+
     def update_motor(theta_val, commutator_on=True, show_forces=True, show_current=True,
                      force_opacity=1.0, current_opacity=1.0, flash_intensity=0.0):
-        """
-        Update positions of all moving parts from master rotation angle theta_val.
-        - theta_val = 0: Conductor 1 at +X, Conductor 2 at -X (max torque position)
-        - theta_val = pi/2: Conductor 1 at -Z (bottom), Conductor 2 at +Z (top) (dead point)
-        """
+        # 1. Rotate rigid rotor geometry (shaft, core, coil, commutator)
+        d_th = theta_val - current_theta[0]
+        if abs(d_th) > 1e-6:
+            rotor_group.rotate(d_th, axis=Y_AXIS, about_point=ORIGIN)
+            current_theta[0] = theta_val
+
+        # 2. Conductor positions
         x1 =  R_ARM * np.cos(theta_val)
         z1 = -R_ARM * np.sin(theta_val)
         x2 = -R_ARM * np.cos(theta_val)
         z2 =  R_ARM * np.sin(theta_val)
 
-        p1_f = np.array([x1, Y_ARM_F, z1])
-        p1_b = np.array([x1, Y_ARM_B, z1])
-        p2_f = np.array([x2, Y_ARM_F, z2])
-        p2_b = np.array([x2, Y_ARM_B, z2])
-
-        wire_cond1.put_start_and_end_on(p1_f, p1_b)
-        wire_cond2.put_start_and_end_on(p2_f, p2_b)
-        wire_back.put_start_and_end_on(p1_b, p2_b)
-
-        ang_seg1 = np.pi / 2 - theta_val
-        ang_seg2 = 3 * np.pi / 2 - theta_val
-        p_comm1 = np.array([R_COMM * np.cos(ang_seg1), Y_COMM, R_COMM * np.sin(ang_seg1)])
-        p_comm2 = np.array([R_COMM * np.cos(ang_seg2), Y_COMM, R_COMM * np.sin(ang_seg2)])
-
-        wire_lead1.put_start_and_end_on(p1_f, p_comm1)
-        wire_lead2.put_start_and_end_on(p2_f, p_comm2)
-
-        half_span = (np.pi - GAP_ANG) / 2
-        a1_start = ang_seg1 - half_span
-        a1_end   = ang_seg1 + half_span
-        a2_start = ang_seg2 - half_span
-        a2_end   = ang_seg2 + half_span
-
-        y_c_f = Y_COMM - 0.12
-        y_c_b = Y_COMM + 0.12
-
-        pts_s1_f = [np.array([R_COMM * np.cos(a), y_c_f, R_COMM * np.sin(a)]) for a in np.linspace(a1_start, a1_end, 14)]
-        pts_s1_b = [np.array([R_COMM * np.cos(a), y_c_b, R_COMM * np.sin(a)]) for a in np.linspace(a1_start, a1_end, 14)]
-        pts_s2_f = [np.array([R_COMM * np.cos(a), y_c_f, R_COMM * np.sin(a)]) for a in np.linspace(a2_start, a2_end, 14)]
-        pts_s2_b = [np.array([R_COMM * np.cos(a), y_c_b, R_COMM * np.sin(a)]) for a in np.linspace(a2_start, a2_end, 14)]
-
-        seg1_f.set_points_smoothly(pts_s1_f)
-        seg1_b.set_points_smoothly(pts_s1_b)
-        seg2_f.set_points_smoothly(pts_s2_f)
-        seg2_b.set_points_smoothly(pts_s2_b)
-
-        gap_edge1a.put_start_and_end_on(pts_s1_f[0], pts_s1_b[0])
-        gap_edge1b.put_start_and_end_on(pts_s1_f[-1], pts_s1_b[-1])
-        gap_edge2a.put_start_and_end_on(pts_s2_f[0], pts_s2_b[0])
-        gap_edge2b.put_start_and_end_on(pts_s2_f[-1], pts_s2_b[-1])
-
-        # Handedness & Physics:
+        # 3. Handedness & Physics:
         # B is along +X: [1, 0, 0]
         # F = I x B
         # When current is +Y: F = (+Y) x (+X) = -Z (down)
@@ -347,23 +272,32 @@ def build_dc_motor():
             dir1 = +1
             dir2 = -1
 
+        # 4. Current direction arrows (offset radially outward to avoid cylinder silhouette)
+        u1 = np.array([x1, 0.0, z1]) / R_ARM
+        u2 = np.array([x2, 0.0, z2]) / R_ARM
+        p1_mid = np.array([x1, 0.0, z1]) + u1 * 0.10
+        p2_mid = np.array([x2, 0.0, z2]) + u2 * 0.10
         arr_len = 0.40
+
         if dir1 == +1:
-            curr_arr1.put_start_and_end_on([x1, -arr_len, z1], [x1, arr_len, z1])
+            curr_arr1.put_start_and_end_on(p1_mid + [0, -arr_len, 0], p1_mid + [0, arr_len, 0])
         else:
-            curr_arr1.put_start_and_end_on([x1, arr_len, z1], [x1, -arr_len, z1])
+            curr_arr1.put_start_and_end_on(p1_mid + [0, arr_len, 0], p1_mid + [0, -arr_len, 0])
 
         if dir2 == +1:
-            curr_arr2.put_start_and_end_on([x2, -arr_len, z2], [x2, arr_len, z2])
+            curr_arr2.put_start_and_end_on(p2_mid + [0, -arr_len, 0], p2_mid + [0, arr_len, 0])
         else:
-            curr_arr2.put_start_and_end_on([x2, arr_len, z2], [x2, -arr_len, z2])
+            curr_arr2.put_start_and_end_on(p2_mid + [0, arr_len, 0], p2_mid + [0, -arr_len, 0])
 
+        # 5. Force arrows (drawn outward from conductor surface to stay fully visible)
         f_len = 1.15
         fz1 = -dir1 * f_len
         fz2 = -dir2 * f_len
+        sgn1 = np.sign(fz1)
+        sgn2 = np.sign(fz2)
 
-        force_arr1.put_start_and_end_on([x1, 0.0, z1], [x1, 0.0, z1 + fz1])
-        force_arr2.put_start_and_end_on([x2, 0.0, z2], [x2, 0.0, z2 + fz2])
+        force_arr1.put_start_and_end_on([x1, 0.0, z1 + sgn1 * 0.07], [x1, 0.0, z1 + fz1])
+        force_arr2.put_start_and_end_on([x2, 0.0, z2 + sgn2 * 0.07], [x2, 0.0, z2 + fz2])
 
         curr_arr1.set_opacity(current_opacity if show_current else 0.0)
         curr_arr2.set_opacity(current_opacity if show_current else 0.0)
@@ -387,7 +321,9 @@ def build_dc_motor():
     return {
         "static": static_mobs,
         "moving": moving_mobs,
+        "rotor": rotor_group,
         "shaft": shaft,
+        "core": armature_core,
         "pole_n": pole_n_group,
         "pole_s": pole_s_group,
         "lbl_n": lbl_n,
@@ -396,8 +332,8 @@ def build_dc_motor():
         "lbl_minus": lbl_minus,
         "field_lines": field_lines,
         "loop": loop_group,
-        "cond1": wire_cond1,
-        "cond2": wire_cond2,
+        "cond1": cond1,
+        "cond2": cond2,
         "comm": comm_group,
         "brushes": brushes_group,
         "battery": battery_group,
@@ -492,7 +428,12 @@ class DCMotor3D(SafeThreeDScene):
 
         # ── SHOT B: The Force (F = I x B Couple) ─────────────────────────────
         # Lock camera at angle where B (+X), I (along Y), F (along Z) are all distinct
-        self.move_camera(phi=68 * DEGREES, theta=-40 * DEGREES, run_time=1.2)
+        # Smoothly fade armature core to see-through (0.28) so coil and arrows remain fully visible
+        self.move_camera(
+            phi=68 * DEGREES, theta=-40 * DEGREES,
+            added_anims=[motor["core"].animate.set_opacity(0.28)],
+            run_time=1.2
+        )
         self.wait(0.3)
 
         # Caption swap: Sequential!
@@ -503,11 +444,13 @@ class DCMotor3D(SafeThreeDScene):
         ))
         self.play(FadeIn(cap_b1, shift=DOWN * 0.15), run_time=0.5)
 
-        # Labels for current and force in 3D world
-        lbl_i1 = Text("I", font_size=24, color=C_CURRENT).move_to([R_ARM + 0.32, 0.15, 0.25]).rotate(90 * DEGREES, axis=RIGHT)
-        lbl_f1 = Text("F", font_size=24, color=C_FORCE).move_to([R_ARM + 0.32, 0.0, -1.25]).rotate(90 * DEGREES, axis=RIGHT)
-        lbl_i2 = Text("I", font_size=24, color=C_CURRENT).move_to([-R_ARM - 0.32, -0.15, -0.25]).rotate(90 * DEGREES, axis=RIGHT)
-        lbl_f2 = Text("F", font_size=24, color=C_FORCE).move_to([-R_ARM - 0.32, 0.0, 1.25]).rotate(90 * DEGREES, axis=RIGHT)
+        # Labels for current and force in 3D world (raised z_index to prevent occlusion)
+        lbl_i1 = Text("I", font_size=24, color=C_CURRENT).move_to([R_ARM, 0.15, 0.35]).rotate(90 * DEGREES, axis=RIGHT)
+        lbl_f1 = Text("F", font_size=24, color=C_FORCE).move_to([R_ARM, 0.0, -1.35]).rotate(90 * DEGREES, axis=RIGHT)
+        lbl_i2 = Text("I", font_size=24, color=C_CURRENT).move_to([-R_ARM, -0.15, -0.35]).rotate(90 * DEGREES, axis=RIGHT)
+        lbl_f2 = Text("F", font_size=24, color=C_FORCE).move_to([-R_ARM, 0.0, 1.35]).rotate(90 * DEGREES, axis=RIGHT)
+        for lbl in (lbl_i1, lbl_f1, lbl_i2, lbl_f2):
+            lbl.set_z_index(80)
         self.world_text(lbl_i1, lbl_f1, lbl_i2, lbl_f2)
 
         # 1. Conductor 1 (+X): current +Y -> force -Z (pushed down)
@@ -554,10 +497,11 @@ class DCMotor3D(SafeThreeDScene):
         ))
         self.play(FadeIn(cap_b3, shift=DOWN * 0.15), run_time=0.5)
 
-        # Show torque indicator
-        torque_arc = Arc(radius=0.55, start_angle=-30 * DEGREES, angle=140 * DEGREES,
-                         color=C_TORQUE, stroke_width=4)
+        # Show torque indicator (radius 1.40 loops around the armature, visible from all angles)
+        torque_arc = Arc(radius=1.40, start_angle=-30 * DEGREES, angle=140 * DEGREES,
+                         color=C_TORQUE, stroke_width=4.5)
         torque_arc.rotate(90 * DEGREES, axis=RIGHT).move_to([0, 0.4, 0])
+        torque_arc.set_z_index(90)
         self.play(Create(torque_arc), run_time=0.9)
         self.wait(2.0)
         self.play(
@@ -697,7 +641,12 @@ class DCMotor3D(SafeThreeDScene):
 
         # ── SHOT E: Continuous Running + Summary Card ────────────────────────
         # Return to 3/4 view (phi = 65 deg, theta = -50 deg)
-        self.move_camera(phi=65 * DEGREES, theta=-50 * DEGREES, run_time=1.8)
+        # Restore armature core to fully opaque solid (1.0)
+        self.move_camera(
+            phi=65 * DEGREES, theta=-50 * DEGREES,
+            added_anims=[motor["core"].animate.set_opacity(1.0)],
+            run_time=1.8
+        )
         self.wait(0.3)
 
         self.play(FadeOut(cap_d2), run_time=0.3)
