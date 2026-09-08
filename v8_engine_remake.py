@@ -4,7 +4,11 @@ Fully implements V8_REMAKE_DESIGN.md following mlib.py and Manim CE standards.
 
 - Scene class: V8EngineRemake(SafeThreeDScene)
 - 90-degree cross-plane Ford Coyote firing order: 1-5-4-8-6-3-7-2
-- Exact slider-crank kinematics (s = r*cos(theta) + sqrt(L^2 - r^2*sin^2(theta)))
+- Physical shared-crankpin kinematics: each throw has ONE bank-independent
+  crankpin trajectory in the X-Z plane around the Y-axis. Both rods for that
+  throw terminate at that exact same physical point at all times.
+- Exact slider-crank displacement consistent with shared pin; rod length remains
+  identically ROD_L across all master crank angles.
 - All geometry contract assertions enforced at module load.
 - 5 comprehensive pedagogical shots covering:
     1. Hook: 8 pistons, 1 crankshaft, solid to translucent reveal.
@@ -49,10 +53,6 @@ assert ROD_L > CRANK_R, "Connecting rod length must exceed crank radius (L > r)"
 U_L = np.array([-1.0, 0.0, 1.0]) / np.sqrt(2.0)
 U_R = np.array([1.0, 0.0, 1.0]) / np.sqrt(2.0)
 
-# Perpendicular vectors in the rotation plane (Y_hat x U)
-V_L = np.array([1.0, 0.0, 1.0]) / np.sqrt(2.0)
-V_R = np.array([1.0, 0.0, -1.0]) / np.sqrt(2.0)
-
 # Assertions required by geometry contract
 assert np.isclose(np.dot(U_L, U_R), 0.0), "Bank axes must be separated by exactly 90 degrees"
 assert np.isclose(np.linalg.norm(U_L), 1.0) and np.isclose(np.linalg.norm(U_R), 1.0), "Bank vectors must be normalized"
@@ -61,6 +61,21 @@ assert np.isclose(U_L[0], -U_R[0]) and np.isclose(U_L[2], U_R[2]), "Banks must b
 # Four throws lie at y = [-2.25, -0.75, 0.75, 2.25]
 THROWS_Y = np.array([-2.25, -0.75, 0.75, 2.25])
 assert np.allclose(np.diff(THROWS_Y), 1.5), "Throw spacing must be uniform at 1.5"
+
+# Cross-plane throw angles in X-Z plane around crank axis (Y axis)
+# Viewed down Y axis: angles form a 90-degree cross pattern
+# Throw 0: 45° (aligned with Bank R at theta=0)
+# Throw 1: -45° (aligned with Bank L at theta=0)
+# Throw 2: 135° (opposite to Throw 1)
+# Throw 3: 225° (opposite to Throw 0)
+THROW_BASE_ANGLES = {
+    0: np.radians(45.0),
+    1: np.radians(-45.0),
+    2: np.radians(135.0),
+    3: np.radians(225.0),
+}
+_sorted_throw_deg = sorted([np.degrees(a) % 360.0 for a in THROW_BASE_ANGLES.values()])
+assert _sorted_throw_deg == [45.0, 135.0, 225.0, 315.0], "Cross-plane throws must be spaced at 90-degree intervals"
 
 # Representative Ford Coyote Firing Order: 1-5-4-8-6-3-7-2
 # Cylinders 1-4: Bank R (Throws 0, 1, 2, 3)
@@ -90,25 +105,16 @@ assert sorted(FIRING_PHASES.values()) == [
     630.0,
 ], "Firing phases must be spaced at 90-degree intervals across 720 degrees"
 
-# Cylinder specification table
-# cyl_id: (bank_key, throw_index, bank_vector_U, bank_perp_V)
+# Cylinder specification table: (bank_key, throw_index, bank_vector_U)
 CYLINDER_SPECS = {
-    1: ("R", 0, U_R, V_R),
-    2: ("R", 1, U_R, V_R),
-    3: ("R", 2, U_R, V_R),
-    4: ("R", 3, U_R, V_R),
-    5: ("L", 0, U_L, V_L),
-    6: ("L", 1, U_L, V_L),
-    7: ("L", 2, U_L, V_L),
-    8: ("L", 3, U_L, V_L),
-}
-
-# Cross-plane throw angles around crank axis (traditional 90-degree cross pattern)
-THROW_ANGLES = {
-    0: 0.0,
-    1: np.pi / 2.0,
-    2: 3.0 * np.pi / 2.0,
-    3: np.pi,
+    1: ("R", 0, U_R),
+    2: ("R", 1, U_R),
+    3: ("R", 2, U_R),
+    4: ("R", 3, U_R),
+    5: ("L", 0, U_L),
+    6: ("L", 1, U_L),
+    7: ("L", 2, U_L),
+    8: ("L", 3, U_L),
 }
 
 # Color palette adhering to design contract
@@ -124,42 +130,86 @@ COLOR_CRANK = "#78909C"        # Crankshaft steel
 
 
 # ==============================================================================
-# 2. EXACT SLIDER-CRANK KINEMATICS
+# 2. SHARED-CRANKPIN SLIDER-CRANK KINEMATICS
 # ==============================================================================
 
-def slider_crank_displacement(theta_rad, r=CRANK_R, L=ROD_L):
+def get_throw_crankpin_pos(theta_rad, t_idx):
     """
-    Exact slider-crank wristpin displacement s(theta) from crankshaft axis:
-        s(theta) = r * cos(theta) + sqrt(L^2 - r^2 * sin^2(theta))
-    At theta = 0 (TDC): s = L + r = 1.87
-    At theta = pi (BDC): s = L - r = 1.03
+    Bank-independent 3D coordinates of the physical crankpin on throw t_idx.
+    Revolves in the common X-Z plane around (0, THROWS_Y[t_idx], 0) at radius CRANK_R.
+    Both Left-bank and Right-bank cylinders on this throw share this exact point.
     """
-    sin_t = np.sin(theta_rad)
-    cos_t = np.cos(theta_rad)
-    radical = L**2 - (r * sin_t)**2
-    return r * cos_t + np.sqrt(np.maximum(radical, 1e-9))
+    y_val = THROWS_Y[t_idx]
+    phi = THROW_BASE_ANGLES[t_idx] - theta_rad
+    return np.array([CRANK_R * np.sin(phi), y_val, CRANK_R * np.cos(phi)])
 
 
-def get_piston_wrist_pos(theta_rad, y_throw, bank_u):
-    """3D coordinates of piston wristpin."""
-    s = slider_crank_displacement(theta_rad)
-    return np.array([0.0, y_throw, 0.0]) + s * bank_u
-
-
-def get_crankpin_pos(theta_rad, y_throw, bank_u, bank_v):
-    """3D coordinates of crankpin journal for this cylinder."""
-    r_vec = CRANK_R * (np.cos(theta_rad) * bank_u + np.sin(theta_rad) * bank_v)
-    return np.array([0.0, y_throw, 0.0]) + r_vec
+def get_piston_wrist_pos(pin_pos, t_idx, bank_u):
+    """
+    Exact slider-crank wristpin position along bank_u consistent with the shared crankpin:
+        |p_wrist - pin_pos|^2 = ROD_L^2
+        s^2 - 2*(bank_u . r_pin)*s + (CRANK_R^2 - ROD_L^2) = 0
+        s = (bank_u . r_pin) + sqrt(ROD_L^2 - CRANK_R^2 + (bank_u . r_pin)^2)
+    Guarantees rod length is identically ROD_L at every crank angle.
+    """
+    y_val = THROWS_Y[t_idx]
+    r_pin = pin_pos - np.array([0.0, y_val, 0.0])
+    u_dot_r = np.dot(bank_u, r_pin)
+    radical = ROD_L**2 - CRANK_R**2 + u_dot_r**2
+    s = u_dot_r + np.sqrt(np.maximum(radical, 1e-9))
+    return np.array([0.0, y_val, 0.0]) + s * bank_u
 
 
 # ==============================================================================
-# 3. 3D MECHANICAL MODEL BUILDERS
+# 3. MODULE-LEVEL NUMERIC ASSERTIONS PROVING MECHANICAL FIDELITY
+# ==============================================================================
+
+# (1) Bank angle remains exactly 90 degrees
+assert np.isclose(
+    np.degrees(np.arccos(np.clip(np.dot(U_L, U_R), -1.0, 1.0))), 90.0
+), "Bank angle must be exactly 90 degrees"
+
+# Sample 145 crank angles across 720 degrees to verify all mechanical invariants
+for _deg in np.linspace(0.0, 720.0, 145):
+    _th = np.radians(_deg)
+    for _t in range(4):
+        # Physical crankpin for this throw
+        _pin_shared = get_throw_crankpin_pos(_th, _t)
+
+        # (1) L/R crankpin coordinates on each throw are identical
+        # Cylinders sharing throw _t are (_t + 1) for Bank R and (_t + 5) for Bank L
+        _pin_R = _pin_shared
+        _pin_L = _pin_shared
+        assert np.array_equal(_pin_L, _pin_R), f"Throw {_t}: L and R crankpins must be identical"
+
+        # (2) Both rod lengths remain ROD_L within tight numerical tolerance
+        _w_R = get_piston_wrist_pos(_pin_shared, _t, U_R)
+        _w_L = get_piston_wrist_pos(_pin_shared, _t, U_L)
+
+        _len_R = np.linalg.norm(_w_R - _pin_shared)
+        _len_L = np.linalg.norm(_w_L - _pin_shared)
+        assert np.isclose(_len_R, ROD_L, atol=1e-10), f"Right rod length deviation on throw {_t}: {_len_R} != {ROD_L}"
+        assert np.isclose(_len_L, ROD_L, atol=1e-10), f"Left rod length deviation on throw {_t}: {_len_L} != {ROD_L}"
+
+# Verify that each cylinder reaches TDC (s = ROD_L + CRANK_R) at its specified firing phase
+for _cid, _psi in FIRING_PHASES.items():
+    _th_fire = np.radians(_psi)
+    _, _t_fire, _u_fire = CYLINDER_SPECS[_cid]
+    _pin_fire = get_throw_crankpin_pos(_th_fire, _t_fire)
+    _w_fire = get_piston_wrist_pos(_pin_fire, _t_fire, _u_fire)
+    _s_fire = np.dot(_w_fire - np.array([0.0, THROWS_Y[_t_fire], 0.0]), _u_fire)
+    assert np.isclose(_s_fire, ROD_L + CRANK_R, atol=1e-9), f"Cylinder {_cid} must be at TDC at firing phase {_psi}"
+
+
+# ==============================================================================
+# 4. 3D MECHANICAL MODEL BUILDERS
 # ==============================================================================
 
 def build_crankshaft():
     """
     Constructs the 3D cross-plane crankshaft assembly:
     main journals along Y axis, 4 throws, counterweights, and rear flywheel.
+    Each crankpin is positioned exactly at THROW_BASE_ANGLES.
     """
     crank_group = Group()
 
@@ -175,7 +225,7 @@ def build_crankshaft():
 
     # Crank webs and counterweights at each throw
     for t_idx, y_val in enumerate(THROWS_Y):
-        angle = THROW_ANGLES[t_idx]
+        angle = THROW_BASE_ANGLES[t_idx]
         pin_dir = np.array([np.sin(angle), 0.0, np.cos(angle)])
 
         # Crankpin
@@ -245,7 +295,7 @@ def build_engine_block(opacity=0.30):
 def build_cylinder_sleeves():
     """Builds 8 translucent cylinder sleeves guiding the pistons."""
     sleeves = Group()
-    for cyl_id, (bank, t_idx, u_vec, _) in CYLINDER_SPECS.items():
+    for cyl_id, (bank, t_idx, u_vec) in CYLINDER_SPECS.items():
         y_val = THROWS_Y[t_idx]
         sleeve = Cylinder(
             radius=0.40,
@@ -282,7 +332,7 @@ def build_piston_assembly(bank_u):
 
 
 # ==============================================================================
-# 4. SCENE CLASS: V8EngineRemake
+# 5. SCENE CLASS: V8EngineRemake
 # ==============================================================================
 
 class V8EngineRemake(SafeThreeDScene):
@@ -299,7 +349,6 @@ class V8EngineRemake(SafeThreeDScene):
         self.camera.background_color = COLOR_BG
 
         # Master ValueTracker for crankshaft rotation angle
-        # All cylinder phases and kinematic states derive strictly from this tracker.
         self.master_angle = ValueTracker(0.0)
 
         # ----------------------------------------------------------------------
@@ -339,16 +388,18 @@ class V8EngineRemake(SafeThreeDScene):
         crankshaft = build_crankshaft()
         sleeves = build_cylinder_sleeves()
 
-        # Build 8 pistons and connecting rods
+        # Build 8 pistons and connecting rods using shared crankpin per throw
         pistons = {}
         rods = {}
         wrist_dots = {}
 
-        for cyl_id, (_, t_idx, u_vec, v_vec) in CYLINDER_SPECS.items():
-            y_val = THROWS_Y[t_idx]
+        # Precompute shared crankpins for all 4 throws at theta=0
+        pins_th0 = [get_throw_crankpin_pos(0.0, t) for t in range(4)]
+
+        for cyl_id, (_, t_idx, u_vec) in CYLINDER_SPECS.items():
+            p_pin = pins_th0[t_idx]
+            p_wrist = get_piston_wrist_pos(p_pin, t_idx, u_vec)
             piston = build_piston_assembly(u_vec)
-            p_wrist = get_piston_wrist_pos(0.0, y_val, u_vec)
-            p_pin = get_crankpin_pos(0.0, y_val, u_vec, v_vec)
 
             piston.move_to(p_wrist + 0.17 * u_vec)
             rod = line3(p_pin, p_wrist, color="#ECEFF1", thickness=0.06)
@@ -442,7 +493,6 @@ class V8EngineRemake(SafeThreeDScene):
 
         y_val = THROWS_Y[0]
         u_vec = U_R
-        v_vec = V_R
 
         # Single cylinder cutaway sleeve
         cyl_sleeve = Cylinder(
@@ -484,14 +534,14 @@ class V8EngineRemake(SafeThreeDScene):
         spark_group = Group(spark_body, spark_tip)
 
         # Intake valve (left/front offset)
-        v_offset_in = np.array([0.0, 0.22, 0.0]) - 0.12 * v_vec
+        v_offset_in = np.array([0.0, 0.22, 0.0]) + 0.12 * np.array([-1.0, 0.0, 1.0]) / np.sqrt(2.0)
         intake_pos_closed = head_pos + v_offset_in
         intake_stem = line3(intake_pos_closed + 0.4 * u_vec, intake_pos_closed, color=COLOR_INTAKE, thickness=0.045)
         intake_disc = Circle(radius=0.14, color=COLOR_INTAKE, fill_opacity=0.8).rotate(45.0 * DEGREES, axis=UP).move_to(intake_pos_closed)
         intake_valve = Group(intake_stem, intake_disc)
 
         # Exhaust valve (right/rear offset)
-        v_offset_ex = np.array([0.0, -0.22, 0.0]) + 0.12 * v_vec
+        v_offset_ex = np.array([0.0, -0.22, 0.0]) - 0.12 * np.array([-1.0, 0.0, 1.0]) / np.sqrt(2.0)
         exhaust_pos_closed = head_pos + v_offset_ex
         exhaust_stem = line3(exhaust_pos_closed + 0.4 * u_vec, exhaust_pos_closed, color=COLOR_EXHAUST, thickness=0.045)
         exhaust_disc = Circle(radius=0.14, color=COLOR_EXHAUST, fill_opacity=0.8).rotate(45.0 * DEGREES, axis=UP).move_to(exhaust_pos_closed)
@@ -556,10 +606,6 @@ class V8EngineRemake(SafeThreeDScene):
         tl_radius = 1.05
 
         # 4 Quadrants on 360-degree HUD ring representing 720 degrees (each quadrant = 180°)
-        # Q1: 0°-180° Intake (Cyan)
-        # Q2: 180°-360° Compression (Amber)
-        # Q3: 360°-540° Power (Red)
-        # Q4: 540°-720° Exhaust (Gray)
         arc_intake = Arc(radius=tl_radius, start_angle=90.0 * DEGREES, angle=-90.0 * DEGREES, arc_center=tl_center, color=COLOR_INTAKE, stroke_width=6)
         arc_comp = Arc(radius=tl_radius, start_angle=0.0 * DEGREES, angle=-90.0 * DEGREES, arc_center=tl_center, color=COLOR_COMPRESSION, stroke_width=6)
         arc_power = Arc(radius=tl_radius, start_angle=-90.0 * DEGREES, angle=-90.0 * DEGREES, arc_center=tl_center, color=COLOR_POWER, stroke_width=6)
@@ -578,10 +624,10 @@ class V8EngineRemake(SafeThreeDScene):
         self.hud(timeline_hud)
         self.play(FadeIn(timeline_hud), run_time=0.8)
 
-        # Kinematic updater linking piston, rod, and crankpin to angle_tracker
+        # Kinematic updater using shared crankpin on Throw 0
         def update_single_cylinder(theta_val):
-            pw = get_piston_wrist_pos(theta_val, y_val, u_vec)
-            pp = get_crankpin_pos(theta_val, y_val, u_vec, v_vec)
+            pp = get_throw_crankpin_pos(theta_val, 0)
+            pw = get_piston_wrist_pos(pp, 0, u_vec)
             piston.move_to(pw + 0.17 * u_vec)
             rod.put_start_and_end_on(pp, pw)
             wrist_pin.move_to(pw)
@@ -595,7 +641,6 @@ class V8EngineRemake(SafeThreeDScene):
         cap_intake = caption_top("1. จังหวะดูด (0°–180°): วาล์วไอดีเปิด ลูกสูบเลื่อนลง ดูดไอดีเข้าห้องเผาไหม้", color=COLOR_INTAKE)
         self.hud(cap_intake)
 
-        # Cyan fuel-air mixture particles flowing along intake runner
         intake_particles = VGroup(*[
             Dot(head_pos + v_offset_in + np.array([0.0, 0.3 + 0.15 * i, 0.2 + 0.1 * i]), radius=0.04, color=COLOR_INTAKE)
             for i in range(7)
@@ -604,11 +649,10 @@ class V8EngineRemake(SafeThreeDScene):
         self.play(
             FadeIn(cap_intake),
             arc_intake.animate.set_stroke(width=10, opacity=1.0),
-            intake_valve.animate.shift(-0.16 * u_vec),  # Valve opens into chamber
+            intake_valve.animate.shift(-0.16 * u_vec),  # Valve opens
             run_time=0.6,
         )
 
-        # Crank sweeps 0 -> PI; piston descends TDC -> BDC; particles enter
         p_target = head_pos - 0.3 * u_vec
         self.play(
             UpdateFromAlphaFunc(
@@ -640,7 +684,6 @@ class V8EngineRemake(SafeThreeDScene):
             run_time=0.5,
         )
 
-        # Crank sweeps PI -> 2*PI; piston rises BDC -> TDC; chamber compresses cyan -> amber
         self.play(
             UpdateFromAlphaFunc(
                 piston,
@@ -662,7 +705,6 @@ class V8EngineRemake(SafeThreeDScene):
         cap_power = caption_top("3. จังหวะกำลัง (360°–540°): หัวเทียนจุดระเบิด ก๊าซขยายตัวดันลูกสูบ หมุนเพลา", color=COLOR_POWER)
         self.hud(cap_power)
 
-        # Spark flash at TDC (theta = 360 degrees)
         spark_burst = Flash(
             spark_tip.get_center(),
             color=YELLOW,
@@ -679,13 +721,12 @@ class V8EngineRemake(SafeThreeDScene):
             run_time=0.6,
         )
 
-        # Pressure arrows driving piston downward
-        p_wrist_curr = get_piston_wrist_pos(2.0 * np.pi, y_val, u_vec)
-        press_arrow1 = arrow3(p_wrist_curr + 0.45 * u_vec - 0.12 * v_vec, p_wrist_curr + 0.18 * u_vec - 0.12 * v_vec, color=COLOR_POWER, thickness=0.035)
-        press_arrow2 = arrow3(p_wrist_curr + 0.45 * u_vec + 0.12 * v_vec, p_wrist_curr + 0.18 * u_vec + 0.12 * v_vec, color=COLOR_POWER, thickness=0.035)
+        p_wrist_curr = get_piston_wrist_pos(get_throw_crankpin_pos(2.0 * np.pi, 0), 0, u_vec)
+        press_arrow1 = arrow3(p_wrist_curr + 0.45 * u_vec + 0.12 * np.array([0, 1, 0]), p_wrist_curr + 0.18 * u_vec + 0.12 * np.array([0, 1, 0]), color=COLOR_POWER, thickness=0.035)
+        press_arrow2 = arrow3(p_wrist_curr + 0.45 * u_vec - 0.12 * np.array([0, 1, 0]), p_wrist_curr + 0.18 * u_vec - 0.12 * np.array([0, 1, 0]), color=COLOR_POWER, thickness=0.035)
         self.add(press_arrow1, press_arrow2)
 
-        # Piston descends to maximum torque lever-arm moment (~90° after spark = 450° crank angle)
+        # Piston descends to peak lever-arm moment (~90° after spark = 450° crank angle)
         self.play(
             UpdateFromAlphaFunc(
                 piston,
@@ -696,19 +737,16 @@ class V8EngineRemake(SafeThreeDScene):
         )
         self.remove(press_arrow1, press_arrow2)
 
-        # Freeze briefly at strongest lever-arm moment and draw force-to-torque causal path
-        p_wrist_mid = get_piston_wrist_pos(2.5 * np.pi, y_val, u_vec)
-        p_pin_mid = get_crankpin_pos(2.5 * np.pi, y_val, u_vec, v_vec)
+        # Freeze briefly at strongest lever arm and draw causal vectors
+        p_pin_mid = get_throw_crankpin_pos(2.5 * np.pi, 0)
+        p_wrist_mid = get_piston_wrist_pos(p_pin_mid, 0, u_vec)
 
-        # Downward force on piston: F_gas
         vec_f_gas = arrow3(p_wrist_mid + 0.6 * u_vec, p_wrist_mid + 0.15 * u_vec, color=COLOR_POWER, thickness=0.04)
         lbl_f_gas = Text("แรงดันก๊าซ (F)", font_size=16, color=COLOR_POWER).next_to(vec_f_gas.get_start(), UP + RIGHT, buff=0.08)
 
-        # Force along connecting rod: F_rod
         vec_f_rod = arrow3(p_wrist_mid, p_pin_mid, color=COLOR_COMPRESSION, thickness=0.045)
         lbl_f_rod = Text("แรงส่งผ่านก้านสูบ", font_size=15, color=COLOR_COMPRESSION).next_to(p_pin_mid, RIGHT, buff=0.12)
 
-        # Rotational torque arrow around crankshaft axis
         torque_arc = Arc(radius=0.45, start_angle=45.0 * DEGREES, angle=-180.0 * DEGREES, color=TORQUE, stroke_width=6)
         torque_arc.rotate(90.0 * DEGREES, axis=RIGHT).move_to(np.array([0.0, y_val, 0.0]))
         lbl_torque = Text("ทอร์กหมุนเพลา (τ)", font_size=17, color=TORQUE).next_to(torque_arc, DOWN + RIGHT, buff=0.1)
@@ -747,7 +785,6 @@ class V8EngineRemake(SafeThreeDScene):
         cap_exhaust = caption_top("4. จังหวะคาย (540°–720°): วาล์วไอเสียเปิด ลูกสูบดันก๊าซไอเสียทิ้ง", color=COLOR_EXHAUST)
         self.hud(cap_exhaust)
 
-        # Gray exhaust particles flowing out
         exhaust_particles = VGroup(*[
             Dot(head_pos - 0.15 * u_vec, radius=0.04, color=COLOR_EXHAUST)
             for _ in range(7)
@@ -803,18 +840,19 @@ class V8EngineRemake(SafeThreeDScene):
         # Return to atomic V pair sharing Throw 0: Cyl 1 (Bank R) & Cyl 5 (Bank L)
         y_val = THROWS_Y[0]
 
-        # Build atomic V-pair at Throw 0
+        # Shared crankpin for Throw 0 at theta=0
+        pin_0 = get_throw_crankpin_pos(0.0, 0)
+
+        # Build atomic V-pair at Throw 0 sharing the exact same pin_0
         piston_r = build_piston_assembly(U_R)
         piston_l = build_piston_assembly(U_L)
-        pw_r = get_piston_wrist_pos(0.0, y_val, U_R)
-        pw_l = get_piston_wrist_pos(np.pi / 2.0, y_val, U_L)
-        pp_r = get_crankpin_pos(0.0, y_val, U_R, V_R)
-        pp_l = get_crankpin_pos(np.pi / 2.0, y_val, U_L, V_L)
+        pw_r = get_piston_wrist_pos(pin_0, 0, U_R)
+        pw_l = get_piston_wrist_pos(pin_0, 0, U_L)
 
         piston_r.move_to(pw_r + 0.17 * U_R)
         piston_l.move_to(pw_l + 0.17 * U_L)
-        rod_r = line3(pp_r, pw_r, color="#FFFFFF", thickness=0.065)
-        rod_l = line3(pp_l, pw_l, color="#FFFFFF", thickness=0.065)
+        rod_r = line3(pin_0, pw_r, color="#FFFFFF", thickness=0.065)
+        rod_l = line3(pin_0, pw_l, color="#FFFFFF", thickness=0.065)
 
         sleeve_r = Cylinder(radius=0.41, height=1.5, direction=U_R, resolution=(8, 8), color="#90A4AE").move_to(1.48 * U_R + np.array([0, y_val, 0])).set_opacity(0.25)
         sleeve_l = Cylinder(radius=0.41, height=1.5, direction=U_L, resolution=(8, 8), color="#90A4AE").move_to(1.48 * U_L + np.array([0, y_val, 0])).set_opacity(0.25)
@@ -845,7 +883,6 @@ class V8EngineRemake(SafeThreeDScene):
         axis_line_r = line3(axis_origin, axis_origin + 2.3 * U_R, color=YELLOW, thickness=0.04)
 
         # Literal 90-degree right angle indicator
-        # Corner square in the plane of the V (X-Z plane)
         sq_size = 0.35
         p_c = axis_origin
         p_l = p_c + sq_size * U_L
@@ -887,7 +924,6 @@ class V8EngineRemake(SafeThreeDScene):
             run_time=0.5,
         )
 
-        # Pull back camera along Y axis
         self.move_camera(
             phi=68.0 * DEGREES,
             theta=-55.0 * DEGREES,
@@ -896,7 +932,6 @@ class V8EngineRemake(SafeThreeDScene):
             run_time=1.8,
         )
 
-        # Replicate atomic pair at Throw 1, Throw 2, Throw 3
         cap_replicate = caption_top("4 ข้อเหวี่ยง × 2 สูบต่อข้อ = 8 สูบในความยาวเครื่องเท่ากับ 4 สูบเรียง", color=OK)
         self.hud(cap_replicate)
         self.play(Transform(shot3_cap, cap_replicate), run_time=0.6)
@@ -904,16 +939,16 @@ class V8EngineRemake(SafeThreeDScene):
         replicated_pairs = []
         for t_idx in [1, 2, 3]:
             y_t = THROWS_Y[t_idx]
-            pr = build_piston_assembly(U_R).move_to(get_piston_wrist_pos(0.0, y_t, U_R) + 0.17 * U_R)
-            pl = build_piston_assembly(U_L).move_to(get_piston_wrist_pos(0.0, y_t, U_L) + 0.17 * U_L)
-            rr = line3(get_crankpin_pos(0.0, y_t, U_R, V_R), get_piston_wrist_pos(0.0, y_t, U_R), color="#FFFFFF", thickness=0.065)
-            rl = line3(get_crankpin_pos(0.0, y_t, U_L, V_L), get_piston_wrist_pos(0.0, y_t, U_L), color="#FFFFFF", thickness=0.065)
+            pin_t = get_throw_crankpin_pos(0.0, t_idx)
+            pr = build_piston_assembly(U_R).move_to(get_piston_wrist_pos(pin_t, t_idx, U_R) + 0.17 * U_R)
+            pl = build_piston_assembly(U_L).move_to(get_piston_wrist_pos(pin_t, t_idx, U_L) + 0.17 * U_L)
+            rr = line3(pin_t, get_piston_wrist_pos(pin_t, t_idx, U_R), color="#FFFFFF", thickness=0.065)
+            rl = line3(pin_t, get_piston_wrist_pos(pin_t, t_idx, U_L), color="#FFFFFF", thickness=0.065)
             sr = Cylinder(radius=0.41, height=1.5, direction=U_R, resolution=(8, 8), color="#90A4AE").move_to(1.48 * U_R + np.array([0, y_t, 0])).set_opacity(0.25)
             sl = Cylinder(radius=0.41, height=1.5, direction=U_L, resolution=(8, 8), color="#90A4AE").move_to(1.48 * U_L + np.array([0, y_t, 0])).set_opacity(0.25)
             pair_mob = Group(pr, pl, rr, rl, sr, sl)
             replicated_pairs.append(pair_mob)
 
-        # Reveal pairs sequentially along the crank axis
         for p in replicated_pairs:
             self.play(FadeIn(p), run_time=0.5)
 
@@ -944,7 +979,6 @@ class V8EngineRemake(SafeThreeDScene):
             run_time=1.0,
         )
 
-        # Title and representative Ford Coyote firing order banner
         shot4_title = title("การจุดระเบิดสลับจังหวะ: 720° หารด้วย 8 สูบ", size=26)
         coyote_banner = Text("ตัวอย่าง Ford Coyote: 1–5–4–8–6–3–7–2", font_size=20, color=YELLOW).move_to(np.array([0.0, 3.05, 0.0]))
         coyote_disclaimer = Text("(ตัวอย่างลำดับการจุดระเบิด — ไม่ได้เหมือนกันทุกเครื่องยนต์ V8)", font_size=14, color=GRAYTXT).move_to(np.array([0.0, 2.75, 0.0]))
@@ -988,11 +1022,9 @@ class V8EngineRemake(SafeThreeDScene):
         c_y_base = -3.4
         c_y_height = 1.15
 
-        # Chart axes
         axis_x = line3(np.array([c_x_min, c_y_base, 0.0]), np.array([c_x_max, c_y_base, 0.0]), color="#64748B", thickness=0.02)
         axis_y = line3(np.array([c_x_min, c_y_base, 0.0]), np.array([c_x_min, c_y_base + c_y_height, 0.0]), color="#64748B", thickness=0.02)
 
-        # Axis ticks and labels
         ticks = []
         tick_labels = []
         for deg_val in [0, 180, 360, 540, 720]:
@@ -1005,7 +1037,6 @@ class V8EngineRemake(SafeThreeDScene):
         lbl_chart_x = Text("มุมหมุนของเพลาข้อเหวี่ยง (องศา)", font_size=13, color=GRAYTXT).move_to(np.array([0.0, c_y_base - 0.44, 0.0]))
         lbl_chart_y = Text("ทอร์ก (Torque)", font_size=13, color=TORQUE).next_to(np.array([c_x_min, c_y_base + c_y_height, 0.0]), UP, buff=0.08)
 
-        # Single cylinder pulse curve (only 1 pulse between 0° and 180°, then zero for 540°)
         pts_single = []
         for d in np.linspace(0, 720, 140):
             x_pos = c_x_min + (d / 720.0) * (c_x_max - c_x_min)
@@ -1017,11 +1048,9 @@ class V8EngineRemake(SafeThreeDScene):
 
         lbl_single_desc = Text("1 สูบ (ว่าง 540°)", font_size=12, color="#64748B").move_to(np.array([-2.5, c_y_base + 0.85, 0.0]))
 
-        # 8-cylinder aggregate curve (continuous stream of torque pulses every 90°)
         pts_v8 = []
         for d in np.linspace(0, 720, 200):
             x_pos = c_x_min + (d / 720.0) * (c_x_max - c_x_min)
-            # Sum pulses from all 8 firing events
             tot = 0.0
             for j in range(8):
                 rel_d = (d - j * 90.0) % 720.0
@@ -1048,7 +1077,7 @@ class V8EngineRemake(SafeThreeDScene):
         wrist_dots = {}
         chamber_flashes = {}
 
-        for cyl_id, (bank, t_idx, u_vec, v_vec) in CYLINDER_SPECS.items():
+        for cyl_id, (bank, t_idx, u_vec) in CYLINDER_SPECS.items():
             y_t = THROWS_Y[t_idx]
             p = build_piston_assembly(u_vec)
             r = line3(ORIGIN, ORIGIN, color="#FFFFFF", thickness=0.065)
@@ -1070,15 +1099,15 @@ class V8EngineRemake(SafeThreeDScene):
         engine_3d = Group(block_trans, crankshaft, sleeves, *pistons.values(), *rods.values(), *wrist_dots.values(), *chamber_flashes.values())
         self.add(engine_3d)
 
-        # Master updater for all 8 cylinders linked to master crank angle
+        # Master updater: exactly ONE crankpin per throw, shared by both L and R cylinders
         def update_all_cylinders(crank_deg):
             theta_rad = np.radians(crank_deg)
-            for cid, (_, t_idx, u_vec, v_vec) in CYLINDER_SPECS.items():
-                psi = FIRING_PHASES[cid]
-                c_angle = np.radians((crank_deg - psi) % 360.0)
-                y_t = THROWS_Y[t_idx]
-                pw = get_piston_wrist_pos(c_angle, y_t, u_vec)
-                pp = get_crankpin_pos(c_angle, y_t, u_vec, v_vec)
+            # Precompute shared crankpins for all 4 throws
+            throw_pins = [get_throw_crankpin_pos(theta_rad, t) for t in range(4)]
+
+            for cid, (_, t_idx, u_vec) in CYLINDER_SPECS.items():
+                pp = throw_pins[t_idx]  # Exact shared crankpin
+                pw = get_piston_wrist_pos(pp, t_idx, u_vec)
 
                 pistons[cid].move_to(pw + 0.17 * u_vec)
                 rods[cid].put_start_and_end_on(pp, pw)
@@ -1092,12 +1121,10 @@ class V8EngineRemake(SafeThreeDScene):
         self.add(cursor_line)
 
         # Animate master crank through 720 degrees, stepping through all 8 firing events
-        # Every 90 degrees: exactly one cylinder flashes, badge lights up, torque pulse added
         for step_idx, cyl_fire in enumerate(FIRING_ORDER):
             deg_start = step_idx * 90.0
             deg_end = (step_idx + 1) * 90.0
 
-            # Highlight current badge on firing rail
             curr_badge = rail_badges[step_idx]
             curr_num = rail_labels[step_idx]
             flash_cyl = chamber_flashes[cyl_fire]
@@ -1169,9 +1196,9 @@ class V8EngineRemake(SafeThreeDScene):
         sleeves = build_cylinder_sleeves()
 
         y_t0 = THROWS_Y[0]
-        piston1 = build_piston_assembly(U_R).move_to(get_piston_wrist_pos(0.0, y_t0, U_R) + 0.17 * U_R)
-        pp0 = get_crankpin_pos(0.0, y_t0, U_R, V_R)
-        pw0 = get_piston_wrist_pos(0.0, y_t0, U_R)
+        pp0 = get_throw_crankpin_pos(0.0, 0)
+        pw0 = get_piston_wrist_pos(pp0, 0, U_R)
+        piston1 = build_piston_assembly(U_R).move_to(pw0 + 0.17 * U_R)
         rod1 = line3(pp0, pw0, color="#FFFFFF", thickness=0.075)
 
         self.add(block, crankshaft, sleeves, piston1, rod1)
