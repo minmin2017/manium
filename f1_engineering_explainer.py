@@ -16,6 +16,7 @@ AIR_BLUE = "#4FC3F7"        # Aerodynamic airflow & low-drag DRS
 FORCE_GREEN = "#66BB6A"     # Downforce and normal force vectors
 ENERGY_GOLD = "#FFD54F"     # Electrical energy & MGU-K recovery
 ICE_ORANGE = "#FF7043"      # Combustion thermal power & brake heat
+COMBUSTION = ICE_ORANGE     # Alias for combustion / brake thermal
 OK_CYAN = "#26C6DA"         # Drivetrain torque & tyre friction interface
 TYRE_GRAY = "#263238"       # Tyre compound
 RIM_WHITE = "#ECEFF1"       # Wheel rim & details
@@ -298,7 +299,7 @@ class F1EngineeringExplainer(SafeScene):
         # Section 4: Braking Energy Recovery & Active Aero (~11.0s)
         # =====================================================================
         s4_title = title("4. Energy Recovery & Active Aerodynamics", color=WHITE, size=28)
-        s4_cap = caption_top("Braking harvests battery energy; active wings trade downforce for straight-line speed.", color=COMBUSTION, size=20)
+        s4_cap = caption_top("Braking harvests battery energy; active wings trade downforce for straight-line speed.", color=ICE_ORANGE, size=20)
 
         # Left Column: Braking Energy Recovery
         s4_left_box = RoundedRectangle(width=5.0, height=3.8, corner_radius=0.18,
