@@ -358,27 +358,27 @@ class F1EngineeringExplainer(SafeScene):
         s5_cap = caption_top("Every fast lap is a closed-loop balance of energy, aerodynamics, and tyre grip.", color=WHITE, size=20)
 
         # 4 System summary cards
-        c1 = RoundedRectangle(width=5.2, height=1.3, corner_radius=0.15, color="#1E232A", fill_opacity=0.9, stroke_width=1.5, stroke_color=ICE_ORANGE).move_to([-3.0, 0.8, 0])
+        c1 = RoundedRectangle(width=5.2, height=1.45, corner_radius=0.15, color="#1E232A", fill_opacity=0.9, stroke_width=1.5, stroke_color=ICE_ORANGE).move_to([-3.0, 0.75, 0])
         c1_t = Text("1. Hybrid Power Unit", font_size=16, color=ICE_ORANGE, weight=BOLD).move_to([-3.0, 1.15, 0])
-        c1_d = Text("ICE continuous propulsion blended with instant MGU-K electric torque.", font_size=13, color=GRAYTXT).move_to([-3.0, 0.65, 0])
+        c1_d = fit_width(Text("ICE combustion propulsion blended with\ninstant electric torque from MGU-K.", font_size=13, color=GRAYTXT, line_spacing=0.85), 4.5).move_to([-3.0, 0.55, 0])
         card1 = VGroup(c1, c1_t, c1_d)
 
-        c2 = RoundedRectangle(width=5.2, height=1.3, corner_radius=0.15, color="#1E232A", fill_opacity=0.9, stroke_width=1.5, stroke_color=AIR_BLUE).move_to([3.0, 0.8, 0])
+        c2 = RoundedRectangle(width=5.2, height=1.45, corner_radius=0.15, color="#1E232A", fill_opacity=0.9, stroke_width=1.5, stroke_color=AIR_BLUE).move_to([3.0, 0.75, 0])
         c2_t = Text("2. Aerodynamics", font_size=16, color=AIR_BLUE, weight=BOLD).move_to([3.0, 1.15, 0])
-        c2_d = Text("Wings and underfloor Venturi suction generate downforce scaling with v^2.", font_size=13, color=GRAYTXT).move_to([3.0, 0.65, 0])
+        c2_d = fit_width(Text("Wings and underfloor Venturi tunnels create\ndownforce scaling with speed squared (v^2).", font_size=13, color=GRAYTXT, line_spacing=0.85), 4.5).move_to([3.0, 0.55, 0])
         card2 = VGroup(c2, c2_t, c2_d)
 
-        c3 = RoundedRectangle(width=5.2, height=1.3, corner_radius=0.15, color="#1E232A", fill_opacity=0.9, stroke_width=1.5, stroke_color=FORCE_GREEN).move_to([-3.0, -0.85, 0])
+        c3 = RoundedRectangle(width=5.2, height=1.45, corner_radius=0.15, color="#1E232A", fill_opacity=0.9, stroke_width=1.5, stroke_color=FORCE_GREEN).move_to([-3.0, -0.9, 0])
         c3_t = Text("3. Tyre Friction Interface", font_size=16, color=FORCE_GREEN, weight=BOLD).move_to([-3.0, -0.5, 0])
-        c3_d = Text("Downforce raises normal force N, multiplying tyre grip without extra mass.", font_size=13, color=GRAYTXT).move_to([-3.0, -1.0, 0])
+        c3_d = fit_width(Text("Downforce raises normal tyre load N,\nmultiplying friction limit F_grip <= mu * N.", font_size=13, color=GRAYTXT, line_spacing=0.85), 4.5).move_to([-3.0, -1.1, 0])
         card3 = VGroup(c3, c3_t, c3_d)
 
-        c4 = RoundedRectangle(width=5.2, height=1.3, corner_radius=0.15, color="#1E232A", fill_opacity=0.9, stroke_width=1.5, stroke_color=OK_CYAN).move_to([3.0, -0.85, 0])
+        c4 = RoundedRectangle(width=5.2, height=1.45, corner_radius=0.15, color="#1E232A", fill_opacity=0.9, stroke_width=1.5, stroke_color=OK_CYAN).move_to([3.0, -0.9, 0])
         c4_t = Text("4. Energy & Drag Management", font_size=16, color=OK_CYAN, weight=BOLD).move_to([3.0, -0.5, 0])
-        c4_d = Text("Braking kinetic energy is recovered; active aero sheds drag on straights.", font_size=13, color=GRAYTXT).move_to([3.0, -1.0, 0])
+        c4_d = fit_width(Text("Braking kinetic energy is harvested;\nactive aero sheds drag on straights.", font_size=13, color=GRAYTXT, line_spacing=0.85), 4.5).move_to([3.0, -1.1, 0])
         card4 = VGroup(c4, c4_t, c4_d)
 
-        summary_banner = Text("Performance = continuous physical optimization across all four systems.", font_size=17, color=WHITE, weight=BOLD).move_to([0, -2.1, 0])
+        summary_banner = fit_width(Text("Performance = continuous physical optimization across all four systems.", font_size=17, color=WHITE, weight=BOLD).move_to([0, -2.15, 0]), 11.0)
 
         self.play(FadeIn(s5_title), FadeIn(s5_cap),
                   FadeIn(card1, shift=UP*0.2), FadeIn(card2, shift=UP*0.2),
