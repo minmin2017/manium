@@ -1382,11 +1382,11 @@ class V8EngineRemake(SafeThreeDScene):
 
         card_title = Text("สรุปหัวใจสำคัญของเครื่องยนต์ V8", font_size=23, color="#F59E0B").move_to(np.array([0.0, 1.05, 0.0]))
 
-        line1 = Text("1 สูบ: ดูด → อัด → กำลัง → คาย (720° ต่อรอบกำลัง)", font_size=19, color=WHITE).move_to(np.array([0.0, 0.42, 0.0]))
-        line2 = Text("8 สูบ: ผลัดกันจุดระเบิดทุก 90° ในตัวอย่างนี้", font_size=19, color="#38BDF8").move_to(np.array([0.0, -0.15, 0.0]))
-        line3 = Text("แรงเป็นจังหวะ → เพลาหมุนต่อเนื่องขึ้นอย่างเห็นได้ชัด", font_size=19, color="#4ADE80").move_to(np.array([0.0, -0.72, 0.0]))
+        summary_line_1 = Text("1 สูบ: ดูด → อัด → กำลัง → คาย (720° ต่อรอบกำลัง)", font_size=19, color=WHITE).move_to(np.array([0.0, 0.42, 0.0]))
+        summary_line_2 = Text("8 สูบ: ผลัดกันจุดระเบิดทุก 90° ในตัวอย่างนี้", font_size=19, color="#38BDF8").move_to(np.array([0.0, -0.15, 0.0]))
+        summary_line_3 = Text("แรงเป็นจังหวะ → เพลาหมุนต่อเนื่องขึ้นอย่างเห็นได้ชัด", font_size=19, color="#4ADE80").move_to(np.array([0.0, -0.72, 0.0]))
 
-        summary_card = Group(card_bg, card_title, line1, line2, line3)
+        summary_card = Group(card_bg, card_title, summary_line_1, summary_line_2, summary_line_3)
         self.hud(summary_card)
 
         self.play(FadeIn(summary_card), run_time=1.0)
