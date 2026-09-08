@@ -161,6 +161,7 @@ def make_tree(x: float, y: float, scale: float = 1.0, foliage_color: str = TREE_
         height=trunk_h,
         resolution=(6, 6),
         fill_color=TREE_TRUNK_COL,
+        checkerboard_colors=[TREE_TRUNK_COL, TREE_TRUNK_COL],
         fill_opacity=1.0,
         stroke_width=0,
     )
@@ -172,6 +173,7 @@ def make_tree(x: float, y: float, scale: float = 1.0, foliage_color: str = TREE_
         radius=canopy_r,
         resolution=(8, 8),
         fill_color=foliage_color,
+        checkerboard_colors=[foliage_color, foliage_color],
         fill_opacity=1.0,
         stroke_width=0,
     )
@@ -218,27 +220,27 @@ class BuildingFlyIn(SafeThreeDScene):
         all_static_mobjects.append(plaza_slab)
 
         # Entrance approach stone walkway
-        walkway = make_window_poly([0.0, -3.8, 0.01], 2.4, 3.8, "+Z", WALKWAY_COLOR, opacity=1.0)
+        walkway = make_window_poly([0.0, -3.8, 0.04], 2.4, 3.8, "+Z", WALKWAY_COLOR, opacity=1.0)
         all_static_mobjects.append(walkway)
 
         # Subtle glowing walkway bollards
         for bx in (-1.25, 1.25):
             for by in (-2.6, -3.8, -5.0):
-                bollard_glow = make_window_poly([bx, by, 0.015], 0.10, 0.10, "+Z", BOLLARD_LIGHT, opacity=0.85)
+                bollard_glow = make_window_poly([bx, by, 0.06], 0.10, 0.10, "+Z", BOLLARD_LIGHT, opacity=0.85)
                 all_static_mobjects.append(bollard_glow)
 
         # Road asphalt strip
-        road_strip = make_window_poly([0.0, -6.8, 0.01], 18.0, 2.2, "+Z", ROAD_ASPHALT, opacity=1.0)
+        road_strip = make_window_poly([0.0, -6.8, 0.03], 18.0, 2.2, "+Z", ROAD_ASPHALT, opacity=1.0)
         all_static_mobjects.append(road_strip)
 
         # Road dashed center markings
         for rx in np.linspace(-7.5, 7.5, 7):
-            dash = make_window_poly([rx, -6.8, 0.015], 1.2, 0.10, "+Z", ROAD_MARKING, opacity=0.6)
+            dash = make_window_poly([rx, -6.8, 0.06], 1.2, 0.10, "+Z", ROAD_MARKING, opacity=0.6)
             all_static_mobjects.append(dash)
 
         # Long-exposure traffic light trails
-        car_tail = make_window_poly([-1.5, -6.35, 0.02], 5.6, 0.07, "+Z", TAIL_LIGHT_RED, opacity=0.85)
-        car_head = make_window_poly([ 1.5, -7.25, 0.02], 5.6, 0.07, "+Z", HEAD_LIGHT_AMB, opacity=0.75)
+        car_tail = make_window_poly([-1.5, -6.35, 0.07], 5.6, 0.07, "+Z", TAIL_LIGHT_RED, opacity=0.85)
+        car_head = make_window_poly([ 1.5, -7.25, 0.07], 5.6, 0.07, "+Z", HEAD_LIGHT_AMB, opacity=0.75)
         all_static_mobjects.extend([car_tail, car_head])
 
         # Architectural landscape trees (6 trees flanking plaza)
@@ -391,6 +393,7 @@ class BuildingFlyIn(SafeThreeDScene):
             height=0.90,
             resolution=(6, 6),
             fill_color="#90A4AE",
+            checkerboard_colors=["#90A4AE", "#90A4AE"],
             fill_opacity=1.0,
             stroke_width=0,
         ).move_to([0.0, 0.20, 10.15])
@@ -400,6 +403,7 @@ class BuildingFlyIn(SafeThreeDScene):
             radius=0.06,
             resolution=(6, 6),
             fill_color="#FF1744",
+            checkerboard_colors=["#FF1744", "#FF1744"],
             fill_opacity=1.0,
             stroke_width=0,
         ).move_to([0.0, 0.20, 10.63])
@@ -433,15 +437,41 @@ class BuildingFlyIn(SafeThreeDScene):
             stroke_width=0,
         ).move_to([0.0, 1.84, 0.9])
 
-        # Podium ceiling slab / roof deck (Z = 1.80 to 1.90)
-        podium_roof_slab = Prism(
-            dimensions=[4.9, 3.9, 0.10],
+        # Podium ceiling slab & roof deck (split into rear roof and front terrace for correct 3D depth sorting)
+        podium_roof_rear = Prism(
+            dimensions=[4.9, 2.6, 0.12],
             fill_color=HERO_ACCENT,
             fill_opacity=1.0,
             stroke_width=0,
-        ).move_to([0.0, 0.0, 1.85])
+        ).move_to([0.0, 0.65, 1.85])
 
-        all_static_mobjects.extend([podium_left_wall, podium_right_wall, podium_back_wall, podium_roof_slab])
+        podium_roof_front = Prism(
+            dimensions=[4.9, 1.3, 0.12],
+            fill_color=HERO_ACCENT,
+            fill_opacity=1.0,
+            stroke_width=0,
+        ).move_to([0.0, -1.30, 1.85])
+
+        # Solid architectural base collar under Tier 1 (seals roof-tower junction)
+        t1_base_collar = Prism(
+            dimensions=[3.70, 2.90, 0.12],
+            fill_color=HERO_ACCENT,
+            fill_opacity=1.0,
+            stroke_width=0,
+        ).move_to([0.0, 0.10, 1.95])
+
+        # Front terrace parapet coping
+        podium_front_coping = Prism(
+            dimensions=[4.92, 0.10, 0.14],
+            fill_color=HERO_FACADE,
+            fill_opacity=1.0,
+            stroke_width=0,
+        ).move_to([0.0, -1.90, 1.92])
+
+        all_static_mobjects.extend([
+            podium_left_wall, podium_right_wall, podium_back_wall,
+            podium_roof_rear, podium_roof_front, t1_base_collar, podium_front_coping
+        ])
 
         # Podium right wall windows (visible during orbital establishing shot)
         pod_ys = np.linspace(-1.20, 1.20, 4)
@@ -487,18 +517,18 @@ class BuildingFlyIn(SafeThreeDScene):
         ).move_to([0.0, -2.20, 1.42])
 
         # Canopy underside warm illumination light strip
-        canopy_glow = make_window_poly([0.0, -2.20, 1.39], 2.10, 0.70, "+Z", CANOPY_LIGHT, opacity=0.92)
+        canopy_glow = make_window_poly([0.0, -2.20, 1.38], 2.10, 0.70, "+Z", CANOPY_LIGHT, opacity=0.92)
 
         # Glass doors in opening (semi-transparent)
         glass_l = make_window_poly([-0.38, -1.84, 0.70], 0.75, 1.38, "-Y", GLASS_DOORS, opacity=0.25)
         glass_r = make_window_poly([ 0.38, -1.84, 0.70], 0.75, 1.38, "-Y", GLASS_DOORS, opacity=0.25)
 
-        # Front wall windows on left and right piers
+        # Front wall windows on left and right piers (offset 0.08 in front of Y = -1.90 wall face to prevent z-fighting)
         front_pod_wins = []
         for fwx in (-1.85, -1.35, 1.35, 1.85):
             for fwz in (0.65, 1.15):
                 c = pick_window_color(rng)
-                front_pod_wins.append(make_window_poly(np.array([fwx, -1.905, fwz]), 0.32, 0.30, "-Y", c))
+                front_pod_wins.append(make_window_poly(np.array([fwx, -1.98, fwz]), 0.32, 0.30, "-Y", c))
         total_window_count += len(front_pod_wins)
 
         # Collect all front elements into the dissolve group
@@ -513,23 +543,22 @@ class BuildingFlyIn(SafeThreeDScene):
         # ---------------------------------------------------------------------
         # 1. Lobby Floor Slab & Ceiling Underside
         lobby_floor = make_window_poly([0.0, 0.0, 0.02], 4.6, 3.6, "+Z", LOBBY_FLOOR, opacity=1.0)
-        lobby_ceiling = make_window_poly([0.0, 0.0, 1.785], 4.6, 3.6, "+Z", LOBBY_CEILING, opacity=1.0)
+        lobby_ceiling = make_window_poly([0.0, 0.25, 1.76], 4.6, 3.1, "+Z", LOBBY_CEILING, opacity=1.0)
         all_static_mobjects.extend([lobby_floor, lobby_ceiling])
 
         # 2. Warm Floor Light Reflection Pools (sells the inviting interior glow)
-        pool_entrance = make_window_poly([0.0, -0.90, 0.025], 2.0, 1.10, "+Z", LOBBY_POOL_1, opacity=0.48)
-        pool_reception = make_window_poly([0.0, -0.15, 0.026], 1.8, 0.85, "+Z", LOBBY_POOL_2, opacity=0.55)
-        pool_elevators = make_window_poly([0.0,  1.15, 0.027], 2.4, 0.75, "+Z", LOBBY_POOL_1, opacity=0.50)
-        pool_lounge = make_window_poly([-1.40,  0.25, 0.028], 1.0, 1.10, "+Z", LOBBY_POOL_2, opacity=0.42)
+        pool_entrance = make_window_poly([0.0, -0.90, 0.05], 2.0, 1.10, "+Z", LOBBY_POOL_1, opacity=0.48)
+        pool_reception = make_window_poly([0.0, -0.15, 0.05], 1.8, 0.85, "+Z", LOBBY_POOL_2, opacity=0.55)
+        pool_elevators = make_window_poly([0.0,  1.15, 0.05], 2.4, 0.75, "+Z", LOBBY_POOL_1, opacity=0.50)
+        pool_lounge = make_window_poly([-1.40,  0.25, 0.05], 1.0, 1.10, "+Z", LOBBY_POOL_2, opacity=0.42)
         all_static_mobjects.extend([pool_entrance, pool_reception, pool_elevators, pool_lounge])
 
         # 3. Ceiling Light Fixtures (bright glowing panels)
-        ceil_troffer_c = make_window_poly([ 0.0, 0.0, 1.780], 0.45, 2.60, "+Z", CEILING_LIGHT_HI, opacity=0.98)
-        ceil_troffer_l = make_window_poly([-1.1, 0.0, 1.780], 0.35, 2.60, "+Z", CEILING_LIGHT, opacity=0.95)
-        ceil_troffer_r = make_window_poly([ 1.1, 0.0, 1.780], 0.35, 2.60, "+Z", CEILING_LIGHT, opacity=0.95)
-        ceil_cross_f = make_window_poly([0.0, -1.0, 1.778], 2.60, 0.30, "+Z", CEILING_LIGHT, opacity=0.90)
-        ceil_cross_b = make_window_poly([0.0,  1.0, 1.778], 2.60, 0.30, "+Z", CEILING_LIGHT, opacity=0.90)
-        all_static_mobjects.extend([ceil_troffer_c, ceil_troffer_l, ceil_troffer_r, ceil_cross_f, ceil_cross_b])
+        ceil_troffer_c = make_window_poly([ 0.0, 0.25, 1.75], 0.45, 2.20, "+Z", CEILING_LIGHT_HI, opacity=0.98)
+        ceil_troffer_l = make_window_poly([-1.1, 0.25, 1.75], 0.35, 2.20, "+Z", CEILING_LIGHT, opacity=0.95)
+        ceil_troffer_r = make_window_poly([ 1.1, 0.25, 1.75], 0.35, 2.20, "+Z", CEILING_LIGHT, opacity=0.95)
+        ceil_cross_b = make_window_poly([0.0,  1.0, 1.75], 2.60, 0.30, "+Z", CEILING_LIGHT, opacity=0.90)
+        all_static_mobjects.extend([ceil_troffer_c, ceil_troffer_l, ceil_troffer_r, ceil_cross_b])
 
         # 4. Lobby Columns (4 cylindrical pillars with brass trim rings, resolution 8x8)
         col_coords = [
@@ -541,12 +570,13 @@ class BuildingFlyIn(SafeThreeDScene):
         for col_x, col_y in col_coords:
             col_shaft = Cylinder(
                 radius=0.10,
-                height=1.74,
+                height=1.66,
                 resolution=(8, 8),
                 fill_color=COLUMN_BODY,
+                checkerboard_colors=[COLUMN_BODY, COLUMN_BODY],
                 fill_opacity=1.0,
                 stroke_width=0,
-            ).move_to([col_x, col_y, 0.88])
+            ).move_to([col_x, col_y, 0.84])
             col_shaft.shade_in_3d = True
 
             col_base = Prism(
@@ -561,7 +591,7 @@ class BuildingFlyIn(SafeThreeDScene):
                 fill_color=COLUMN_TRIM,
                 fill_opacity=1.0,
                 stroke_width=0,
-            ).move_to([col_x, col_y, 1.725])
+            ).move_to([col_x, col_y, 1.68])
             all_static_mobjects.extend([col_shaft, col_base, col_cap])
 
         # 5. Reception Desk & Backlit Onyx Glow Feature
@@ -572,7 +602,7 @@ class BuildingFlyIn(SafeThreeDScene):
             stroke_width=0,
         ).move_to([0.0, 0.25, 0.22])
 
-        desk_glow_panel = make_window_poly([0.0, -0.005, 0.21], 1.40, 0.34, "-Y", RECEPTION_GLOW, opacity=0.95)
+        desk_glow_panel = make_window_poly([0.0, -0.03, 0.21], 1.40, 0.34, "-Y", RECEPTION_GLOW, opacity=0.95)
 
         desk_top = Prism(
             dimensions=[1.54, 0.54, 0.04],
@@ -588,7 +618,7 @@ class BuildingFlyIn(SafeThreeDScene):
             stroke_width=0,
         ).move_to([0.25, 0.28, 0.54])
 
-        terminal_glow = make_window_poly([0.25, 0.255, 0.54], 0.20, 0.13, "-Y", TERMINAL_SCREEN, opacity=0.90)
+        terminal_glow = make_window_poly([0.25, 0.24, 0.54], 0.20, 0.13, "-Y", TERMINAL_SCREEN, opacity=0.90)
         all_static_mobjects.extend([desk_body, desk_glow_panel, desk_top, terminal_housing, terminal_glow])
 
         # 6. Lounge Seating Blocks (Left) & Planter (Right)
@@ -611,6 +641,7 @@ class BuildingFlyIn(SafeThreeDScene):
             height=0.28,
             resolution=(6, 6),
             fill_color="#3E2723",
+            checkerboard_colors=["#3E2723", "#3E2723"],
             fill_opacity=1.0,
             stroke_width=0,
         ).move_to([1.50, 0.25, 0.14])
@@ -620,6 +651,7 @@ class BuildingFlyIn(SafeThreeDScene):
             radius=0.22,
             resolution=(8, 8),
             fill_color=PLANT_LEAVES,
+            checkerboard_colors=[PLANT_LEAVES, PLANT_LEAVES],
             fill_opacity=1.0,
             stroke_width=0,
         ).move_to([1.50, 0.25, 0.40])
@@ -650,7 +682,7 @@ class BuildingFlyIn(SafeThreeDScene):
                 stroke_width=0,
             ).move_to([ed_x, 1.68, 0.65])
 
-            door_slit = make_window_poly([ed_x, 1.655, 0.65], 0.016, 1.14, "-Y", ELEVATOR_SEAM, opacity=0.95)
+            door_slit = make_window_poly([ed_x, 1.635, 0.65], 0.016, 1.14, "-Y", ELEVATOR_SEAM, opacity=0.95)
             floor_display = make_window_poly([ed_x, 1.670, 1.30], 0.18, 0.06, "-Y", ELEVATOR_INDIC, opacity=0.96)
             all_static_mobjects.extend([door_prism, door_slit, floor_display])
 
