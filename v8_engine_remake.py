@@ -1032,7 +1032,9 @@ class V8EngineRemake(SafeThreeDScene):
 
         cap_replicate = caption_top("4 ข้อเหวี่ยง × 2 สูบต่อข้อ = 8 สูบในความยาวเครื่องเท่ากับ 4 สูบเรียง", color=OK)
         self.hud(cap_replicate)
-        self.play(Transform(shot3_cap, cap_replicate), run_time=0.6)
+        # Cross-fade captions with different glyph counts; morphing Text objects
+        # causes Thai glyphs to spread during interpolation.
+        self.play(FadeOut(shot3_cap), FadeIn(cap_replicate), run_time=0.6)
 
         replicated_pairs = []
         for t_idx in [1, 2, 3]:
