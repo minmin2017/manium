@@ -9,17 +9,22 @@ Fully implements V8_REMAKE_DESIGN.md following mlib.py and Manim CE standards.
   throw terminate at that exact same physical point at all times.
 - Exact slider-crank displacement consistent with shared pin; rod length remains
   identically ROD_L across all master crank angles.
+- Fully synchronized visible crankshaft rotation: whenever theta changes,
+  visible webs, pins, counterweights, and journals rotate around the Y axis
+  with the exact same signed angle (phi = base - theta) in the same frame.
 - All geometry contract assertions enforced at module load.
 - 5 comprehensive pedagogical shots covering:
     1. Hook: 8 pistons, 1 crankshaft, solid to translucent reveal.
     2. Atomic unit: 4-stroke cycle with physical valve/particle changes,
-       720° circular timeline, force-to-torque causal vectors.
+       720° circular timeline, force-to-torque causal vectors, and synchronously
+       rotating single-throw crank assembly.
     3. Why the V exists: end-on 90° proving shot (phi≈88°, theta≈-83°),
        Bank L/R labels, causal replication along crankshaft.
     4. Staggered firing: 720° divided among 8 cylinders, Coyote firing rail,
-       live torque vs crank angle comparison (1 cylinder vs 8 cylinders).
-    5. Payoff: mechanical energy path highlight, high-speed running finale,
-       3-line summary card.
+       live torque vs crank angle comparison, and fully synchronized full-engine
+       rotation without cumulative drift.
+    5. Payoff: mechanical energy path highlight, synchronized high-speed running
+       finale with full mechanism, and 3-line summary card.
 """
 
 from manim import *
@@ -62,7 +67,7 @@ assert np.isclose(U_L[0], -U_R[0]) and np.isclose(U_L[2], U_R[2]), "Banks must b
 THROWS_Y = np.array([-2.25, -0.75, 0.75, 2.25])
 assert np.allclose(np.diff(THROWS_Y), 1.5), "Throw spacing must be uniform at 1.5"
 
-# Cross-plane throw angles in X-Z plane around crank axis (Y axis)
+# Cross-plane throw base angles in X-Z plane around crank axis (Y axis)
 # Viewed down Y axis: angles form a 90-degree cross pattern
 # Throw 0: 45° (aligned with Bank R at theta=0)
 # Throw 1: -45° (aligned with Bank L at theta=0)
@@ -130,7 +135,7 @@ COLOR_CRANK = "#78909C"        # Crankshaft steel
 
 
 # ==============================================================================
-# 2. SHARED-CRANKPIN SLIDER-CRANK KINEMATICS
+# 2. SHARED-CRANKPIN SLIDER-CRANK KINEMATICS & DETERMINISTIC CRANK ROTATION
 # ==============================================================================
 
 def get_throw_crankpin_pos(theta_rad, t_idx):
@@ -160,6 +165,40 @@ def get_piston_wrist_pos(pin_pos, t_idx, bank_u):
     return np.array([0.0, y_val, 0.0]) + s * bank_u
 
 
+def set_crankshaft_angle(crank_mob, target_theta_rad):
+    """
+    Deterministically updates crankshaft rotation around Y axis to match target_theta_rad:
+    Crankpin trajectory uses phi = base - theta_rad.
+    Rotating by -delta around +Y matches this transformation with zero cumulative drift.
+    """
+    current = getattr(crank_mob, "_current_angle", 0.0)
+    delta = target_theta_rad - current
+    if abs(delta) > 1e-12:
+        crank_mob.rotate(-delta, axis=np.array([0.0, 1.0, 0.0]), about_point=ORIGIN)
+        crank_mob._current_angle = target_theta_rad
+
+
+def update_v8_mechanism(crankshaft, pistons, rods, wrist_dots, crank_deg):
+    """
+    Synchronously updates the entire V8 mechanism for crank angle crank_deg:
+    1. Rotates visible crankshaft around Y axis by (-theta_rad) relative to base angle.
+    2. Updates all 8 piston positions along their respective bank axes.
+    3. Updates all 8 connecting rods to terminate at the exact shared crankpin for each throw.
+    4. Updates wristpin markers.
+    """
+    theta_rad = np.radians(crank_deg)
+    set_crankshaft_angle(crankshaft, theta_rad)
+    throw_pins = [get_throw_crankpin_pos(theta_rad, t) for t in range(4)]
+
+    for cid, (_, t_idx, u_vec) in CYLINDER_SPECS.items():
+        pp = throw_pins[t_idx]
+        pw = get_piston_wrist_pos(pp, t_idx, u_vec)
+
+        pistons[cid].move_to(pw + 0.17 * u_vec)
+        rods[cid].put_start_and_end_on(pp, pw)
+        wrist_dots[cid].move_to(pw)
+
+
 # ==============================================================================
 # 3. MODULE-LEVEL NUMERIC ASSERTIONS PROVING MECHANICAL FIDELITY
 # ==============================================================================
@@ -173,11 +212,9 @@ assert np.isclose(
 for _deg in np.linspace(0.0, 720.0, 145):
     _th = np.radians(_deg)
     for _t in range(4):
-        # Physical crankpin for this throw
         _pin_shared = get_throw_crankpin_pos(_th, _t)
 
         # (1) L/R crankpin coordinates on each throw are identical
-        # Cylinders sharing throw _t are (_t + 1) for Bank R and (_t + 5) for Bank L
         _pin_R = _pin_shared
         _pin_L = _pin_shared
         assert np.array_equal(_pin_L, _pin_R), f"Throw {_t}: L and R crankpins must be identical"
@@ -210,6 +247,7 @@ def build_crankshaft():
     Constructs the 3D cross-plane crankshaft assembly:
     main journals along Y axis, 4 throws, counterweights, and rear flywheel.
     Each crankpin is positioned exactly at THROW_BASE_ANGLES.
+    Stores .pins list for programmatic inspection and verification.
     """
     crank_group = Group()
 
@@ -223,6 +261,7 @@ def build_crankshaft():
     ).move_to(ORIGIN)
     crank_group.add(main_shaft)
 
+    pins = []
     # Crank webs and counterweights at each throw
     for t_idx, y_val in enumerate(THROWS_Y):
         angle = THROW_BASE_ANGLES[t_idx]
@@ -250,6 +289,7 @@ def build_crankshaft():
         web.set_color("#607D8B")
 
         crank_group.add(pin, cweight, web)
+        pins.append(pin)
 
     # Rear flywheel at y = 2.85
     flywheel = Cylinder(
@@ -261,7 +301,56 @@ def build_crankshaft():
     ).move_to(np.array([0.0, 2.85, 0.0]))
     crank_group.add(flywheel)
 
+    crank_group.pins = pins
+    crank_group._current_angle = 0.0
     return crank_group
+
+
+def build_single_throw_assembly(t_idx=0):
+    """
+    Constructs a visible rotating single-throw crank assembly for Shot 2.
+    Includes main shaft journal, crankpin, web, and counterweight.
+    """
+    y_val = THROWS_Y[t_idx]
+    angle = THROW_BASE_ANGLES[t_idx]
+    pin_dir = np.array([np.sin(angle), 0.0, np.cos(angle)])
+
+    throw_group = Group()
+
+    # Main journal shaft segment
+    journal = Cylinder(
+        radius=0.15,
+        height=1.2,
+        direction=np.array([0.0, 1.0, 0.0]),
+        resolution=(8, 8),
+        color=COLOR_CRANK,
+    ).move_to(np.array([0.0, y_val, 0.0]))
+
+    # Crankpin
+    pin = Cylinder(
+        radius=0.13,
+        height=0.36,
+        direction=np.array([0.0, 1.0, 0.0]),
+        resolution=(8, 8),
+        color="#B0BEC5",
+    ).move_to(np.array([0.0, y_val, 0.0]) + CRANK_R * pin_dir)
+
+    # Counterweight
+    cweight = Prism(
+        dimensions=[0.24, 0.38, 0.65]
+    ).move_to(np.array([0.0, y_val, 0.0]) - (CRANK_R * 0.7) * pin_dir)
+    cweight.set_color("#455A64")
+
+    # Crank web
+    web = Prism(
+        dimensions=[0.18, 0.16, CRANK_R * 1.8]
+    ).move_to(np.array([0.0, y_val, 0.0]) + (CRANK_R * 0.2) * pin_dir)
+    web.set_color("#607D8B")
+
+    throw_group.add(journal, pin, cweight, web)
+    throw_group.pin = pin
+    throw_group._current_angle = 0.0
+    return throw_group
 
 
 def build_engine_block(opacity=0.30):
@@ -332,7 +421,24 @@ def build_piston_assembly(bank_u):
 
 
 # ==============================================================================
-# 5. SCENE CLASS: V8EngineRemake
+# 5. NUMERICAL NON-RENDER VERIFICATION (VISIBLE CRANKPINS MATCH KINEMATICS)
+# ==============================================================================
+
+# Verify that transforming visible crankshaft by set_crankshaft_angle produces
+# pin centers matching get_throw_crankpin_pos across multiple sample angles
+_test_crank = build_crankshaft()
+for _deg_test in np.linspace(0.0, 720.0, 37):
+    _th_test = np.radians(_deg_test)
+    set_crankshaft_angle(_test_crank, _th_test)
+    for _t_test in range(4):
+        _vis_pin = _test_crank.pins[_t_test].get_center()
+        _math_pin = get_throw_crankpin_pos(_th_test, _t_test)
+        _err = np.linalg.norm(_vis_pin - _math_pin)
+        assert _err < 1e-10, f"Visible pin mismatch on throw {_t_test} at {_deg_test}°: {_err}"
+
+
+# ==============================================================================
+# 6. SCENE CLASS: V8EngineRemake
 # ==============================================================================
 
 class V8EngineRemake(SafeThreeDScene):
@@ -504,20 +610,13 @@ class V8EngineRemake(SafeThreeDScene):
         ).move_to(np.array([0.0, y_val, 0.0]) + 1.48 * u_vec)
         cyl_sleeve.set_opacity(0.22)
 
-        # Single crank throw assembly
-        crank_journal = Cylinder(
-            radius=0.15,
-            height=1.2,
-            direction=np.array([0.0, 1.0, 0.0]),
-            resolution=(8, 8),
-            color=COLOR_CRANK,
-        ).move_to(np.array([0.0, y_val, 0.0]))
+        # Visible single crank throw assembly that rotates with the rod
+        single_crank_throw = build_single_throw_assembly(t_idx=0)
 
         # Piston and connecting rod
         piston = build_piston_assembly(u_vec)
         rod = line3(ORIGIN, ORIGIN, color="#FFFFFF", thickness=0.07)
         wrist_pin = Dot(ORIGIN, radius=0.07, color="#B0BEC5")
-        crank_pin = Dot(ORIGIN, radius=0.08, color="#90A4AE")
 
         # Cylinder head assembly: Valves & Spark plug
         head_pos = np.array([0.0, y_val, 0.0]) + (ROD_L + CRANK_R + 0.42) * u_vec
@@ -558,7 +657,7 @@ class V8EngineRemake(SafeThreeDScene):
         chamber_glow.set_opacity(0.0)
 
         single_cyl_group = Group(
-            cyl_sleeve, crank_journal, piston, rod, wrist_pin, crank_pin,
+            cyl_sleeve, single_crank_throw, piston, rod, wrist_pin,
             spark_group, intake_valve, exhaust_valve, chamber_glow
         )
         self.add(single_cyl_group)
@@ -605,7 +704,6 @@ class V8EngineRemake(SafeThreeDScene):
         tl_center = np.array([4.8, -0.8, 0.0])
         tl_radius = 1.05
 
-        # 4 Quadrants on 360-degree HUD ring representing 720 degrees (each quadrant = 180°)
         arc_intake = Arc(radius=tl_radius, start_angle=90.0 * DEGREES, angle=-90.0 * DEGREES, arc_center=tl_center, color=COLOR_INTAKE, stroke_width=6)
         arc_comp = Arc(radius=tl_radius, start_angle=0.0 * DEGREES, angle=-90.0 * DEGREES, arc_center=tl_center, color=COLOR_COMPRESSION, stroke_width=6)
         arc_power = Arc(radius=tl_radius, start_angle=-90.0 * DEGREES, angle=-90.0 * DEGREES, arc_center=tl_center, color=COLOR_POWER, stroke_width=6)
@@ -624,14 +722,14 @@ class V8EngineRemake(SafeThreeDScene):
         self.hud(timeline_hud)
         self.play(FadeIn(timeline_hud), run_time=0.8)
 
-        # Kinematic updater using shared crankpin on Throw 0
+        # Fully synchronized updater: rotates single crank throw and moves rod/piston
         def update_single_cylinder(theta_val):
+            set_crankshaft_angle(single_crank_throw, theta_val)
             pp = get_throw_crankpin_pos(theta_val, 0)
             pw = get_piston_wrist_pos(pp, 0, u_vec)
             piston.move_to(pw + 0.17 * u_vec)
             rod.put_start_and_end_on(pp, pw)
             wrist_pin.move_to(pw)
-            crank_pin.move_to(pp)
 
         update_single_cylinder(0.0)
 
@@ -649,14 +747,14 @@ class V8EngineRemake(SafeThreeDScene):
         self.play(
             FadeIn(cap_intake),
             arc_intake.animate.set_stroke(width=10, opacity=1.0),
-            intake_valve.animate.shift(-0.16 * u_vec),  # Valve opens
+            intake_valve.animate.shift(-0.16 * u_vec),
             run_time=0.6,
         )
 
         p_target = head_pos - 0.3 * u_vec
         self.play(
             UpdateFromAlphaFunc(
-                piston,
+                single_cyl_group,
                 lambda m, a: update_single_cylinder(a * np.pi),
             ),
             chamber_glow.animate.set_opacity(0.35).set_color(COLOR_INTAKE),
@@ -665,7 +763,7 @@ class V8EngineRemake(SafeThreeDScene):
             rate_func=linear,
         )
         self.play(
-            intake_valve.animate.shift(0.16 * u_vec),  # Valve closes at BDC
+            intake_valve.animate.shift(0.16 * u_vec),
             FadeOut(intake_particles),
             FadeOut(cap_intake),
             arc_intake.animate.set_stroke(width=5, opacity=0.4),
@@ -686,7 +784,7 @@ class V8EngineRemake(SafeThreeDScene):
 
         self.play(
             UpdateFromAlphaFunc(
-                piston,
+                single_cyl_group,
                 lambda m, a: update_single_cylinder(np.pi + a * np.pi),
             ),
             chamber_glow.animate.set_color(COLOR_COMPRESSION).scale(0.6).shift(0.08 * u_vec),
@@ -729,7 +827,7 @@ class V8EngineRemake(SafeThreeDScene):
         # Piston descends to peak lever-arm moment (~90° after spark = 450° crank angle)
         self.play(
             UpdateFromAlphaFunc(
-                piston,
+                single_cyl_group,
                 lambda m, a: update_single_cylinder(2.0 * np.pi + a * (0.5 * np.pi)),
             ),
             run_time=1.2,
@@ -766,7 +864,7 @@ class V8EngineRemake(SafeThreeDScene):
             FadeOut(vec_f_rod), FadeOut(lbl_f_rod),
             FadeOut(torque_arc), FadeOut(lbl_torque),
             UpdateFromAlphaFunc(
-                piston,
+                single_cyl_group,
                 lambda m, a: update_single_cylinder(2.5 * np.pi + a * (0.5 * np.pi)),
             ),
             chamber_glow.animate.set_opacity(0.4).scale(1.2),
@@ -793,7 +891,7 @@ class V8EngineRemake(SafeThreeDScene):
         self.play(
             FadeIn(cap_exhaust),
             arc_exhaust.animate.set_stroke(width=10, opacity=1.0),
-            exhaust_valve.animate.shift(-0.16 * u_vec),  # Exhaust valve opens
+            exhaust_valve.animate.shift(-0.16 * u_vec),
             FadeIn(exhaust_particles),
             run_time=0.6,
         )
@@ -801,7 +899,7 @@ class V8EngineRemake(SafeThreeDScene):
         p_ex_exit = exhaust_pos_closed + np.array([0.0, -0.4, 0.4])
         self.play(
             UpdateFromAlphaFunc(
-                piston,
+                single_cyl_group,
                 lambda m, a: update_single_cylinder(3.0 * np.pi + a * np.pi),
             ),
             chamber_glow.animate.set_opacity(0.0),
@@ -811,7 +909,7 @@ class V8EngineRemake(SafeThreeDScene):
         )
 
         self.play(
-            exhaust_valve.animate.shift(0.16 * u_vec),  # Valve closes at TDC
+            exhaust_valve.animate.shift(0.16 * u_vec),
             FadeOut(exhaust_particles),
             FadeOut(cap_exhaust),
             arc_exhaust.animate.set_stroke(width=5, opacity=0.4),
@@ -857,7 +955,7 @@ class V8EngineRemake(SafeThreeDScene):
         sleeve_r = Cylinder(radius=0.41, height=1.5, direction=U_R, resolution=(8, 8), color="#90A4AE").move_to(1.48 * U_R + np.array([0, y_val, 0])).set_opacity(0.25)
         sleeve_l = Cylinder(radius=0.41, height=1.5, direction=U_L, resolution=(8, 8), color="#90A4AE").move_to(1.48 * U_L + np.array([0, y_val, 0])).set_opacity(0.25)
 
-        crank_throw_0 = Cylinder(radius=0.16, height=0.6, direction=np.array([0, 1, 0]), resolution=(8, 8), color=COLOR_CRANK).move_to(np.array([0, y_val, 0]))
+        crank_throw_0 = build_single_throw_assembly(t_idx=0)
 
         v_pair_0 = Group(sleeve_r, sleeve_l, piston_r, piston_l, rod_r, rod_l, crank_throw_0)
         self.add(v_pair_0)
@@ -1099,21 +1197,8 @@ class V8EngineRemake(SafeThreeDScene):
         engine_3d = Group(block_trans, crankshaft, sleeves, *pistons.values(), *rods.values(), *wrist_dots.values(), *chamber_flashes.values())
         self.add(engine_3d)
 
-        # Master updater: exactly ONE crankpin per throw, shared by both L and R cylinders
-        def update_all_cylinders(crank_deg):
-            theta_rad = np.radians(crank_deg)
-            # Precompute shared crankpins for all 4 throws
-            throw_pins = [get_throw_crankpin_pos(theta_rad, t) for t in range(4)]
-
-            for cid, (_, t_idx, u_vec) in CYLINDER_SPECS.items():
-                pp = throw_pins[t_idx]  # Exact shared crankpin
-                pw = get_piston_wrist_pos(pp, t_idx, u_vec)
-
-                pistons[cid].move_to(pw + 0.17 * u_vec)
-                rods[cid].put_start_and_end_on(pp, pw)
-                wrist_dots[cid].move_to(pw)
-
-        update_all_cylinders(0.0)
+        # Initialize full mechanism at theta=0
+        update_v8_mechanism(crankshaft, pistons, rods, wrist_dots, 0.0)
 
         # Tracking cursor on torque chart
         cursor_line = line3(np.array([c_x_min, c_y_base, 0.0]), np.array([c_x_min, c_y_base + c_y_height, 0.0]), color=YELLOW, thickness=0.025)
@@ -1121,6 +1206,7 @@ class V8EngineRemake(SafeThreeDScene):
         self.add(cursor_line)
 
         # Animate master crank through 720 degrees, stepping through all 8 firing events
+        # In each step, crankshaft webs/pins and all 8 rods/pistons update in strict lockstep
         for step_idx, cyl_fire in enumerate(FIRING_ORDER):
             deg_start = step_idx * 90.0
             deg_end = (step_idx + 1) * 90.0
@@ -1136,7 +1222,7 @@ class V8EngineRemake(SafeThreeDScene):
                 pistons[cyl_fire].animate.set_color(COLOR_ACTIVE),
                 UpdateFromAlphaFunc(
                     engine_3d,
-                    lambda m, a: update_all_cylinders(deg_start + a * 90.0),
+                    lambda m, a: update_v8_mechanism(crankshaft, pistons, rods, wrist_dots, deg_start + a * 90.0),
                 ),
                 UpdateFromAlphaFunc(
                     cursor_line,
@@ -1195,13 +1281,28 @@ class V8EngineRemake(SafeThreeDScene):
         crankshaft = build_crankshaft()
         sleeves = build_cylinder_sleeves()
 
-        y_t0 = THROWS_Y[0]
-        pp0 = get_throw_crankpin_pos(0.0, 0)
-        pw0 = get_piston_wrist_pos(pp0, 0, U_R)
-        piston1 = build_piston_assembly(U_R).move_to(pw0 + 0.17 * U_R)
-        rod1 = line3(pp0, pw0, color="#FFFFFF", thickness=0.075)
+        # Build full set of 8 pistons and rods for synchronized finale
+        pistons = {}
+        rods = {}
+        wrist_dots = {}
+        pins_th0 = [get_throw_crankpin_pos(0.0, t) for t in range(4)]
 
-        self.add(block, crankshaft, sleeves, piston1, rod1)
+        for cyl_id, (_, t_idx, u_vec) in CYLINDER_SPECS.items():
+            pp = pins_th0[t_idx]
+            pw = get_piston_wrist_pos(pp, t_idx, u_vec)
+            p = build_piston_assembly(u_vec).move_to(pw + 0.17 * u_vec)
+            r = line3(pp, pw, color="#FFFFFF", thickness=0.065)
+            wd = Dot(pw, radius=0.06, color="#B0BEC5")
+            pistons[cyl_id] = p
+            rods[cyl_id] = r
+            wrist_dots[cyl_id] = wd
+
+        engine_full = Group(block, crankshaft, sleeves, *pistons.values(), *rods.values(), *wrist_dots.values())
+        self.add(engine_full)
+
+        y_t0 = THROWS_Y[0]
+        pp0 = pins_th0[0]
+        pw0 = get_piston_wrist_pos(pp0, 0, U_R)
 
         # Moving highlight along literal connected components:
         # Step 1: Expanding gas at crown
@@ -1223,7 +1324,7 @@ class V8EngineRemake(SafeThreeDScene):
         self.play(FadeIn(glow_rod), FadeIn(lbl_step3), run_time=0.7)
 
         # Step 4: Crankshaft torque
-        torque_ring = Arc(radius=0.48, start_angle=0.0, angle=270.0 * DEGREES, color=TORQUE, stroke_width=6)
+        torque_ring = Arc(radius=0.48, start_angle=45.0 * DEGREES, angle=-270.0 * DEGREES, color=TORQUE, stroke_width=6)
         torque_ring.rotate(90.0 * DEGREES, axis=RIGHT).move_to(np.array([0.0, y_t0, 0.0]))
         lbl_step4 = Text("4. เกิดทอร์กหมุนเพลา", font_size=17, color=TORQUE).move_to(np.array([-3.8, 0.3, 0.0]))
         self.hud(lbl_step4)
@@ -1248,15 +1349,18 @@ class V8EngineRemake(SafeThreeDScene):
             run_time=0.6,
         )
 
-        # Smooth high-speed running finale with slow ambient rotation
+        # Smooth high-speed running finale with synchronized full-mechanism update
         cap_smooth = caption_top("เมื่อ 8 สูบทำงานประสานกัน เพลาข้อเหวี่ยงจึงได้รับแรงขับเคลื่อนที่สม่ำเสมอและทรงพลัง", color=WHITE)
         self.hud(cap_smooth)
         self.play(FadeIn(cap_smooth), block.animate.set_opacity(0.65), run_time=0.8)
 
-        # Fast rotation with ambient beauty orbit
+        # Fast rotation with ambient beauty orbit: fully synchronized update of all 8 cylinders and crankshaft
         self.begin_ambient_camera_rotation(rate=0.18)
         self.play(
-            crankshaft.animate.rotate(4.0 * TAU, axis=np.array([0.0, 1.0, 0.0]), about_point=ORIGIN),
+            UpdateFromAlphaFunc(
+                engine_full,
+                lambda m, a: update_v8_mechanism(crankshaft, pistons, rods, wrist_dots, a * 4.0 * 360.0),
+            ),
             run_time=3.2,
             rate_func=linear,
         )
