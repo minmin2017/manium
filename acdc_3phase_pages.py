@@ -484,92 +484,230 @@ class Page09Scene(SafeScene):
 # ==============================================================================
 class Page10Scene(SafeScene):
     def construct(self):
-        pref = page_ref("หน้า 10 · กราฟและกระแสอ้างอิง")
-        ttl = title("Circuit Currents and Waveform Correlation")
-        cap = caption_top("ดูการไหลของกระแสจริงเทียบกับรูปคลื่น: ไดโอดผลัดกันนำตัวละ 120°")
+        pref = page_ref("หน้า 10 · แบบจำลองกระแสและแรงดันทีละขณะ")
+        ttl = title("3-Phase Bridge: Current Simulator (6 Steps)")
+        cap = caption_top("จำลองการทำงานจริงทีละ 60°: วงจรทางซ้าย + กราฟตรงกลาง + ตารางสถานะทางขวา")
         self.play(FadeIn(pref), FadeIn(ttl), FadeIn(cap), run_time=0.8)
-        self.wait(1.2)
+        self.wait(1.5)
         self.play(FadeOut(cap), run_time=0.3)
 
-        # 1. Circuit diagram on Left
-        top_y, bot_y, mid_y = 1.0, -1.6, -0.3
-        r_top = Line([-5.5, top_y, 0], [-1.5, top_y, 0], color=EMF, stroke_width=3)
-        r_bot = Line([-5.5, bot_y, 0], [-1.5, bot_y, 0], color=FIELD, stroke_width=3)
-        lbl_vplus = MathTex("v^+", color=EMF, font_size=20).next_to(r_top, UP, buff=0.06)
-        lbl_vminus = MathTex("v^-", color=FIELD, font_size=20).next_to(r_bot, DOWN, buff=0.06)
+        # -------------------------------------------------------------
+        # 1. Left 45%: 6-Diode Bridge Circuit (x center ~ -3.8)
+        # -------------------------------------------------------------
+        top_y, bot_y, mid_y = 1.0, -1.8, -0.4
+        r_top = Line([-6.2, top_y, 0], [-1.8, top_y, 0], color=EMF, stroke_width=3)
+        r_bot = Line([-6.2, bot_y, 0], [-1.8, bot_y, 0], color=FIELD, stroke_width=3)
+        lbl_vp = MathTex("v^+", color=EMF, font_size=20).next_to(r_top, UP, buff=0.06)
+        lbl_vm = MathTex("v^-", color=FIELD, font_size=20).next_to(r_bot, DOWN, buff=0.06)
 
-        xs = [-4.7, -3.7, -2.7]
-        wires, diodes = VGroup(), VGroup()
-        for i, x in enumerate(xs):
-            w_vert = Line([x, top_y, 0], [x, bot_y, 0], color=GRAYTXT, stroke_width=1.5)
-            dt = Triangle(color=WHITE, fill_opacity=0.3, fill_color=GRAY).scale(0.13).rotate(PI/2).move_to([x, (top_y + mid_y)/2, 0])
-            db = Triangle(color=WHITE, fill_opacity=0.3, fill_color=GRAY).scale(0.13).rotate(PI/2).move_to([x, (mid_y + bot_y)/2, 0])
-            wires.add(w_vert)
-            diodes.add(dt, db)
+        # 3 Phase inputs: a(red), b(blue), c(green)
+        xs = [-5.2, -4.0, -2.8]
+        src_dots = [
+            Dot([-6.0, 0.4, 0], color=PHASE_A, radius=0.1),
+            Dot([-6.0, -0.4, 0], color=PHASE_B, radius=0.1),
+            Dot([-6.0, -1.2, 0], color=PHASE_C, radius=0.1)
+        ]
+        lbl_a = Text("a", font_size=15, color=PHASE_A).next_to(src_dots[0], LEFT, buff=0.06)
+        lbl_b = Text("b", font_size=15, color=PHASE_B).next_to(src_dots[1], LEFT, buff=0.06)
+        lbl_c = Text("c", font_size=15, color=PHASE_C).next_to(src_dots[2], LEFT, buff=0.06)
 
-        load_box = Rectangle(width=0.45, height=1.1, color=WHITE, fill_color=METAL, fill_opacity=0.3).move_to([-1.5, mid_y, 0])
-        w_lt = Line([-1.5, top_y, 0], load_box.get_top(), color=EMF)
-        w_lb = Line([-1.5, bot_y, 0], load_box.get_bottom(), color=FIELD)
-        load_lbl = Text("Load", font_size=14, color=WHITE).move_to(load_box)
-        cir_grp = VGroup(r_top, r_bot, lbl_vplus, lbl_vminus, wires, diodes, load_box, w_lt, w_lb, load_lbl)
-        self.play(FadeIn(cir_grp), run_time=1.0)
+        # Connect source dots to limb centers
+        w_ina = Line(src_dots[0].get_center(), [xs[0], 0.4, 0], color=PHASE_A, stroke_width=2)
+        w_inb = Line(src_dots[1].get_center(), [xs[1], -0.4, 0], color=PHASE_B, stroke_width=2)
+        w_inc = Line(src_dots[2].get_center(), [xs[2], -1.2, 0], color=PHASE_C, stroke_width=2)
 
-        # 2. Waveforms on Right
-        ax_v = Axes(x_range=[0, TAU, PI/3], y_range=[-1.5, 1.8, 1], x_length=6.0, y_length=1.8, tips=False).move_to([3.4, 0.7, 0])
-        lbl_ax_v = Text("v_dc (Voltage)", font_size=15, color=VDC_COL).next_to(ax_v, UP, buff=0.08)
+        # Limbs with correct numbering:
+        # Upper: D1(a), D3(b), D5(c)
+        # Lower: D4(a), D6(b), D2(c)
+        wires = VGroup()
+        for x in xs:
+            wires.add(Line([x, top_y, 0], [x, bot_y, 0], color=GRAYTXT, stroke_width=1.5))
+
+        d_t = [
+            Triangle(color=WHITE, fill_opacity=0.3, fill_color=GRAY).scale(0.13).rotate(PI/2).move_to([xs[0], (top_y+0.4)/2, 0]),
+            Triangle(color=WHITE, fill_opacity=0.3, fill_color=GRAY).scale(0.13).rotate(PI/2).move_to([xs[1], (top_y-0.4)/2, 0]),
+            Triangle(color=WHITE, fill_opacity=0.3, fill_color=GRAY).scale(0.13).rotate(PI/2).move_to([xs[2], (top_y-1.2)/2, 0])
+        ]
+        d_b = [
+            Triangle(color=WHITE, fill_opacity=0.3, fill_color=GRAY).scale(0.13).rotate(PI/2).move_to([xs[0], (0.4+bot_y)/2, 0]),
+            Triangle(color=WHITE, fill_opacity=0.3, fill_color=GRAY).scale(0.13).rotate(PI/2).move_to([xs[1], (-0.4+bot_y)/2, 0]),
+            Triangle(color=WHITE, fill_opacity=0.3, fill_color=GRAY).scale(0.13).rotate(PI/2).move_to([xs[2], (-1.2+bot_y)/2, 0])
+        ]
+
+        t_d1 = MathTex("D_1", font_size=16, color=WHITE).next_to(d_t[0], RIGHT, buff=0.05)
+        t_d3 = MathTex("D_3", font_size=16, color=WHITE).next_to(d_t[1], RIGHT, buff=0.05)
+        t_d5 = MathTex("D_5", font_size=16, color=WHITE).next_to(d_t[2], RIGHT, buff=0.05)
+        t_d4 = MathTex("D_4", font_size=16, color=WHITE).next_to(d_b[0], RIGHT, buff=0.05)
+        t_d6 = MathTex("D_6", font_size=16, color=WHITE).next_to(d_b[1], RIGHT, buff=0.05)
+        t_d2 = MathTex("D_2", font_size=16, color=WHITE).next_to(d_b[2], RIGHT, buff=0.05)
+
+        # Load
+        l_box = Rectangle(width=0.45, height=1.1, color=WHITE, fill_color=METAL, fill_opacity=0.3).move_to([-1.8, mid_y, 0])
+        w_lt = Line([-1.8, top_y, 0], l_box.get_top(), color=EMF)
+        w_lb = Line([-1.8, bot_y, 0], l_box.get_bottom(), color=FIELD)
+        l_txt = Text("Load", font_size=14, color=WHITE).move_to(l_box)
+
+        circuit_grp = VGroup(r_top, r_bot, lbl_vp, lbl_vm, *src_dots, lbl_a, lbl_b, lbl_c,
+                             w_ina, w_inb, w_inc, wires, *d_t, *d_b,
+                             t_d1, t_d3, t_d5, t_d4, t_d6, t_d2, l_box, w_lt, w_lb, l_txt)
+        self.play(FadeIn(circuit_grp), run_time=1.0)
+
+        # -------------------------------------------------------------
+        # 2. Centre 25%: Waveform Plot (x ~ 0.5)
+        # -------------------------------------------------------------
+        ax_w = Axes(x_range=[0, TAU, PI/3], y_range=[-1.4, 1.6, 1], x_length=4.0, y_length=2.8, tips=False).move_to([0.5, -0.4, 0])
+        lbl_vo = MathTex("v_o", font_size=18, color=VDC_COL).next_to(ax_w, UP, buff=0.08)
 
         def env_func(t):
             t_mod = (t - PI/6) % (PI/3)
-            return np.sqrt(3) * np.cos(t_mod - PI/6)
-        v_env = ax_v.plot(env_func, x_range=[0, TAU], color=VDC_COL, stroke_width=3.0, use_smoothing=False)
+            return np.sqrt(3) * np.cos(t_mod - PI/6) * 0.7
+        v_trace = ax_w.plot(env_func, x_range=[0, TAU], color=VDC_COL, stroke_width=2.5, use_smoothing=False)
 
-        ax_i = Axes(x_range=[0, TAU, PI/3], y_range=[-1.2, 1.2, 1], x_length=6.0, y_length=1.8, tips=False).move_to([3.4, -1.3, 0])
-        lbl_ax_i = Text("i_D1 and i_a (Currents)", font_size=15, color=WARN).next_to(ax_i, UP, buff=0.08)
+        cursor = DashedLine(ax_w.c2p(PI/6, -1.3), ax_w.c2p(PI/6, 1.5), color=WHITE, stroke_width=2)
+        self.play(Create(ax_w), Create(v_trace), FadeIn(lbl_vo), Create(cursor), run_time=1.0)
 
-        p_id1 = ax_i.plot_line_graph(
-            x_values=[0, PI/6, PI/6, 5*PI/6, 5*PI/6, TAU],
-            y_values=[0, 0, 0.8, 0.8, 0, 0],
-            line_color=WARN, add_vertex_dots=False
-        )
-        t_id1 = MathTex(r"i_{D1} \text{ (120 deg)}", font_size=17, color=WARN).next_to(ax_i.c2p(PI/2, 0.8), UP, buff=0.05)
+        # -------------------------------------------------------------
+        # 3. Right 30%: Live Truth Panel (x ~ 4.8)
+        # -------------------------------------------------------------
+        p_box = RoundedRectangle(width=4.4, height=3.2, corner_radius=0.12, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.6).move_to([4.8, -0.4, 0])
+        p_ttl = Text("ตารางสถานะจริง (Truth Panel)", font_size=17, color=WHITE).move_to(p_box.get_top() + DOWN * 0.3)
+        self.play(FadeIn(p_box), FadeIn(p_ttl), run_time=0.6)
 
-        p_ia = ax_i.plot_line_graph(
+        # Step definitions
+        # 1: 0-60°: D1+D6, vo=vab
+        # 2: 60-120°: D1+D2, vo=vac
+        # 3: 120-180°: D3+D2, vo=vbc
+        # 4: 180-240°: D3+D4, vo=vba
+        # 5: 240-300°: D5+D4, vo=vca
+        # 6: 300-360°: D5+D6, vo=vcb
+        steps = [
+            {"cap": "ช่วง 1 (0–60°): เฟส a สูงสุด, เฟส b ต่ำสุด -> D1 และ D6 นำ", "t_x": PI/6,
+             "on": (0, 1), "dt": (d_t[0], d_b[1]), "txt": (t_d1, t_d6),
+             "max": "a", "min": "b", "d_in": "D1", "d_out": "D6", "vo": "v_{ab}", "ia": "+i_D",
+             "path": [[xs[0], 0.4, 0], [xs[0], top_y, 0], [-1.8, top_y, 0], [-1.8, bot_y, 0], [xs[1], bot_y, 0], [xs[1], -0.4, 0]]},
+            {"cap": "ช่วง 2 (60–120°): เฟส a สูงสุด, เฟส c ต่ำสุด -> สลับล่างเป็น D2 (D1+D2)", "t_x": PI/2,
+             "on": (0, 2), "dt": (d_t[0], d_b[2]), "txt": (t_d1, t_d2),
+             "max": "a", "min": "c", "d_in": "D1", "d_out": "D2", "vo": "v_{ac}", "ia": "+i_D",
+             "path": [[xs[0], 0.4, 0], [xs[0], top_y, 0], [-1.8, top_y, 0], [-1.8, bot_y, 0], [xs[2], bot_y, 0], [xs[2], -1.2, 0]]},
+            {"cap": "ช่วง 3 (120–180°): เฟส b สูงสุด, เฟส c ต่ำสุด -> สลับบนเป็น D3 (D3+D2)", "t_x": 5*PI/6,
+             "on": (1, 2), "dt": (d_t[1], d_b[2]), "txt": (t_d3, t_d2),
+             "max": "b", "min": "c", "d_in": "D3", "d_out": "D2", "vo": "v_{bc}", "ia": "0",
+             "path": [[xs[1], -0.4, 0], [xs[1], top_y, 0], [-1.8, top_y, 0], [-1.8, bot_y, 0], [xs[2], bot_y, 0], [xs[2], -1.2, 0]]},
+            {"cap": "ช่วง 4 (180–240°): เฟส b สูงสุด, เฟส a ต่ำสุด -> สลับล่างเป็น D4 (D3+D4)", "t_x": 7*PI/6,
+             "on": (1, 0), "dt": (d_t[1], d_b[0]), "txt": (t_d3, t_d4),
+             "max": "b", "min": "a", "d_in": "D3", "d_out": "D4", "vo": "v_{ba}", "ia": "-i_D",
+             "path": [[xs[1], -0.4, 0], [xs[1], top_y, 0], [-1.8, top_y, 0], [-1.8, bot_y, 0], [xs[0], bot_y, 0], [xs[0], 0.4, 0]]},
+            {"cap": "ช่วง 5 (240–300°): เฟส c สูงสุด, เฟส a ต่ำสุด -> สลับบนเป็น D5 (D5+D4)", "t_x": 9*PI/6,
+             "on": (2, 0), "dt": (d_t[2], d_b[0]), "txt": (t_d5, t_d4),
+             "max": "c", "min": "a", "d_in": "D5", "d_out": "D4", "vo": "v_{ca}", "ia": "-i_D",
+             "path": [[xs[2], -1.2, 0], [xs[2], top_y, 0], [-1.8, top_y, 0], [-1.8, bot_y, 0], [xs[0], bot_y, 0], [xs[0], 0.4, 0]]},
+            {"cap": "ช่วง 6 (300–360°): เฟส c สูงสุด, เฟส b ต่ำสุด -> สลับล่างเป็น D6 (D5+D6)", "t_x": 11*PI/6,
+             "on": (2, 1), "dt": (d_t[2], d_b[1]), "txt": (t_d5, t_d6),
+             "max": "c", "min": "b", "d_in": "D5", "d_out": "D6", "vo": "v_{cb}", "ia": "0",
+             "path": [[xs[2], -1.2, 0], [xs[2], top_y, 0], [-1.8, top_y, 0], [-1.8, bot_y, 0], [xs[1], bot_y, 0], [xs[1], -0.4, 0]]}
+        ]
+
+        active_path = VMobject()
+        current_panel = VGroup()
+
+        for s in steps:
+            cap_step = caption_top(s["cap"])
+            self.play(FadeIn(cap_step), run_time=0.3)
+
+            # Reset all diodes
+            for d in d_t + d_b:
+                d.set_fill(GRAY, opacity=0.3)
+            # Highlight active 2 diodes in yellow
+            s["dt"][0].set_fill(PATH_ACT, opacity=1.0)
+            s["dt"][1].set_fill(PATH_ACT, opacity=1.0)
+
+            # Highlight path
+            new_path = VMobject()
+            new_path.set_points_as_corners(s["path"])
+            new_path.set_color(PATH_ACT).set_stroke(width=4.5)
+
+            # Cursor move
+            new_cur = DashedLine(ax_w.c2p(s["t_x"], -1.3), ax_w.c2p(s["t_x"], 1.5), color=WHITE, stroke_width=2)
+
+            # Update truth panel
+            row1 = Text(f"เฟส: บวกสุด {s['max']} / ลบสุด {s['min']}", font_size=15, color=WHITE).move_to([4.8, 0.4, 0])
+            row2 = Text(f"ไดโอด: {s['d_in']} (เข้า) + {s['d_out']} (กลับ)", font_size=15, color=PATH_ACT).move_to([4.8, -0.1, 0])
+            row3 = MathTex(f"v_o = {s['vo']}", font_size=20, color=VDC_COL).move_to([4.8, -0.6, 0])
+            row4 = MathTex(f"i_a = {s['ia']}", font_size=18, color=PHASE_A).move_to([4.8, -1.1, 0])
+            new_panel = VGroup(row1, row2, row3, row4)
+
+            self.play(
+                Transform(active_path, new_path),
+                Transform(cursor, new_cur),
+                Transform(current_panel, new_panel),
+                run_time=0.8
+            )
+            self.wait(1.5)
+            self.play(FadeOut(cap_step), run_time=0.2)
+
+        self.play(FadeOut(active_path), FadeOut(current_panel), FadeOut(p_box), FadeOut(p_ttl), FadeOut(cursor), FadeOut(ax_w), FadeOut(v_trace), FadeOut(lbl_vo), run_time=0.5)
+
+        # -------------------------------------------------------------
+        # 4. Deep-dive: ia Current waveform explanation (+Io / 0 / -Io)
+        # -------------------------------------------------------------
+        cap_ia = caption_top("ทำไมกระแสสาย ia ถึงมีทั้งบวก ศูนย์ และลบ? (วิเคราะห์กิ่งเฟส a)")
+        self.play(FadeIn(cap_ia), run_time=0.4)
+
+        ax_ia = Axes(x_range=[0, TAU, PI/3], y_range=[-1.2, 1.2, 1], x_length=6.0, y_length=2.4, tips=False).move_to([3.4, -0.3, 0])
+        lbl_ax_ia = MathTex("i_a \text{ (Phase a Line Current)}", font_size=18, color=PHASE_A).next_to(ax_ia, UP, buff=0.1)
+
+        p_ia_cur = ax_ia.plot_line_graph(
             x_values=[0, PI/6, PI/6, 5*PI/6, 5*PI/6, 7*PI/6, 7*PI/6, 11*PI/6, 11*PI/6, TAU],
-            y_values=[0, 0, 0.5, 0.5, 0, 0, -0.5, -0.5, 0, 0],
+            y_values=[0, 0, 0.7, 0.7, 0, 0, -0.7, -0.7, 0, 0],
             line_color=PHASE_A, add_vertex_dots=False
         )
-        t_ia = MathTex(r"i_a \text{ (AC)}", font_size=17, color=PHASE_A).next_to(ax_i.c2p(9*PI/6, -0.5), DOWN, buff=0.05)
 
-        self.play(Create(ax_v), Create(v_env), FadeIn(lbl_ax_v),
-                  Create(ax_i), Create(p_id1), Create(p_ia), FadeIn(lbl_ax_i), FadeIn(t_id1), FadeIn(t_ia), run_time=1.4)
+        self.play(Create(ax_ia), Create(p_ia_cur), FadeIn(lbl_ax_ia), run_time=1.0)
 
-        # 3. Animate Current Flow & Loop through D1 and D5
-        cap_flow = caption_top("ช่วงที่ 1: กระแสไหลวนลูป (เหลือง) ผ่าน D1 -> Load -> กลับทาง D5")
-        diodes[0].set_fill(WARN, opacity=1.0)
-        diodes[3].set_fill(WARN, opacity=1.0)
+        # Highlight D1 conducting (ia > 0)
+        d_t[0].set_fill(PATH_ACT, opacity=1.0)
+        t_d1_box = SurroundingRectangle(d_t[0], color=WARN_NEG, buff=0.08)
+        c_ia1 = caption_top("เมื่อ D1 นำ 120°: กระแสไหล 'ออกจากเฟส a' เข้าโหลด -> ia เป็นบวก (+iD)")
+        self.play(Transform(cap_ia, c_ia1), Create(t_d1_box), run_time=0.8)
+        self.wait(1.8)
 
-        path_loop = VMobject()
-        path_loop.set_points_as_corners([
-            [-4.7, 0.3, 0], [-4.7, top_y, 0], [-1.5, top_y, 0],
-            [-1.5, bot_y, 0], [-3.7, bot_y, 0], [-3.7, -0.4, 0]
-        ])
-        path_loop.set_color(WARN)
-        path_loop.set_stroke(width=4)
+        # Highlight Zero current
+        d_t[0].set_fill(GRAY, opacity=0.3)
+        self.play(FadeOut(t_d1_box), run_time=0.2)
+        c_ia2 = caption_top("ช่วง 60° ถัดมา: ทั้ง D1 และ D4 ดับสนิท -> ไม่มีกระแสไหลผ่านสาย a (ia = 0)")
+        self.play(Transform(cap_ia, c_ia2), run_time=0.8)
+        self.wait(1.5)
 
-        cursor_v = DashedLine(ax_v.c2p(PI/3, -1.2), ax_v.c2p(PI/3, 1.8), color=WHITE, stroke_width=2)
-        cursor_i = DashedLine(ax_i.c2p(PI/3, -1.2), ax_i.c2p(PI/3, 1.2), color=WHITE, stroke_width=2)
+        # Highlight D4 conducting (ia < 0)
+        d_b[0].set_fill(PATH_ACT, opacity=1.0)
+        t_d4_box = SurroundingRectangle(d_b[0], color=WARN_NEG, buff=0.08)
+        c_ia3 = caption_top("เมื่อ D4 นำ 120°: กระแสไหล 'จากโหลดกลับเข้าเฟส a' -> ia มีค่าติดลบ (-iD)")
+        self.play(Transform(cap_ia, c_ia3), Create(t_d4_box), run_time=0.8)
+        self.wait(1.8)
 
-        self.play(FadeIn(cap_flow), Create(path_loop), Create(cursor_v), Create(cursor_i), run_time=1.2)
-        self.wait(2.0)
+        self.play(FadeOut(t_d4_box), FadeOut(cap_ia), FadeOut(circuit_grp), FadeOut(ax_ia), FadeOut(p_ia_cur), FadeOut(lbl_ax_ia), run_time=0.5)
 
-        # 4. Filter effect explanation
-        self.play(FadeOut(cap_flow), run_time=0.3)
-        cap_filt = caption_top("เมื่อมีตัวเหนี่ยวนำ L กรองกระแส: กระแสโหลดจะเรียบเป็นสี่เหลี่ยมเป๊ะๆ")
-        box_summary = RoundedRectangle(width=6.0, height=0.9, corner_radius=0.1, color=OK, fill_color=BLACK, fill_opacity=0.6).move_to([3.4, -0.3, 0])
-        t_sum = Text("L ต้านการเปลี่ยนกระแส -> บังคับ i_D และ i_a ให้เป็นแท่งสี่เหลี่ยมสมบูรณ์", font_size=16, color=OK).move_to(box_summary)
-        self.play(FadeIn(cap_filt), FadeIn(box_summary), FadeIn(t_sum), run_time=1.0)
-        self.wait(2.2)
+        # -------------------------------------------------------------
+        # 5. Recap Card & Check-yourself Question
+        # -------------------------------------------------------------
+        cap_end = caption_top("สรุปจำแม่นยำ & คำถามเช็กความเข้าใจ")
+        self.play(FadeIn(cap_end), run_time=0.4)
 
+        card_recap = VGroup(
+            Text("• D1 นำ -> ia เป็นบวก (+Io) : กระแสจ่ายออกจากสาย a", font_size=17, color=WHITE),
+            Text("• D4 นำ -> ia เป็นลบ (-Io) : กระแสรับกลับเข้าสาย a", font_size=17, color=WHITE),
+            Text("• ไม่ใช่ทั้ง D1/D4 -> ia เป็นศูนย์ (0) : ไดโอดกิ่ง a ดับสนิท", font_size=17, color=WHITE),
+            Text("• แต่ละไดโอดนำ 120° แต่สลับผลัดกะกันทุก 60°", font_size=17, color=OK)
+        ).arrange(DOWN, buff=0.12, aligned_edge=LEFT)
+
+        q_box = RoundedRectangle(width=9.6, height=1.6, corner_radius=0.15, color=WARN, fill_color=BLACK, fill_opacity=0.5)
+        q_txt = Text("คำถาม: ช่วงที่ D3 และ D4 นำพร้อมกัน vo เท่ากับเท่าไร และ ia มีค่าเป็นอย่างไร?", font_size=17, color=WARN).move_to(q_box.get_top() + DOWN * 0.35)
+        a_txt = Text("เฉลย: vo = vba และ ia < 0 (ติดลบ) เพราะกระแสไหลกลับเข้าสาย a ผ่าน D4!", font_size=17, color=OK).next_to(q_txt, DOWN, buff=0.18)
+        q_grp = VGroup(q_box, q_txt, a_txt)
+
+        final_grp = VGroup(card_recap, q_grp).arrange(DOWN, buff=0.35).move_to([0, -0.3, 0])
+        self.play(FadeIn(final_grp), run_time=1.0)
+        self.wait(3.0)
         self.fade_out_all(run_time=0.6)
 
 
