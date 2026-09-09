@@ -485,44 +485,91 @@ class Page09Scene(SafeScene):
 class Page10Scene(SafeScene):
     def construct(self):
         pref = page_ref("หน้า 10 · กราฟและกระแสอ้างอิง")
-        ttl = title("Circuit Currents & Reference Waveforms")
-        cap = caption_top("วิเคราะห์กระแส: แต่ละไดโอดนำกระแสเป็นพัลส์สี่เหลี่ยมกว้าง 120°")
+        ttl = title("Circuit Currents and Waveform Correlation")
+        cap = caption_top("ดูการไหลของกระแสจริงเทียบกับรูปคลื่น: ไดโอดผลัดกันนำตัวละ 120°")
         self.play(FadeIn(pref), FadeIn(ttl), FadeIn(cap), run_time=0.8)
-        self.wait(1.5)
-        self.play(FadeOut(cap), run_time=0.4)
+        self.wait(1.2)
+        self.play(FadeOut(cap), run_time=0.3)
 
-        cap_diag = caption_top("กระแสไดโอด iD1 นำ 120° ส่วนกระแสสาย ia เป็น AC สองทิศทางบวก-ลบ")
-        self.play(FadeIn(cap_diag), run_time=0.4)
+        # 1. Circuit diagram on Left
+        top_y, bot_y, mid_y = 1.0, -1.6, -0.3
+        r_top = Line([-5.5, top_y, 0], [-1.5, top_y, 0], color=EMF, stroke_width=3)
+        r_bot = Line([-5.5, bot_y, 0], [-1.5, bot_y, 0], color=FIELD, stroke_width=3)
+        lbl_vplus = MathTex("v^+", color=EMF, font_size=20).next_to(r_top, UP, buff=0.06)
+        lbl_vminus = MathTex("v^-", color=FIELD, font_size=20).next_to(r_bot, DOWN, buff=0.06)
 
-        axes = Axes(x_range=[0, TAU + 0.1, PI/3], y_range=[-1.2, 1.2, 1], x_length=8.5, y_length=2.4, tips=False).move_to([0, 0.5, 0])
-        self.play(Create(axes), run_time=0.8)
+        xs = [-4.7, -3.7, -2.7]
+        wires, diodes = VGroup(), VGroup()
+        for i, x in enumerate(xs):
+            w_vert = Line([x, top_y, 0], [x, bot_y, 0], color=GRAYTXT, stroke_width=1.5)
+            dt = Triangle(color=WHITE, fill_opacity=0.3, fill_color=GRAY).scale(0.13).rotate(PI/2).move_to([x, (top_y + mid_y)/2, 0])
+            db = Triangle(color=WHITE, fill_opacity=0.3, fill_color=GRAY).scale(0.13).rotate(PI/2).move_to([x, (mid_y + bot_y)/2, 0])
+            wires.add(w_vert)
+            diodes.add(dt, db)
 
-        p_id1 = axes.plot_line_graph(
+        load_box = Rectangle(width=0.45, height=1.1, color=WHITE, fill_color=METAL, fill_opacity=0.3).move_to([-1.5, mid_y, 0])
+        w_lt = Line([-1.5, top_y, 0], load_box.get_top(), color=EMF)
+        w_lb = Line([-1.5, bot_y, 0], load_box.get_bottom(), color=FIELD)
+        load_lbl = Text("Load", font_size=14, color=WHITE).move_to(load_box)
+        cir_grp = VGroup(r_top, r_bot, lbl_vplus, lbl_vminus, wires, diodes, load_box, w_lt, w_lb, load_lbl)
+        self.play(FadeIn(cir_grp), run_time=1.0)
+
+        # 2. Waveforms on Right
+        ax_v = Axes(x_range=[0, TAU, PI/3], y_range=[-1.5, 1.8, 1], x_length=6.0, y_length=1.8, tips=False).move_to([3.4, 0.7, 0])
+        lbl_ax_v = Text("v_dc (Voltage)", font_size=15, color=VDC_COL).next_to(ax_v, UP, buff=0.08)
+
+        def env_func(t):
+            t_mod = (t - PI/6) % (PI/3)
+            return np.sqrt(3) * np.cos(t_mod - PI/6)
+        v_env = ax_v.plot(env_func, x_range=[0, TAU], color=VDC_COL, stroke_width=3.0, use_smoothing=False)
+
+        ax_i = Axes(x_range=[0, TAU, PI/3], y_range=[-1.2, 1.2, 1], x_length=6.0, y_length=1.8, tips=False).move_to([3.4, -1.3, 0])
+        lbl_ax_i = Text("i_D1 and i_a (Currents)", font_size=15, color=WARN).next_to(ax_i, UP, buff=0.08)
+
+        p_id1 = ax_i.plot_line_graph(
             x_values=[0, PI/6, PI/6, 5*PI/6, 5*PI/6, TAU],
-            y_values=[0, 0, 0.9, 0.9, 0, 0],
+            y_values=[0, 0, 0.8, 0.8, 0, 0],
             line_color=WARN, add_vertex_dots=False
         )
-        lbl_id1 = MathTex(r"i_{D1} \text{ (120 deg)}", font_size=20, color=WARN).next_to(axes.c2p(PI/2, 0.9), UP, buff=0.08)
+        t_id1 = MathTex(r"i_{D1} \text{ (120 deg)}", font_size=17, color=WARN).next_to(ax_i.c2p(PI/2, 0.8), UP, buff=0.05)
 
-        p_ia = axes.plot_line_graph(
+        p_ia = ax_i.plot_line_graph(
             x_values=[0, PI/6, PI/6, 5*PI/6, 5*PI/6, 7*PI/6, 7*PI/6, 11*PI/6, 11*PI/6, TAU],
-            y_values=[0, 0, 0.6, 0.6, 0, 0, -0.6, -0.6, 0, 0],
+            y_values=[0, 0, 0.5, 0.5, 0, 0, -0.5, -0.5, 0, 0],
             line_color=PHASE_A, add_vertex_dots=False
         )
-        lbl_ia = MathTex(r"i_a \text{ (AC line current)}", font_size=20, color=PHASE_A).next_to(axes.c2p(9*PI/6, -0.6), DOWN, buff=0.08)
+        t_ia = MathTex(r"i_a \text{ (AC)}", font_size=17, color=PHASE_A).next_to(ax_i.c2p(9*PI/6, -0.5), DOWN, buff=0.05)
 
-        self.play(Create(p_id1), FadeIn(lbl_id1), run_time=1.0)
-        self.play(Create(p_ia), FadeIn(lbl_ia), run_time=1.0)
-        self.wait(1.5)
+        self.play(Create(ax_v), Create(v_env), FadeIn(lbl_ax_v),
+                  Create(ax_i), Create(p_id1), Create(p_ia), FadeIn(lbl_ax_i), FadeIn(t_id1), FadeIn(t_ia), run_time=1.4)
 
-        summary_p10 = VGroup(
-            Text("1. ไดโอดแต่ละตัวนำกระแส 1 ใน 3 ของคาบ (120°)", font_size=18, color=WHITE),
-            Text("2. กระแสสาย ac ไม่มีองค์ประกอบ DC (สมมาตรบวก-ลบอย่างสมบูรณ์)", font_size=18, color=WHITE),
-            Text("3. เมื่อต่อ Filter L-C กระแสเอาต์พุต io จะเรียบสม่ำเสมอยิ่งขึ้น", font_size=18, color=OK)
-        ).arrange(DOWN, buff=0.12, aligned_edge=LEFT).move_to([0, -2.1, 0])
+        # 3. Animate Current Flow & Loop through D1 and D5
+        cap_flow = caption_top("ช่วงที่ 1: กระแสไหลวนลูป (เหลือง) ผ่าน D1 -> Load -> กลับทาง D5")
+        diodes[0].set_fill(WARN, opacity=1.0)
+        diodes[3].set_fill(WARN, opacity=1.0)
 
-        self.play(FadeIn(summary_p10), run_time=0.9)
-        self.wait(2.5)
+        path_loop = VMobject()
+        path_loop.set_points_as_corners([
+            [-4.7, 0.3, 0], [-4.7, top_y, 0], [-1.5, top_y, 0],
+            [-1.5, bot_y, 0], [-3.7, bot_y, 0], [-3.7, -0.4, 0]
+        ])
+        path_loop.set_color(WARN)
+        path_loop.set_stroke(width=4)
+
+        cursor_v = DashedLine(ax_v.c2p(PI/3, -1.2), ax_v.c2p(PI/3, 1.8), color=WHITE, stroke_width=2)
+        cursor_i = DashedLine(ax_i.c2p(PI/3, -1.2), ax_i.c2p(PI/3, 1.2), color=WHITE, stroke_width=2)
+
+        self.play(FadeIn(cap_flow), Create(path_loop), Create(cursor_v), Create(cursor_i), run_time=1.2)
+        self.wait(2.0)
+
+        # 4. Filter effect explanation
+        self.play(FadeOut(cap_flow), run_time=0.3)
+        cap_filt = caption_top("เมื่อมีตัวเหนี่ยวนำ L กรองกระแส: กระแสโหลดจะเรียบเป็นสี่เหลี่ยมเป๊ะๆ")
+        box_summary = RoundedRectangle(width=6.0, height=0.9, corner_radius=0.1, color=OK, fill_color=BLACK, fill_opacity=0.6).move_to([3.4, -0.3, 0])
+        t_sum = Text("L ต้านการเปลี่ยนกระแส -> บังคับ i_D และ i_a ให้เป็นแท่งสี่เหลี่ยมสมบูรณ์", font_size=16, color=OK).move_to(box_summary)
+        self.play(FadeIn(cap_filt), FadeIn(box_summary), FadeIn(t_sum), run_time=1.0)
+        self.wait(2.2)
+
         self.fade_out_all(run_time=0.6)
 
 
