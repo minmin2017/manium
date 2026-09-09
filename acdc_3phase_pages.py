@@ -5,13 +5,15 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(__file__))
 from mlib import *
 
-# Palette for 3-Phase
-PHASE_A  = "#42A5F5"   # ฟ้า
-PHASE_B  = "#FFA726"   # ส้ม
-PHASE_C  = "#66BB6A"   # เขียว
-VDC_COL  = "#FFD54F"   # ทอง/เหลือง
-DIODE_ON = "#26C6DA"   # เขียวอมฟ้า นำกระแส
+# Palette for 3-Phase (Authoritative Visual Language)
+PHASE_A  = "#EF5350"   # แดง (Phase a)
+PHASE_B  = "#42A5F5"   # น้ำเงิน/ฟ้า (Phase b)
+PHASE_C  = "#66BB6A"   # เขียว (Phase c)
+VDC_COL  = "#FF9800"   # ส้ม (vdc / output)
+PATH_ACT = "#FFD54F"   # เหลือง (Active current path)
+WARN_NEG = "#E91E63"   # Magenta-red (Danger / Negative voltage)
 DIODE_OFF= "#78909C"   # เทา ดับ
+DIODE_ON = "#FFD54F"   # เหลือง นำกระแส
 
 
 # ==============================================================================
