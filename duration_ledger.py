@@ -49,6 +49,16 @@ def analyze_scene_duration(file_path):
                                 total_duration += run_time
                                 events.append(("fade_out_all", run_time))
 
+                            # check self.move_camera(...)
+                            elif isinstance(stmt.func, ast.Attribute) and stmt.func.attr == "move_camera":
+                                run_time = 1.0 # manim default
+                                for kw in stmt.keywords:
+                                    if kw.arg == "run_time":
+                                        if isinstance(kw.value, ast.Constant):
+                                            run_time = float(kw.value.value)
+                                total_duration += run_time
+                                events.append(("move_camera", run_time))
+
             if events:
                 scene_durations[class_name] = (total_duration, events)
 

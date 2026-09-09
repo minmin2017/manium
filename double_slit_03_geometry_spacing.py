@@ -138,7 +138,7 @@ class DS05_GeometryDerivation(SafeScene):
         cap_trig = caption_top("การฉายเรขาคณิต: ด้านตรงข้ามมุม theta คือ Delta r ด้านตรงข้ามมุมฉากคือ d")
         self.play(ReplacementTransform(cap3, cap_trig), run_time=1.0)
 
-        proof_trig = MathTex("\\sin\\theta = \\frac{\\text{ด้านตรงข้าม}}{\\text{ด้านตรงข้ามมุมฉาก}} = \\frac{\\Delta r}{d} \\implies \\Delta r \\approx d\\sin\\theta", font_size=20, color=WHITE).move_to([2.0, -2.6, 0])
+        proof_trig = MathTex(r"\sin\theta = \frac{\Delta r}{d} \implies \Delta r \approx d\sin\theta", font_size=21, color=WHITE).move_to([2.0, -2.6, 0])
         self.play(FadeIn(proof_trig), run_time=1.5)
         self.wait(7.5)
 
@@ -265,7 +265,7 @@ class DS06_SmallAngleSpacing(SafeScene):
         deriv_box = RoundedRectangle(width=5.6, height=4.8, corner_radius=0.15, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.88).move_to([3.1, -0.2, 0])
 
         step1 = MathTex("\\tan\\theta = \\frac{y}{L}", font_size=20, color=WHITE).move_to([3.1, 1.7, 0])
-        step2 = MathTex("\\sin\\theta \\approx \\tan\\theta \\approx \\frac{y}{L} \\quad (\\text{เมื่อ } \\theta \\ll 1)", font_size=19, color=C_ANGLE).move_to([3.1, 1.05, 0])
+        step2 = MathTex(r"\sin\theta \approx \tan\theta \approx \frac{y}{L} \quad (\theta \ll 1)", font_size=19, color=C_ANGLE).move_to([3.1, 1.05, 0])
 
         self.play(
             FadeIn(deriv_box),

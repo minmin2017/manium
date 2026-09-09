@@ -441,27 +441,43 @@ class DS09_CausalSummary(SafeThreeDScene):
         self.play(FadeIn(dot_p0), FadeIn(lbl_p0), run_time=1.2)
         self.wait(4.0)
 
-        # 3. Master Prediction Review Cards with 3 Cycles (Micro-beat 3: ~20s)
-        cap_pred = self.hud(caption_top("สรุป 3 กฎทองทำนายผล: จดจำความสัมพันธ์เพื่อการใช้งานที่แม่นยำ"))
-        self.play(ReplacementTransform(cap_energy, cap_pred), run_time=1.0)
-        self.wait(3.0)
-
+        # 3. Master Prediction Review with 3 Question / Pause / Reveal Cycles (Micro-beat 3: ~33s)
         card_pred = RoundedRectangle(width=11.4, height=1.3, corner_radius=0.12, color=OK, fill_color=BLACK, fill_opacity=0.92).move_to([0, -2.5, 0])
         self.hud(card_pred)
 
-        txt_p1 = self.hud(Text("lambda ขึ้น: ริ้วบานออก (แปรผันตรง)", font_size=13.5, color=C_LAMBDA).move_to([-3.7, -2.5, 0]))
-        txt_p2 = self.hud(Text("L ขึ้น: ริ้วบานออก (แปรผันตรง)", font_size=13.5, color=C_L_DIST).move_to([0.0, -2.5, 0]))
-        txt_p3 = self.hud(Text("d ขึ้น: ริ้วบีบแคบลง (แปรผันผกผัน)", font_size=13.5, color=C_D_SLIT).move_to([3.7, -2.5, 0]))
+        txt_p1 = self.hud(Text("1. lambda ขึ้น: ริ้วบานออก (แปรผันตรง)", font_size=13.5, color=C_LAMBDA).move_to([-3.7, -2.5, 0]))
+        txt_p2 = self.hud(Text("2. L ขึ้น: ริ้วบานออก (แปรผันตรง)", font_size=13.5, color=C_L_DIST).move_to([0.0, -2.5, 0]))
+        txt_p3 = self.hud(Text("3. d ขึ้น: ริ้วบีบแคบลง (แปรผันผกผัน)", font_size=13.5, color=C_D_SLIT).move_to([3.7, -2.5, 0]))
 
-        self.play(
-            FadeIn(card_pred),
-            FadeIn(txt_p1), FadeIn(txt_p2), FadeIn(txt_p3),
-            run_time=1.5
-        )
-        self.wait(6.5)
+        # Cycle 1: lambda
+        cap_q1 = self.hud(caption_top("คำถามทบทวน 1: ถ้าเปลี่ยนไปใช้แสงความยาวคลื่น lambda มากขึ้น ริ้วจะเปลี่ยนอย่างไร?"))
+        self.play(ReplacementTransform(cap_energy, cap_q1), run_time=1.0)
+        self.wait(3.0)
+
+        cap_a1 = self.hud(caption_top("เฉลย: lambda เพิ่มขึ้น (ตัวเศษ) -> ริ้วบานกว้างออก (แปรผันตรง)"))
+        self.play(ReplacementTransform(cap_q1, cap_a1), FadeIn(card_pred), FadeIn(txt_p1), run_time=1.2)
+        self.wait(3.5)
+
+        # Cycle 2: L
+        cap_q2 = self.hud(caption_top("คำถามทบทวน 2: ถ้าเลื่อนฉากรับภาพ L ให้ห่างออกไป ริ้วจะเปลี่ยนอย่างไร?"))
+        self.play(ReplacementTransform(cap_a1, cap_q2), run_time=1.0)
+        self.wait(3.0)
+
+        cap_a2 = self.hud(caption_top("เฉลย: L เพิ่มขึ้น (ตัวเศษ) -> ริ้วบานกว้างออก (แปรผันตรง)"))
+        self.play(ReplacementTransform(cap_q2, cap_a2), FadeIn(txt_p2), run_time=1.2)
+        self.wait(3.5)
+
+        # Cycle 3: d
+        cap_q3 = self.hud(caption_top("คำถามทบทวน 3: ถ้าระยะห่างสลิตคู่ d กว้างขึ้น ริ้วจะเปลี่ยนอย่างไร?"))
+        self.play(ReplacementTransform(cap_a2, cap_q3), run_time=1.0)
+        self.wait(3.0)
+
+        cap_a3 = self.hud(caption_top("เฉลย: d เพิ่มขึ้น (ตัวหาร) -> ริ้วบีบแคบลง (แปรผันผกผัน)"))
+        self.play(ReplacementTransform(cap_q3, cap_a3), FadeIn(txt_p3), run_time=1.2)
+        self.wait(4.0)
 
         cap_final = self.hud(caption_top("เข้าใจคลื่น เข้าใจแสง: จากเรขาคณิตผลต่างเส้นทาง สู่ความเข้าใจธรรมชาติของเอกภพ"))
-        self.play(ReplacementTransform(cap_pred, cap_final), run_time=1.0)
+        self.play(ReplacementTransform(cap_a3, cap_final), run_time=1.0)
         self.wait(5.0)
 
         self.fade_out_all(run_time=1.0)
