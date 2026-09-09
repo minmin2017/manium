@@ -484,8 +484,8 @@ class Page09Scene(SafeScene):
 # ==============================================================================
 class Page10Scene(SafeScene):
     def construct(self):
-        pref = page_ref("หน้า 10 · แบบจำลองกระแสและแรงดันทีละขณะ")
-        ttl = title("3-Phase Bridge: Current Simulator (6 Steps)")
+        pref = page_ref("หน้า 10 · แบบจำลองกระแส", size=15)
+        ttl = title("3-Phase Bridge: Current Simulator (6 Steps)", size=22)
         cap = caption_top("จำลองการทำงานจริงทีละ 60°: วงจรทางซ้าย + กราฟตรงกลาง + ตารางสถานะทางขวา")
         self.play(FadeIn(pref), FadeIn(ttl), FadeIn(cap), run_time=0.8)
         self.wait(1.5)
