@@ -348,8 +348,8 @@ class Page06Scene(SafeScene):
         cap_math = caption_top("ขั้วบวกยังคงต่อกับ va แต่ขั้วลบย้ายไปต่อกับ vc")
         self.play(FadeIn(cap_math), run_time=0.4)
 
-        eq1 = MathTex(r"v^+ = v_a \quad \text{(ผ่าน } D_1 \text{)}", font_size=23, color=EMF).move_to([-3.0, -0.7, 0])
-        eq2 = MathTex(r"v^- = v_c \quad \text{(ผ่าน } D_6 \text{)}", font_size=23, color=FIELD).move_to([3.0, -0.7, 0])
+        eq1 = MathTex(r"v^+ = v_a \quad (\text{via } D_1)", font_size=23, color=EMF).move_to([-3.0, -0.7, 0])
+        eq2 = MathTex(r"v^- = v_c \quad (\text{via } D_6)", font_size=23, color=FIELD).move_to([3.0, -0.7, 0])
         eq_res = MathTex(r"v_{dc} = v_a - v_c = v_{ac}", font_size=30, color=VDC_COL).move_to([0, -1.6, 0])
 
         self.play(FadeIn(eq1), FadeIn(eq2), Write(eq_res), run_time=1.2)
@@ -382,8 +382,8 @@ class Page07Scene(SafeScene):
         cap_eq = caption_top("ขั้วบวกเปลี่ยนเป็น vb ขณะที่ขั้วลบยังคงเป็น vc")
         self.play(FadeIn(cap_eq), run_time=0.4)
 
-        eq1 = MathTex(r"v^+ = v_b \quad \text{(ผ่าน } D_2 \text{)}", font_size=23, color=EMF).move_to([-3.0, -0.7, 0])
-        eq2 = MathTex(r"v^- = v_c \quad \text{(ผ่าน } D_6 \text{)}", font_size=23, color=FIELD).move_to([3.0, -0.7, 0])
+        eq1 = MathTex(r"v^+ = v_b \quad (\text{via } D_2)", font_size=23, color=EMF).move_to([-3.0, -0.7, 0])
+        eq2 = MathTex(r"v^- = v_c \quad (\text{via } D_6)", font_size=23, color=FIELD).move_to([3.0, -0.7, 0])
         eq_res = MathTex(r"v_{dc} = v_b - v_c = v_{bc}", font_size=30, color=VDC_COL).move_to([0, -1.6, 0])
 
         self.play(FadeIn(eq1), FadeIn(eq2), Write(eq_res), run_time=1.2)
