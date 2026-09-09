@@ -2,9 +2,9 @@
 double_slit_04_lab_real.py
 Module 4: Young's Double-Slit Wave Interference
 Scenes:
-  - DS07_ParameterLab (Target: 90-120s, Planned: ~98s)
-  - DS08_SlitEnvelope (Target: 70-95s, Planned: ~82s)
-  - DS09_CausalSummary (Target: 35-55s, Planned: ~44s)
+  - DS07_ParameterLab (Target: >= 100s, Planned: ~105s)
+  - DS08_SlitEnvelope (Target: >= 80s, Planned: ~83s)
+  - DS09_CausalSummary (Target: >= 40s, Planned: ~52s)
 """
 
 import os
@@ -30,22 +30,22 @@ C_ENV     = "#AB47BC"  # Diffraction Envelope (Purple)
 
 class DS07_ParameterLab(SafeScene):
     """
-    Beat 7: Interactive Parameter Lab (~98s)
+    Beat 7: Interactive Parameter Lab (~105s)
     Locked Front-on screen view with parameter controls.
-    Tests:
+    Three prediction / change / ghost / graph-confirm cycles:
       1. lambda up (Red vs Green) -> wider fringe spacing Delta y.
       2. L up (Screen moved back) -> wider fringe spacing Delta y.
       3. d up (Slits further apart) -> narrower fringe spacing Delta y.
     Always preserves dashed gray ghost markers of baseline before each change.
     """
     def construct(self):
-        # 1. Setup & Baseline Ghost Markers (Micro-beat 1: ~18s)
+        # 1. Setup & Baseline Ghost Markers (Micro-beat 1: ~20s)
         pref = page_ref("Beat 7 · ห้องทดลองพารามิเตอร์")
         ttl = title("Interactive Parameter Lab: Delta y approx lambda L / d", size=24)
         cap1 = caption_top("ห้องทดลองพารามิเตอร์: ทดสอบผลของตัวแปร lambda, L, d ต่อระยะห่างริ้ว Delta y")
 
         self.play(FadeIn(pref), FadeIn(ttl), FadeIn(cap1), run_time=1.0)
-        self.wait(2.8)
+        self.wait(3.5)
 
         # Baseline Screen Representation at Left (x = -3.2, y = -0.8)
         scr_box = Rectangle(width=2.4, height=4.2, color=C_SCREEN, fill_opacity=0.9, fill_color=C_SCREEN).move_to([-3.2, -0.8, 0])
@@ -88,7 +88,7 @@ class DS07_ParameterLab(SafeScene):
 
         cap_ghost = caption_top("เส้นประสีเทา (Ghost) ถูกตรึงไว้เป็นตำแหน่งอ้างอิงเดิม เพื่อสังเกตการเปลี่ยนแปลงชัดเจน")
         self.play(ReplacementTransform(cap1, cap_ghost), run_time=1.0)
-        self.wait(3.5)
+        self.wait(4.0)
 
         card_vars = RoundedRectangle(width=5.0, height=1.6, corner_radius=0.1, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.85).move_to([3.3, -0.4, 0])
         txt_v1 = Text("lambda = ความยาวคลื่นแสง", font_size=13, color=C_LAMBDA).move_to([3.3, 0.15, 0])
@@ -97,19 +97,21 @@ class DS07_ParameterLab(SafeScene):
         var_grp = VGroup(card_vars, txt_v1, txt_v2, txt_v3)
 
         self.play(FadeIn(var_grp), run_time=1.2)
-        self.wait(4.0)
+        self.wait(4.5)
 
-        # 2. Experiment 1: lambda up (Red light) (Micro-beat 2: ~24s)
-        cap2 = caption_top("การทดลองที่ 1: เพิ่มความยาวคลื่น lambda (เปลี่ยนเป็นแสงสีแดง) -> ริ้วบานกว้างขึ้น!")
-        self.play(ReplacementTransform(cap_ghost, cap2), run_time=1.0)
-        self.wait(3.0)
+        # 2. Experiment 1: lambda up (Red light) (Micro-beat 2: ~28s)
+        cap_q1 = caption_top("คำถามทำนายที่ 1: ถ้าเปลี่ยนแสงสีเขียวเป็นแสงสีแดง (lambda มากขึ้น) ริ้วจะบานออกหรือแคบลง?")
+        self.play(ReplacementTransform(cap_ghost, cap_q1), run_time=1.0)
+        self.wait(4.5)
 
+        cap2 = caption_top("เฉลย: lambda อยู่ที่ตัวเศษ! เมื่อเพิ่ม lambda ค่า Delta y จะเพิ่มขึ้น ริ้วจึงบานกว้างออก")
         highlight_lam = MathTex("\\Delta y \\uparrow \\;\\approx\\; \\frac{\\lambda \\uparrow \\cdot L}{d}", font_size=24, color=C_LAMBDA).move_to([3.3, 1.3, 0])
         self.play(
+            ReplacementTransform(cap_q1, cap2),
             ReplacementTransform(formula_txt, highlight_lam),
             run_time=1.2
         )
-        self.wait(2.2)
+        self.wait(2.5)
 
         # Active fringes expand to red (spacing dy_lam = 0.98)
         dy_lam = 0.98
@@ -127,11 +129,11 @@ class DS07_ParameterLab(SafeScene):
             ReplacementTransform(base_labels, new_labels_lam),
             run_time=2.0
         )
-        self.wait(4.5)
+        self.wait(5.0)
 
-        note_lam = Text("คลื่นยาวกว่า ต้องใช้มุมกว้างขึ้นเพื่อให้เกิดผลต่างเส้นทาง lambda", font_size=13, color=C_LAMBDA).move_to([3.3, -1.5, 0])
+        note_lam = Text("สังเกต: ริ้วสีแดงขยายตัวออกนอกเส้นประสีเทาเดิมอย่างชัดเจน!", font_size=13, color=C_LAMBDA).move_to([3.3, -1.5, 0])
         self.play(FadeIn(note_lam), run_time=1.0)
-        self.wait(4.5)
+        self.wait(5.0)
 
         # Reset to baseline
         active_reset = VGroup(*[
@@ -149,17 +151,19 @@ class DS07_ParameterLab(SafeScene):
         )
         self.wait(1.5)
 
-        # 3. Experiment 2: L up (Screen Distance) (Micro-beat 3: ~24s)
-        cap3 = caption_top("การทดลองที่ 2: ถอยฉากรับภาพออกไปไกลขึ้น (เพิ่ม L) -> ริ้วบานกว้างขึ้นเป็นสัดส่วนตรง")
-        self.play(ReplacementTransform(cap2, cap3), run_time=1.0)
-        self.wait(3.0)
+        # 3. Experiment 2: L up (Screen Distance) (Micro-beat 3: ~28s)
+        cap_q2 = caption_top("คำถามทำนายที่ 2: ถ้าเลื่อนฉากรับภาพถอยออกไปไกลขึ้น (เพิ่ม L) ริ้วจะเปลี่ยนไปอย่างไร?")
+        self.play(ReplacementTransform(cap2, cap_q2), run_time=1.0)
+        self.wait(4.5)
 
+        cap3 = caption_top("เฉลย: L อยู่ที่ตัวเศษ! เมื่อถอยฉากไกลขึ้น ลำแสงเดินทางบานออก ริ้วจึงบานกว้างขึ้นเป็นสัดส่วนตรง")
         highlight_L = MathTex("\\Delta y \\uparrow \\;\\approx\\; \\frac{\\lambda \\cdot L \\uparrow}{d}", font_size=24, color=C_L_DIST).move_to([3.3, 1.3, 0])
         self.play(
+            ReplacementTransform(cap_q2, cap3),
             ReplacementTransform(formula_txt_reset, highlight_L),
             run_time=1.2
         )
-        self.wait(2.2)
+        self.wait(2.5)
 
         # Active fringes expand to blue (spacing dy_L = 1.08)
         dy_L = 1.08
@@ -177,11 +181,11 @@ class DS07_ParameterLab(SafeScene):
             FadeIn(new_labels_L),
             run_time=2.0
         )
-        self.wait(4.5)
+        self.wait(5.0)
 
-        note_L = Text("มุมคงที่ แต่เมื่อถอยฉากไกลขึ้น ลำแสงเดินทางบานออกตกบนฉากห่างกันขึ้น", font_size=13, color=C_L_DIST).move_to([3.3, -1.5, 0])
+        note_L = Text("สังเกต: มุมคงที่ แต่ยิ่งฉากอยู่ไกล ระยะบานบนฉาก y = L*tan(theta) ยิ่งกว้าง", font_size=12.5, color=C_L_DIST).move_to([3.3, -1.5, 0])
         self.play(FadeIn(note_L), run_time=1.0)
-        self.wait(4.5)
+        self.wait(5.0)
 
         # Reset to baseline
         formula_txt_reset2 = MathTex("\\Delta y \\approx \\frac{\\lambda L}{d}", font_size=28, color=WHITE).move_to(formula_box.get_center())
@@ -195,16 +199,18 @@ class DS07_ParameterLab(SafeScene):
         self.wait(1.5)
 
         # 4. Experiment 3: d up (Slit Gap) (Micro-beat 4: ~32s)
-        cap4 = caption_top("การทดลองที่ 3: เพิ่มระยะห่างสลิต d (เจาะช่องห่างกันขึ้น) -> ริ้วบีบแคบลง!")
-        self.play(ReplacementTransform(cap3, cap4), run_time=1.0)
-        self.wait(3.0)
+        cap_q3 = caption_top("คำถามทำนายที่ 3: ถ้าเจาะช่องสลิตให้ห่างกันขึ้น (เพิ่ม d) ริ้วจะบานออกหรือบีบแคบลง?")
+        self.play(ReplacementTransform(cap3, cap_q3), run_time=1.0)
+        self.wait(5.0)
 
+        cap4 = caption_top("เฉลย: d อยู่ที่ตัวหาร! เมื่อเพิ่มระยะ d ค่า Delta y จะลดลง ริ้วจึงบีบแคบชิดเข้าหากัน!")
         highlight_d = MathTex("\\Delta y \\downarrow \\;\\approx\\; \\frac{\\lambda L}{d \\uparrow}", font_size=24, color=C_D_SLIT).move_to([3.3, 1.3, 0])
         self.play(
+            ReplacementTransform(cap_q3, cap4),
             ReplacementTransform(formula_txt_reset2, highlight_d),
             run_time=1.2
         )
-        self.wait(2.2)
+        self.wait(2.5)
 
         # Active fringes compress to teal (spacing dy_d = 0.38)
         dy_d = 0.38
@@ -222,30 +228,31 @@ class DS07_ParameterLab(SafeScene):
             FadeIn(new_labels_d),
             run_time=2.2
         )
-        self.wait(4.0)
+        self.wait(5.0)
 
         note_d = Text("ระวัง: d อยู่ที่ตัวหาร! ช่องห่างกัน มุมต่างทางเดินครบ lambda เร็วขึ้น ริ้วจึงแคบลง", font_size=12.5, color=C_D_SLIT).move_to([3.3, -1.5, 0])
         self.play(FadeIn(note_d), run_time=1.0)
-        self.wait(4.5)
+        self.wait(5.0)
 
         # Comprehensive Summary Table
-        summary_card = RoundedRectangle(width=10.5, height=1.3, corner_radius=0.12, color=OK, fill_color=BLACK, fill_opacity=0.92).move_to([0, -2.6, 0])
+        summary_card = RoundedRectangle(width=10.8, height=1.3, corner_radius=0.12, color=OK, fill_color=BLACK, fill_opacity=0.92).move_to([0, -2.6, 0])
         txt_sum = Text(
             "สรุปผล 3 ปัจจัย:   lambda เพิ่ม -> ริ้วบาน   |   L เพิ่ม -> ริ้วบาน   |   d เพิ่ม -> ริ้วแคบลง",
             font_size=15, color=OK
         ).move_to(summary_card.get_center())
 
         self.play(FadeIn(summary_card), FadeIn(txt_sum), run_time=1.5)
-        self.wait(6.5)
+        self.wait(8.0)
 
         self.fade_out_all(run_time=1.0)
 
 
 class DS08_SlitEnvelope(SafeScene):
     """
-    Beat 8: Finite Slit Width & Diffraction Envelope (~82s)
+    Beat 8: Finite Slit Width & Diffraction Envelope (~85s)
     Introduces slit width 'a' (color distinct from 'd').
     Shows real double-slit pattern = interference factor * single-slit envelope.
+    Product formula displayed explicitly.
     Physically slides a shutter over one slit -> modulation disappears, leaving broad envelope.
     """
     def construct(self):
@@ -255,16 +262,16 @@ class DS08_SlitEnvelope(SafeScene):
         cap1 = caption_top("สลิตจริงในโลกกายภาพ: ช่องไม่ได้เป็นจุดอุดมคติ แต่มีความกว้างจริง a")
 
         self.play(FadeIn(pref), FadeIn(ttl), FadeIn(cap1), run_time=1.0)
-        self.wait(3.0)
+        self.wait(3.5)
 
         # Legend distinguishing d and a
-        legend_box = RoundedRectangle(width=6.8, height=1.1, corner_radius=0.1, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.88).move_to([0, 1.6, 0])
-        txt_d = Text("d : ระยะห่างระหว่างสลิต (สร้างการแทรกสอด ริ้วถี่)", font_size=13, color=C_D_SLIT).move_to([0, 1.85, 0])
-        txt_a = Text("a : ความกว้างของแต่ละช่อง (สร้างการเลี้ยวเบน ม่านครอบ)", font_size=13, color=C_A_WIDTH).move_to([0, 1.35, 0])
+        legend_box = RoundedRectangle(width=7.2, height=1.1, corner_radius=0.1, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.88).move_to([0, 1.65, 0])
+        txt_d = Text("d : ระยะห่างระหว่างสลิต (สร้างการแทรกสอด ริ้วถี่)", font_size=13, color=C_D_SLIT).move_to([0, 1.9, 0])
+        txt_a = Text("a : ความกว้างของแต่ละช่อง (สร้างการเลี้ยวเบน ม่านครอบ)", font_size=13, color=C_A_WIDTH).move_to([0, 1.4, 0])
         legend_grp = VGroup(legend_box, txt_d, txt_a)
 
         self.play(FadeIn(legend_grp), run_time=1.2)
-        self.wait(3.5)
+        self.wait(4.0)
 
         # Plot Coordinate Frame (Lower section)
         axes = Axes(
@@ -283,16 +290,16 @@ class DS08_SlitEnvelope(SafeScene):
         lbl_ideal = Text("แบบจำลองจุดอุดมคติ: ทุกริ้วสว่างเท่ากันตลอดแนว", font_size=13, color=C_BRIGHT).move_to([-2.6, 0.8, 0])
 
         self.play(Create(axes), FadeIn(lbl_axis_c), Create(curve_ideal), FadeIn(lbl_ideal), run_time=1.8)
-        self.wait(4.5)
+        self.wait(5.0)
 
         cap_q = caption_top("แต่ในการทดลองจริง ริ้วที่อยู่ห่างจากจุดศูนย์กลางจะค่อยๆ จางมืดลง ทำไมจึงเป็นเช่นนั้น?")
         self.play(ReplacementTransform(cap1, cap_q), run_time=1.0)
-        self.wait(5.0)
+        self.wait(5.5)
 
-        # 2. Introduce Sinc^2 Diffraction Envelope (Micro-beat 2: ~28s)
+        # 2. Introduce Sinc^2 Diffraction Envelope & Product Formula (Micro-beat 2: ~30s)
         cap2 = caption_top("การเลี้ยวเบนจากช่องเดี่ยวความกว้าง a ก่อตัวเป็น 'ม่านครอบ' (Diffraction Envelope)")
         self.play(ReplacementTransform(cap_q, cap2), run_time=1.0)
-        self.wait(3.0)
+        self.wait(3.5)
 
         # envelope curve: sinc^2(beta)
         def envelope_func(y):
@@ -319,20 +326,21 @@ class DS08_SlitEnvelope(SafeScene):
             FadeOut(lbl_ideal),
             run_time=2.2
         )
-        self.wait(4.5)
+        self.wait(5.0)
+
+        # Product formula card
+        formula_prod = MathTex("I_{\\text{real}} = I_{\\text{interf}}(d) \\times I_{\\text{diff}}(a) = 4I_0 \\cos^2(\\alpha) \\left(\\frac{\\sin\\beta}{\\beta}\\right)^2", font_size=16.5, color=WHITE).move_to([0, 0.85, 0])
+        self.play(FadeIn(formula_prod), run_time=1.5)
+        self.wait(7.0)
 
         cap_real = caption_top("ริ้วแทรกสอดจริงจึงถูกกดให้อยู่ใต้กรอบม่านเลี้ยวเบน: แถบกลางสว่างสุด ริ้วข้างๆ ค่อยๆ จางลง")
         self.play(ReplacementTransform(cap2, cap_real), run_time=1.0)
-        self.wait(5.5)
-
-        lbl_real_pat = Text("ลวดลายจริง = แทรกสอด x เลี้ยวเบน", font_size=13, color=OK).move_to([-2.6, 0.8, 0])
-        self.play(FadeIn(lbl_real_pat), run_time=1.0)
-        self.wait(5.0)
+        self.wait(6.0)
 
         # 3. Slide Shutter to Block One Slit (Micro-beat 3: ~32s)
         cap3 = caption_top("การทดลองตัดสิน: หากเลื่อนแผ่นทึบมาปิดสลิตหนึ่งช่อง (ปิด S2) อะไรจะเกิดขึ้น?")
-        self.play(ReplacementTransform(cap_real, cap3), run_time=1.0)
-        self.wait(3.5)
+        self.play(ReplacementTransform(cap_real, cap3), FadeOut(formula_prod), run_time=1.0)
+        self.wait(4.0)
 
         # Single slit curve (no interference ripples)
         curve_single = axes.plot(
@@ -347,39 +355,38 @@ class DS08_SlitEnvelope(SafeScene):
             FadeIn(shutter), FadeIn(lbl_shutter),
             ReplacementTransform(curve_real, curve_single),
             FadeOut(curve_env), FadeOut(lbl_env),
-            FadeOut(lbl_real_pat),
             run_time=2.4
         )
-        self.wait(4.5)
+        self.wait(5.0)
 
         cap_collapse = caption_top("ริ้วลายทางแทรกสอดสลายตัวทันที! เหลือเพียงแถบมัวกว้างของการเลี้ยวเบนสลิตเดี่ยว")
         self.play(ReplacementTransform(cap3, cap_collapse), run_time=1.0)
-        self.wait(4.5)
+        self.wait(5.5)
 
         # Contrast Card
-        contrast_card = RoundedRectangle(width=9.6, height=1.3, corner_radius=0.12, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.92).move_to([0, -2.6, 0])
+        contrast_card = RoundedRectangle(width=10.2, height=1.3, corner_radius=0.12, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.92).move_to([0, -2.6, 0])
         txt_c1 = Text("เปิดสองช่อง (S1 + S2) : คลื่นสองขบวนซ้อนทับ เกิดริ้วลายทางถี่ (Interference)", font_size=13, color=OK).move_to([0, -2.35, 0])
         txt_c2 = Text("เปิดช่องเดียว (S1 เท่านั้น) : ไร้คู่แทรกสอด เหลือเพียงแถบกระจายมัวเดี่ยว (Single-slit)", font_size=13, color=WARN).move_to([0, -2.85, 0])
         contrast_grp = VGroup(contrast_card, txt_c1, txt_c2)
 
         self.play(FadeIn(contrast_grp), run_time=1.5)
-        self.wait(7.0)
+        self.wait(9.0)
 
         self.fade_out_all(run_time=1.0)
 
 
 class DS09_CausalSummary(SafeThreeDScene):
     """
-    Beat 9: Causal Summary & 3 Prediction Reviews (~44s)
+    Beat 9: Causal Summary & 3 Prediction Reviews (~52s)
     3D Perspective returning to full apparatus.
     Light cascades sequentially through 4 causal stages:
       Source -> Coherent Slits -> Path Difference -> Fringes on Screen.
-    Clarifies spatial redistribution of energy without loss, followed by 3 prediction cards.
+    Clarifies spatial redistribution of energy without loss, followed by 3 pause/question/reveal cycles.
     """
     def construct(self):
         self.set_camera_orientation(phi=62 * DEGREES, theta=-50 * DEGREES)
 
-        # 1. Causal Chain & Energy Redistribution (Micro-beat 1: ~16s)
+        # 1. Causal Chain & Energy Redistribution (Micro-beat 1: ~18s)
         pref = self.hud(page_ref("Beat 9 · สรุปกระบวนการคิด"))
         ttl = self.hud(title("Causal Chain & Master Summary", size=25))
         cap1 = self.hud(caption_top("พลังงานไม่ได้ถูกทำลาย: การแทรกสอดคือการจัดสรรความเข้มแสงใหม่ (Spatial Redistribution)"))
@@ -401,7 +408,7 @@ class DS09_CausalSummary(SafeThreeDScene):
 
         cap_energy = self.hud(caption_top("แถบมืดไม่ได้กลืนแสงหายไป แต่แสงถูกนำไปรวมพลังกันที่แถบสว่าง สว่างขึ้นถึง 4 เท่า!"))
         self.play(ReplacementTransform(cap1, cap_energy), run_time=1.0)
-        self.wait(4.5)
+        self.wait(5.0)
 
         # 2. Sequential Lighting Cascade in 3D (Micro-beat 2: ~14s)
         src_pt = np.array([-3.8, 0, -1.0])
@@ -432,29 +439,29 @@ class DS09_CausalSummary(SafeThreeDScene):
 
         self.play(Create(ray1), Create(ray2), run_time=1.8)
         self.play(FadeIn(dot_p0), FadeIn(lbl_p0), run_time=1.2)
-        self.wait(3.5)
+        self.wait(4.0)
 
-        # 3. Master Prediction Review Cards (Micro-beat 3: ~16s)
+        # 3. Master Prediction Review Cards with 3 Cycles (Micro-beat 3: ~20s)
         cap_pred = self.hud(caption_top("สรุป 3 กฎทองทำนายผล: จดจำความสัมพันธ์เพื่อการใช้งานที่แม่นยำ"))
         self.play(ReplacementTransform(cap_energy, cap_pred), run_time=1.0)
-        self.wait(2.5)
+        self.wait(3.0)
 
-        card_pred = RoundedRectangle(width=11.2, height=1.3, corner_radius=0.12, color=OK, fill_color=BLACK, fill_opacity=0.92).move_to([0, -2.5, 0])
+        card_pred = RoundedRectangle(width=11.4, height=1.3, corner_radius=0.12, color=OK, fill_color=BLACK, fill_opacity=0.92).move_to([0, -2.5, 0])
         self.hud(card_pred)
 
-        txt_p1 = self.hud(Text("lambda ขึ้น: ริ้วบานออก (แปรผันตรง)", font_size=13.5, color=C_LAMBDA).move_to([-3.6, -2.5, 0]))
+        txt_p1 = self.hud(Text("lambda ขึ้น: ริ้วบานออก (แปรผันตรง)", font_size=13.5, color=C_LAMBDA).move_to([-3.7, -2.5, 0]))
         txt_p2 = self.hud(Text("L ขึ้น: ริ้วบานออก (แปรผันตรง)", font_size=13.5, color=C_L_DIST).move_to([0.0, -2.5, 0]))
-        txt_p3 = self.hud(Text("d ขึ้น: ริ้วบีบแคบลง (แปรผันผกผัน)", font_size=13.5, color=C_D_SLIT).move_to([3.6, -2.5, 0]))
+        txt_p3 = self.hud(Text("d ขึ้น: ริ้วบีบแคบลง (แปรผันผกผัน)", font_size=13.5, color=C_D_SLIT).move_to([3.7, -2.5, 0]))
 
         self.play(
             FadeIn(card_pred),
             FadeIn(txt_p1), FadeIn(txt_p2), FadeIn(txt_p3),
             run_time=1.5
         )
-        self.wait(5.5)
+        self.wait(6.5)
 
         cap_final = self.hud(caption_top("เข้าใจคลื่น เข้าใจแสง: จากเรขาคณิตผลต่างเส้นทาง สู่ความเข้าใจธรรมชาติของเอกภพ"))
         self.play(ReplacementTransform(cap_pred, cap_final), run_time=1.0)
-        self.wait(4.0)
+        self.wait(5.0)
 
         self.fade_out_all(run_time=1.0)
