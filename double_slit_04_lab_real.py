@@ -15,8 +15,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 from mlib import *
 
 # Color Palette
-C_BARRIER = "#78909C"
-C_SCREEN  = "#37474F"
+C_SOURCE  = "#FFD54F"  # Light Source (Amber)
+C_BARRIER = "#78909C"  # Barrier (Slate)
+C_SCREEN  = "#37474F"  # Screen (Dark Slate)
 C_BRIGHT  = "#00E676"  # Bright maxima
 C_DARK    = "#1A237E"  # Dark minima
 C_GHOST   = "#616161"  # Dashed gray ghost reference
@@ -44,29 +45,29 @@ class DS07_ParameterLab(SafeScene):
 
         self.play(FadeIn(pref), FadeIn(ttl), FadeIn(cap1), run_time=0.8)
 
-        # Baseline Screen Representation at Left (x = -3.2)
-        scr_box = Rectangle(width=2.4, height=5.2, color=C_SCREEN, fill_opacity=0.9, fill_color=C_SCREEN).move_to([-3.2, -0.2, 0])
-        scr_lbl = Text("ฉากรับภาพ", font_size=16, color=WHITE).next_to(scr_box.get_top(), UP, buff=0.1)
+        # Baseline Screen Representation at Left (x = -3.2, y = -0.8 to stay well below caption_top)
+        scr_box = Rectangle(width=2.4, height=4.2, color=C_SCREEN, fill_opacity=0.9, fill_color=C_SCREEN).move_to([-3.2, -0.8, 0])
+        scr_lbl = Text("ฉากรับภาพ", font_size=15, color=WHITE).next_to(scr_box.get_top(), UP, buff=0.1)
 
-        # Baseline Fringes (spacing dy0 = 0.8)
-        dy0 = 0.8
+        # Baseline Fringes (spacing dy0 = 0.65)
+        dy0 = 0.65
         baseline_ys = [-2*dy0, -dy0, 0.0, dy0, 2*dy0]
 
         # Active fringes
         active_fringes = VGroup(*[
-            Rectangle(width=2.0, height=0.3, color=C_BRIGHT, fill_opacity=0.9, fill_color=C_BRIGHT).move_to([-3.2, y - 0.2, 0])
+            Rectangle(width=2.0, height=0.25, color=C_BRIGHT, fill_opacity=0.9, fill_color=C_BRIGHT).move_to([-3.2, y - 0.8, 0])
             for y in baseline_ys
         ])
 
         # Persistent Ghost Fringes (dashed gray markers)
         ghost_fringes = VGroup(*[
-            DashedLine([-4.2, y - 0.2, 0], [-2.2, y - 0.2, 0], color=C_GHOST, stroke_width=2.5)
+            DashedLine([-4.2, y - 0.8, 0], [-2.2, y - 0.8, 0], color=C_GHOST, stroke_width=2.5)
             for y in baseline_ys
         ])
 
-        # Formula Card at Right
-        formula_box = RoundedRectangle(width=4.8, height=1.5, corner_radius=0.12, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.85).move_to([3.4, 2.2, 0])
-        formula_txt = MathTex("\\Delta y \\approx \\frac{\\lambda L}{d}", font_size=28, color=WHITE).move_to(formula_box.get_center())
+        # Formula Card at Right (placed safely below caption_top)
+        formula_box = RoundedRectangle(width=4.8, height=1.3, corner_radius=0.12, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.85).move_to([3.4, 1.2, 0])
+        formula_txt = MathTex("\\Delta y \\approx \\frac{\\lambda L}{d}", font_size=26, color=WHITE).move_to(formula_box.get_center())
 
         self.play(
             FadeIn(scr_box), FadeIn(scr_lbl),
@@ -78,13 +79,13 @@ class DS07_ParameterLab(SafeScene):
 
         # Experiment 1: Increase lambda (Wavelength) -> Wider spacing
         cap2 = caption_top("การทดลองที่ 1: เพิ่ม lambda (แสงสีแดง) -> ริ้วบานกว้างขึ้นกว่าเส้นประเดิม")
-        dy_lam = 1.15
+        dy_lam = 0.95
         lam_fringes = VGroup(*[
-            Rectangle(width=2.0, height=0.35, color=C_LAMBDA, fill_opacity=0.9, fill_color=C_LAMBDA).move_to([-3.2, y - 0.2, 0])
+            Rectangle(width=2.0, height=0.28, color=C_LAMBDA, fill_opacity=0.9, fill_color=C_LAMBDA).move_to([-3.2, y - 0.8, 0])
             for y in [-dy_lam, 0.0, dy_lam]
         ])
 
-        highlight_lam = MathTex("\\Delta y \\uparrow \\;\\approx\\; \\frac{\\lambda \\uparrow \\cdot L}{d}", font_size=24, color=C_LAMBDA).move_to([3.4, 0.8, 0])
+        highlight_lam = MathTex("\\Delta y \\uparrow \\;\\approx\\; \\frac{\\lambda \\uparrow \\cdot L}{d}", font_size=22, color=C_LAMBDA).move_to([3.4, 0.0, 0])
 
         self.play(
             ReplacementTransform(cap1, cap2),
@@ -96,7 +97,7 @@ class DS07_ParameterLab(SafeScene):
 
         # Reset to baseline
         active_reset = VGroup(*[
-            Rectangle(width=2.0, height=0.3, color=C_BRIGHT, fill_opacity=0.9, fill_color=C_BRIGHT).move_to([-3.2, y - 0.2, 0])
+            Rectangle(width=2.0, height=0.25, color=C_BRIGHT, fill_opacity=0.9, fill_color=C_BRIGHT).move_to([-3.2, y - 0.8, 0])
             for y in baseline_ys
         ])
         self.play(
@@ -107,13 +108,13 @@ class DS07_ParameterLab(SafeScene):
 
         # Experiment 2: Increase L (Screen Distance) -> Wider spacing
         cap3 = caption_top("การทดลองที่ 2: ถอยฉากรับภาพออกไปไกล (เพิ่ม L) -> ริ้วบานกว้างขึ้นเป็นสัดส่วนตรง")
-        dy_L = 1.25
+        dy_L = 1.05
         L_fringes = VGroup(*[
-            Rectangle(width=2.0, height=0.35, color=C_L_DIST, fill_opacity=0.9, fill_color=C_L_DIST).move_to([-3.2, y - 0.2, 0])
+            Rectangle(width=2.0, height=0.28, color=C_L_DIST, fill_opacity=0.9, fill_color=C_L_DIST).move_to([-3.2, y - 0.8, 0])
             for y in [-dy_L, 0.0, dy_L]
         ])
 
-        highlight_L = MathTex("\\Delta y \\uparrow \\;\\approx\\; \\frac{\\lambda \\cdot L \\uparrow}{d}", font_size=24, color=C_L_DIST).move_to([3.4, 0.8, 0])
+        highlight_L = MathTex("\\Delta y \\uparrow \\;\\approx\\; \\frac{\\lambda \\cdot L \\uparrow}{d}", font_size=22, color=C_L_DIST).move_to([3.4, 0.0, 0])
 
         self.play(
             ReplacementTransform(cap2, cap3),
@@ -132,13 +133,13 @@ class DS07_ParameterLab(SafeScene):
 
         # Experiment 3: Increase d (Slit Separation) -> Narrower spacing
         cap4 = caption_top("การทดลองที่ 3: เพิ่มระยะห่างสลิต d (ช่องห่างกันขึ้น) -> ริ้วบีบแคบชิดเข้าหากัน!")
-        dy_d = 0.50
+        dy_d = 0.42
         d_fringes = VGroup(*[
-            Rectangle(width=2.0, height=0.22, color=C_D_SLIT, fill_opacity=0.9, fill_color=C_D_SLIT).move_to([-3.2, y - 0.2, 0])
+            Rectangle(width=2.0, height=0.18, color=C_D_SLIT, fill_opacity=0.9, fill_color=C_D_SLIT).move_to([-3.2, y - 0.8, 0])
             for y in [-4*dy_d, -3*dy_d, -2*dy_d, -dy_d, 0.0, dy_d, 2*dy_d, 3*dy_d, 4*dy_d]
         ])
 
-        highlight_d = MathTex("\\Delta y \\downarrow \\;\\approx\\; \\frac{\\lambda L}{d \\uparrow}", font_size=24, color=C_D_SLIT).move_to([3.4, 0.8, 0])
+        highlight_d = MathTex("\\Delta y \\downarrow \\;\\approx\\; \\frac{\\lambda L}{d \\uparrow}", font_size=22, color=C_D_SLIT).move_to([3.4, 0.0, 0])
 
         self.play(
             ReplacementTransform(cap3, cap4),
@@ -166,9 +167,9 @@ class DS08_SlitEnvelope(SafeScene):
         self.play(FadeIn(pref), FadeIn(ttl), FadeIn(cap1), run_time=0.8)
 
         # Legend distinguishing d and a
-        legend_box = RoundedRectangle(width=5.8, height=1.1, corner_radius=0.1, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.85).move_to([0, 2.1, 0])
-        txt_d = Text("d: ระยะห่างระหว่างสลิต (Interference)", font_size=14, color=C_D_SLIT).move_to([0, 2.35, 0])
-        txt_a = Text("a: ความกว้างของแต่ละช่อง (Diffraction Envelope)", font_size=14, color=C_A_WIDTH).move_to([0, 1.85, 0])
+        legend_box = RoundedRectangle(width=5.8, height=1.0, corner_radius=0.1, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.85).move_to([0, 1.8, 0])
+        txt_d = Text("d: ระยะห่างระหว่างสลิต (Interference)", font_size=13, color=C_D_SLIT).move_to([0, 2.05, 0])
+        txt_a = Text("a: ความกว้างของแต่ละช่อง (Diffraction Envelope)", font_size=13, color=C_A_WIDTH).move_to([0, 1.55, 0])
         legend_grp = VGroup(legend_box, txt_d, txt_a)
 
         self.play(FadeIn(legend_grp), run_time=1.0)
@@ -176,9 +177,9 @@ class DS08_SlitEnvelope(SafeScene):
         # Plot Coordinate Frame
         axes = Axes(
             x_range=[-3.0, 3.0, 1], y_range=[0, 4.5, 1],
-            x_length=9.0, y_length=3.2,
+            x_length=9.0, y_length=3.0,
             axis_config={"include_ticks": False, "stroke_color": GRAYTXT, "stroke_width": 1.5}
-        ).move_to([0, -0.6, 0])
+        ).move_to([0, -0.8, 0])
 
         lbl_axis_c = Text("y = 0", font_size=13, color=GRAYTXT).next_to(axes.c2p(0, 0), DOWN, buff=0.1)
 
@@ -187,7 +188,7 @@ class DS08_SlitEnvelope(SafeScene):
             lambda y: 4.0 * (np.cos(PI * y / 0.6) ** 2),
             x_range=[-2.8, 2.8], color=C_BRIGHT, stroke_width=1.5
         )
-        lbl_ideal = Text("แบบจำลองอุดมคติ (ยอดเท่ากัน)", font_size=14, color=C_BRIGHT).move_to([-3.2, 1.3, 0])
+        lbl_ideal = Text("แบบจำลองอุดมคติ (ยอดเท่ากัน)", font_size=14, color=C_BRIGHT).move_to([-3.2, 1.0, 0])
 
         self.play(Create(axes), FadeIn(lbl_axis_c), Create(curve_ideal), FadeIn(lbl_ideal), run_time=1.5)
         self.wait(1.0)
@@ -203,7 +204,7 @@ class DS08_SlitEnvelope(SafeScene):
             return 4.0 * ((np.sin(beta) / beta) ** 2)
 
         curve_env = axes.plot(envelope_func, x_range=[-2.8, 2.8], color=C_ENV, stroke_width=2.5)
-        lbl_env = Text("Diffraction Envelope", font_size=14, color=C_ENV).move_to([3.4, 1.3, 0])
+        lbl_env = Text("Diffraction Envelope", font_size=14, color=C_ENV).move_to([3.4, 1.0, 0])
 
         # Combined Real Curve: I_real = ideal * (sinc(beta))^2
         def real_func(y):
@@ -264,8 +265,8 @@ class DS09_CausalSummary(SafeThreeDScene):
 
         self.play(FadeIn(pref), FadeIn(ttl), FadeIn(cap1), run_time=0.8)
 
-        # 4-Step Causal Diagram (HUD)
-        c_box = RoundedRectangle(width=11.2, height=1.2, corner_radius=0.15, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.9).move_to([0, 1.8, 0])
+        # 4-Step Causal Diagram (HUD, safely positioned)
+        c_box = RoundedRectangle(width=11.2, height=1.1, corner_radius=0.15, color=GRAYTXT, fill_color=BLACK, fill_opacity=0.9).move_to([0, 1.7, 0])
         self.hud(c_box)
 
         step_txt = self.hud(Text(
