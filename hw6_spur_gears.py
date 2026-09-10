@@ -238,7 +238,7 @@ class HW6Page02Scene(SafeScene):
             Text("2. กำมือขวาตามทิศหมุน -> หัวแม่มือชี้ขึ้น (UP)", font_size=16, color=GRAYTXT),
             Text("3. หนอนถูกล็อคแนวแกน -> ฟันหนอนส่งแรงกดลง (DOWN)", font_size=16, color=WARN),
             Text("4. แรงกดลงที่ฝั่งซ้ายของล้อหนอน 9 ทำให้ล้อหมุนทวนเข็ม", font_size=16, color=OK),
-            MathTex(r"\boxed{\text{ทิศทาง: Counter-Clockwise (CCW)}}", color=OK, font_size=20),
+            VGroup(Text("ทิศทาง:", font_size=17, color=OK), MathTex(r"\boxed{\text{Counter-Clockwise (CCW)}}", color=OK, font_size=19)).arrange(RIGHT, buff=0.12),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.18).move_to([3.4, 0.0, 0])
 
         self.play(FadeIn(worm_diagram), run_time=1.2)
