@@ -53,7 +53,8 @@ class TransformerPrimary(SafeScene):
         coil = VGroup()
         for i in range(n_turns):
             y_offset = (i - n_turns/2 + 0.5) * 0.3
-            circle = Circle(radius=radius, color=color, opacity=opacity)
+            circle = Circle(radius=radius, color=color)
+            circle.set_opacity(opacity)
             circle.move_to(center + UP * y_offset)
             coil.add(circle)
         return coil
@@ -105,7 +106,8 @@ class TransformerFlux(SafeScene):
         coil = VGroup()
         for i in range(n_turns):
             y_offset = (i - n_turns/2 + 0.5) * 0.3
-            circle = Circle(radius=radius, color=color, opacity=opacity)
+            circle = Circle(radius=radius, color=color)
+            circle.set_opacity(opacity)
             circle.move_to(center + UP * y_offset)
             coil.add(circle)
         return coil
@@ -153,7 +155,8 @@ class TransformerVoltageRatio(SafeScene):
         coil = VGroup()
         for i in range(n_turns):
             y_offset = (i - n_turns/2 + 0.5) * 0.3
-            circle = Circle(radius=radius, color=color, opacity=opacity)
+            circle = Circle(radius=radius, color=color)
+            circle.set_opacity(opacity)
             circle.move_to(center + UP * y_offset)
             coil.add(circle)
         return coil
