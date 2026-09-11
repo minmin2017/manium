@@ -11,7 +11,8 @@ class TransformerPrimary(SafeScene):
     def construct(self):
         # Transformer outline
         primary_coil = self.draw_coil(LEFT * 2.5, n_turns=5, color=RED)
-        secondary_coil = self.draw_coil(RIGHT * 2.5, n_turns=8, color=RED, opacity=0.3)
+        secondary_coil = self.draw_coil(RIGHT * 2.5, n_turns=8, color=RED)
+        secondary_coil.set_opacity(0.3)
         core = Line(DOWN * 2, UP * 2, color=GRAY, stroke_width=8)
 
         transformer = VGroup(primary_coil, secondary_coil, core)
@@ -48,13 +49,12 @@ class TransformerPrimary(SafeScene):
         self.play(FadeIn(p1_result, shift=UP * 0.3))
         self.wait(2)
 
-    def draw_coil(self, center, n_turns=5, color=RED, opacity=1.0, radius=0.4):
+    def draw_coil(self, center, n_turns=5, color=RED, radius=0.4):
         """Draw a multi-turn coil"""
         coil = VGroup()
         for i in range(n_turns):
             y_offset = (i - n_turns/2 + 0.5) * 0.3
             circle = Circle(radius=radius, color=color)
-            circle.set_opacity(opacity)
             circle.move_to(center + UP * y_offset)
             coil.add(circle)
         return coil
@@ -65,9 +65,12 @@ class TransformerFlux(SafeScene):
 
     def construct(self):
         # Full transformer (faded)
-        primary_coil = self.draw_coil(LEFT * 2.5, n_turns=5, color=RED, opacity=0.3)
-        secondary_coil = self.draw_coil(RIGHT * 2.5, n_turns=8, color=RED, opacity=0.3)
-        core = Line(DOWN * 2, UP * 2, color=GRAY, stroke_width=8, opacity=0.3)
+        primary_coil = self.draw_coil(LEFT * 2.5, n_turns=5, color=RED)
+        primary_coil.set_opacity(0.3)
+        secondary_coil = self.draw_coil(RIGHT * 2.5, n_turns=8, color=RED)
+        secondary_coil.set_opacity(0.3)
+        core = Line(DOWN * 2, UP * 2, color=GRAY, stroke_width=8)
+        core.set_opacity(0.3)
 
         transformer = VGroup(primary_coil, secondary_coil, core)
         self.add(transformer)
@@ -101,13 +104,12 @@ class TransformerFlux(SafeScene):
         self.play(FadeIn(faraday, shift=UP * 0.3))
         self.wait(2)
 
-    def draw_coil(self, center, n_turns=5, color=RED, opacity=1.0, radius=0.4):
+    def draw_coil(self, center, n_turns=5, color=RED, radius=0.4):
         """Draw a multi-turn coil"""
         coil = VGroup()
         for i in range(n_turns):
             y_offset = (i - n_turns/2 + 0.5) * 0.3
             circle = Circle(radius=radius, color=color)
-            circle.set_opacity(opacity)
             circle.move_to(center + UP * y_offset)
             coil.add(circle)
         return coil
@@ -150,13 +152,12 @@ class TransformerVoltageRatio(SafeScene):
         self.play(FadeIn(v2_example))
         self.wait(2)
 
-    def draw_coil(self, center, n_turns=5, color=RED, opacity=1.0, radius=0.4):
+    def draw_coil(self, center, n_turns=5, color=RED, radius=0.4):
         """Draw a multi-turn coil"""
         coil = VGroup()
         for i in range(n_turns):
             y_offset = (i - n_turns/2 + 0.5) * 0.3
             circle = Circle(radius=radius, color=color)
-            circle.set_opacity(opacity)
             circle.move_to(center + UP * y_offset)
             coil.add(circle)
         return coil
