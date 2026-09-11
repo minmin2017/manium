@@ -120,7 +120,7 @@ class TransformerVoltageRatio(SafeScene):
 
     def construct(self):
         # Secondary coil highlight
-        secondary_coil = self.draw_coil(ORIGIN, n_turns=8, color=RED, opacity=1.0)
+        secondary_coil = self.draw_coil(ORIGIN, n_turns=8, color=RED)
         self.add(secondary_coil)
 
         # Turn ratio
