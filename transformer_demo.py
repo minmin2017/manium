@@ -84,22 +84,20 @@ def make_transformer_rig(n1=5, n2=10):
         )
         fronts.add(top_lead, bot_lead)
 
-        # Wire centerline path for flowing current particles
-        pts = [[leg_x + (w_wire / 2.0 + 0.5) * sign, y_bot + n_turns * h_turn + h_turn * 0.25, 0]]
+        # Wire centerline path for flowing current particles (internal invisible track)
+        pts = [[leg_x + (w_wire / 2.0 + 0.45) * sign, y_bot + n_turns * h_turn + h_turn * 0.25, 0]]
         for i in range(n_turns - 1, -1, -1):
             y_i = y_bot + i * h_turn
             pts.append([leg_x - w_wire / 2.0, y_i + h_turn * 0.75, 0])
             pts.append([leg_x + w_wire / 2.0, y_i + h_turn * 0.25, 0])
-        pts.append([leg_x + (w_wire / 2.0 + 0.5) * sign, y_bot + h_turn * 0.75, 0])
+        pts.append([leg_x + (w_wire / 2.0 + 0.45) * sign, y_bot + h_turn * 0.75, 0])
         path = VMobject().set_points_as_corners(pts)
+        path.set_opacity(0)
 
         return backs, fronts, path
 
     p_backs, p_fronts, p_path = build_coil(left_x, n1, CURRENT, "#B78103", y_span=2.2)
     s_backs, s_fronts, s_path = build_coil(right_x, n2, OK, "#00838F", y_span=2.5)
-
-    primary_all = VGroup(p_backs, p_fronts)
-    secondary_all = VGroup(s_backs, s_fronts)
 
     loop_w = w_core - t_core
     loop_h = h_core - t_core
@@ -117,7 +115,8 @@ def make_transformer_rig(n1=5, n2=10):
     arrow_b = Arrow([0.45, bot_y, 0], [-0.45, bot_y, 0], color=FIELD, buff=0, stroke_width=4, max_tip_length_to_length_ratio=0.25)
     flux_arrows = VGroup(arrow_l, arrow_t, arrow_r, arrow_b)
 
-    rig = VGroup(p_backs, s_backs, core_group, flux_loop, flux_arrows, p_fronts, s_fronts)
+    # All components including wire tracking paths bundled into one synchronized group
+    rig = VGroup(p_backs, s_backs, core_group, flux_loop, flux_arrows, p_fronts, s_fronts, p_path, s_path)
 
     return {
         "group": rig,
@@ -126,8 +125,8 @@ def make_transformer_rig(n1=5, n2=10):
         "core": core_group,
         "p_fronts": p_fronts,
         "s_fronts": s_fronts,
-        "primary": primary_all,
-        "secondary": secondary_all,
+        "primary": VGroup(p_backs, p_fronts),
+        "secondary": VGroup(s_backs, s_fronts),
         "flux_loop": flux_loop,
         "flux_arrows": flux_arrows,
         "p_path": p_path,
@@ -188,7 +187,6 @@ class TransformerPrimary(SafeScene):
         res_box = SurroundingRectangle(eq_res, color=OK, buff=0.15)
         note_foot = fit_width(Text("กำลังงาน 2300 W นี้ จะถูกส่งผ่านแกนเหล็กไปยังขดลวดทุติยภูมิ", font_size=17, color=GRAYTXT), 6.5).move_to([p_x, -2.15, 0])
 
-        # Current particles drive the scene forward
         self.play(FadeIn(box_title), FadeIn(step1), FadeIn(step2), FadeIn(step3),
                   i_tracker.animate.increment_value(0.5), run_time=1.0)
         self.play(FadeIn(eq_label), FadeIn(eq_math), FadeIn(eq_sub),
@@ -244,7 +242,6 @@ class TransformerFlux(SafeScene):
         )
 
         # Carrier travels: Camera travels along top limb from Primary to Secondary (STAGE_SECONDARY)
-        cx, cy = stage.get_center()[0], stage.get_center()[1]
         flux_tag = VGroup(
             Text("ฟลักซ์แม่เหล็ก Φ", font_size=17, color=FIELD),
             Text("(แกนร่วม Conserved)", font_size=14, color=FIELD)
@@ -363,10 +360,10 @@ class TransformerCurrentInverse(SafeScene):
         self.add(stage)
 
         lx, rx = STAGE_FULL[0] - 1.425, STAGE_FULL[0] + 1.425
-        p1_tag = Text("P1 = 2300 W", font_size=19, color=CURRENT).move_to([lx - 1.4, 0.7, 0])
-        i1_tag = Text("I1 = 10 A", font_size=19, color=WARN).move_to([lx - 1.4, 0.2, 0])
-        p2_tag = Text("P2 = 2300 W", font_size=19, color=OK).move_to([rx + 1.45, 0.7, 0])
-        i2_tag = Text("I2 = ?", font_size=21, color=WARN).move_to([rx + 1.45, 0.2, 0])
+        p1_tag = Text("P1 = 2300 W", font_size=19, color=CURRENT).move_to([lx, 2.0, 0])
+        i1_tag = Text("I1 = 10 A", font_size=19, color=WARN).move_to([lx - 1.45, -1.0, 0])
+        p2_tag = Text("P2 = 2300 W", font_size=19, color=OK).move_to([rx, 2.0, 0])
+        i2_tag = Text("I2 = ?", font_size=21, color=WARN).move_to([rx + 1.45, -1.0, 0])
         self.play(FadeIn(p1_tag), FadeIn(i1_tag), FadeIn(p2_tag), FadeIn(i2_tag), run_time=0.7)
 
         # Causal Motion: Both coils have live current flow (No Idle Wobble)
@@ -376,9 +373,9 @@ class TransformerCurrentInverse(SafeScene):
 
         live_dots = always_redraw(lambda: VGroup(
             # Primary current dots (10A, faster/denser)
-            *[Dot(p_path.point_from_proportion((t_tracker.get_value() * 1.5 + k * 0.25) % 1.0), radius=0.07, color=WARN) for k in range(4)],
-            # Secondary current dots (5A, half speed/fewer)
-            *[Dot(s_path.point_from_proportion((t_tracker.get_value() * 0.75 + k * 0.5) % 1.0), radius=0.07, color=OK) for k in range(2)]
+            *[Dot(p_path.point_from_proportion((t_tracker.get_value() * 1.5 + k * 0.25) % 1.0), radius=0.06, color=WARN) for k in range(4)],
+            # Secondary current dots (5A, half speed)
+            *[Dot(s_path.point_from_proportion((t_tracker.get_value() * 0.75 + k * 0.5) % 1.0), radius=0.06, color=OK) for k in range(2)]
         ))
         self.add(live_dots)
 
