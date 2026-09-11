@@ -26,10 +26,10 @@ class TransformerPrimary(SafeScene):
         self.wait(0.5)
 
         # Power equation
-        power_eq = MathTex(
-            r"P_1 = V_1 \times I_1",
+        power_eq = Text(
+            "P = V × I",
             color=WHITE,
-            font_size=48
+            font_size=40
         ).to_edge(UP, buff=0.5)
 
         self.play(FadeIn(power_eq, shift=DOWN * 0.3))
@@ -85,20 +85,20 @@ class TransformerFlux(SafeScene):
         self.wait(0.5)
 
         # Flux equation
-        flux_eq = MathTex(
-            r"\Phi = \text{Φ through core (unchanged)}",
+        flux_eq = Text(
+            "Φ through core (unchanged)",
             color=BLUE,
-            font_size=44
+            font_size=36
         ).to_edge(UP, buff=0.5)
 
         self.play(FadeIn(flux_eq, shift=DOWN * 0.3))
         self.wait(2)
 
         # Faraday's law
-        faraday = MathTex(
-            r"V \propto \frac{d\Phi}{dt}",
+        faraday = Text(
+            "V ∝ dΦ/dt",
             color=WHITE,
-            font_size=40
+            font_size=36
         ).to_edge(DOWN, buff=1)
 
         self.play(FadeIn(faraday, shift=UP * 0.3))
@@ -124,28 +124,28 @@ class TransformerVoltageRatio(SafeScene):
         self.add(secondary_coil)
 
         # Turn ratio
-        n_ratio = MathTex(
-            r"\frac{N_1}{N_2} = \frac{5}{8}",
+        n_ratio = Text(
+            "N1/N2 = 5/8",
             color=WHITE,
-            font_size=48
+            font_size=40
         ).to_edge(UP, buff=0.5)
 
         self.play(FadeIn(n_ratio))
         self.wait(1)
 
         # Voltage relationship
-        voltage_rel = MathTex(
-            r"V_2 = \frac{N_2}{N_1} \times V_1",
+        voltage_rel = Text(
+            "V2 = (N2/N1) × V1",
             color=RED,
-            font_size=44
+            font_size=36
         ).shift(UP * 1.5)
 
         self.play(FadeIn(voltage_rel, shift=DOWN * 0.3))
         self.wait(1)
 
         # Numerical example
-        v1_example = MathTex(r"V_1 = 230 \, V", color=RED, font_size=40).shift(DOWN * 0.5)
-        v2_example = MathTex(r"V_2 = \frac{8}{5} \times 230 = 368 \, V", color=RED, font_size=40).shift(DOWN * 1.5)
+        v1_example = Text("V1 = 230 V", color=RED, font_size=36).shift(DOWN * 0.5)
+        v2_example = Text("V2 = (8/5) × 230 = 368 V", color=RED, font_size=36).shift(DOWN * 1.5)
 
         self.play(FadeIn(v1_example))
         self.wait(0.5)
@@ -168,30 +168,30 @@ class TransformerCurrentInverse(SafeScene):
 
     def construct(self):
         # Simple representation
-        title = MathTex(r"\text{Power Conservation: } P_1 = P_2", color=WHITE, font_size=48).to_edge(UP, buff=0.5)
+        title = Text("Power Conservation: P1 = P2", color=WHITE, font_size=40).to_edge(UP, buff=0.5)
         self.add(title)
 
         # Power at primary
-        p1 = MathTex(r"P_1 = V_1 \times I_1 = 230 \times 10 = 2300 \, W", color=WHITE, font_size=40).shift(UP * 1)
+        p1 = Text("P1 = V1 × I1 = 230 × 10 = 2300 W", color=WHITE, font_size=36).shift(UP * 1)
         self.play(FadeIn(p1))
         self.wait(1)
 
         # Power at secondary
-        p2_eq = MathTex(r"P_2 = V_2 \times I_2 = 368 \times I_2", color=WHITE, font_size=40).shift(DOWN * 0.5)
+        p2_eq = Text("P2 = V2 × I2 = 368 × I2", color=WHITE, font_size=36).shift(DOWN * 0.5)
         self.play(FadeIn(p2_eq))
         self.wait(1)
 
         # Set equal
-        equal = MathTex(r"2300 = 368 \times I_2", color=YELLOW, font_size=40).shift(DOWN * 2)
+        equal = Text("2300 = 368 × I2", color=YELLOW, font_size=36).shift(DOWN * 2)
         self.play(FadeIn(equal))
         self.wait(0.5)
 
         # Solve for I2
-        i2_result = MathTex(r"I_2 = \frac{2300}{368} \approx 6.25 \, A", color=YELLOW, font_size=40).shift(DOWN * 3)
+        i2_result = Text("I2 = 2300/368 ≈ 6.25 A", color=YELLOW, font_size=36).shift(DOWN * 3)
         self.play(FadeIn(i2_result))
         self.wait(2)
 
         # Current ratio summary
-        summary = MathTex(r"\frac{I_1}{I_2} = \frac{N_2}{N_1}", color=YELLOW, font_size=44).to_edge(DOWN, buff=1)
+        summary = Text("I1/I2 = N2/N1", color=YELLOW, font_size=40).to_edge(DOWN, buff=1)
         self.play(FadeIn(summary, shift=UP * 0.3))
         self.wait(2)
