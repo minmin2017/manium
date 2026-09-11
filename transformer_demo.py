@@ -80,7 +80,7 @@ class TransformerFlux(SafeScene):
         self.play(FadeIn(core_bright))
 
         # Flux arrow through core
-        flux_arrow = arrow3(DOWN * 1.8, UP * 1.8, color=BLUE, label=r"\Phi")
+        flux_arrow = arrow3(DOWN * 1.8, UP * 1.8, color=BLUE)
         self.play(FadeIn(flux_arrow))
         self.wait(0.5)
 
