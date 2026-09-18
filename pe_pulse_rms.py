@@ -317,32 +317,36 @@ class PulseRmsTeachingScene(SafeScene):
         # DC resistor card returns at lower left (x = -4.0, y = -2.5)
         card_mini = RoundedRectangle(corner_radius=0.12, width=3.6, height=1.1, color=COL_RMS, fill_color=COL_BG_BOX, fill_opacity=0.9).move_to([cx, -2.5, 0])
         lbl_bridge = Text("Irms² = mean(i²)", font_size=13, color=COL_RMS).move_to(card_mini.get_center())
+        # Three words: Square -> Mean -> Root + unit cue shown BEFORE result panel arrives
+        w_sq = Text("Square", font_size=13, color=COL_HEAT).move_to([ax_x - 1.5, -2.5, 0])
+        arr_m1 = Text("->", font_size=13, color=COL_WIRE).move_to([ax_x - 0.75, -2.5, 0])
+        w_mean = Text("Mean", font_size=13, color=COL_DUTY).move_to([ax_x, -2.5, 0])
+        arr_m2 = Text("->", font_size=13, color=COL_WIRE).move_to([ax_x + 0.75, -2.5, 0])
+        w_root = Text("Root", font_size=13, color=COL_RMS).move_to([ax_x + 1.5, -2.5, 0])
+        cards_smr = VGroup(w_sq, arr_m1, w_mean, arr_m2, w_root)
+
+        unit_cue = Text("A² -> sqrt -> A", font_size=14, color=WHITE).move_to([ax_x, -2.9, 0])
+
+        # Show transition concept chain in clear lower space first (sequential fade to avoid transient collision)
+        self.play(FadeOut(eq_st1), run_time=0.4)
+        self.play(FadeIn(cards_smr), FadeIn(unit_cue), run_time=0.6)
+        self.wait(1.0)
+
+        # DC resistor card returns at lower left (x = -4.0, y = -2.5)
+        card_mini = RoundedRectangle(corner_radius=0.12, width=3.6, height=1.1, color=COL_RMS, fill_color=COL_BG_BOX, fill_opacity=0.9).move_to([cx, -2.5, 0])
+        lbl_bridge = Text("Irms² = mean(i²)", font_size=13, color=COL_RMS).move_to(card_mini.get_center())
         card_mini_grp = VGroup(card_mini, lbl_bridge)
 
         # Morph derivation panel to large centered formula at bottom-right (x = 2.8, y = -2.75)
         formula_hero = Text("Irms = Ipk sqrt(D)", font_size=22, color=COL_RMS).move_to(deriv_box.get_center())
 
-        # Three tiny word-cards: Square -> Mean -> Root placed above formula at y = -2.0
-        w_sq = Text("Square", font_size=11, color=COL_HEAT).move_to([ax_x - 1.4, -2.0, 0])
-        arr_m1 = Text("->", font_size=11, color=COL_WIRE).move_to([ax_x - 0.7, -2.0, 0])
-        w_mean = Text("Mean", font_size=11, color=COL_DUTY).move_to([ax_x, -2.0, 0])
-        arr_m2 = Text("->", font_size=11, color=COL_WIRE).move_to([ax_x + 0.7, -2.0, 0])
-        w_root = Text("Root", font_size=11, color=COL_RMS).move_to([ax_x + 1.4, -2.0, 0])
-        cards_smr = VGroup(w_sq, arr_m1, w_mean, arr_m2, w_root)
-
-        unit_cue = Text("A² -> sqrt -> A", font_size=12, color=WHITE).move_to([ax_x, -1.6, 0])
-
-        self.play(
-            FadeIn(card_mini_grp),
-            Transform(eq_st1, formula_hero),
-            run_time=0.8
-        )
-        self.play(FadeIn(cards_smr), FadeIn(unit_cue), run_time=0.8)
+        self.play(FadeOut(cards_smr), FadeOut(unit_cue), run_time=0.4)
+        self.play(FadeIn(card_mini_grp), FadeIn(formula_hero), run_time=0.6)
         self.wait(1.2)
 
         # Clear i^2 graph and transient cards to make room for Shot 7
         self.play(
-            FadeOut(card_mini_grp), FadeOut(cards_smr), FadeOut(unit_cue),
+            FadeOut(card_mini_grp),
             FadeOut(ax_sq), FadeOut(lbl_ax_isq), FadeOut(sq_path), FadeOut(lbl_ipksq), FadeOut(sq_shade),
             FadeOut(mean_line), FadeOut(lbl_mean_line),
             run_time=0.6
@@ -367,9 +371,9 @@ class PulseRmsTeachingScene(SafeScene):
         f_sub1 = Text("Irms = 10 sqrt(0.25)", font_size=17, color=WHITE).move_to(deriv_box.get_center())
         f_sub2 = Text("Irms = 5 A", font_size=20, color=COL_RMS).move_to(deriv_box.get_center())
 
-        self.play(Transform(eq_st1, f_sub1), run_time=0.7)
+        self.play(Transform(formula_hero, f_sub1), run_time=0.7)
         self.wait(0.6)
-        self.play(Transform(eq_st1, f_sub2), run_time=0.7)
+        self.play(Transform(formula_hero, f_sub2), run_time=0.7)
 
         # Two heat bars in the left thermal world (under circuit at y = -2.1)
         h_bg_l = Rectangle(width=1.4, height=1.3, color="#334155", fill_color=COL_BG_BOX, fill_opacity=0.6).move_to([cx - 0.9, -2.1, 0])
@@ -396,7 +400,12 @@ class PulseRmsTeachingScene(SafeScene):
             run_time=1.0
         )
         self.wait(1.2)
-        self.play(FadeOut(hbars_grp), FadeOut(h_bar_l), FadeOut(h_bar_r), run_time=0.4)
+        # Fade out heat bars AND derivation panel + Irms=5A so table has full clean space
+        self.play(
+            FadeOut(hbars_grp), FadeOut(h_bar_l), FadeOut(h_bar_r),
+            FadeOut(deriv_box), FadeOut(formula_hero),
+            run_time=0.4
+        )
 
         # ----------------------------------------------------------------------
         # SHOT 8 — 1:07–1:17 — Duty as an intuitive control
@@ -404,12 +413,12 @@ class PulseRmsTeachingScene(SafeScene):
         cap8 = caption_top("เปิดนานขึ้น = RMS สูงขึ้น = R ร้อนขึ้น", size=20)
         self.play(Transform(cap, cap8), run_time=0.5)
 
-        # Compact right-bottom table: D | Irms | heat at y = -1.45
-        tbl_rect = RoundedRectangle(corner_radius=0.12, width=4.8, height=1.5, color="#475569", fill_color=COL_BG_BOX, fill_opacity=0.95).move_to([ax_x, -1.45, 0])
-        th = Text("D             Irms          ความร้อน (W)", font_size=12, color=COL_DUTY).move_to([ax_x, -1.0, 0])
-        tr1 = Text("0.25         5.00 A            25 W", font_size=12, color=COL_RMS).move_to([ax_x, -1.3, 0])
-        tr2 = Text("0.50         7.07 A            50 W", font_size=12, color=WHITE).move_to([ax_x, -1.6, 0])
-        tr3 = Text("1.00        10.00 A           100 W", font_size=12, color=COL_HEAT).move_to([ax_x, -1.9, 0])
+        # Compact right-bottom table: D | Irms | heat cleanly positioned at y = -1.85
+        tbl_rect = RoundedRectangle(corner_radius=0.12, width=5.2, height=1.8, color="#475569", fill_color=COL_BG_BOX, fill_opacity=0.95).move_to([ax_x, -1.85, 0])
+        th = Text("D             Irms          ความร้อน (W)", font_size=12, color=COL_DUTY).move_to([ax_x, -1.35, 0])
+        tr1 = Text("0.25         5.00 A            25 W", font_size=12, color=COL_RMS).move_to([ax_x, -1.65, 0])
+        tr2 = Text("0.50         7.07 A            50 W", font_size=12, color=WHITE).move_to([ax_x, -1.95, 0])
+        tr3 = Text("1.00        10.00 A           100 W", font_size=12, color=COL_HEAT).move_to([ax_x, -2.25, 0])
         tbl_all = VGroup(tbl_rect, th, tr1, tr2, tr3)
 
         self.play(FadeIn(tbl_all), run_time=0.6)
@@ -463,18 +472,18 @@ class PulseRmsTeachingScene(SafeScene):
             run_time=0.4
         )
 
-        # Red Left Card in thermal world (x = -4.0, y = -2.2)
-        c_wrong = RoundedRectangle(corner_radius=0.15, width=4.4, height=1.6, color=COL_TRAP, fill_color=COL_BG_BOX, fill_opacity=0.95).move_to([cx, -2.2, 0])
-        t_w_h = Text("WRONG for heat", font_size=12, color=COL_TRAP).move_to([cx, -1.6, 0])
-        t_w_form = Text("Iavg = Ipk D = 2.5 A", font_size=13, color=WHITE).move_to([cx, -1.95, 0])
-        t_w_calc = Text("2.5² × 1 Ω = 6.25 W (ผิด! หายไป 4 เท่า)", font_size=11, color=COL_TRAP).move_to([cx, -2.4, 0])
+        # Red Left Card in thermal world (x = -4.0, y = -1.85)
+        c_wrong = RoundedRectangle(corner_radius=0.15, width=4.4, height=1.6, color=COL_TRAP, fill_color=COL_BG_BOX, fill_opacity=0.95).move_to([cx, -1.85, 0])
+        t_w_h = Text("WRONG for heat", font_size=12, color=COL_TRAP).move_to([cx, -1.25, 0])
+        t_w_form = Text("Iavg = Ipk D = 2.5 A", font_size=13, color=WHITE).move_to([cx, -1.60, 0])
+        t_w_calc = Text("2.5² × 1 Ω = 6.25 W (ผิด! หายไป 4 เท่า)", font_size=11, color=COL_TRAP).move_to([cx, -2.05, 0])
         wrong_grp = VGroup(c_wrong, t_w_h, t_w_form, t_w_calc)
 
-        # Green Right Card in formula world (x = 2.8, y = -1.45)
-        c_right = RoundedRectangle(corner_radius=0.15, width=4.4, height=1.6, color=COL_RMS, fill_color=COL_BG_BOX, fill_opacity=0.95).move_to([ax_x, -1.45, 0])
-        t_r_h = Text("RIGHT for heat", font_size=12, color=COL_RMS).move_to([ax_x, -0.85, 0])
-        t_r_form = Text("Irms = Ipk sqrt(D) = 5 A", font_size=13, color=WHITE).move_to([ax_x, -1.2, 0])
-        t_r_calc = Text("5² × 1 Ω = 25 W (ถูกต้อง! เท่าพัลส์จริง)", font_size=11, color=COL_RMS).move_to([ax_x, -1.65, 0])
+        # Green Right Card in formula world (x = 2.8, y = -1.85)
+        c_right = RoundedRectangle(corner_radius=0.15, width=4.4, height=1.6, color=COL_RMS, fill_color=COL_BG_BOX, fill_opacity=0.95).move_to([ax_x, -1.85, 0])
+        t_r_h = Text("RIGHT for heat", font_size=12, color=COL_RMS).move_to([ax_x, -1.25, 0])
+        t_r_form = Text("Irms = Ipk sqrt(D) = 5 A", font_size=13, color=WHITE).move_to([ax_x, -1.60, 0])
+        t_r_calc = Text("5² × 1 Ω = 25 W (ถูกต้อง! เท่าพัลส์จริง)", font_size=11, color=COL_RMS).move_to([ax_x, -2.05, 0])
         right_grp = VGroup(c_right, t_r_h, t_r_form, t_r_calc)
 
         self.play(FadeIn(wrong_grp), FadeIn(right_grp), run_time=0.8)
@@ -491,15 +500,25 @@ class PulseRmsTeachingScene(SafeScene):
             ttl.animate.set_opacity(0.25),
             FadeOut(axes_hero), FadeOut(pulse_path), FadeOut(brk_dts), FadeOut(lbl_dts),
             FadeOut(lbl_d_def), FadeOut(lbl_ipk_tag), FadeOut(lbl_pr_formula),
-            FadeOut(deriv_box), FadeOut(eq_st1), FadeOut(switch_rail),
+            FadeOut(switch_rail),
             run_time=0.6
         )
 
         # Centered recap card rising 0.35 units
         recap_box = RoundedRectangle(corner_radius=0.18, width=9.6, height=2.0, color=COL_RMS, fill_color=COL_BG_BOX, fill_opacity=0.95).move_to([0, 0.65, 0]).shift(DOWN * 0.35)
         rc1 = Text("1. RMS = DC ที่ร้อนเท่ากัน", font_size=16, color=WHITE).move_to([0, 1.15, 0]).shift(DOWN * 0.35)
-        rc2 = Text("2. พัลส์สูง Ipk นาน D Ts", font_size=16, color=COL_CURR).move_to([0, 0.65, 0]).shift(DOWN * 0.35)
-        rc3 = Text("3. Irms = Ipk sqrt(D)", font_size=18, color=COL_RMS).move_to([0, 0.15, 0]).shift(DOWN * 0.35)
+
+        # Rebuilt line 2 with VGroup.arrange to guarantee Latin 'Ipk' never collides with Thai glyphs
+        t2_a = Text("2. พัลส์สูง", font_size=16, color=COL_CURR)
+        t2_b = Text("Ipk", font_size=16, color=COL_CURR)
+        t2_c = Text("นาน", font_size=16, color=COL_CURR)
+        t2_d = Text("D Ts", font_size=16, color=COL_DUTY)
+        rc2 = VGroup(t2_a, t2_b, t2_c, t2_d).arrange(RIGHT, buff=0.18).move_to([0, 0.65, 0]).shift(DOWN * 0.35)
+
+        t3_a = Text("3. Irms =", font_size=18, color=COL_RMS)
+        t3_b = Text("Ipk", font_size=18, color=COL_CURR)
+        t3_c = Text("sqrt(D)", font_size=18, color=COL_DUTY)
+        rc3 = VGroup(t3_a, t3_b, t3_c).arrange(RIGHT, buff=0.16).move_to([0, 0.15, 0]).shift(DOWN * 0.35)
         recap_card = VGroup(recap_box, rc1, rc2, rc3)
 
         self.play(recap_card.animate.shift(UP * 0.35), run_time=0.8)
