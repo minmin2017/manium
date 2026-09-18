@@ -210,7 +210,7 @@ class H6_01_Reservoir(SafeThreeDScene):
         # ----------------------------------------------------------------------
         # BEAT 14.0–17.0: Function 1: เก็บน้ำมันสำรอง (Reserve Storage)
         # ----------------------------------------------------------------------
-        fn1_t = Text("1. เก็บน้ำมันสำรอง (Reserve Oil)", font_size=18, color=WHITE).move_to([-3.8, 1.90, 0])
+        fn1_t = Text("1. เก็บน้ำมันสำรอง (Reserve Oil)", font_size=17, color=COL_WARN).move_to([-3.8, 2.05, 0])
         self.hud(fn1_t)
 
         self.play(
@@ -223,10 +223,11 @@ class H6_01_Reservoir(SafeThreeDScene):
         # ----------------------------------------------------------------------
         # BEAT 17.0–20.5: Function 2: ระบายความร้อน (Cooling) — Live Color Change
         # ----------------------------------------------------------------------
-        fn2_t = Text("2. ระบายความร้อน (Heat Dissipation)", font_size=18, color=COL_WARN).next_to(fn1_t, DOWN, aligned_edge=LEFT, buff=0.18)
+        fn2_t = Text("2. ระบายความร้อน (Heat Dissipation)", font_size=17, color=COL_WARN).next_to(fn1_t, DOWN, aligned_edge=LEFT, buff=0.15)
         self.hud(fn2_t)
 
         self.play(
+            fn1_t.animate.set_color(WHITE),
             FadeIn(fn2_t, shift=UP * 0.2),
             oil_body.animate.set_color(COL_FIELD),
             run_time=2.5
@@ -236,7 +237,7 @@ class H6_01_Reservoir(SafeThreeDScene):
         # ----------------------------------------------------------------------
         # BEAT 20.5–24.0: Function 3: แยกฟองอากาศ (De-aeration) — Bubbles Rising
         # ----------------------------------------------------------------------
-        fn3_t = Text("3. แยกฟองอากาศ (De-aeration)", font_size=18, color=WHITE).next_to(fn2_t, DOWN, aligned_edge=LEFT, buff=0.18)
+        fn3_t = Text("3. แยกฟองอากาศ (De-aeration)", font_size=17, color=COL_WARN).next_to(fn2_t, DOWN, aligned_edge=LEFT, buff=0.15)
         self.hud(fn3_t)
 
         bubble_pts = [
@@ -249,6 +250,7 @@ class H6_01_Reservoir(SafeThreeDScene):
         ])
 
         self.play(
+            fn2_t.animate.set_color(WHITE),
             FadeIn(fn3_t, shift=UP * 0.2),
             *[b.animate.shift(UP * 1.5) for b in bubbles],
             run_time=2.8,
@@ -259,25 +261,38 @@ class H6_01_Reservoir(SafeThreeDScene):
         # ----------------------------------------------------------------------
         # BEAT 24.0–27.5: Function 4: ตกตะกอน (Settling) — Particles Sinking
         # ----------------------------------------------------------------------
-        fn4_t = Text("4. ให้สิ่งสกปรกตกตะกอน (Settling)", font_size=18, color=COL_GRAY).next_to(fn3_t, DOWN, aligned_edge=LEFT, buff=0.18)
+        fn4_t = Text("4. ให้สิ่งสกปรกตกตะกอน (Settling)", font_size=17, color=COL_WARN).next_to(fn3_t, DOWN, aligned_edge=LEFT, buff=0.15)
         self.hud(fn4_t)
 
+        # Dark sediment color visually distinct from white bubbles
+        COL_DIRT = "#3E2723"
         dirt_pts = [
-            [-2.2, -0.6, 0.1], [-1.2, -0.5, -0.2],
-            [+1.0, -0.6, 0.2], [+2.0, -0.5, -0.1]
+            [-2.4, -0.45, 0.1], [-1.5, -0.42, -0.2], [-0.8, -0.48, 0.2],
+            [+0.8, -0.48, -0.2], [+1.5, -0.42, 0.2], [+2.3, -0.45, -0.1]
         ]
         dirt_group = VGroup(*[
-            Dot(point=pt, radius=0.055, color=DARK_GRAY)
+            Dot(point=pt, radius=0.08, color=COL_DIRT)
             for pt in dirt_pts
         ])
 
+        # Step 1: Particles appear near surface and item 4 highlights in WARN
         self.play(
+            fn3_t.animate.set_color(WHITE),
             FadeIn(fn4_t, shift=UP * 0.2),
-            *[d.animate.shift(DOWN * 1.4) for d in dirt_group],
-            run_time=2.8,
+            FadeIn(dirt_group),
+            run_time=0.5
+        )
+        # Step 2: Particles visibly sink downward to the tank floor
+        self.play(
+            *[d.animate.shift(DOWN * 1.65) for d in dirt_group],
+            run_time=2.4,
             rate_func=linear
         )
-        self.wait(0.5)
+        self.play(
+            fn4_t.animate.set_color(WHITE),
+            run_time=0.3
+        )
+        self.wait(0.2)
 
         # ----------------------------------------------------------------------
         # BEAT 27.5–29.5: Clear Stage & Pose Misconception Question
@@ -337,25 +352,30 @@ class H6_01_Reservoir(SafeThreeDScene):
             Create(line_direct),
             MoveAlongPath(dot_direct, Line(path_direct[0], path_direct[1])),
             MoveAlongPath(bubble_direct, Line(path_direct[0], path_direct[1])),
-            run_time=3.0,
+            run_time=2.6,
             rate_func=linear
         )
 
         # ----------------------------------------------------------------------
         # BEAT 34.5–37.0: Consequence: Cavitation & Rapid Wear
         # ----------------------------------------------------------------------
-        cav_card = RoundedRectangle(corner_radius=0.12, width=5.2, height=1.15, color=COL_WARN, fill_color=COL_BG_BOX, fill_opacity=0.95).move_to([+1.8, 1.25, 0])
-        cav_t1 = Text("เกิด Cavitation ในปั๊ม!", font_size=18, color=COL_WARN).move_to([+1.8, 1.45, 0])
-        cav_t2 = Text("เสียงดังรุนแรง · กัดกร่อนใบพัด · สึกหรอเร็ว", font_size=15, color=WHITE).move_to([+1.8, 1.05, 0])
-        cav_grp = VGroup(cav_card, cav_t1, cav_t2)
+        cav_card = RoundedRectangle(
+            corner_radius=0.15, width=5.6, height=1.35,
+            color=COL_WARN, stroke_width=2.5,
+            fill_color="#0F172A", fill_opacity=1.0
+        ).move_to([+2.4, 1.85, 0])
+        cav_t1 = Text("เกิด Cavitation ในปั๊ม!", font_size=20, color=COL_WARN, weight=BOLD).move_to([+2.4, 2.18, 0])
+        cav_t2 = Text("เสียงดังรุนแรง · กัดกร่อนใบพัด · สึกหรอเร็ว", font_size=16, color=WHITE).move_to([+2.4, 1.62, 0])
+        cav_arr = arrow3([+2.4, 1.15, 0], [+2.6, 0.75, 0], color=COL_WARN, thickness=0.035)
+        cav_grp = VGroup(cav_card, cav_t1, cav_t2, cav_arr)
         self.hud(cav_grp)
 
         self.play(
             Indicate(pump_full, color=COL_WARN, scale_factor=1.25),
-            FadeIn(cav_grp),
-            run_time=0.8
+            FadeIn(cav_grp, shift=DOWN * 0.15),
+            run_time=0.5
         )
-        self.wait(1.7)
+        self.wait(2.2)
 
         # ----------------------------------------------------------------------
         # BEAT 37.0–39.5: Insert Baffle Plate Back
