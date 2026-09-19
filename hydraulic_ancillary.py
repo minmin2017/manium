@@ -8459,3 +8459,396 @@ class H6_21_Intensifier(SafeScene):
         self.wait(0.2)
         self.fade_out_all(run_time=0.6)
         self.wait(0.5)
+
+
+# ==============================================================================
+# SCENE 22: H6_22_Accumulators1 (hydraulic06.pdf page 25)
+# Duration: ~48 seconds | 2D SafeScene
+# Pedagogical Focus: Weighted Accumulator vs Spring-Loaded Accumulator
+# Core Contrasts:
+# 1. Weighted (P = W / A): Constant pressure across full stroke. Heavy, bulky.
+#    Gauge needle static at 45° across both high and low oil levels.
+# 2. Spring-Loaded (P = F_spring / A): Variable pressure (Hooke's Law F = kx).
+#    Spring visibly compresses: Relaxed (5 loose coils, pitch 0.30, h=2.3) vs
+#    Compressed (10 dense coils, pitch 0.12, h=1.2).
+#    Gauge needle sweeps from 140° (P_min) to -15° (P_max).
+# Comparative cards & review question card.
+# ==============================================================================
+COL_OIL_RED = "#EF4444"  # Red hydraulic oil (matching slide 25)
+COL_WEIGHT  = "#64748B"  # Slate gray for weight stack
+COL_SPRING  = "#F59E0B"  # Amber coil spring
+
+
+def _h6_22_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_22_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_22_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_22_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_22_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _create_spring_path(start_y, end_y, width, num_turns, center_x=0.0):
+    """Generates a zigzag spring path VMobject between start_y (bottom) and end_y (top)."""
+    h = end_y - start_y
+    pts = [[center_x, start_y, 0]]
+    half_turns = num_turns * 2
+    for i in range(1, half_turns):
+        y = start_y + (i / half_turns) * h
+        x = center_x + (width / 2 if i % 2 == 1 else -width / 2)
+        pts.append([x, y, 0])
+    pts.append([center_x, end_y, 0])
+    path = VMobject(color=COL_SPRING, stroke_width=3.2)
+    path.set_points_as_corners([np.array(p) for p in pts])
+    return path
+
+
+def _create_gauge(center, angle, status_text, color=COL_OK):
+    """Creates a circular analog pressure gauge with a needle and clean outside label."""
+    dial = Circle(radius=0.38, color=COL_METAL, stroke_width=2.0).set_fill(COL_BG_BOX, 0.95).move_to(center)
+    arc_bg = Arc(radius=0.30, start_angle=-20*DEGREES, angle=220*DEGREES, arc_center=center, color=COL_GRAY, stroke_width=1.5)
+    needle = Line(center, center + 0.28 * np.array([np.cos(angle), np.sin(angle), 0]), color=color, stroke_width=2.5)
+    pin = Dot(center, radius=0.04, color=WHITE)
+    lbl = Text(status_text, font_size=10, color=color).next_to(dial, UP, buff=0.08)
+    return VGroup(dial, arc_bg, needle, pin, lbl)
+
+
+class H6_22_Accumulators1(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_22_title("Accumulators: ตัวสะสมพลังงานไฮดรอลิก")
+        self.ref_m = _h6_22_page_ref("hydraulic06 น.25")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 2.0–5.5: Hook Question
+        # ======================================================================
+        hook_q = _h6_22_caption_top("Accumulator ทุกแบบเก็บพลังงานไฮดรอลิกเหมือนกัน แรงดันที่ได้ต้องเท่ากันตลอดทุกแบบจริงไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 6.0–18.5: Weighted Accumulator (Constant Pressure: P = W / A)
+        # ======================================================================
+        cap1 = _h6_22_caption_top("1. Weighted Accumulator: แรงดันคงที่ตลอด (P = น้ำหนัก / พื้นที่)")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Layout for Weighted Accumulator (Center-Left):
+        cyl_w_x = -1.2
+        cyl_w_w = 2.4
+        cyl_w_bot_y = -1.50
+        cyl_w_top_y = 0.00
+        cyl_w_h = cyl_w_top_y - cyl_w_bot_y
+
+        cyl_w_outer = Rectangle(width=cyl_w_w + 0.3, height=cyl_w_h, color=COL_METAL, stroke_width=2.0).set_fill("#0F172A", 0.95).move_to([cyl_w_x, (cyl_w_top_y + cyl_w_bot_y)/2, 0])
+        # T-Port base at bottom:
+        t_port_stem = Rectangle(width=0.45, height=0.50, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.95).next_to(cyl_w_outer, DOWN, buff=0)
+        t_port_bar = Rectangle(width=2.8, height=0.32, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.95).next_to(t_port_stem, DOWN, buff=0)
+        t_port_grp = VGroup(t_port_stem, t_port_bar)
+        lbl_port_w = Text("PORT (ต่อเข้าระบบ)", font_size=9.5, color=WHITE).next_to(t_port_bar, DOWN, buff=0.08)
+
+        # High Oil State (Initial):
+        y_piston_high = -0.20
+        piston_h = 0.30
+        piston_w_high = Rectangle(width=cyl_w_w, height=piston_h, color=COL_METAL, stroke_width=2.0).set_fill("#94A3B8", 1.0).move_to([cyl_w_x, y_piston_high, 0])
+        lbl_piston_w = Text("PISTON (ลูกสูบ A)", font_size=9, color=BLACK, weight=BOLD).move_to(piston_w_high.get_center())
+
+        # Oil chamber high:
+        oil_h_high = y_piston_high - piston_h/2 - cyl_w_bot_y
+        oil_w_high = Rectangle(width=cyl_w_w, height=oil_h_high, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.90).move_to([cyl_w_x, cyl_w_bot_y + oil_h_high/2, 0])
+
+        # Vertical shaft:
+        shaft_h = 0.85
+        shaft_w_high = Rectangle(width=0.42, height=shaft_h, color=COL_METAL, stroke_width=2.0).set_fill("#CBD5E1", 1.0).next_to(piston_w_high, UP, buff=0)
+
+        # Weight stack (3 slabs):
+        slab_w = 2.6
+        slab_h = 0.22
+        slabs_high = VGroup(*[
+            Rectangle(width=slab_w, height=slab_h, color=WHITE, stroke_width=1.5).set_fill(COL_WEIGHT, 0.95).move_to([cyl_w_x, shaft_w_high.get_top()[1] + (i + 0.5) * slab_h, 0])
+            for i in range(3)
+        ])
+        lbl_weights_w = Text("WEIGHTS (น้ำหนัก W)", font_size=11, color=WHITE, weight=BOLD).next_to(slabs_high, UP, buff=0.10)
+        weight_stack_high = VGroup(shaft_w_high, slabs_high, lbl_weights_w)
+
+        # Pressure Gauge connected to port:
+        gauge_w_high = _create_gauge(center=[-3.4, -1.0, 0], angle=45*DEGREES, status_text="P (คงที่)", color=COL_OK)
+        line_gauge_w = Line(t_port_stem.get_left(), gauge_w_high.get_right(), color=COL_OIL_RED, stroke_width=2.2)
+
+        # Label: State 1 (น้ำมันเต็ม/ลูกสูบสูง)
+        badge_state_w1 = _h6_22_badge("ระดับน้ำมันสูง (เก็บพลังงานเต็ม)", COL_OK).move_to([2.8, 1.5, 0])
+
+        # Formula callout card on right:
+        f_box_w = RoundedRectangle(width=4.4, height=2.4, corner_radius=0.12, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([2.8, -0.2, 0])
+        formula_w = MathTex("P = \\frac{W}{A}", font_size=32, color=COL_OK).move_to([2.8, 0.45, 0])
+        f_sub_w1 = Text("W = น้ำหนักคงที่ (แผ่นเหล็ก)", font_size=11, color=WHITE).move_to([2.8, -0.05, 0])
+        f_sub_w2 = Text("A = พื้นที่หน้าตัดลูกสูบ", font_size=11, color=WHITE).move_to([2.8, -0.40, 0])
+        f_sub_w3 = Text("→ แรงดัน P ไม่เปลี่ยนตลอดช่วงชัก!", font_size=11, color=COL_OK).move_to([2.8, -0.80, 0])
+        formula_w_grp = VGroup(f_box_w, formula_w, f_sub_w1, f_sub_w2, f_sub_w3)
+
+        banner1 = _h6_22_banner(
+            "น้ำหนักไม่เปลี่ยนไม่ว่าลูกสูบจะอยู่ตำแหน่งไหน → แรงดันคงที่ตลอด (เหมาะกับงานที่ต้องการแรงสม่ำเสมอ เช่น เครื่องอัดขนาดใหญ่)",
+            COL_OK
+        )
+
+        weighted_full_grp = VGroup(
+            cyl_w_outer, t_port_grp, lbl_port_w,
+            oil_w_high, piston_w_high, lbl_piston_w, weight_stack_high,
+            gauge_w_high, line_gauge_w, badge_state_w1, formula_w_grp
+        )
+
+        self.play(FadeIn(weighted_full_grp, shift=UP * 0.2), FadeIn(banner1), run_time=1.2)
+        self.wait(2.8)
+
+        # Transition to Low Oil State:
+        # Piston moves DOWN by 0.70 units:
+        dy_w = -0.70
+        y_piston_low = y_piston_high + dy_w
+
+        oil_h_low = y_piston_low - piston_h/2 - cyl_w_bot_y
+        oil_w_low = Rectangle(width=cyl_w_w, height=oil_h_low, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.90).move_to([cyl_w_x, cyl_w_bot_y + oil_h_low/2, 0])
+
+        badge_state_w2 = _h6_22_badge("ระดับน้ำมันต่ำ (จ่ายน้ำมันออกไป)", COL_WARN).move_to([2.8, 1.5, 0])
+        # Gauge reading in low state has IDENTICAL angle and status_text ("P (คงที่)")!
+        gauge_w_low = _create_gauge(center=[-3.4, -1.0, 0], angle=45*DEGREES, status_text="P (คงที่)", color=COL_OK)
+
+        self.play(
+            piston_w_high.animate.shift(DOWN * 0.70),
+            lbl_piston_w.animate.shift(DOWN * 0.70),
+            weight_stack_high.animate.shift(DOWN * 0.70),
+            Transform(oil_w_high, oil_w_low),
+            Transform(badge_state_w1, badge_state_w2),
+            Transform(gauge_w_high, gauge_w_low),
+            run_time=1.8
+        )
+        self.wait(4.5)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 19.1–32.5: Spring-Loaded Accumulator (Variable Pressure: P = F_spring / A)
+        # ======================================================================
+        cap2 = _h6_22_caption_top("2. Spring-Loaded Accumulator: แรงดันเพิ่มขึ้นตามปริมาตรน้ำมัน")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Spring Accumulator Geometry (Center-Left):
+        cyl_s_x = -1.2
+        cyl_s_w = 2.4
+        cyl_s_bot_y = -1.5
+        cyl_s_top_y = 1.6
+        cyl_s_h = cyl_s_top_y - cyl_s_bot_y
+
+        cyl_s_outer = Rectangle(width=cyl_s_w + 0.3, height=cyl_s_h, color=COL_METAL, stroke_width=2.0).set_fill("#0F172A", 0.95).move_to([cyl_s_x, (cyl_s_top_y + cyl_s_bot_y)/2, 0])
+        t_port_s_stem = Rectangle(width=0.45, height=0.50, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.95).next_to(cyl_s_outer, DOWN, buff=0)
+        t_port_s_bar = Rectangle(width=2.8, height=0.32, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.95).next_to(t_port_s_stem, DOWN, buff=0)
+        t_port_s_grp = VGroup(t_port_s_stem, t_port_s_bar)
+        lbl_port_s = Text("PORT (ต่อเข้าระบบ)", font_size=9.5, color=WHITE).next_to(t_port_s_bar, DOWN, buff=0.08)
+
+        # State 1: Low Oil, Relaxed Spring (Longer spring, fewer coils, looser pitch)
+        y_piston_s_low = -0.70
+        oil_h_s_low = y_piston_s_low - piston_h/2 - cyl_s_bot_y
+        oil_s_low = Rectangle(width=cyl_s_w, height=oil_h_s_low, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.90).move_to([cyl_s_x, cyl_s_bot_y + oil_h_s_low/2, 0])
+        piston_s_low = Rectangle(width=cyl_s_w, height=piston_h, color=COL_METAL, stroke_width=2.0).set_fill("#94A3B8", 1.0).move_to([cyl_s_x, y_piston_s_low, 0])
+        lbl_piston_s = Text("PISTON (ลูกสูบ A)", font_size=9, color=BLACK, weight=BOLD).move_to(piston_s_low.get_center())
+
+        # Relaxed spring (from piston top to cylinder top):
+        # Turns = 5, loose pitch
+        spring_relaxed = _create_spring_path(
+            start_y=y_piston_s_low + piston_h/2,
+            end_y=cyl_s_top_y,
+            width=1.4,
+            num_turns=5,
+            center_x=cyl_s_x
+        )
+        lbl_spring_rel = Text("SPRING (สปริงคลายตัว: แรง F ต่ำ)", font_size=10, color=COL_SPRING).next_to(spring_relaxed, RIGHT, buff=0.15)
+
+        # Low pressure gauge (needle pointing low, angle 140 deg):
+        gauge_s_low = _create_gauge(center=[-3.4, -1.0, 0], angle=140*DEGREES, status_text="P_min (แรงดันต่ำ)", color=COL_WARN)
+        line_gauge_s = Line(t_port_s_stem.get_left(), gauge_s_low.get_right(), color=COL_OIL_RED, stroke_width=2.2)
+
+        badge_state_s1 = _h6_22_badge("ระดับน้ำมันน้อย (สปริงคลายตัว)", COL_WARN).move_to([2.8, 1.5, 0])
+
+        f_box_s = RoundedRectangle(width=4.4, height=2.4, corner_radius=0.12, color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([2.8, -0.2, 0])
+        formula_s = MathTex("P = \\frac{F_{spring}}{A}", font_size=32, color=COL_WARN).move_to([2.8, 0.45, 0])
+        f_sub_s1 = Text("F_spring = แรงสปริง (ตามกฎฮุค k·x)", font_size=10.5, color=WHITE).move_to([2.8, -0.05, 0])
+        f_sub_s2 = Text("ยิ่งน้ำมันเข้ามาก สปริงยิ่งยุบมาก", font_size=11, color=WHITE).move_to([2.8, -0.40, 0])
+        f_sub_s3 = Text("→ แรงดัน P สูงขึ้นตามปริมาตรน้ำมัน!", font_size=11, color=COL_WARN).move_to([2.8, -0.80, 0])
+        formula_s_grp = VGroup(f_box_s, formula_s, f_sub_s1, f_sub_s2, f_sub_s3)
+
+        banner2 = _h6_22_banner(
+            "สปริงยิ่งถูกอัดมาก (น้ำมันเก็บมาก) แรงสปริงยิ่งเพิ่มตามกฎของฮุค → แรงดันไม่คงที่ เพิ่มขึ้นตามปริมาตรน้ำมัน",
+            COL_OK
+        )
+
+        spring_low_grp = VGroup(
+            cyl_s_outer, t_port_s_grp, lbl_port_s,
+            oil_s_low, piston_s_low, lbl_piston_s,
+            spring_relaxed, lbl_spring_rel,
+            gauge_s_low, line_gauge_s,
+            badge_state_s1, formula_s_grp
+        )
+
+        self.play(FadeIn(spring_low_grp, shift=UP * 0.2), FadeIn(banner2), run_time=1.2)
+        self.wait(2.2)
+
+        # State 2: High Oil, Compressed Spring (Shorter spring, 10 coils, dense pitch!)
+        y_piston_s_high = 0.40
+        oil_h_s_high = y_piston_s_high - piston_h/2 - cyl_s_bot_y
+        oil_s_high = Rectangle(width=cyl_s_w, height=oil_h_s_high, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.90).move_to([cyl_s_x, cyl_s_bot_y + oil_h_s_high/2, 0])
+        piston_s_high = Rectangle(width=cyl_s_w, height=piston_h, color=COL_METAL, stroke_width=2.0).set_fill("#94A3B8", 1.0).move_to([cyl_s_x, y_piston_s_high, 0])
+
+        # Compressed spring (turns = 10, dense coils, visibly compressed!):
+        spring_compressed = _create_spring_path(
+            start_y=y_piston_s_high + piston_h/2,
+            end_y=cyl_s_top_y,
+            width=1.4,
+            num_turns=10,
+            center_x=cyl_s_x
+        )
+        lbl_spring_comp = Text("SPRING (สปริงถูกอัดแน่น: แรง F สูง)", font_size=10, color=COL_WARN).next_to(spring_compressed, RIGHT, buff=0.15)
+
+        # High pressure gauge (needle rotated to high, angle -15 deg):
+        gauge_s_high = _create_gauge(center=[-3.4, -1.0, 0], angle=-15*DEGREES, status_text="P_max (แรงดันสูง)", color=COL_OK)
+        badge_state_s2 = _h6_22_badge("ระดับน้ำมันมาก (สปริงถูกอัดแน่น)", COL_OK).move_to([2.8, 1.5, 0])
+
+        self.play(
+            Transform(oil_s_low, oil_s_high),
+            piston_s_low.animate.move_to(piston_s_high.get_center()),
+            lbl_piston_s.animate.move_to(piston_s_high.get_center()),
+            Transform(spring_relaxed, spring_compressed),
+            Transform(lbl_spring_rel, lbl_spring_comp),
+            Transform(gauge_s_low, gauge_s_high),
+            Transform(badge_state_s1, badge_state_s2),
+            run_time=2.0
+        )
+        self.wait(5.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 33.1–40.5: Comparative Summary Cards (Weighted vs Spring-Loaded)
+        # ======================================================================
+        cap3 = _h6_22_caption_top("3. เลือกใช้ตามลักษณะงาน: ข้อดี-ข้อเสียคนละแบบ")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        # Card 1: Weighted Accumulator
+        card_w_box = RoundedRectangle(width=5.6, height=3.6, corner_radius=0.14, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([-3.1, -0.15, 0])
+        head_w = _h6_22_badge("1. Weighted (แบบถ่วงน้ำหนัก)", COL_OK).move_to([-3.1, 1.35, 0])
+        bullets_w = VGroup(
+            Text("• แรงดันคงที่ตลอดการทำงาน 100%", font_size=11, color=COL_OK, weight=BOLD),
+            Text("• ไม่ขึ้นกับปริมาตรน้ำมันที่เหลืออยู่ในห้อง", font_size=10.5, color=WHITE),
+            Text("• ขนาดใหญ่ เทอะทะ หนักมาก ต้องมีโครงสร้างรับ", font_size=10.5, color=COL_GRAY),
+            Text("• เหมาะกับ: เครื่องอัดงานหนัก (Heavy Presses)", font_size=11, color=YELLOW)
+        ).arrange(DOWN, buff=0.16, aligned_edge=LEFT).move_to([-3.1, -0.25, 0])
+        card_w = VGroup(card_w_box, head_w, bullets_w)
+
+        # Card 2: Spring-Loaded Accumulator
+        card_s_box = RoundedRectangle(width=5.6, height=3.6, corner_radius=0.14, color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([3.1, -0.15, 0])
+        head_s = _h6_22_badge("2. Spring-Loaded (แบบสปริง)", COL_WARN).move_to([3.1, 1.35, 0])
+        bullets_s = VGroup(
+            Text("• ไม่ต้องอัดประจุแก๊สล่วงหน้า (No Pre-charge)", font_size=11, color=COL_OK, weight=BOLD),
+            Text("• ติดตั้งง่าย ดูแลง่าย โครงสร้างกะทัดรัดกว่า", font_size=10.5, color=WHITE),
+            Text("• แรงดันไม่คงที่ (แปรผันตามระยะยุบสปริง)", font_size=10.5, color=COL_WARN),
+            Text("• ไม่เหมาะกับ: งานรอบเร็ว/ถี่ (High Cycle Rate)", font_size=11, color=COL_BAD)
+        ).arrange(DOWN, buff=0.16, aligned_edge=LEFT).move_to([3.1, -0.25, 0])
+        card_s = VGroup(card_s_box, head_s, bullets_s)
+
+        banner3 = _h6_22_banner(
+            "Weighted: แรงดันคงที่แต่เทอะทะ เหมาะเครื่องอัดงานหนัก — Spring: ไม่ต้องอัดประจุล่วงหน้า แต่ไม่เหมาะงานรอบเร็ว/ถี่",
+            COL_OK
+        )
+
+        cards_grp = VGroup(card_w, card_s)
+        self.play(FadeIn(cards_grp, shift=UP * 0.25), FadeIn(banner3), run_time=1.0)
+        self.wait(5.5)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 41.1–44.5: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: ตัวสะสมพลังงานไฮดรอลิก (Accumulators - hydraulic06 น.25)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. Weighted: P = W / A ให้แรงดันคงที่ตลอดช่วงชัก เหมาะกับเครื่องอัดขนาดใหญ่ (Heavy Presses)",
+            "2. Spring-Loaded: P = F_spring / A แรงดันเพิ่มขึ้นตามปริมาตรน้ำมันที่เก็บ (ตามกฎของฮุค แรงดันไม่คงที่)",
+            "3. การเลือกใช้: Weighted คงที่แต่เทอะทะ | Spring กะทัดรัดไม่ต้อง pre-charge แต่ไม่เหมาะกับงานรอบเร็ว"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(2.6)
+
+        # ======================================================================
+        # BEAT 44.5–47.5: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ถ้าต้องการแรงดันคงที่เป๊ะตลอดการทำงาน (ไม่ขึ้นกับปริมาตรน้ำมันที่เหลือ) ควรเลือก accumulator แบบไหนระหว่าง weighted กับ spring-loaded เพราะอะไร?",
+            font_size=12.0, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: ควรเลือกแบบ Weighted Accumulator เพราะแรงดันคำนวณจากน้ำหนักถ่วงคงที่ P = W / A\nขณะที่แบบสปริง แรงดันจะลดลงเรื่อยๆ เมื่อน้ำมันถูกปล่อยออกและสปริงคลายตัวตามกฎของฮุค)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.4)
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
