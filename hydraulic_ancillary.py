@@ -8310,7 +8310,7 @@ class H6_21_Intensifier(SafeScene):
         lbl_q2 = VGroup(
             MathTex("Q_2 = A_2 \\times d", font_size=16, color=COL_WARN),
             Text("(เล็ก)", font_size=10, color=COL_WARN)
-        ).arrange(DOWN, buff=0.06).move_to(swept_q2.get_center())
+        ).arrange(DOWN, buff=0.06).next_to(swept_q2, UP, buff=0.12)
         fit_width(lbl_q2, stroke_d * 0.85)
 
         # Motion arrows for stroke displacement d (positioned cleanly below swept boxes):
