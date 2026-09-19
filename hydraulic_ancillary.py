@@ -5252,14 +5252,14 @@ class H6_13_ConductorNomograph(SafeScene):
         y_intake_4 = -1.25
         dot_intake_4 = Dot([x_vel_new, y_intake_4, 0], radius=0.09, color=COL_WARN)
         arr_intake = Arrow([x_vel_new + 0.65, y_intake_4, 0], [x_vel_new + 0.12, y_intake_4, 0], color=COL_WARN, stroke_width=2.5, tip_length=0.12)
-        lbl_intake_4 = Text("4 ft/s (ความเร็วสูงสุดเส้นดูด)", font_size=11, color=COL_WARN).next_to(arr_intake, RIGHT, buff=0.10)
+        lbl_intake_4 = Text("4 ft/s", font_size=11, color=COL_WARN).next_to(arr_intake, RIGHT, buff=0.10)
         mark_intake_4 = VGroup(dot_intake_4, arr_intake, lbl_intake_4)
 
         # 2. Pressure line limit: 20 ft/s at y = 0.85 (well above 10 ft/s at -0.40)
         y_pressure_20 = 0.85
         dot_pressure_20 = Dot([x_vel_new, y_pressure_20, 0], radius=0.09, color=COL_OK)
         arr_pressure = Arrow([x_vel_new + 0.65, y_pressure_20, 0], [x_vel_new + 0.12, y_pressure_20, 0], color=COL_OK, stroke_width=2.5, tip_length=0.12)
-        lbl_pressure_20 = Text("20 ft/s (ความเร็วสูงสุดเส้นแรงดัน)", font_size=11, color=COL_OK).next_to(arr_pressure, RIGHT, buff=0.10)
+        lbl_pressure_20 = Text("20 ft/s", font_size=11, color=COL_OK).next_to(arr_pressure, RIGHT, buff=0.10)
         mark_pressure_20 = VGroup(dot_pressure_20, arr_pressure, lbl_pressure_20)
 
         # Callout card on right side explaining the comparison
