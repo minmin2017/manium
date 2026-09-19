@@ -7776,3 +7776,327 @@ class H6_19_PistonRings(SafeScene):
         self.wait(0.2)
         self.fade_out_all(run_time=0.6)
         self.wait(0.5)
+
+
+# ==============================================================================
+# SCENE 20: H6_20_WiperRings (hydraulic06.pdf page 23)
+# Duration: ~34 seconds | 2D SafeScene
+# Pedagogical Focus: Wiper Ring cross-section & dedicated dust scraping function
+# Misconception: Closed ring like O-ring, but wedge knife-lip (not round/pressure seal)
+# Key Dynamic: Retraction scraping where dust is scraped off outside into a pile
+# ==============================================================================
+COL_DUST = "#B45309"  # Brown debris / dust particles color
+
+
+def _h6_20_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_20_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_20_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_20_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_20_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class H6_20_WiperRings(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_20_title("Wiper Rings: แหวนปาดฝุ่น")
+        self.ref_m = _h6_20_page_ref("hydraulic06 น.23")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 2.0–5.5: Hook Question
+        # ======================================================================
+        hook_q = _h6_20_caption_top("Wiper ring ก็เป็นแหวนยางปิดสนิทเหมือน O-ring แปลว่าซีลแรงดันได้เหมือนกันไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 5.5–15.5: Round O-ring vs Asymmetric Wedge Wiper Profile
+        # ======================================================================
+        cap1 = _h6_20_caption_top("1. ปิดสนิทเหมือนกัน แต่หน้าตัดเป็นรูปลิ่มปากคม ไม่กลมแบบ O-ring")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # ----------------- LEFT: O-RING REFERENCE (Round Symmetric) -----------------
+        xl = -3.4
+        # Circular cross section O-ring
+        oring_circle = Circle(radius=0.95, color=COL_BAD, fill_color="#DC2626", fill_opacity=0.35, stroke_width=3.0).move_to([xl, 0.0, 0.0])
+        # Concentric center dashed circle to emphasize symmetry
+        oring_center = DashedVMobject(Circle(radius=0.50, color=COL_BAD, stroke_width=1.5), num_dashes=16).move_to([xl, 0.0, 0.0])
+        oring_badge = _h6_20_badge("O-ring: หน้าตัดกลมสมมาตร", COL_BAD).move_to([xl, 1.75, 0.0])
+        oring_sub = Text("หน้าตัดกลมมน ทนแรงดันของไหลได้ดี", font_size=10, color=WHITE).move_to([xl, -1.65, 0.0])
+        oring_ref_grp = VGroup(oring_circle, oring_center, oring_badge, oring_sub)
+
+        # ----------------- RIGHT: WIPER PROFILE (Asymmetric Wedge Lip) -----------------
+        # Matches "ENLARGED SECTION" from slide 23:
+        # Tall block on left, tapering via diagonal edge to sharp scraper tip at bottom right
+        xr = 3.2
+        # Points defining the asymmetric wedge profile:
+        # Top-left, top-right, inner notch step, sharp lip tip (bottom-right), bottom heel (bottom-left)
+        wiper_pts = [
+            [xr - 1.20,  1.10, 0.0],  # 0: top-left (outer diameter back)
+            [xr + 0.10,  1.10, 0.0],  # 1: top-right (width B)
+            [xr + 0.10,  0.25, 0.0],  # 2: inner notch step
+            [xr + 1.25, -0.65, 0.0],  # 3: SHARP SCRAPER LIP TIP! (knife-edge pressing rod)
+            [xr - 1.20, -0.65, 0.0],  # 4: bottom heel (along rod)
+        ]
+        wiper_profile = Polygon(
+            *wiper_pts,
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.45
+        ).set_stroke(COL_OK, 3.2)
+
+        # Horizontal dashed reference line for the rod contact surface
+        rod_ref_line = DashedLine([xr - 1.6, -0.65, 0.0], [xr + 1.6, -0.65, 0.0], color=COL_GRAY, stroke_width=1.5)
+        rod_ref_lbl = Text("ผิวแกนก้านสูบ (ROD SURFACE)", font_size=8.5, color=COL_GRAY).next_to(rod_ref_line, DOWN, buff=0.10)
+
+        # Sharp lip callout
+        lip_tip_pt = np.array([xr + 1.25, -0.65, 0.0])
+        lip_badge = _h6_20_badge("ปากคมรูปลิ่ม (Scraper Lip)", COL_OK).move_to([xr + 0.2, -1.25, 0.0])
+        lip_arrow = Arrow(lip_badge.get_top(), lip_tip_pt + DOWN * 0.05, color=COL_OK, stroke_width=2.5, tip_length=0.12)
+        lip_callout = VGroup(lip_badge, lip_arrow)
+
+        wiper_badge = _h6_20_badge("Wiper Ring: หน้าตัดรูปลิ่มปากคม", COL_OK).move_to([xr, 1.75, 0.0])
+        wiper_sub = Text("หน้าตัดไม่สมมาตร มีปากคมสำหรับปาดขูดฝุ่น", font_size=10, color=WHITE).move_to([xr, -1.75, 0.0])
+        wiper_profile_grp = VGroup(wiper_profile, rod_ref_line, rod_ref_lbl, wiper_badge, wiper_sub)
+
+        banner1 = _h6_20_banner(
+            "O-ring: หน้าตัดกลม (ซีลแรงดัน) — Wiper Ring: หน้าตัดลิ่มปากคม (ปาดฝุ่น) วงปิดสนิทเหมือนกัน แต่คนละรูปทรง คนละหน้าที่",
+            COL_OK
+        )
+
+        self.play(
+            FadeIn(oring_ref_grp, shift=UP * 0.25),
+            FadeIn(wiper_profile_grp, shift=UP * 0.25),
+            FadeIn(banner1),
+            run_time=1.0
+        )
+        # Sequentially Indicate sharp lip tip (Lesson 5: after FadeIn)
+        self.play(FadeIn(lip_callout), run_time=0.5)
+        self.play(Indicate(lip_badge, color=COL_OK, scale_factor=1.08), run_time=0.8)
+        self.wait(5.5)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 15.5–25.0: Cylinder Mouth Cross-Section & Dynamic Retraction Scraping
+        # ======================================================================
+        cap2 = _h6_20_caption_top("2. หน้าที่: ปาดฝุ่นออกจากก้านสูบตอนถอยกลับเข้ากระบอกสูบ")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # ----------------- CYLINDER MOUTH (GLAND) CROSS-SECTION -----------------
+        # Cylinder body on left (x from -5.5 to -0.9), mouth opening at x = -0.9
+        gland_top_pts = [
+            [-5.2, 0.45, 0], [-1.55, 0.45, 0], [-1.55, 1.05, 0],
+            [-0.95, 1.05, 0], [-0.95, 1.55, 0], [-5.2, 1.55, 0]
+        ]
+        gland_top = Polygon(*gland_top_pts, color=COL_METAL, fill_color="#334155", fill_opacity=0.95).set_stroke(COL_METAL, 2.0)
+
+        gland_bot_pts = [
+            [-5.2, -0.45, 0], [-1.55, -0.45, 0], [-1.55, -1.05, 0],
+            [-0.95, -1.05, 0], [-0.95, -1.55, 0], [-5.2, -1.55, 0]
+        ]
+        gland_bot = Polygon(*gland_bot_pts, color=COL_METAL, fill_color="#334155", fill_opacity=0.95).set_stroke(COL_METAL, 2.0)
+
+        lbl_cyl_mouth = Text("กระบอกสูบ (ปากกระบอก / Gland)", font_size=10, color=COL_METAL).move_to([-3.4, 1.80, 0.0])
+        lbl_outside = Text("ภายนอก (อากาศ / ฝุ่น)", font_size=10, color=COL_GRAY).move_to([2.6, 1.80, 0.0])
+
+        # Wiper rings seated in mouth grooves:
+        w_ring_t_pts = [
+            [-1.50, 0.50, 0], [-1.50, 1.00, 0], [-1.05, 1.00, 0],
+            [-1.05, 0.75, 0], [-0.85, 0.45, 0], [-1.50, 0.45, 0]
+        ]
+        wiper_top = Polygon(*w_ring_t_pts, color=COL_OK, fill_color="#0284C7", fill_opacity=0.95).set_stroke(COL_OK, 2.0)
+
+        w_ring_b_pts = [
+            [-1.50, -0.50, 0], [-1.50, -1.00, 0], [-1.05, -1.00, 0],
+            [-1.05, -0.75, 0], [-0.85, -0.45, 0], [-1.50, -0.45, 0]
+        ]
+        wiper_bot = Polygon(*w_ring_b_pts, color=COL_OK, fill_color="#0284C7", fill_opacity=0.95).set_stroke(COL_OK, 2.0)
+
+        wiper_lbl = _h6_20_badge("WIPER RING (ปากคมปาดฝุ่น)", COL_OK).move_to([-0.85, 1.45, 0.0])
+        wiper_arr = Arrow(wiper_lbl.get_bottom(), [-0.85, 0.65, 0], color=COL_OK, stroke_width=2.0, tip_length=0.10)
+        wiper_installed_callout = VGroup(wiper_lbl, wiper_arr)
+
+        # Piston Rod: extending from left inside cylinder out to the right
+        rod = Rectangle(width=7.8, height=0.90, color=COL_METAL).set_fill("#475569", 0.95).move_to([1.2, 0.0, 0.0])
+        lbl_rod = Text("PISTON ROD (ก้านสูบ)", font_size=9.5, color=WHITE).move_to([1.2, 0.0, 0.0])
+        rod_grp = VGroup(rod, lbl_rod)
+
+        # Cylinder assembly (stationary)
+        cylinder_mouth_grp = VGroup(
+            gland_top, gland_bot, lbl_cyl_mouth, lbl_outside,
+            wiper_top, wiper_bot, wiper_installed_callout
+        )
+
+        # Dust dots on rod surface outside cylinder (x from 0.1 to 3.8)
+        top_dot_xs = [0.1, 0.6, 1.2, 1.7, 2.3, 2.9, 3.5]
+        bot_dot_xs = [0.3, 0.9, 1.5, 2.0, 2.6, 3.2, 3.8]
+
+        dust_dots_top = [
+            Dot(point=[x, 0.49, 0], radius=0.06, color=COL_DUST) for x in top_dot_xs
+        ]
+        dust_dots_bot = [
+            Dot(point=[x, -0.49, 0], radius=0.06, color=COL_DUST) for x in bot_dot_xs
+        ]
+        all_dust_dots = VGroup(*dust_dots_top, *dust_dots_bot)
+
+        # Dust annotation badge
+        dust_badge = _h6_20_badge("ฝุ่น/สิ่งสกปรกเกาะบนผิวก้านสูบภายนอก", COL_WARN).move_to([2.2, 1.15, 0.0])
+
+        banner2 = _h6_20_banner(
+            "ปากคมของ wiper ปาดฝุ่นออกจากผิวก้านสูบก่อนเข้าสู่ในกระบอกสูบ — ป้องกันฝุ่นปนเปื้อนน้ำมันไฮดรอลิกด้านใน",
+            COL_OK
+        )
+
+        self.play(FadeIn(cylinder_mouth_grp), FadeIn(rod_grp), FadeIn(banner2), run_time=0.8)
+        self.play(FadeIn(all_dust_dots, shift=UP * 0.1), FadeIn(dust_badge), run_time=0.6)
+        self.wait(1.4)
+
+        # Retraction Arrow (pointing LEFT <-)
+        retract_arr = Arrow([2.5, -1.15, 0], [0.9, -1.15, 0], color=YELLOW, stroke_width=3.5, tip_length=0.14)
+        retract_lbl = Text("ก้านสูบถอยกลับ (Retract)", font_size=10.5, color=YELLOW).next_to(retract_arr, DOWN, buff=0.08)
+        retract_grp = VGroup(retract_arr, retract_lbl)
+
+        self.play(FadeIn(retract_grp), run_time=0.6)
+        self.wait(0.2)
+
+        # Debris pile at the lip (-0.85, 0.49) that accumulates as dust is scraped!
+        debris_top = VGroup(
+            Dot(point=[-0.80, 0.53, 0], radius=0.07, color=COL_DUST),
+            Dot(point=[-0.75, 0.56, 0], radius=0.08, color=COL_WARN),
+            Dot(point=[-0.70, 0.52, 0], radius=0.06, color=COL_DUST),
+        )
+        debris_bot = VGroup(
+            Dot(point=[-0.80, -0.53, 0], radius=0.07, color=COL_DUST),
+            Dot(point=[-0.75, -0.56, 0], radius=0.08, color=COL_WARN),
+            Dot(point=[-0.70, -0.52, 0], radius=0.06, color=COL_DUST),
+        )
+        debris_pile = VGroup(debris_top, debris_bot)
+
+        # Scraped status badge
+        scraped_badge = _h6_20_badge("ฝุ่นถูกปาดกองอยู่หน้าปาก Lip (ก้านสูบด้านในสะอาด 100%)", COL_OK).move_to([1.8, 1.15, 0.0])
+
+        # Dynamic motion: Rod moves LEFT by 2.2 units
+        # Dots move left with rod, but any dot crossing x <= -0.85 is removed/scraped!
+        lip_x = -0.85
+
+        def update_scraping(mob, alpha):
+            dx = -2.2 * alpha
+            # Move rod
+            rod_grp.move_to([1.2 + dx, 0.0, 0.0])
+            # Update each top dot
+            for i, init_x in enumerate(top_dot_xs):
+                curr_x = init_x + dx
+                dot = dust_dots_top[i]
+                if curr_x <= lip_x:
+                    dot.set_opacity(0.0)  # Scraped off!
+                else:
+                    dot.move_to([curr_x, 0.49, 0.0])
+                    dot.set_opacity(1.0)
+            # Update each bottom dot
+            for i, init_x in enumerate(bot_dot_xs):
+                curr_x = init_x + dx
+                dot = dust_dots_bot[i]
+                if curr_x <= lip_x:
+                    dot.set_opacity(0.0)  # Scraped off!
+                else:
+                    dot.move_to([curr_x, -0.49, 0.0])
+                    dot.set_opacity(1.0)
+
+        self.play(
+            UpdateFromAlphaFunc(VGroup(rod_grp, all_dust_dots), update_scraping),
+            Transform(dust_badge, scraped_badge),
+            FadeIn(debris_pile),
+            run_time=2.4
+        )
+        self.wait(1.8)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 25.6–29.0: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: แหวนปาดฝุ่น (Wiper Rings - hydraulic06 น.23)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. วงปิดสนิทแต่หน้าตัดเป็นลิ่ม: รูปลิ่มปากคม (Scraper Lip) ไม่สมมาตร ต่างจาก O-ring ที่หน้าตัดกลมมน",
+            "2. หน้าที่ปาดฝุ่นโดยเฉพาะ: ปาดขูดฝุ่น โคลน และสิ่งสกปรกออกจากผิวก้านสูบตอนก้านสูบถอยกลับ (Retract)",
+            "3. ไม่ใช่ซีลรับแรงดัน: ติดตั้งอยู่ที่ร่องปากกระบอกสูบ (Mouth / Gland) ตำแหน่งนอกสุดก่อนออกสู่อากาศภายนอก"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.7)
+        self.wait(2.7)
+
+        # ======================================================================
+        # BEAT 29.0–32.5: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ถ้าเอา O-ring ไปติดตั้งตำแหน่ง wiper ring แทน จะป้องกันฝุ่นได้ดีเท่ากันไหม เพราะอะไร?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: ป้องกันได้ไม่ดีเท่า เพราะ O-ring มีหน้าตัดกลมมน ไม่มีสันคมรูปลิ่มสำหรับขูดปาดฝุ่น\nทำให้เม็ดทรายหรือฝุ่นอาจถูกรูดลอดผ่านเข้าสู่กระบอกสูบจนทำลายผิวกระบอกสูบและซีลภายในได้)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.9)
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
