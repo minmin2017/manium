@@ -9255,3 +9255,434 @@ class H6_23_GasAccumulators1(SafeScene):
         self.wait(0.2)
         self.fade_out_all(run_time=0.6)
         self.wait(0.5)
+
+
+# ======================================================================
+# SCENE: H6_24_GasAccumulatorsDiaphragm
+# hydraulic06.pdf — Page 27: Gas-loaded Diaphragm Type Accumulators
+# ======================================================================
+
+def _h6_24_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_24_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_24_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_24_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_24_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    fit_width(lbl, 11.4)
+    return VGroup(bg, lbl)
+
+
+def _create_diaphragm_curve(xl, xr, yc, y_mid, color=WHITE, stroke_width=4.0):
+    """Creates a smooth cubic bezier diaphragm curve clamped at (xl, yc) and (xr, yc)."""
+    p0 = np.array([xl, yc, 0])
+    p1 = np.array([xl + 0.35 * (xr - xl), y_mid, 0])
+    p2 = np.array([xr - 0.35 * (xr - xl), y_mid, 0])
+    p3 = np.array([xr, yc, 0])
+    return CubicBezier(p0, p1, p2, p3, color=color, stroke_width=stroke_width)
+
+
+def _create_shutoff_button(x_mid, y_mid):
+    """Small poppet button vulcanized to the center of the diaphragm."""
+    btn = RoundedRectangle(
+        width=0.45, height=0.10, corner_radius=0.03,
+        color=COL_METAL, stroke_width=1.5
+    ).set_fill("#94A3B8", 1.0).move_to([x_mid, y_mid, 0])
+    return btn
+
+
+class H6_24_GasAccumulatorsDiaphragm(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_24_title("Diaphragm Accumulator: วงจร 6 สถานะ")
+        self.ref_m = _h6_24_page_ref("hydraulic06 น.27")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 2.0–6.0: Hook Question
+        # ======================================================================
+        hook_q = _h6_24_caption_top(
+            "Diaphragm accumulator แค่มีแผ่นยางกั้นแก๊ส-น้ำมัน ทำงานแบบเดียวตลอด ไม่มีขั้นตอนซับซ้อนจริงไหม?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 12.0)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.0)
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 6.0–26.5: 6 Operating States Sequence (a -> f)
+        # ======================================================================
+        cap1 = _h6_24_caption_top("1. วงจรทำงานจริงมี 6 สถานะต่อเนื่องกัน (a → f)")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Vessel Geometry (Centered slightly to left: x = -2.7)
+        vx = -2.7
+        vw = 2.8
+        vh = 3.6
+        v_cy = -0.15
+        clamp_y = v_cy  # Equator seam at y = -0.15
+        xl = vx - vw / 2
+        xr = vx + vw / 2
+
+        # Outer steel shell (capsule shape)
+        outer_shell = RoundedRectangle(
+            width=vw + 0.32, height=vh + 0.32, corner_radius=0.90,
+            color=COL_METAL, stroke_width=2.5
+        ).set_fill("#0F172A", 0.95).move_to([vx, v_cy, 0])
+
+        # Equatorial clamp seam ring
+        seam_l = Rectangle(width=0.20, height=0.12, color=COL_METAL, stroke_width=1.5).set_fill("#64748B", 1.0).move_to([xl - 0.08, clamp_y, 0])
+        seam_r = Rectangle(width=0.20, height=0.12, color=COL_METAL, stroke_width=1.5).set_fill("#64748B", 1.0).move_to([xr + 0.08, clamp_y, 0])
+        seam_grp = VGroup(seam_l, seam_r)
+
+        # Gas valve on top
+        g_stem = Rectangle(width=0.22, height=0.26, color=COL_METAL, stroke_width=1.5).set_fill(COL_METAL, 0.9).next_to(outer_shell, UP, buff=0)
+        g_cap = Rectangle(width=0.38, height=0.12, color=COL_METAL, stroke_width=1.5).set_fill(COL_METAL, 1.0).next_to(g_stem, UP, buff=0)
+        lbl_g_valve = Text("GAS VALVE", font_size=9, color=WHITE, weight=BOLD).next_to(g_cap, UP, buff=0.08)
+        top_valve_grp = VGroup(g_stem, g_cap, lbl_g_valve)
+
+        # Fluid port at bottom
+        f_stem = Rectangle(width=0.42, height=0.28, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.95).next_to(outer_shell, DOWN, buff=0)
+        lbl_f_port = Text("OIL PORT", font_size=9, color=WHITE, weight=BOLD).next_to(f_stem, DOWN, buff=0.08)
+        port_seat = Circle(radius=0.16, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([vx, v_cy - vh / 2 + 0.08, 0])
+        bot_port_grp = VGroup(f_stem, lbl_f_port, port_seat)
+
+        vessel_grp = VGroup(outer_shell, seam_grp, top_valve_grp, bot_port_grp)
+
+        # Right-side state explanation card (Fixed coordinates: x = 2.4, y = -0.15)
+        state_card_box = RoundedRectangle(
+            width=5.0, height=3.6, corner_radius=0.14,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([2.4, -0.15, 0])
+
+        banner1 = _h6_24_banner(
+            "ไดอะแฟรมเป็นแผ่นยางยืดหยุ่น ยึดที่กึ่งกลางถัง — เปลี่ยนรูปตามสมดุลแรงดันระหว่างแก๊ส N2 ด้านบน กับน้ำมันด้านล่าง",
+            COL_OK
+        )
+
+        self.play(FadeIn(vessel_grp), FadeIn(state_card_box), FadeIn(banner1), run_time=1.0)
+
+        # ----------------------------------------------------------------------
+        # Exact Diaphragm Y-coordinates for the 6 states (Geometry Rule §34):
+        # clamp_y = -0.15
+        # ya = -0.15  (relaxed middle)
+        # yb = -1.60  (pre-charged to p1, bottomed out on port seat at -1.65)
+        # yc = -0.65  (oil enters at p2, lifts diaphragm)
+        # yd = +1.15  (maximum pressure p3, pushed high into top dome)
+        # ye = -0.30  (discharging oil)
+        # yf = -1.15  (discharged to minimum operating pressure p2, HIGHER than yb=-1.60 by 0.45!)
+        # ----------------------------------------------------------------------
+        ya = -0.15
+        yb = -1.60
+        yc = -0.65
+        yd = +1.15
+        ye = -0.30
+        yf = -1.15
+
+        # --- STATE (a): Uncharged / Relaxed (7.6–10.6s) ---
+        diaph_a = _create_diaphragm_curve(xl, xr, clamp_y, ya, color=WHITE, stroke_width=4.0)
+        btn_a = _create_shutoff_button(vx, ya)
+        diaph_btn_a = VGroup(diaph_a, btn_a)
+
+        tag_a = _h6_24_badge("a) Without Nitrogen Charge", COL_GRAY).move_to([2.4, 1.25, 0])
+        txt_a = VGroup(
+            Text("• ยังไม่มีประจุแก๊ส (ถังเปล่า)", font_size=11, color=WHITE),
+            Text("• แผ่นไดอะแฟรมหย่อนตัวอยู่กึ่งกลางถัง", font_size=11, color=COL_OK),
+            Text("• ยังไม่มีแรงดันแก๊สหรือน้ำมันกระทำ", font_size=10.5, color=COL_GRAY),
+            Text("• ปุ่ม Shut-off ลอยอยู่ตรงกลาง", font_size=10.5, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([2.4, -0.15, 0])
+        fit_width(txt_a, 4.4)
+        info_a = VGroup(tag_a, txt_a)
+
+        self.play(FadeIn(diaph_btn_a), FadeIn(info_a), run_time=0.6)
+        self.wait(2.4)
+
+        # --- STATE (b): Pre-charged to p1 (10.6–13.6s) ---
+        diaph_b = _create_diaphragm_curve(xl, xr, clamp_y, yb, color=COL_GAS, stroke_width=4.0)
+        btn_b = _create_shutoff_button(vx, yb)
+        diaph_btn_b = VGroup(diaph_b, btn_b)
+
+        tag_b = _h6_24_badge("b) Charged to Pre-charge Pressure p1", COL_GAS).move_to([2.4, 1.25, 0])
+        txt_b = VGroup(
+            Text("• อัดแก๊ส N2 เข้าจนถึงแรงดันประจุ p1", font_size=11, color=COL_GAS, weight=BOLD),
+            Text("• แก๊สขยายตัวดันไดอะแฟรมลงเกือบสุดถัง", font_size=11, color=WHITE),
+            Text("• ปุ่ม Shut-off แนบปิดรูพอร์ตป้องกันยางฉีก", font_size=10.5, color=COL_WARN),
+            Text("• ยังไม่มีน้ำมันในห้องล่างเลย (พิกัด y = -1.60)", font_size=10.5, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([2.4, -0.15, 0])
+        fit_width(txt_b, 4.4)
+        info_b = VGroup(tag_b, txt_b)
+
+        p1_label = Text("p1 (ประจุ)", font_size=10, color=COL_GAS, weight=BOLD).move_to([vx, 0.45, 0])
+
+        self.play(
+            Transform(diaph_btn_a, diaph_btn_b),
+            Transform(info_a, info_b),
+            FadeIn(p1_label),
+            run_time=0.7
+        )
+        self.wait(2.3)
+
+        # --- STATE (c): Inlet of fluid for storage (13.6–16.6s) ---
+        diaph_c = _create_diaphragm_curve(xl, xr, clamp_y, yc, color=COL_OIL_RED, stroke_width=4.0)
+        btn_c = _create_shutoff_button(vx, yc)
+        diaph_btn_c = VGroup(diaph_c, btn_c)
+
+        tag_c = _h6_24_badge("c) Inlet of Fluid for Storage", COL_CURR).move_to([2.4, 1.25, 0])
+        txt_c = VGroup(
+            Text("• แรงดันระบบชนะแรงดันประจุ (P > p1)", font_size=11, color=WHITE),
+            Text("• น้ำมันไฮดรอลิกเริ่มไหลเข้าทางพอร์ตล่าง", font_size=11, color=COL_OIL_RED),
+            Text("• ดันไดอะแฟรมยกตัวลอยสูงขึ้น (y = -0.65)", font_size=10.5, color=COL_OK),
+            Text("• แก๊ส N2 ด้านบนเริ่มถูกอัดตัวสะสมพลังงาน", font_size=10.5, color=WHITE)
+        ).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([2.4, -0.15, 0])
+        fit_width(txt_c, 4.4)
+        info_c = VGroup(tag_c, txt_c)
+
+        arrow_in = Arrow(start=[vx, -2.40, 0], end=[vx, -1.80, 0], color=COL_OIL_RED, stroke_width=3.5, max_tip_length_to_length_ratio=0.3)
+        lbl_in = Text("น้ำมันไหลเข้า", font_size=9.5, color=COL_OIL_RED).next_to(arrow_in, LEFT, buff=0.08)
+        inflow_grp = VGroup(arrow_in, lbl_in)
+
+        self.play(
+            Transform(diaph_btn_a, diaph_btn_c),
+            Transform(info_a, info_c),
+            FadeIn(inflow_grp),
+            run_time=0.7
+        )
+        self.wait(2.3)
+
+        # --- STATE (d): Maximum operating pressure p3 (16.6–19.6s) ---
+        diaph_d = _create_diaphragm_curve(xl, xr, clamp_y, yd, color=COL_OIL_RED, stroke_width=4.0)
+        btn_d = _create_shutoff_button(vx, yd)
+        diaph_btn_d = VGroup(diaph_d, btn_d)
+
+        tag_d = _h6_24_badge("d) Maximum Operating Pressure p3", COL_WARN).move_to([2.4, 1.25, 0])
+        txt_d = VGroup(
+            Text("• น้ำมันไหลเข้าเต็มที่ แรงดันสูงสุด p3", font_size=11, color=COL_WARN, weight=BOLD),
+            Text("• ไดอะแฟรมถูกดันสูงเกือบสุดถังบน (y = +1.15)", font_size=11, color=WHITE),
+            Text("• แก๊ส N2 ถูกอัดจนมีปริมาตรเหลือน้อยที่สุด", font_size=10.5, color=COL_GAS),
+            Text("• สะสมพลังงานไฮดรอลิกไว้เต็มพิกัด", font_size=10.5, color=COL_OK)
+        ).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([2.4, -0.15, 0])
+        fit_width(txt_d, 4.4)
+        info_d = VGroup(tag_d, txt_d)
+
+        p3_label = Text("p3 (สูงสุด)", font_size=10, color=COL_WARN, weight=BOLD).move_to([vx, -0.55, 0])
+
+        self.play(
+            FadeOut(inflow_grp),
+            FadeOut(p1_label),
+            FadeIn(p3_label),
+            Transform(diaph_btn_a, diaph_btn_d),
+            Transform(info_a, info_d),
+            run_time=0.7
+        )
+        self.wait(2.3)
+
+        # --- STATE (e): Discharge of fluid (19.6–22.6s) ---
+        diaph_e = _create_diaphragm_curve(xl, xr, clamp_y, ye, color=COL_CURR, stroke_width=4.0)
+        btn_e = _create_shutoff_button(vx, ye)
+        diaph_btn_e = VGroup(diaph_e, btn_e)
+
+        tag_e = _h6_24_badge("e) Discharge of Fluid", COL_CURR).move_to([2.4, 1.25, 0])
+        txt_e = VGroup(
+            Text("• ระบบต้องการอัตราไหลเสริม / ความดันตก", font_size=11, color=WHITE),
+            Text("• แก๊ส N2 ขยายตัวดันน้ำมันออกจากพอร์ตล่าง", font_size=11, color=COL_CURR),
+            Text("• ไดอะแฟรมเริ่มลดระดับลง (y = -0.30)", font_size=10.5, color=WHITE),
+            Text("• คลายพลังงานกลับคืนเข้าสู่วงจรใช้งาน", font_size=10.5, color=COL_OK)
+        ).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([2.4, -0.15, 0])
+        fit_width(txt_e, 4.4)
+        info_e = VGroup(tag_e, txt_e)
+
+        arrow_out = Arrow(start=[vx, -1.80, 0], end=[vx, -2.40, 0], color=COL_OIL_RED, stroke_width=3.5, max_tip_length_to_length_ratio=0.3)
+        lbl_out = Text("น้ำมันไหลออก", font_size=9.5, color=COL_OIL_RED).next_to(arrow_out, LEFT, buff=0.08)
+        outflow_grp = VGroup(arrow_out, lbl_out)
+
+        self.play(
+            FadeOut(p3_label),
+            FadeIn(outflow_grp),
+            Transform(diaph_btn_a, diaph_btn_e),
+            Transform(info_a, info_e),
+            run_time=0.7
+        )
+        self.wait(2.3)
+
+        # --- STATE (f): Minimum operating pressure p2 (22.6–26.5s) ---
+        # Crucial requirement (§34): yf = -1.15 is HIGHER than yb = -1.60!
+        diaph_f = _create_diaphragm_curve(xl, xr, clamp_y, yf, color=COL_OK, stroke_width=4.0)
+        btn_f = _create_shutoff_button(vx, yf)
+        diaph_btn_f = VGroup(diaph_f, btn_f)
+
+        tag_f = _h6_24_badge("f) Discharged to Min Operating Pressure p2", COL_OK).move_to([2.4, 1.25, 0])
+        txt_f = VGroup(
+            Text("• จ่ายน้ำมันจนถึงความดันทำงานต่ำสุด p2", font_size=11, color=COL_OK, weight=BOLD),
+            Text("• ไดอะแฟรมหยุดที่ y = -1.15 (สูงกว่า b ชัดเจน!)", font_size=11, color=YELLOW, weight=BOLD),
+            Text("• p2 > p1 เสมอ: ปุ่ม Shut-off ไม่แตะพื้นถัง", font_size=10.5, color=WHITE),
+            Text("• มีชั้นน้ำมันรองรับ ป้องกันไดอะแฟรมฉีกขาด", font_size=10.5, color=COL_OK)
+        ).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([2.4, -0.15, 0])
+        fit_width(txt_f, 4.4)
+        info_f = VGroup(tag_f, txt_f)
+
+        # Polished spacing: moved slightly left so it doesn't crowd gap_grp on right
+        p2_label = Text("p2 (ต่ำสุดทำงาน)", font_size=10, color=COL_OK, weight=BOLD).move_to([vx - 0.65, -1.48, 0])
+        # Gap indicator between button and bottom seat:
+        gap_line = DoubleArrow(start=[vx + 0.35, yf, 0], end=[vx + 0.35, yb, 0], color=YELLOW, stroke_width=2.0, tip_length=0.10)
+        gap_lbl = Text("p2 > p1\n(มีระยะปลอดภัย)", font_size=8.5, color=YELLOW).next_to(gap_line, RIGHT, buff=0.06)
+        gap_grp = VGroup(gap_line, gap_lbl)
+
+        self.play(
+            FadeOut(outflow_grp),
+            FadeIn(p2_label),
+            FadeIn(gap_grp),
+            Transform(diaph_btn_a, diaph_btn_f),
+            Transform(info_a, info_f),
+            run_time=0.7
+        )
+        self.wait(3.2)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 27.1–36.0: Why p2 Must Always Exceed p1 (Engineering Rationale)
+        # ======================================================================
+        cap2 = _h6_24_caption_top("2. ทำไมแรงดันต่ำสุดตอนทำงาน (p2) ต้องสูงกว่าแรงดันประจุ (p1) เสมอ?")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Card 1: Wrong Setting (p2 <= p1) - Danger
+        card_wrong_box = RoundedRectangle(width=5.6, height=3.6, corner_radius=0.14, color=COL_BAD, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([-3.1, -0.15, 0])
+        head_wrong = _h6_24_badge("กรณีผิด: ตั้ง p2 ≤ p1 [ อันตราย ✗ ]", COL_BAD).move_to([-3.1, 1.35, 0])
+        # Mini diagram showing bottomed-out diaphragm hitting shut-off button hard
+        mw_shell = RoundedRectangle(width=1.6, height=1.3, corner_radius=0.35, color=COL_METAL, stroke_width=1.5).move_to([-3.1, 0.40, 0])
+        mw_diaph = _create_diaphragm_curve(-3.1 - 0.7, -3.1 + 0.7, 0.40, 0.40 - 0.55, color=COL_BAD, stroke_width=2.5)
+        mw_btn = _create_shutoff_button(-3.1, 0.40 - 0.55)
+        mw_seat = Circle(radius=0.10, color=COL_BAD, stroke_width=1.5).set_fill(COL_BAD, 1.0).move_to([-3.1, 0.40 - 0.60, 0])
+        mw_hit = Text("กระแทก!", font_size=9, color=YELLOW, weight=BOLD).next_to(mw_btn, UP, buff=0.04)
+        mini_wrong = VGroup(mw_shell, mw_diaph, mw_btn, mw_seat, mw_hit)
+
+        bullets_wrong = VGroup(
+            Text("• ไดอะแฟรมจะยืดจนสุดไปกระแทกปุ่ม Shut-off ทุกรอบ", font_size=10.5, color=WHITE),
+            Text("• เสี่ยงถูกแรงดันอัดทะลักเข้าไปในรูพอร์ต", font_size=10.5, color=COL_BAD),
+            Text("• แผ่นยางเกิดการล้าตัว (Fatigue) และฉีกขาดอย่างรวดเร็ว", font_size=10.5, color=COL_WARN)
+        ).arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to([-3.1, -0.85, 0])
+        fit_width(bullets_wrong, 5.1)
+        case_wrong = VGroup(card_wrong_box, head_wrong, mini_wrong, bullets_wrong)
+
+        # Card 2: Correct Setting (p2 > p1) - Safe
+        card_right_box = RoundedRectangle(width=5.6, height=3.6, corner_radius=0.14, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([3.1, -0.15, 0])
+        head_right = _h6_24_badge("กรณีถูก: ตั้ง p2 > p1 [ ปลอดภัย ✓ ]", COL_OK).move_to([3.1, 1.35, 0])
+        # Mini diagram showing floating diaphragm with clearance gap
+        mr_shell = RoundedRectangle(width=1.6, height=1.3, corner_radius=0.35, color=COL_METAL, stroke_width=1.5).move_to([3.1, 0.40, 0])
+        mr_diaph = _create_diaphragm_curve(3.1 - 0.7, 3.1 + 0.7, 0.40, 0.40 - 0.32, color=COL_OK, stroke_width=2.5)
+        mr_btn = _create_shutoff_button(3.1, 0.40 - 0.32)
+        mr_seat = Circle(radius=0.10, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([3.1, 0.40 - 0.60, 0])
+        mr_oil_gap = Rectangle(width=1.2, height=0.20, color=COL_OIL_RED, stroke_width=0).set_fill(COL_OIL_RED, 0.6).move_to([3.1, 0.40 - 0.48, 0])
+        # Polished spacing: moved up slightly to avoid crowding mr_btn
+        mr_safe = Text("มีน้ำมันรองรับ", font_size=9, color=COL_OK, weight=BOLD).move_to([3.1, 0.40 + 0.35, 0])
+        mini_right = VGroup(mr_shell, mr_oil_gap, mr_diaph, mr_btn, mr_seat, mr_safe)
+
+        bullets_right = VGroup(
+            Text("• มีชั้นน้ำมันรองรับด้านล่างเสมอ ไดอะแฟรมไม่แตะพื้น", font_size=10.5, color=WHITE),
+            Text("• ปุ่ม Shut-off ทำหน้าที่เป็นเพียงเซฟตี้สำรองฉุกเฉิน", font_size=10.5, color=COL_OK),
+            Text("• ไดอะแฟรมไม่เกิดความเค้นสะสม ใช้งานได้ทนทานยาวนาน", font_size=10.5, color=WHITE)
+        ).arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to([3.1, -0.85, 0])
+        fit_width(bullets_right, 5.1)
+        case_right = VGroup(card_right_box, head_right, mini_right, bullets_right)
+
+        banner2 = _h6_24_banner(
+            "ถ้า p2 ต่ำเกินไป (≤ p1) ไดอะแฟรมจะยืดสุดไปชนปุ่ม Shut-off เสี่ยงถูกดันเข้ารูพอร์ตจนฉีกขาด — การตั้ง p2 > p1 เว้นระยะป้องกันไว้เสมอ",
+            COL_OK
+        )
+
+        cases_grp = VGroup(case_wrong, case_right)
+        self.play(FadeIn(cases_grp, shift=UP * 0.25), FadeIn(banner2), run_time=1.0)
+        self.wait(7.3)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 36.6–39.5: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: Diaphragm Accumulator (hydraulic06 น.27)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. วงจรทำงานมี 6 สถานะต่อเนื่อง (a→f): เคลื่อนไหวตามสมดุลแรงดันระหว่างแก๊ส N2 กับน้ำมันไฮดรอลิก",
+            "2. สัญลักษณ์แรงดัน: p1 = แรงดันประจุเริ่มต้น, p3 = แรงดันสูงสุดตอนเต็ม, p2 = แรงดันต่ำสุดตอนทำงานจริง",
+            "3. กฎความปลอดภัยสำคัญที่สุด: ต้องตั้งค่า p2 > p1 เสมอ เพื่อป้องกันไดอะแฟรมชนปุ่ม Shut-off จนฉีกขาด"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        fit_width(s_rows, 10.8)
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.7)
+        self.wait(2.2)
+
+        # ======================================================================
+        # BEAT 39.5–41.5: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ถ้าตั้งค่าแรงดันต่ำสุดตอนทำงาน p2 เท่ากับแรงดันประจุ p1 พอดี (ไม่มีระยะเผื่อ) จะเกิดผลเสียอย่างไรในระยะยาว?",
+            font_size=12.0, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        fit_width(q_body, 10.6)
+        q_ans = Text(
+            "(คำตอบ: ไดอะแฟรมจะยุบตัวลงไปชนและกระแทกกับปุ่ม Shut-off ทุกรอบการทำงาน\nทำให้แผ่นยางเกิดความล้าตัวเร็ว เสี่ยงถูกแรงดันอัดเข้าไปในรูพอร์ตจนฉีกขาดและรั่วในที่สุด)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        fit_width(q_ans, 10.6)
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.4)
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
+
