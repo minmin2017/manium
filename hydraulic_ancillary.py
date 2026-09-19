@@ -8853,3 +8853,405 @@ class H6_22_Accumulators1(SafeScene):
         self.wait(0.2)
         self.fade_out_all(run_time=0.6)
         self.wait(0.5)
+
+
+# ==============================================================================
+# SCENE 23: H6_23_GasAccumulators1 (hydraulic06.pdf page 26)
+# Duration: ~48 seconds | 2D SafeScene
+# Pedagogical Focus: Gas-loaded Accumulators (Nonseparator vs Piston Type)
+# Core Contrasts:
+# 1. Nonseparator Type: Direct liquid-gas contact (no physical barrier).
+#    Drawn with wavy liquid-gas interface line (§34). Simple, low cost.
+#    Must be mounted vertically only (gas must float on top of oil).
+# 2. Piston Type: Mechanical piston with elastomer seals separating chambers (§34).
+#    Gas and oil strictly separated. Can be mounted in any orientation.
+#    Seal is a wearing part.
+# 3. Gas Choice: Must use Nitrogen (N2), an inert non-flammable gas.
+#    Atmospheric air contains ~21% oxygen and risks diesel-effect explosion when compressed.
+# Comparative cards & review question card.
+# ==============================================================================
+COL_GAS = "#38BDF8"  # Sky blue for Nitrogen gas chamber
+
+
+def _h6_23_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_23_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_23_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_23_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_23_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    fit_width(lbl, 11.4)
+    return VGroup(bg, lbl)
+
+
+def _create_wavy_interface(start_x, end_x, y_center, num_waves=3, amp=0.07):
+    """Generates a wavy fluid interface line showing direct liquid-gas contact (§34)."""
+    xs = np.linspace(start_x, end_x, 60)
+    pts = []
+    for x in xs:
+        rel_x = (x - start_x) / (end_x - start_x)
+        wave = amp * np.sin(rel_x * num_waves * 2 * np.pi)
+        meniscus = 0.04 * (4 * (rel_x - 0.5)**2)
+        pts.append([x, y_center + wave + meniscus, 0])
+    line = VMobject(color=COL_WARN, stroke_width=3.5)
+    line.set_points_smoothly([np.array(p) for p in pts])
+    return line
+
+
+class H6_23_GasAccumulators1(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_23_title("Gas-Loaded Accumulators: หม้อสะสมความดันแบบแก๊ส")
+        self.ref_m = _h6_23_page_ref("hydraulic06 น.26")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 2.0–5.5: Hook Question
+        # ======================================================================
+        hook_q = _h6_23_caption_top(
+            "Gas-loaded accumulator ทุกแบบเหมือนกันหมด ใช้แก๊สอะไรก็ได้ที่หาง่าย เช่น อากาศทั่วไป จริงไหม?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 12.0)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 6.5–17.5: Nonseparator Type
+        # ======================================================================
+        cap1 = _h6_23_caption_top("1. Nonseparator Type: แก๊สสัมผัสน้ำมันโดยตรง ไม่มีตัวกั้น")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Geometry of Nonseparator Vessel (Vertical Capsule at center-left: x = -3.4)
+        v_x = -3.4
+        v_w = 1.7
+        v_h = 3.1
+        v_bot = -1.85
+        v_top = v_bot + v_h  # 1.25
+
+        # Outer capsule housing
+        outer_shell = RoundedRectangle(
+            width=v_w + 0.28, height=v_h + 0.28, corner_radius=0.40,
+            color=COL_METAL, stroke_width=2.5
+        ).set_fill("#0F172A", 0.95).move_to([v_x, (v_top + v_bot)/2, 0])
+
+        # Gas valve at top (stays well below cap1 at y=2.45)
+        gas_valve_stem = Rectangle(width=0.22, height=0.28, color=COL_METAL, stroke_width=1.5).set_fill(COL_METAL, 0.9).next_to(outer_shell, UP, buff=0)
+        gas_valve_cap = Rectangle(width=0.38, height=0.14, color=COL_METAL, stroke_width=1.5).set_fill(COL_METAL, 1.0).next_to(gas_valve_stem, UP, buff=0)
+        gas_valve_grp = VGroup(gas_valve_stem, gas_valve_cap)
+        lbl_gas_valve = Text("GAS VALVE", font_size=9.5, color=WHITE, weight=BOLD).next_to(gas_valve_cap, UP, buff=0.08)
+
+        # Oil port at bottom
+        oil_port_stem = Rectangle(width=0.36, height=0.32, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.95).next_to(outer_shell, DOWN, buff=0)
+        lbl_oil_port = Text("OIL PORT", font_size=9.5, color=WHITE, weight=BOLD).next_to(oil_port_stem, DOWN, buff=0.08)
+
+        # Internal chambers: interface at y = -0.30
+        y_iface = -0.30
+        gas_h = v_top - y_iface
+        gas_chamber = RoundedRectangle(
+            width=v_w, height=gas_h, corner_radius=0.28,
+            color=COL_GAS, stroke_width=1.0
+        ).set_fill(COL_GAS, 0.35).move_to([v_x, y_iface + gas_h/2, 0])
+        lbl_gas_zone = Text("GAS CHAMBER\n(แก๊ส N2)", font_size=9.5, color=COL_GAS).move_to([v_x, 0.45, 0])
+
+        oil_h = y_iface - v_bot
+        oil_chamber = RoundedRectangle(
+            width=v_w, height=oil_h, corner_radius=0.28,
+            color=COL_OIL_RED, stroke_width=1.0
+        ).set_fill(COL_OIL_RED, 0.85).move_to([v_x, v_bot + oil_h/2, 0])
+        lbl_oil_zone = Text("OIL CHAMBER\n(น้ำมันไฮดรอลิก)", font_size=9.5, color=WHITE).move_to([v_x, -1.05, 0])
+
+        # §34 Wavy Interface Line (Direct contact surface - no solid divider!)
+        interface_line = _create_wavy_interface(
+            start_x=v_x - v_w/2 + 0.04,
+            end_x=v_x + v_w/2 - 0.04,
+            y_center=y_iface,
+            num_waves=2.5,
+            amp=0.07
+        )
+
+        # Interface callout label positioned between vessel and right cards
+        arrow_iface = Arrow(start=[-0.50, y_iface, 0], end=[-2.45, y_iface, 0], color=COL_WARN, stroke_width=2.2, max_tip_length_to_length_ratio=0.25)
+        lbl_iface = Text("GAS-OIL INTERFACE\n(ผิวสัมผัสตรง ไม่มีตัวกั้น!)", font_size=10, color=COL_WARN, weight=BOLD).move_to([-1.35, y_iface + 0.38, 0])
+        fit_width(lbl_iface, 2.0)
+        iface_callout = VGroup(arrow_iface, lbl_iface)
+
+        # Nonseparator info card & Vertical Mounting Only Warning (Right side: x = 2.2)
+        info_box = RoundedRectangle(width=4.8, height=2.3, corner_radius=0.12, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([2.2, 0.85, 0])
+        info_head = _h6_23_badge("จุดเด่น & ข้อจำกัด", COL_OK).move_to([2.2, 1.70, 0])
+        info_bullets = VGroup(
+            Text("• โครงสร้างเรียบง่าย ไม่มีชิ้นส่วนเคลื่อนที่", font_size=10.5, color=WHITE),
+            Text("• ต้นทุนต่ำที่สุด จุน้ำมันได้ปริมาตรมาก", font_size=10.5, color=WHITE),
+            Text("• ข้อควรระวัง: แก๊สอาจละลายปนในน้ำมันได้", font_size=10.5, color=COL_WARN),
+            Text("• ต้องติดตั้งในแนวตั้ง 100% เท่านั้น!", font_size=11, color=COL_BAD, weight=BOLD)
+        ).arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to([2.2, 0.70, 0])
+        info_grp = VGroup(info_box, info_head, info_bullets)
+
+        # Warning Box: Vertical Only with crossed-out horizontal icon
+        warn_box = RoundedRectangle(width=4.8, height=1.6, corner_radius=0.12, color=COL_BAD, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([2.2, -1.30, 0])
+        mini_h_shell = RoundedRectangle(width=1.4, height=0.55, corner_radius=0.15, color=COL_METAL, stroke_width=1.5).move_to([0.65, -1.30, 0])
+        mini_gas = Rectangle(width=1.3, height=0.22, color=COL_GAS, stroke_width=0).set_fill(COL_GAS, 0.4).next_to(mini_h_shell.get_top(), DOWN, buff=0.03)
+        mini_oil = Rectangle(width=1.3, height=0.22, color=COL_OIL_RED, stroke_width=0).set_fill(COL_OIL_RED, 0.8).next_to(mini_h_shell.get_bottom(), UP, buff=0.03)
+        cross_x = Text("✗", font_size=32, color=COL_BAD, weight=BOLD).move_to(mini_h_shell.get_center())
+        mini_icon = VGroup(mini_h_shell, mini_gas, mini_oil, cross_x)
+
+        warn_txt1 = Text("ห้ามติดตั้งแนวนอนเด็ดขาด!", font_size=11, color=COL_BAD, weight=BOLD).move_to([2.95, -1.05, 0])
+        warn_txt2 = Text("(แก๊สจะลอยขึ้นบนและหลุดเข้าท่อน้ำมัน)", font_size=9.5, color=COL_GRAY).move_to([2.95, -1.45, 0])
+        warn_grp = VGroup(warn_box, mini_icon, warn_txt1, warn_txt2)
+
+        banner1 = _h6_23_banner(
+            "แก๊สกับน้ำมันสัมผัสกันโดยตรง เรียบง่าย ราคาถูก แต่แก๊สอาจละลายปนน้ำมันได้ ต้องติดตั้งแนวตั้งเท่านั้น",
+            COL_OK
+        )
+
+        nonsep_grp = VGroup(
+            outer_shell, gas_valve_grp, lbl_gas_valve, oil_port_stem, lbl_oil_port,
+            gas_chamber, lbl_gas_zone, oil_chamber, lbl_oil_zone,
+            interface_line, iface_callout, info_grp, warn_grp
+        )
+
+        self.play(FadeIn(nonsep_grp, shift=UP * 0.2), FadeIn(banner1), run_time=1.0)
+        # Sequentially Indicate interface_line after FadeIn (§8)
+        self.play(Indicate(interface_line, color=COL_WARN, scale_factor=1.15), run_time=0.8)
+        self.wait(8.5)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 18.5–29.5: Piston Type
+        # ======================================================================
+        cap2 = _h6_23_caption_top("2. Piston Type: มีลูกสูบ + ซีล กั้นแก๊สกับน้ำมันไว้คนละฝั่งเด็ดขาด")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Geometry of Piston Type (Horizontal Cylinder at center: y = 0.45)
+        c_y = 0.45
+        cyl_len = 5.6
+        cyl_dia = 1.7
+
+        cyl_outer = RoundedRectangle(
+            width=cyl_len + 0.3, height=cyl_dia + 0.28, corner_radius=0.15,
+            color=COL_METAL, stroke_width=2.5
+        ).set_fill("#0F172A", 0.95).move_to([0.0, c_y, 0])
+
+        # Gas valve on left
+        p_gas_stem = Rectangle(width=0.35, height=0.22, color=COL_METAL, stroke_width=1.5).set_fill(COL_METAL, 0.9).next_to(cyl_outer, LEFT, buff=0)
+        p_gas_cap = Rectangle(width=0.16, height=0.38, color=COL_METAL, stroke_width=1.5).set_fill(COL_METAL, 1.0).next_to(p_gas_stem, LEFT, buff=0)
+        lbl_p_gas = Text("GAS VALVE", font_size=9.5, color=WHITE, weight=BOLD).next_to(p_gas_cap, LEFT, buff=0.08)
+        p_gas_grp = VGroup(p_gas_stem, p_gas_cap, lbl_p_gas)
+
+        # Oil port on right
+        p_oil_stem = Rectangle(width=0.35, height=0.28, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.95).next_to(cyl_outer, RIGHT, buff=0)
+        lbl_p_oil = Text("PORT", font_size=10, color=WHITE, weight=BOLD).next_to(p_oil_stem, RIGHT, buff=0.08)
+        p_oil_grp = VGroup(p_oil_stem, lbl_p_oil)
+
+        # §34 Solid Mechanical Piston with Seals in center
+        piston_w = 0.85
+        piston_h = cyl_dia
+        piston_x = 0.15
+
+        # Piston body (solid metal block)
+        piston_body = Rectangle(
+            width=piston_w, height=piston_h, color=COL_METAL, stroke_width=2.0
+        ).set_fill("#64748B", 1.0).move_to([piston_x, c_y, 0])
+        piston_core = Rectangle(
+            width=piston_w - 0.20, height=piston_h - 0.24, color=WHITE, stroke_width=1.0
+        ).set_fill("#475569", 0.9).move_to([piston_x, c_y, 0])
+
+        # Piston seals: distinct elastomer seal bands at outer perimeter touching walls
+        seal_w = 0.14
+        seal_h = 0.15
+        seal_t1 = Rectangle(width=seal_w, height=seal_h, color=COL_WARN, stroke_width=1.2).set_fill(COL_WARN, 1.0).move_to([piston_x - 0.22, c_y + piston_h/2 - seal_h/2, 0])
+        seal_t2 = Rectangle(width=seal_w, height=seal_h, color=COL_WARN, stroke_width=1.2).set_fill(COL_WARN, 1.0).move_to([piston_x + 0.22, c_y + piston_h/2 - seal_h/2, 0])
+        seal_b1 = Rectangle(width=seal_w, height=seal_h, color=COL_WARN, stroke_width=1.2).set_fill(COL_WARN, 1.0).move_to([piston_x - 0.22, c_y - piston_h/2 + seal_h/2, 0])
+        seal_b2 = Rectangle(width=seal_w, height=seal_h, color=COL_WARN, stroke_width=1.2).set_fill(COL_WARN, 1.0).move_to([piston_x + 0.22, c_y - piston_h/2 + seal_h/2, 0])
+        lbl_piston = Text("PISTON", font_size=10, color=WHITE, weight=BOLD).move_to([piston_x, c_y, 0])
+
+        piston_seal_mob = VGroup(piston_body, piston_core, seal_t1, seal_t2, seal_b1, seal_b2, lbl_piston)
+
+        # Callout for Piston Seal: placed cleanly in open space above cylinder!
+        arrow_seal = Arrow(start=[piston_x + 0.85, 1.72, 0], end=[piston_x + 0.22, 1.32, 0], color=COL_WARN, stroke_width=2.0, max_tip_length_to_length_ratio=0.22)
+        lbl_piston_seal = Text("PISTON SEAL\n(ซีลลูกสูบกั้นแยกของไหล)", font_size=9.5, color=COL_WARN, weight=BOLD).move_to([piston_x + 1.85, 1.85, 0])
+        fit_width(lbl_piston_seal, 2.4)
+        seal_callout = VGroup(arrow_seal, lbl_piston_seal)
+
+        # Gas Chamber (Left of piston)
+        gas_c_w = (piston_x - piston_w/2) - (-cyl_len/2)
+        gas_c_x = -cyl_len/2 + gas_c_w/2
+        gas_c_rect = Rectangle(width=gas_c_w, height=cyl_dia, color=COL_GAS, stroke_width=1.0).set_fill(COL_GAS, 0.35).move_to([gas_c_x, c_y, 0])
+        lbl_gas_c = Text("GAS CHAMBER\n(ห้องแก๊ส N2)", font_size=9.5, color=COL_GAS).move_to([gas_c_x, c_y, 0])
+        gas_grp = VGroup(gas_c_rect, lbl_gas_c)
+
+        # Fluid Chamber (Right of piston)
+        fluid_c_w = (cyl_len/2) - (piston_x + piston_w/2)
+        fluid_c_x = (piston_x + piston_w/2) + fluid_c_w/2
+        fluid_c_rect = Rectangle(width=fluid_c_w, height=cyl_dia, color=COL_OIL_RED, stroke_width=1.0).set_fill(COL_OIL_RED, 0.85).move_to([fluid_c_x, c_y, 0])
+        lbl_fluid_c = Text("FLUID CHAMBER\n(ห้องน้ำมัน)", font_size=9.5, color=WHITE).move_to([fluid_c_x, c_y, 0])
+        fluid_grp = VGroup(fluid_c_rect, lbl_fluid_c)
+
+        # Bottom Orientation Badge & Features Card (y = -1.75):
+        feat_box = RoundedRectangle(width=11.6, height=1.35, corner_radius=0.12, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -1.75, 0])
+        # Two orientation icons showing versatility:
+        m_v = RoundedRectangle(width=0.35, height=0.75, corner_radius=0.08, color=COL_METAL, stroke_width=1.2).move_to([-4.8, -1.75, 0])
+        chk_v = Text("✓", font_size=16, color=COL_OK, weight=BOLD).next_to(m_v, RIGHT, buff=0.08)
+        m_h = RoundedRectangle(width=0.75, height=0.35, corner_radius=0.08, color=COL_METAL, stroke_width=1.2).move_to([-3.4, -1.75, 0])
+        chk_h = Text("✓", font_size=16, color=COL_OK, weight=BOLD).next_to(m_h, RIGHT, buff=0.08)
+        lbl_orient = Text("ติดตั้งได้ทุกทิศทาง\n(แนวตั้ง / แนวนอน / เอียง)", font_size=10, color=COL_OK, weight=BOLD).move_to([-1.7, -1.75, 0])
+        orient_icons = VGroup(m_v, chk_v, m_h, chk_h, lbl_orient)
+
+        # Feature bullets
+        feat_txt = VGroup(
+            Text("• ลูกสูบ+ซีล กั้นแยกแก๊สกับน้ำมันเด็ดขาด 100% (แก๊สไม่ปนน้ำมัน)", font_size=10.5, color=WHITE),
+            Text("• จ่ายอัตราไหลสูงได้ดี ทนแรงดันสูง แต่ซีลเป็นชิ้นส่วนที่สึกหรอตามอายุใช้งาน", font_size=10.5, color=COL_WARN)
+        ).arrange(DOWN, buff=0.12, aligned_edge=LEFT).move_to([2.3, -1.75, 0])
+        fit_width(feat_txt, 5.8)
+
+        feat_grp = VGroup(feat_box, orient_icons, feat_txt)
+
+        banner2 = _h6_23_banner(
+            "ลูกสูบ+ซีลกั้นแก๊สกับน้ำมันไว้คนละฝั่งจริง แก๊สไม่ปนน้ำมันแน่นอน ติดตั้งได้ทุกทิศทาง แต่ซีลเป็นชิ้นส่วนสึกหรอ",
+            COL_OK
+        )
+
+        piston_type_grp = VGroup(
+            cyl_outer, p_gas_grp, p_oil_grp,
+            gas_grp, fluid_grp, piston_seal_mob, seal_callout, feat_grp
+        )
+
+        self.play(FadeIn(piston_type_grp, shift=UP * 0.2), FadeIn(banner2), run_time=1.0)
+        # Sequentially Indicate piston_seal_mob after FadeIn (§8)
+        self.play(Indicate(piston_seal_mob, color=COL_OK, scale_factor=1.12), run_time=0.8)
+        self.wait(8.5)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 30.5–41.0: Why Nitrogen (N2)? Not Atmospheric Air?
+        # ======================================================================
+        cap3 = _h6_23_caption_top("3. ทำไมต้องไนโตรเจน (N2) ไม่ใช่อากาศทั่วไป?")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        # Card 1: Nitrogen (N2) - Safe (Left: x = -3.1)
+        card_n2_box = RoundedRectangle(width=5.6, height=3.6, corner_radius=0.14, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([-3.1, -0.15, 0])
+        head_n2 = _h6_23_badge("ก๊าซไนโตรเจน (N2) [ ปลอดภัย ✓ ]", COL_OK).move_to([-3.1, 1.35, 0])
+        bullets_n2 = VGroup(
+            Text("• เป็นแก๊สเฉื่อย (Inert Gas) ไม่ทำปฏิกิริยากับน้ำมัน", font_size=11, color=COL_OK, weight=BOLD),
+            Text("• ไม่ติดไฟ ไม่เกิดออกซิเดชัน แม้ที่อุณหภูมิ/ความดันสูง", font_size=10.5, color=WHITE),
+            Text("• ไนโตรเจนบริสุทธิ์ปราศจากความชื้น ไม่กัดกร่อนโลหะ", font_size=10.5, color=WHITE),
+            Text("• มาตรฐานความปลอดภัยสากลสำหรับระบบไฮดรอลิก", font_size=10.5, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([-3.1, -0.25, 0])
+        fit_width(bullets_n2, 5.1)
+        card_n2 = VGroup(card_n2_box, head_n2, bullets_n2)
+
+        # Card 2: Atmospheric Air - Danger (Right: x = 3.1)
+        card_air_box = RoundedRectangle(width=5.6, height=3.6, corner_radius=0.14, color=COL_BAD, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([3.1, -0.15, 0])
+        head_air = _h6_23_badge("อากาศทั่วไป (Air) [ อันตรายห้ามใช้ ✗ ]", COL_BAD).move_to([3.1, 1.35, 0])
+        bullets_air = VGroup(
+            Text("• มีออกซิเจนผสมอยู่ ~21%", font_size=11, color=COL_BAD, weight=BOLD),
+            Text("• เสี่ยงต่อการลุกไหม้หรือระเบิด (Diesel Effect)", font_size=11, color=YELLOW, weight=BOLD),
+            Text("• เมื่อถูกอัดแรงดันสูงอย่างรวดเร็ว แก๊สจะร้อนจัด", font_size=10.5, color=WHITE),
+            Text("• ไอละอองน้ำมัน + ออกซิเจน + ความร้อน = ระเบิดได้!", font_size=10.5, color=COL_BAD)
+        ).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([3.1, -0.25, 0])
+        fit_width(bullets_air, 5.1)
+        card_air = VGroup(card_air_box, head_air, bullets_air)
+
+        banner3 = _h6_23_banner(
+            "ไนโตรเจนเฉื่อย ไม่ทำปฏิกิริยากับน้ำมัน — อากาศทั่วไปมีออกซิเจน เสี่ยงลุกไหม้เมื่อถูกอัดแรงดันสูงจนร้อน (หลักการเดียวกับเครื่องยนต์ดีเซล)",
+            COL_OK
+        )
+
+        n2_vs_air_grp = VGroup(card_n2, card_air)
+        self.play(FadeIn(n2_vs_air_grp, shift=UP * 0.25), FadeIn(banner3), run_time=1.0)
+        self.wait(8.9)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 41.6–44.5: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: Gas-Loaded Accumulators (hydraulic06 น.26)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. Nonseparator Type: แก๊สสัมผัสน้ำมันตรง ไร้ตัวกั้นกลไก เรียบง่ายราคาถูก แต่ต้องติดตั้งแนวตั้งเท่านั้น",
+            "2. Piston Type: มีลูกสูบ+ซีลกั้นแยกเด็ดขาด แก๊สไม่ปนน้ำมัน ติดตั้งได้ทุกทิศทาง แต่ซีลสึกหรอตามอายุใช้งาน",
+            "3. ต้องใช้ไนโตรเจน (N2) เสมอ: เป็นแก๊สเฉื่อย ไม่ติดไฟ ห้ามใช้อากาศทั่วไปเพราะมีออกซิเจน ~21% เสี่ยงระเบิดเมื่อถูกอัดร้อน"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        fit_width(s_rows, 10.8)
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.7)
+        self.wait(2.2)
+
+        # ======================================================================
+        # BEAT 44.5–47.0: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ถ้าต้องติดตั้ง accumulator ในแนวราบ (แนวนอน) ควรเลือกแบบ nonseparator หรือ piston type เพราะอะไร?",
+            font_size=12.0, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        fit_width(q_body, 10.6)
+        q_ans = Text(
+            "(คำตอบ: ต้องเลือก Piston type เพราะมีลูกสูบและซีลกั้นแยกแก๊สกับน้ำมันอย่างเด็ดขาด\nหากใช้แบบ Nonseparator ในแนวนอน แก๊สจะลอยหนีขึ้นด้านบนและปนหลุดเข้าสู่ระบบไฮดรอลิกทันที)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        fit_width(q_ans, 10.6)
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.1)
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
