@@ -6996,5 +6996,441 @@ class H6_17_CompressionPackings2(SafeScene):
         self.wait(0.5)
 
 
+# ==============================================================================
+# Scene: H6_18_PistonCupPackings (คัพซีลลูกสูบ Piston Cup Packings)
+# Lecture slides: hydraulic06.pdf page 21
+# Pedagogical Objective:
+# - Single-acting uses 1 cup facing pressure; Double-acting uses 2 cups back-to-back
+# - Pressure-actuated sealing mechanism (Self-energizing outward flare against cylinder barrel wall)
+# - Clamping assembly: Backing plate (supports base against pressure) + Retainer plate
+# ==============================================================================
+
+def _h6_18_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
 
 
+def _h6_18_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_18_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_18_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_18_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class H6_18_PistonCupPackings(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_18_title("Piston Cup Packing: คัพซีลลูกสูบ")
+        self.ref_m = _h6_18_page_ref("hydraulic06 น.21")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 2.0–5.5: Hook Question
+        # ======================================================================
+        hook_q = _h6_18_caption_top("คัพซีลลูกสูบใช้แบบเดียวกันหมด ไม่ว่ากระบอกสูบจะดันทิศเดียวหรือสองทิศจริงไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 5.5–16.0: Single-Acting (1 Cup) vs Double-Acting (2 Cups Back-to-Back)
+        # ======================================================================
+        cap1 = _h6_18_caption_top("1. เลือกจำนวนคัพตามทิศทางแรงดัน (Single vs Double Acting)")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # ----------------- LEFT: SINGLE-ACTING (x_center = -3.3) -----------------
+        xs = -3.3
+        # Cylinder barrel: top and bottom walls
+        s_cyl_t = Rectangle(width=4.8, height=0.25, color=COL_METAL).set_fill("#334155", 0.95).move_to([xs, 1.25, 0.0])
+        s_cyl_b = Rectangle(width=4.8, height=0.25, color=COL_METAL).set_fill("#334155", 0.95).move_to([xs, -1.25, 0.0])
+        s_bore_bg = Rectangle(width=4.8, height=2.25, color=BLACK).set_fill("#0F172A", 1.0).move_to([xs, 0.0, 0.0])
+
+        # Piston rod (entering from right, ending at nut on left)
+        s_rod = Rectangle(width=2.5, height=0.55, color=COL_METAL).set_fill("#475569", 0.95).move_to([xs + 1.25, 0.0, 0.0])
+        s_stud = Rectangle(width=0.7, height=0.32, color=WHITE).set_fill("#94A3B8", 1.0).move_to([xs - 0.35, 0.0, 0.0])
+        s_nut = Rectangle(width=0.35, height=0.65, color=WHITE).set_fill("#CBD5E1", 1.0).move_to([xs - 0.55, 0.0, 0.0])
+
+        # Backing plate (behind the cup on right, supporting it)
+        s_backing = Rectangle(width=0.45, height=2.0, color=COL_METAL).set_fill("#475569", 0.95).move_to([xs + 0.25, 0.0, 0.0])
+
+        # SINGLE CUP (Elastomer, lips pointing LEFT <)
+        # Upper half of cup: base at x=0.0 to 0.02, lip extends left to x=-0.50
+        s_cup_t = Polygon(
+            [xs + 0.02, 0.27, 0], [xs + 0.02, 0.95, 0], [xs - 0.50, 1.10, 0],
+            [xs - 0.50, 0.92, 0], [xs - 0.16, 0.80, 0], [xs - 0.16, 0.27, 0],
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.95
+        ).set_stroke(COL_OK, 1.8)
+        # Lower half of cup:
+        s_cup_b = Polygon(
+            [xs + 0.02, -0.27, 0], [xs + 0.02, -0.95, 0], [xs - 0.50, -1.10, 0],
+            [xs - 0.50, -0.92, 0], [xs - 0.16, -0.80, 0], [xs - 0.16, -0.27, 0],
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.95
+        ).set_stroke(COL_OK, 1.8)
+        s_cup = VGroup(s_cup_t, s_cup_b)
+
+        # Retainer plate (clamps cup base against backing plate)
+        s_retainer = Rectangle(width=0.20, height=1.55, color="#E2E8F0").set_fill("#94A3B8", 1.0).move_to([xs - 0.26, 0.0, 0.0])
+
+        # Pressure arrow coming from left only
+        s_p_arr = Arrow([xs - 2.1, 0.0, 0], [xs - 1.1, 0.0, 0], color=RED, stroke_width=4.5, tip_length=0.18)
+        s_p_lbl = Text("PRESSURE", font_size=9, color=RED).next_to(s_p_arr, UP, buff=0.08)
+        s_press_grp = VGroup(s_p_arr, s_p_lbl)
+
+        s_badge = _h6_18_badge("Single-Acting (1 คัพ)", COL_OK).move_to([xs, 1.65, 0.0])
+        s_sub = Text("แรงดันมาทิศเดียว — ใช้คัพเดียว ปากหันสู้แรงดัน", font_size=9.5, color=WHITE).move_to([xs, -1.55, 0.0])
+
+        single_grp = VGroup(
+            s_bore_bg, s_cyl_t, s_cyl_b, s_rod, s_backing,
+            s_cup, s_retainer, s_stud, s_nut, s_press_grp, s_badge, s_sub
+        )
+
+        # ----------------- RIGHT: DOUBLE-ACTING (x_center = +3.3) -----------------
+        xd = 3.3
+        # Cylinder barrel
+        d_cyl_t = Rectangle(width=4.8, height=0.25, color=COL_METAL).set_fill("#334155", 0.95).move_to([xd, 1.25, 0.0])
+        d_cyl_b = Rectangle(width=4.8, height=0.25, color=COL_METAL).set_fill("#334155", 0.95).move_to([xd, -1.25, 0.0])
+        d_bore_bg = Rectangle(width=4.8, height=2.25, color=BLACK).set_fill("#0F172A", 1.0).move_to([xd, 0.0, 0.0])
+
+        # Piston rod through center
+        d_rod = Rectangle(width=2.2, height=0.55, color=COL_METAL).set_fill("#475569", 0.95).move_to([xd + 1.40, 0.0, 0.0])
+        d_stud = Rectangle(width=0.7, height=0.32, color=WHITE).set_fill("#94A3B8", 1.0).move_to([xd - 0.75, 0.0, 0.0])
+        d_nut = Rectangle(width=0.35, height=0.65, color=WHITE).set_fill("#CBD5E1", 1.0).move_to([xd - 0.95, 0.0, 0.0])
+
+        # Central Backing Plate (Spacer between the 2 cups)
+        d_center_plate = Rectangle(width=0.45, height=2.0, color=COL_METAL).set_fill("#475569", 0.95).move_to([xd, 0.0, 0.0])
+
+        # CUP 1 (Left Cup): Lips pointing LEFT <
+        d_cup1_t = Polygon(
+            [xd - 0.23, 0.27, 0], [xd - 0.23, 0.95, 0], [xd - 0.70, 1.10, 0],
+            [xd - 0.70, 0.92, 0], [xd - 0.40, 0.80, 0], [xd - 0.40, 0.27, 0],
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.95
+        ).set_stroke(COL_OK, 1.8)
+        d_cup1_b = Polygon(
+            [xd - 0.23, -0.27, 0], [xd - 0.23, -0.95, 0], [xd - 0.70, -1.10, 0],
+            [xd - 0.70, -0.92, 0], [xd - 0.40, -0.80, 0], [xd - 0.40, -0.27, 0],
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.95
+        ).set_stroke(COL_OK, 1.8)
+        d_cup1 = VGroup(d_cup1_t, d_cup1_b)
+
+        # CUP 2 (Right Cup): Lips pointing RIGHT > (Back-to-Back with Cup 1!)
+        d_cup2_t = Polygon(
+            [xd + 0.23, 0.27, 0], [xd + 0.23, 0.95, 0], [xd + 0.70, 1.10, 0],
+            [xd + 0.70, 0.92, 0], [xd + 0.40, 0.80, 0], [xd + 0.40, 0.27, 0],
+            color=COL_WARN, fill_color="#EA580C", fill_opacity=0.95
+        ).set_stroke(COL_WARN, 1.8)
+        d_cup2_b = Polygon(
+            [xd + 0.23, -0.27, 0], [xd + 0.23, -0.95, 0], [xd + 0.70, -1.10, 0],
+            [xd + 0.70, -0.92, 0], [xd + 0.40, -0.80, 0], [xd + 0.40, -0.27, 0],
+            color=COL_WARN, fill_color="#EA580C", fill_opacity=0.95
+        ).set_stroke(COL_WARN, 1.8)
+        d_cup2 = VGroup(d_cup2_t, d_cup2_b)
+
+        # Retainers on both sides
+        d_ret_l = Rectangle(width=0.18, height=1.55, color="#E2E8F0").set_fill("#94A3B8", 1.0).move_to([xd - 0.49, 0.0, 0.0])
+        d_ret_r = Rectangle(width=0.18, height=1.55, color="#E2E8F0").set_fill("#94A3B8", 1.0).move_to([xd + 0.49, 0.0, 0.0])
+
+        # Dual pressure arrows (from both sides)
+        d_p_arr_l = Arrow([xd - 2.1, 0.0, 0], [xd - 1.2, 0.0, 0], color=RED, stroke_width=3.5, tip_length=0.14)
+        d_p_lbl_l = Text("PRESSURE", font_size=8.5, color=RED).next_to(d_p_arr_l, UP, buff=0.06)
+        d_p_arr_r = Arrow([xd + 2.1, 0.0, 0], [xd + 1.2, 0.0, 0], color=RED, stroke_width=3.5, tip_length=0.14)
+        d_p_lbl_r = Text("PRESSURE", font_size=8.5, color=RED).next_to(d_p_arr_r, UP, buff=0.06)
+        d_press_grp = VGroup(d_p_arr_l, d_p_lbl_l, d_p_arr_r, d_p_lbl_r)
+
+        d_badge = _h6_18_badge("Double-Acting (2 คัพหันหลังชนกัน)", COL_WARN).move_to([xd, 1.65, 0.0])
+        d_sub = Text("แรงดันสลับ 2 ทิศ — 2 คัพหันหลังชนกัน (Back-to-Back)", font_size=9.5, color=WHITE).move_to([xd, -1.55, 0.0])
+
+        double_grp = VGroup(
+            d_bore_bg, d_cyl_t, d_cyl_b, d_rod, d_center_plate,
+            d_cup1, d_cup2, d_ret_l, d_ret_r, d_stud, d_nut, d_press_grp, d_badge, d_sub
+        )
+
+        banner1 = _h6_18_banner(
+            "Single-Acting: แรงดันมาทิศเดียว ใช้คัพเดียว — Double-Acting: แรงดันสลับ 2 ทิศ ต้องใช้ 2 คัพหันหลังชนกัน",
+            COL_OK
+        )
+
+        self.play(FadeIn(VGroup(single_grp, double_grp), shift=UP * 0.25), FadeIn(banner1), run_time=1.2)
+        # Lesson 5: Sequence Indicate after FadeIn
+        self.play(
+            Indicate(s_badge, color=COL_OK, scale_factor=1.08),
+            Indicate(s_cup, color=WHITE, scale_factor=1.05),
+            run_time=0.9
+        )
+        self.play(
+            Indicate(d_badge, color=COL_WARN, scale_factor=1.08),
+            Indicate(d_cup1, color=WHITE, scale_factor=1.05),
+            Indicate(d_cup2, color=WHITE, scale_factor=1.05),
+            run_time=0.9
+        )
+        self.wait(5.0)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 16.6–27.0: Pressure-Actuated (Self-Energizing) Lip Flare
+        # ======================================================================
+        cap2 = _h6_18_caption_top("2. คัพซีลทำงานแบบ Pressure-Actuated (เชื่อม O-ring H6_15 + V-packing H6_16/17)")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Large detailed cross section of cylinder bore (focusing on single cup sealing against wall)
+        cyl_wall_top = Rectangle(width=8.6, height=0.40, color=COL_METAL).set_fill("#334155", 0.95).move_to([-0.2, 1.45, 0.0])
+        cyl_wall_bot = Rectangle(width=8.6, height=0.40, color=COL_METAL).set_fill("#334155", 0.95).move_to([-0.2, -1.45, 0.0])
+        cyl_bore_bg  = Rectangle(width=8.6, height=2.50, color=BLACK).set_fill("#0F172A", 1.0).move_to([-0.2, 0.0, 0.0])
+        lbl_barrel   = Text("CYLINDER BARREL (ผนังกระบอกสูบ)", font_size=10, color=COL_METAL).move_to([1.8, 1.80, 0.0])
+
+        # Piston rod & backing plate on right side
+        p_rod = Rectangle(width=4.0, height=0.65, color=COL_METAL).set_fill("#475569", 0.95).move_to([2.1, 0.0, 0.0])
+        lbl_rod = Text("PISTON ROD", font_size=10, color=WHITE).move_to([2.1, 0.0, 0.0])
+        p_backing = Rectangle(width=0.60, height=2.20, color=COL_METAL).set_fill("#64748B", 0.95).move_to([0.40, 0.0, 0.0])
+        p_retainer = Rectangle(width=0.30, height=1.70, color="#CBD5E1").set_fill("#94A3B8", 1.0).move_to([-0.35, 0.0, 0.0])
+        p_nut = Rectangle(width=0.40, height=0.80, color=WHITE).set_fill("#E2E8F0", 1.0).move_to([-0.70, 0.0, 0.0])
+
+        # ----------------- NEUTRAL CUP (Relaxed Lip Angle, Small Clearance) -----------------
+        # Upper lip: relaxes down to y = 1.15 (gap of 0.10 from barrel wall at 1.25)
+        neutral_cup_t = Polygon(
+            [0.10, 0.32, 0], [0.10, 1.05, 0], [-1.05, 1.15, 0],
+            [-1.05, 0.98, 0], [-0.20, 0.88, 0], [-0.20, 0.32, 0],
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.95
+        ).set_stroke(COL_OK, 2.0)
+        # Lower lip: relaxes up to y = -1.15 (gap of 0.10 from barrel wall at -1.25)
+        neutral_cup_b = Polygon(
+            [0.10, -0.32, 0], [0.10, -1.05, 0], [-1.05, -1.15, 0],
+            [-1.05, -0.98, 0], [-0.20, -0.88, 0], [-0.20, -0.32, 0],
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.95
+        ).set_stroke(COL_OK, 2.0)
+        cup_neutral = VGroup(neutral_cup_t, neutral_cup_b)
+
+        # ----------------- ENERGIZED CUP (Lip Flares OUTWARD and Seals Hard Against Wall) -----------------
+        # Upper lip: FLARED OUT to y = 1.25 (flush against wall, wider contact line)
+        energized_cup_t = Polygon(
+            [0.10, 0.32, 0], [0.10, 1.05, 0], [-1.15, 1.25, 0],
+            [-1.15, 1.08, 0], [-0.20, 0.90, 0], [-0.20, 0.32, 0],
+            color=COL_WARN, fill_color="#EA580C", fill_opacity=0.95
+        ).set_stroke(COL_WARN, 2.5)
+        # Lower lip: FLARED OUT to y = -1.25 (flush against wall)
+        energized_cup_b = Polygon(
+            [0.10, -0.32, 0], [0.10, -1.05, 0], [-1.15, -1.25, 0],
+            [-1.15, -1.08, 0], [-0.20, -0.90, 0], [-0.20, -0.32, 0],
+            color=COL_WARN, fill_color="#EA580C", fill_opacity=0.95
+        ).set_stroke(COL_WARN, 2.5)
+        cup_energized = VGroup(energized_cup_t, energized_cup_b)
+
+        # Status badge for neutral state
+        badge_state_n = _h6_18_badge("สภาวะปกติ (ยังไม่มีแรงดัน) — ปากคัพแนบหลวมๆ", COL_GRAY).move_to([-2.4, 1.80, 0.0])
+
+        cylinder_assembly = VGroup(
+            cyl_bore_bg, cyl_wall_top, cyl_wall_bot, lbl_barrel,
+            p_rod, lbl_rod, p_backing, p_retainer, p_nut, cup_neutral, badge_state_n
+        )
+
+        banner2 = _h6_18_banner(
+            "แรงดันดันปากคัพให้บานออกกดผนังกระบอกสูบ ยิ่งแรงดันสูงยิ่งซีลแน่น — self-energizing แบบเดียวกับ O-ring และ V-packing",
+            COL_OK
+        )
+
+        self.play(FadeIn(cylinder_assembly, shift=UP * 0.25), FadeIn(banner2), run_time=0.8)
+        self.wait(1.0)
+
+        # Fluid Pressure injection from left (RED chamber)
+        press_fluid_t = Rectangle(width=3.2, height=1.0, color=RED).set_fill(RED, 0.55).move_to([-2.7, 0.72, 0.0])
+        press_fluid_b = Rectangle(width=3.2, height=1.0, color=RED).set_fill(RED, 0.55).move_to([-2.7, -0.72, 0.0])
+        lbl_p_fluid = Text("PRESSURE (น้ำมันแรงดันสูง)", font_size=11, color=YELLOW).move_to([-2.7, 0.72, 0.0])
+        press_zone = VGroup(press_fluid_t, press_fluid_b, lbl_p_fluid)
+
+        # Pressure arrows driving INTO the cup pockets and pushing outward!
+        arr_push_t = Arrow([-0.65, 0.65, 0], [-0.75, 1.20, 0], color=YELLOW, stroke_width=4.0, tip_length=0.14)
+        arr_push_b = Arrow([-0.65, -0.65, 0], [-0.75, -1.20, 0], color=YELLOW, stroke_width=4.0, tip_length=0.14)
+        press_arrows = VGroup(arr_push_t, arr_push_b)
+
+        # Status badge for energized state
+        badge_state_e = _h6_18_badge("แรงดันดันปากบานออก (Self-Energizing) แนบผนังแน่นสนิท!", COL_WARN).move_to([-2.4, 1.80, 0.0])
+
+        # Sealing contact highlight lines along barrel
+        seal_line_t = Line([-1.20, 1.25, 0], [-0.60, 1.25, 0], color=COL_OK, stroke_width=5.0)
+        seal_line_b = Line([-1.20, -1.25, 0], [-0.60, -1.25, 0], color=COL_OK, stroke_width=5.0)
+        seal_highlights = VGroup(seal_line_t, seal_line_b)
+
+        # Real transform: Lip angle genuinely expands and presses wall!
+        self.play(
+            FadeIn(press_zone, shift=RIGHT * 0.3),
+            FadeIn(press_arrows),
+            Transform(badge_state_n, badge_state_e),
+            Transform(cup_neutral, cup_energized),
+            run_time=1.2
+        )
+        self.play(FadeIn(seal_highlights), run_time=0.4)
+        self.wait(5.0)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 27.6–36.0: Backing Plate + Retainer Clamping Mechanism
+        # ======================================================================
+        cap3 = _h6_18_caption_top("3. Backing Plate + Retainer หนีบยึดคัพให้อยู่กับที่ (Clamping Assembly)")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        # Assembly showcase on left side (x = -2.6)
+        # 1. Piston Rod
+        a_rod = Rectangle(width=3.5, height=0.60, color=COL_METAL).set_fill("#475569", 0.95).move_to([-0.7, 0.0, 0.0])
+        a_rod_axis = DashedLine([-4.6, 0.0, 0.0], [1.1, 0.0, 0.0], color="#94A3B8", stroke_width=1.5, dash_length=0.15)
+
+        # 2. Backing Plate (Distinct thick steel plate behind cup on right, x = -1.8)
+        # Sits against rod shoulder, supports flat base of cup
+        a_backing = Rectangle(width=0.50, height=2.6, color=COL_METAL).set_fill("#475569", 0.95).set_stroke(COL_METAL, 2.5).move_to([-1.8, 0.0, 0.0])
+
+        # 3. Cup Seal (Elastomer, base at x = -2.2, lips facing left to x = -3.2)
+        a_cup_t = Polygon(
+            [-2.05, 0.30, 0], [-2.05, 1.20, 0], [-3.15, 1.30, 0],
+            [-3.15, 1.10, 0], [-2.35, 0.95, 0], [-2.35, 0.30, 0],
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.95
+        ).set_stroke(COL_OK, 2.2)
+        a_cup_b = Polygon(
+            [-2.05, -0.30, 0], [-2.05, -1.20, 0], [-3.15, -1.30, 0],
+            [-3.15, -1.10, 0], [-2.35, -0.95, 0], [-2.35, -0.30, 0],
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.95
+        ).set_stroke(COL_OK, 2.2)
+        a_cup = VGroup(a_cup_t, a_cup_b)
+
+        # 4. Retainer Plate (Fits inside cup cavity, clamps cup base, x = -2.5)
+        a_retainer = Rectangle(width=0.30, height=1.9, color=YELLOW).set_fill("#CA8A04", 0.95).set_stroke(YELLOW, 2.2).move_to([-2.5, 0.0, 0.0])
+
+        # 5. Threaded Stud and Clamp Nut on end of rod
+        a_stud = Rectangle(width=0.9, height=0.36, color=WHITE).set_fill("#94A3B8", 1.0).move_to([-3.10, 0.0, 0.0])
+        a_nut = Rectangle(width=0.45, height=0.85, color=WHITE).set_fill("#CBD5E1", 1.0).move_to([-3.40, 0.0, 0.0])
+
+        # Clamping pinch arrows: Retainer pushes right -> | <- Backing plate pushes left
+        arr_clamp_r = Arrow([-2.9, 0.65, 0], [-2.55, 0.65, 0], color=YELLOW, stroke_width=3.5, tip_length=0.12)
+        arr_clamp_l = Arrow([-1.4, 0.65, 0], [-1.75, 0.65, 0], color=COL_METAL, stroke_width=3.5, tip_length=0.12)
+        clamp_arrows = VGroup(arr_clamp_r, arr_clamp_l)
+
+        # Callout Badges
+        lbl_c_cup = _h6_18_badge("Piston Cup Seal (คัพซีล)", COL_OK).move_to([-2.6, 1.85, 0.0])
+        arr_c_cup = Arrow([-2.6, 1.68, 0], [-2.6, 1.32, 0], color=COL_OK, stroke_width=2.0, tip_length=0.10)
+        call_cup = VGroup(lbl_c_cup, arr_c_cup)
+
+        lbl_c_back = _h6_18_badge("Backing Plate (แผ่นรองหลัง)", COL_METAL).move_to([-0.2, 1.85, 0.0])
+        arr_c_back = Arrow([-0.6, 1.68, 0], [-1.75, 1.32, 0], color=COL_METAL, stroke_width=2.0, tip_length=0.10)
+        call_back = VGroup(lbl_c_back, arr_c_back)
+
+        lbl_c_ret = _h6_18_badge("Retainer (ตัวล็อกหนีบ)", YELLOW).move_to([-2.6, -1.85, 0.0])
+        arr_c_ret = Arrow([-2.6, -1.68, 0], [-2.5, -1.05, 0], color=YELLOW, stroke_width=2.0, tip_length=0.10)
+        call_ret = VGroup(lbl_c_ret, arr_c_ret)
+
+        a_assembly = VGroup(
+            a_rod, a_rod_axis, a_backing, a_cup, a_retainer, a_stud, a_nut,
+            clamp_arrows, call_cup, call_back, call_ret
+        )
+
+        # Right explanatory panel (x = 2.5)
+        a_card = RoundedRectangle(width=5.8, height=3.3, corner_radius=0.12, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([2.5, 0.05, 0.0])
+        a_head = _h6_18_badge("หน้าที่ของชุดยึดคัพลูกสูบ", COL_OK).move_to([2.5, 1.35, 0.0])
+        a_points = VGroup(
+            Text("• Backing Plate: แผ่นเหล็กรองหลัง รับแรงดันมหาศาล", font_size=11, color=WHITE),
+            Text("  ป้องกันฐานคัพยางโก่งงอหรือปลิ้นออกทางช่องว่าง", font_size=10.5, color=COL_GRAY),
+            Text("• Retainer: แผ่นกดหนีบฐานคัพเข้ากับ Backing Plate", font_size=11, color=WHITE),
+            Text("  ล็อกตำแหน่งให้แน่นสนิท ไม่ให้คัพหลุดเลื่อนตอนก้านสูบถอย", font_size=10.5, color=COL_OK),
+            Text("• ควบคุมแรงบีบพอดี ป้องกันขอบคัพฉีกขาดจากแรงกดเกิน", font_size=11, color=COL_WARN),
+        ).arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to([2.5, 0.0, 0.0])
+        a_panel = VGroup(a_card, a_head, a_points)
+
+        banner3 = _h6_18_banner(
+            "แผ่นรองหลัง (Backing Plate) และตัวล็อก (Retainer) หนีบขอบคัพให้แน่น ป้องกันคัพเคลื่อน/บิดตอนใช้งาน",
+            COL_OK
+        )
+
+        self.play(FadeIn(a_assembly, shift=UP * 0.25), FadeIn(a_panel), FadeIn(banner3), run_time=0.8)
+        # Sequentially indicate backing plate and retainer (Lesson 5: after FadeIn)
+        self.play(
+            Indicate(call_back, color=COL_METAL, scale_factor=1.08),
+            Indicate(call_ret, color=YELLOW, scale_factor=1.08),
+            run_time=1.2
+        )
+        self.wait(4.0)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 36.6–41.0: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: คัพซีลลูกสูบ (Piston Cup Packings - hydraulic06 น.21)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. ทิศทางการทำงาน: Single-acting ใช้ 1 คัพ (หันปากสู้แรงดัน) / Double-acting ใช้ 2 คัพหันหลังชนกัน (Back-to-Back)",
+            "2. กลไก Pressure-Actuated: แรงดันของไหลช่วยดันถ่างปากคัพให้แนบแน่นกับกระบอกสูบ (Self-Energizing)",
+            "3. ความเชื่อมโยงของซีล: เป็นหลักการเดียวกับ O-ring (H6_15) และ V-packing (H6_16/17) ยิ่งแรงดันสูง ยิ่งซีลแน่น",
+            "4. ชุดประกบยึดแน่น: Backing Plate + Retainer หนีบฐานคัพไว้แน่น ป้องกันการบิดเลื่อนและป้องกันการปลิ้นเสียหาย"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(3.6)
+
+        # ======================================================================
+        # BEAT 41.0–45.5: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "กระบอกสูบที่ต้องรับแรงดันสลับทิศทั้งขาเข้าและขาออก (Double-Acting)\nควรติดตั้งคัพซีลกี่ตัว และจัดวางในลักษณะใด?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: ต้องใช้ 2 คัพ วางหันหลังชนกัน (Back-to-Back) โดยให้ปากคัพแต่ละตัวหันออกคนละทิศ\nเพื่อรับแรงดันของไหลที่สลับเข้ามาจากแต่ละฝั่งได้อย่างสมบูรณ์)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.5)
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
