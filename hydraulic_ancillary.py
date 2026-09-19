@@ -3087,6 +3087,319 @@ class H6_07_SteelTubeSizes(SafeScene):
         self.fade_out_all(run_time=0.8)
 
 
+# ==============================================================================
+# Scene: H6_08_TubeFittings (ข้อต่อท่อ Tube: Flare Fitting & Compression Fitting)
+# Lecture slides: hydraulic06.pdf page 11 ("Tube Fittings")
+# Duration: ~38s
+# Pedagogical Objective:
+# - Explain why thin-walled tubes (1-3 mm wall from H6_07) cannot use cut threads:
+#   thread cutting removes too much wall thickness, risking explosive burst.
+# - Reveal Mechanism 1 (Flare Fitting): 37° flared tube end clamped between
+#   conical nose and nut shoulder (metal-to-metal seal without cutting tube).
+# - Reveal Mechanism 2 (Compression Fitting): Straight tube with separate
+#   ferrule ring crimping radially into tube OD during nut tightening.
+# - Explicit contrast with H6_05 (Pipe Thread): same metal-to-metal sealing goal,
+#   completely different mechanical principle (no wall weakening).
+# ==============================================================================
+
+class H6_08_TubeFittings(SafeScene):
+    def clear_stage(self, keep=(), run_time=0.6):
+        """Fade out active stage objects while preserving persistent title badges."""
+        targets = [m for m in self.mobjects if m not in keep and m not in getattr(self, "keep_mobs", ())]
+        if targets:
+            self.play(FadeOut(Group(*targets)), run_time=run_time)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # SETUP PERSISTENT BADGES (0.0–1.5s)
+        # ----------------------------------------------------------------------
+        title_mob = title("ข้อต่อท่อทองแดง/สแตนเลส (Tube Fittings)")
+        page_ref_mob = page_ref("hydraulic06 น.11")
+        self.keep_mobs = (title_mob, page_ref_mob)
+
+        self.play(
+            FadeIn(title_mob, shift=UP * 0.4),
+            FadeIn(page_ref_mob),
+            run_time=1.0
+        )
+        self.wait(0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–5.2: Hook Question — Callback to H6_07 Thin Wall
+        # ----------------------------------------------------------------------
+        hook_q = caption_top("Tube ผนังบางกว่า Pipe มาก (H6_07) — ตัดเกลียวเข้าไปได้ไหม?", color=COL_GRAY)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.4)
+        self.play(FadeOut(hook_q), run_time=0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 5.2–10.8: Thread Cut Hazard on Thin-Walled Tube
+        # ----------------------------------------------------------------------
+        cap1 = caption_top("ตัดเกลียวเข้าผนังบาง = ผนังที่เหลือบางเกินไปจนพังง่าย")
+        sub1 = Text(
+            "ผนัง Tube หนาเพียง 1–3 mm (H6_07) — การต๊าปเกลียวจะกินเนื้อท่อจนเสี่ยงต่อการระเบิดแตก",
+            font_size=12, color=COL_GRAY
+        ).move_to([0, 2.25, 0])
+        self.play(FadeIn(cap1, shift=UP * 0.3), FadeIn(sub1), run_time=0.8)
+
+        # Container box
+        box_hazard = RoundedRectangle(
+            corner_radius=0.12, width=11.6, height=3.5,
+            color=COL_METAL, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.92).move_to([0, -0.20, 0])
+
+        # Left Panel: Pipe (Thick Wall, Safe)
+        p_x = -3.2
+        pipe_box = RoundedRectangle(corner_radius=0.08, width=5.2, height=3.0, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.5).move_to([p_x, -0.20, 0])
+        p_head = Text("Pipe (ท่อเหล็กผนังหนา — H6_05)", font_size=13, color=COL_OK).move_to([p_x, 1.05, 0])
+
+        # Graphic of thick pipe wall with thread
+        pipe_outer = Rectangle(width=3.6, height=1.1, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.4).move_to([p_x, 0.15, 0])
+        pipe_inner = Rectangle(width=3.6, height=0.45, color=COL_BG_BOX, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 1.0).move_to([p_x, 0.15, 0])
+        # Thread teeth cutting into outer top
+        teeth_pipe = VGroup(*[
+            Polygon([-1.4 + i*0.35, 0.70, 0], [-1.22 + i*0.35, 0.48, 0], [-1.05 + i*0.35, 0.70, 0],
+                    color=COL_BG_BOX, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 1.0)
+            for i in range(7)
+        ]).shift(RIGHT * p_x)
+        p_stat = Text("ความหนาผนังคงเหลือ: หนาพอรับแรงดันได้สบาย", font_size=11, color=COL_OK).move_to([p_x, -0.65, 0])
+        p_tag = Text("✓ ใช้เกลียว NPT ซีลได้ปลอดภัย", font_size=11, color=WHITE).move_to([p_x, -0.95, 0])
+        grp_pipe = VGroup(pipe_box, p_head, pipe_outer, pipe_inner, teeth_pipe, p_stat, p_tag)
+
+        # Right Panel: Tube (Thin Wall, Hazard)
+        t_x = 3.2
+        tube_box = RoundedRectangle(corner_radius=0.08, width=5.2, height=3.0, color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.5).move_to([t_x, -0.20, 0])
+        t_head = Text("Tube (ท่อผนังบาง 1–3 mm — H6_07)", font_size=13, color=COL_WARN).move_to([t_x, 1.05, 0])
+
+        # Graphic of thin tube wall with thread cut
+        tube_outer = Rectangle(width=3.6, height=0.9, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.4).move_to([t_x, 0.15, 0])
+        tube_inner = Rectangle(width=3.6, height=0.65, color=COL_BG_BOX, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 1.0).move_to([t_x, 0.15, 0])
+        # Thread teeth cutting almost through the thin wall!
+        teeth_tube = VGroup(*[
+            Polygon([-1.4 + i*0.35, 0.60, 0], [-1.22 + i*0.35, 0.35, 0], [-1.05 + i*0.35, 0.60, 0],
+                    color=COL_WARN, fill_color=COL_WARN).set_fill(COL_WARN, 0.95)
+            for i in range(7)
+        ]).shift(RIGHT * t_x)
+        t_stat = Text("ร่องเกลือกินลึก: ผนังที่เหลือบางเกินไป!", font_size=11, color=COL_WARN).move_to([t_x, -0.65, 0])
+        t_tag = Text("✗ เสี่ยงต่อการปริแตกเมื่อเจอแรงดันสูง", font_size=11, color=WHITE).move_to([t_x, -0.95, 0])
+        grp_tube = VGroup(tube_box, t_head, tube_outer, tube_inner, teeth_tube, t_stat, t_tag)
+
+        hazard_stage = VGroup(box_hazard, grp_pipe, grp_tube)
+
+        self.play(FadeIn(hazard_stage, shift=UP * 0.3), run_time=1.0)
+        self.play(Indicate(teeth_tube, color=COL_WARN, scale_factor=1.1), run_time=0.8)
+        self.wait(1.8)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 10.8–16.8: Solution 1 — Flare Fitting (37° Flared End)
+        # ----------------------------------------------------------------------
+        cap2 = caption_top("ทางแก้ 1: Flare Fitting (บานปลายท่อ 37°)")
+        sub2 = Text(
+            "ปลายท่อบานออกเป็นกรวย 37° แล้วขันอัดเข้ากับที่นั่งเรียว — ซีลโลหะชนโลหะ ไม่ตัดเนื้อท่อเลย",
+            font_size=12, color=COL_GRAY
+        ).move_to([0, 2.25, 0])
+        self.play(FadeIn(cap2, shift=UP * 0.3), FadeIn(sub2), run_time=0.8)
+
+        # Flare Diagram Box
+        box_flare = RoundedRectangle(
+            corner_radius=0.12, width=11.6, height=3.5,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.92).move_to([0, -0.15, 0])
+
+        # 1. Fitting Body with 37° male cone nose
+        body_block = Rectangle(width=2.4, height=1.6, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.45).move_to([-3.1, 0.15, 0])
+        body_hex = Rectangle(width=0.4, height=1.9, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.85).move_to([-3.4, 0.15, 0])
+        # Conical nose seat: chamfered at 37 deg
+        cone_seat = Polygon([-1.9, 0.95, 0], [-1.0, 0.30, 0], [-1.0, 0.0, 0], [-1.9, -0.65, 0],
+                            color=COL_OK, fill_color=COL_OK).set_fill(COL_OK, 0.65)
+        body_bore = Rectangle(width=3.0, height=0.45, color=COL_BG_BOX, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 1.0).move_to([-2.5, 0.15, 0])
+        body_grp = VGroup(body_block, body_hex, cone_seat, body_bore)
+
+        # 2. Tube with 37° Flared End
+        # Straight tube stem
+        t_stem = Rectangle(width=3.2, height=0.76, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.45).move_to([1.8, 0.15, 0])
+        t_bore = Rectangle(width=3.5, height=0.45, color=COL_BG_BOX, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 1.0).move_to([1.8, 0.15, 0])
+        # Flared cone skirt (angled outward at 37°)
+        flare_top = Polygon([0.2, 0.53, 0], [-0.85, 1.05, 0], [-0.95, 0.95, 0], [0.1, 0.43, 0],
+                            color=COL_OK, fill_color=COL_OK).set_fill(COL_OK, 0.95)
+        flare_bot = Polygon([0.2, -0.23, 0], [-0.85, -0.75, 0], [-0.95, -0.65, 0], [0.1, -0.13, 0],
+                            color=COL_OK, fill_color=COL_OK).set_fill(COL_OK, 0.95)
+        flared_tube = VGroup(t_stem, t_bore, flare_top, flare_bot)
+
+        # 3. Clamping Nut / Sleeve
+        nut_sleeve = Polygon([0.4, 1.15, 0], [-0.75, 1.15, 0], [0.2, 0.55, 0], [0.4, 0.55, 0],
+                             color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.7)
+        nut_sleeve_bot = Polygon([0.4, -0.85, 0], [-0.75, -0.85, 0], [0.2, -0.25, 0], [0.4, -0.25, 0],
+                                 color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.7)
+        nut_body = Rectangle(width=1.8, height=1.9, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.35).move_to([1.3, 0.15, 0])
+        nut_grp = VGroup(nut_sleeve, nut_sleeve_bot, nut_body)
+
+        # Contact line highlight
+        contact_line = DashedLine([-0.95, 0.95, 0], [-0.95, -0.65, 0], color=COL_OK, stroke_width=3)
+        contact_lbl = Text("รอยประกบซีล 37° (Metal-to-Metal)", font_size=12, color=COL_OK).move_to([-0.95, 1.35, 0])
+
+        flare_callout = Text(
+            "ปลายท่อถูกบานออก 37° แล้วอัดแน่นกับที่นั่งเรียว — ผนังท่อหนาเท่าเดิม 100% ปราศจากรอยตัด",
+            font_size=12, color=WHITE
+        ).move_to([0, -1.55, 0])
+
+        flare_diagram = VGroup(box_flare, body_grp, flared_tube, nut_grp, contact_line, contact_lbl, flare_callout)
+
+        self.play(FadeIn(flare_diagram, shift=UP * 0.3), run_time=1.0)
+        self.play(Indicate(contact_line, color=COL_OK, scale_factor=1.15), run_time=0.8)
+        self.wait(1.8)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 16.8–22.8: Solution 2 — Compression Fitting (Ferrule Crimping)
+        # ----------------------------------------------------------------------
+        cap3 = caption_top("ทางแก้ 2: Compression Fitting (เฟอร์รูลบีบรัด)")
+        sub3 = Text(
+            "ไม่ต้องบานปลายท่อ — ใช้วงแหวนเฟอร์รูล (Ferrule) สวมรอบท่อตรง แล้วขันนัตให้อัดกอดผิวท่อ",
+            font_size=12, color=COL_GRAY
+        ).move_to([0, 2.25, 0])
+        self.play(FadeIn(cap3, shift=UP * 0.3), FadeIn(sub3), run_time=0.8)
+
+        # Compression Diagram Box
+        box_comp = RoundedRectangle(
+            corner_radius=0.12, width=11.6, height=3.5,
+            color=COL_FIELD, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.92).move_to([0, -0.15, 0])
+
+        # 1. Straight Tube (Completely straight, unlike flared tube!)
+        str_tube = Rectangle(width=5.0, height=0.76, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.45).move_to([0.6, 0.15, 0])
+        str_bore = Rectangle(width=5.2, height=0.45, color=COL_BG_BOX, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 1.0).move_to([0.6, 0.15, 0])
+        str_tube_grp = VGroup(str_tube, str_bore)
+
+        # 2. Fitting Body with internal cam angle
+        c_body = Rectangle(width=2.4, height=1.6, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.45).move_to([-2.9, 0.15, 0])
+        c_hex = Rectangle(width=0.4, height=1.9, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.85).move_to([-3.2, 0.15, 0])
+        c_cam_top = Polygon([-1.7, 0.75, 0], [-1.2, 0.53, 0], [-1.2, 0.75, 0], color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.9)
+        c_cam_bot = Polygon([-1.7, -0.45, 0], [-1.2, -0.23, 0], [-1.2, -0.45, 0], color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.9)
+        c_body_grp = VGroup(c_body, c_hex, c_cam_top, c_cam_bot)
+
+        # 3. Ferrule Ring (Distinct wedge-shaped sleeve around tube OD)
+        ferrule_top = Polygon([-1.2, 0.53, 0], [-0.5, 0.72, 0], [-0.5, 0.53, 0], [-1.0, 0.48, 0],
+                              color=COL_WARN, fill_color=COL_WARN).set_fill(COL_WARN, 0.95)
+        ferrule_bot = Polygon([-1.2, -0.23, 0], [-0.5, -0.42, 0], [-0.5, -0.23, 0], [-1.0, -0.18, 0],
+                              color=COL_WARN, fill_color=COL_WARN).set_fill(COL_WARN, 0.95)
+        ferrule_lbl = Text("ปลอกเฟอร์รูล (Ferrule)", font_size=12, color=COL_WARN).move_to([-0.8, 1.15, 0])
+        ferrule_grp = VGroup(ferrule_top, ferrule_bot, ferrule_lbl)
+
+        # 4. Compression Nut
+        c_nut = Rectangle(width=1.6, height=1.8, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.4).move_to([0.6, 0.15, 0])
+        nut_lbl = Text("นัตขันบีบอัด (Nut)", font_size=12, color=COL_FIELD).move_to([0.6, 1.35, 0])
+        c_nut_grp = VGroup(c_nut, nut_lbl)
+
+        # Bite crimp indicator
+        crimp_arr_top = Arrow(start=[-0.9, 0.85, 0], end=[-1.0, 0.53, 0], color=COL_OK, stroke_width=2.5, max_tip_length_to_length_ratio=0.35)
+        crimp_arr_bot = Arrow(start=[-0.9, -0.55, 0], end=[-1.0, -0.23, 0], color=COL_OK, stroke_width=2.5, max_tip_length_to_length_ratio=0.35)
+        crimp_tag = Text("คมเฟอร์รูลจิกรัดผิวท่อ (Bite / Crimp) ล็อกและซีลสนิท", font_size=12, color=WHITE).move_to([0, -1.55, 0])
+
+        comp_diagram = VGroup(box_comp, c_body_grp, str_tube_grp, ferrule_grp, c_nut_grp, crimp_arr_top, crimp_arr_bot, crimp_tag)
+
+        self.play(FadeIn(comp_diagram, shift=UP * 0.3), run_time=1.0)
+        self.play(Indicate(ferrule_grp, color=COL_OK, scale_factor=1.08), run_time=0.8)
+        self.wait(1.8)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 22.8–28.8: Comparison Table (Pipe Thread vs Tube Fitting)
+        # ----------------------------------------------------------------------
+        cap4 = caption_top("เปรียบเทียบ: Pipe Thread (H6_05) vs Tube Fitting (คลิปนี้)")
+        sub4 = Text(
+            "ทั้งคู่ซีลได้โดยไม่พึ่งปะเก็น (Metal-to-Metal Seal) — แต่ใช้วิธีทางกลที่ต่างกันอย่างสิ้นเชิง",
+            font_size=12, color=COL_GRAY
+        ).move_to([0, 2.25, 0])
+        self.play(FadeIn(cap4, shift=UP * 0.3), FadeIn(sub4), run_time=0.8)
+
+        card_w, card_h = 5.8, 3.4
+        c_y = -0.30
+
+        # Left: Pipe Thread (H6_05)
+        b_pipe = RoundedRectangle(corner_radius=0.12, width=card_w, height=card_h, color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.92).move_to([-3.2, c_y, 0])
+        h_pipe = Text("Pipe Thread (ท่อ Pipe — H6_05)", font_size=13, color=COL_METAL).move_to([-3.2, c_y + 1.30, 0])
+        div_p = Line([-5.8, c_y + 1.05, 0], [-0.6, c_y + 1.05, 0], color=COL_METAL, stroke_width=1.2)
+        p1 = Text("• ท่อที่ใช้: ท่อเหล็กผนังหนา (Steel Pipe)", font_size=11, color=WHITE).move_to([-3.2, c_y + 0.75, 0])
+        p2 = Text("• การแปรรูป: ต๊าปเกลียวเรียว (NPT) ตัดลึกเข้าผนัง", font_size=11, color=WHITE).move_to([-3.2, c_y + 0.30, 0])
+        p3 = Text("• กลไกซีล: ยอด-รากเกลียวบดอัดกัน (Interference)", font_size=11, color=WHITE).move_to([-3.2, c_y - 0.15, 0])
+        p4 = Text("• ข้อจำกัด: ผนังต้องหนามาก / ห้ามใช้กับท่อบาง", font_size=11, color=COL_WARN).move_to([-3.2, c_y - 0.60, 0])
+        p5 = Text("• การใช้งาน: งานท่อเมนหลัก ทนแรงกระแทกสูง", font_size=11, color=COL_GRAY).move_to([-3.2, c_y - 1.05, 0])
+        card_p = VGroup(b_pipe, h_pipe, div_p, p1, p2, p3, p4, p5)
+
+        # Right: Tube Fitting (H6_08)
+        b_tube = RoundedRectangle(corner_radius=0.12, width=card_w, height=card_h, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.92).move_to([3.2, c_y, 0])
+        h_tube = Text("Tube Fitting (ท่อ Tube — คลิปนี้)", font_size=13, color=COL_OK).move_to([3.2, c_y + 1.30, 0])
+        div_t = Line([0.6, c_y + 1.05, 0], [5.8, c_y + 1.05, 0], color=COL_OK, stroke_width=1.2)
+        u1 = Text("• ท่อที่ใช้: ท่อผนังบาง (เหล็ก, สแตนเลส, ทองแดง)", font_size=11, color=WHITE).move_to([3.2, c_y + 0.75, 0])
+        u2 = Text("• การแปรรูป: บานปลาย 37° หรือสวม Ferrule", font_size=11, color=WHITE).move_to([3.2, c_y + 0.30, 0])
+        u3 = Text("• กลไกซีล: ผิวโลหะประกบโลหะ (ไม่ตัดเนื้อท่อ)", font_size=11, color=WHITE).move_to([3.2, c_y - 0.15, 0])
+        u4 = Text("• ข้อได้เปรียบ: คงความหนา 100% / ปลอดภัยต่อท่อบาง", font_size=11, color=COL_OK).move_to([3.2, c_y - 0.60, 0])
+        u5 = Text("• การใช้งาน: เดินท่อประณีต, ดัดโค้งง่าย, ซ่อมบำรุงสะดวก", font_size=11, color=COL_GRAY).move_to([3.2, c_y - 1.05, 0])
+        card_t = VGroup(b_tube, h_tube, div_t, u1, u2, u3, u4, u5)
+
+        self.play(FadeIn(card_p, shift=UP * 0.25), FadeIn(card_t, shift=UP * 0.25), run_time=1.0)
+        self.wait(3.0)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 28.8–33.0: Summary Card
+        # ----------------------------------------------------------------------
+        sum_box = RoundedRectangle(
+            corner_radius=0.15, width=11.4, height=3.5,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.25, 0])
+
+        s_head = Text("สรุปสำคัญ: ข้อต่อท่อ Tube Fittings (hydraulic06 น.11)", font_size=16, color=COL_OK).move_to([0, 1.15, 0])
+        s1 = Text("1. Tube ผนังบาง (1–3 mm) จึงเลี่ยงการตัดเกลียวเพื่อป้องกันท่อแตกจากความดัน", font_size=13, color=WHITE).move_to([0, 0.55, 0])
+        s2 = Text("2. Flare Fitting: บานปลายท่อ 37° แล้วขันอัดเข้ากับที่นั่งเรียว (Metal-to-Metal Seal)", font_size=13, color=WHITE).move_to([0, 0.05, 0])
+        s3 = Text("3. Compression Fitting: ปลอก Ferrule บีบรัดรอบผิวท่อตรง ยึดแน่นและซีลพร้อมกัน", font_size=13, color=WHITE).move_to([0, -0.45, 0])
+        s4 = Text("4. ทั้งสองแบบซีลแรงดันสูงได้สนิทโดยไม่ต้องพึ่งปะเก็น และรักษาความแข็งแรงท่อ 100%", font_size=12, color=COL_CURR).move_to([0, -0.95, 0])
+
+        sum_grp = VGroup(sum_box, s_head, s1, s2, s3, s4)
+
+        self.play(FadeIn(sum_grp, shift=UP * 0.35), run_time=0.8)
+        self.wait(3.0)
+
+        self.clear_stage(run_time=0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 33.0–38.0: Review Question Card & Outro
+        # ----------------------------------------------------------------------
+        q_box = RoundedRectangle(
+            corner_radius=0.15, width=11.2, height=2.6,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.35, 0.0])
+        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0.0, 0.50, 0.0])
+        q_body = Text(
+            "ทำไม tube ถึงเลี่ยงการตัดเกลียว แต่ pipe (H6_05) กลับใช้เกลียวเป็นตัวซีลหลักได้สบายๆ?",
+            font_size=14, color=WHITE
+        ).move_to([0.0, 0.05, 0.0])
+        q_ans = Text(
+            "(คำตอบ: Pipe ผนังหนามาก ตัดเกลียวแล้วยังเหลือเนื้อรับแรงดัน แต่ Tube ผนังบาง 1–3 mm ถ้าตัดเกลียวจะเสี่ยงระเบิดแตก)",
+            font_size=12, color=COL_GRAY
+        ).move_to([0.0, -0.65, 0.0])
+
+        q_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.4)
+
+        self.play(FadeOut(q_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+
+
+
 
 
 
