@@ -10582,3 +10582,563 @@ class H6_26_AccumulatorApps1(SafeScene):
         self.fade_out_all(run_time=0.6)
         self.wait(0.5)
 
+
+# ======================================================================
+# SCENE: H6_27_AccumulatorApps2
+# hydraulic06.pdf — Page 30: Accumulator Applications (3 & 4)
+# (FINAL CLIP 27 OF 27 IN THE SERIES)
+# ======================================================================
+
+def _h6_27_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_27_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_27_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_27_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_27_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    fit_width(lbl, 11.4)
+    return VGroup(bg, lbl)
+
+
+# ----------------------------------------------------------------------
+# ISO Hydraulic Schematic Symbol Builders (page 30)
+# ----------------------------------------------------------------------
+
+def _build_check_valve_27(x, y, direction="right"):
+    """
+    Check valve symbol.
+    If direction == 'right': seat on left (<), ball on right (blocks left flow, allows right flow).
+    If direction == 'left': seat on right (>), ball on left (blocks right flow, allows left flow).
+    """
+    if direction == "right":
+        seat = Polygon([x - 0.12, y + 0.14, 0], [x - 0.02, y, 0], [x - 0.12, y - 0.14, 0], color=COL_METAL, stroke_width=1.8)
+        ball = Circle(radius=0.08, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([x + 0.06, y, 0])
+    else:  # direction == "left": blocks rightward backflow from accumulator
+        seat = Polygon([x + 0.12, y + 0.14, 0], [x + 0.02, y, 0], [x + 0.12, y - 0.14, 0], color=COL_METAL, stroke_width=1.8)
+        ball = Circle(radius=0.08, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([x - 0.06, y, 0])
+    return VGroup(seat, ball)
+
+
+def _build_dcv_emergency(x, y):
+    """
+    Directional Control Valve for Emergency Circuit (slide 30 left):
+    2 positions: Left box has upward straight arrow; Right box has diagonal arrow to tank.
+    Solenoid on left, spring return on right.
+    """
+    h = 0.44
+    b1 = Square(side_length=h, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([x - h/2, y, 0])
+    b2 = Square(side_length=h, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([x + h/2, y, 0])
+    a1 = Arrow(start=[x - h/2, y - 0.14, 0], end=[x - h/2, y + 0.14, 0], color=COL_METAL, stroke_width=1.5, max_tip_length_to_length_ratio=0.35)
+    a2 = Arrow(start=[x + h/2 - 0.12, y + 0.14, 0], end=[x + h/2 + 0.12, y - 0.14, 0], color=COL_METAL, stroke_width=1.5, max_tip_length_to_length_ratio=0.35)
+    sol = Rectangle(width=0.20, height=0.26, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([x - h - 0.10, y, 0])
+    sol_slash = Line([x - h - 0.20, y - 0.13, 0], [x - h, y + 0.13, 0], color=COL_METAL, stroke_width=1.5)
+    solenoid = VGroup(sol, sol_slash)
+    sp_pts = [[x + h, y - 0.10, 0], [x + h + 0.08, y - 0.05, 0], [x + h, y, 0], [x + h + 0.08, y + 0.05, 0], [x + h, y + 0.10, 0]]
+    spring = VMobject(color=COL_SPRING, stroke_width=1.5).set_points_as_corners([np.array(p) for p in sp_pts])
+    tank = _build_reservoir(x + h/2 + 0.12, y - 0.40)
+    t_line = Line([x + h/2 + 0.12, y - h/2, 0], [x + h/2 + 0.12, y - 0.30, 0], color=COL_METAL, stroke_width=1.8)
+
+    return VGroup(b1, b2, a1, a2, solenoid, spring, t_line, tank)
+
+
+def _build_shutoff_valve(x, y):
+    """
+    Emergency Shut-off Valve (slide 30 right):
+    2 positions: Right box has straight-through arrow (normal flow);
+    Left box has blocked ports (T shape).
+    Spring on left, roller/push-button lever on right.
+    """
+    h = 0.48
+    b1 = Square(side_length=h, color=COL_WARN, stroke_width=1.8).set_fill("#0F172A", 1.0).move_to([x - h/2, y, 0])
+    b2 = Square(side_length=h, color=COL_WARN, stroke_width=1.8).set_fill("#0F172A", 1.0).move_to([x + h/2, y, 0])
+    arr = Arrow(start=[x + h/2, y - 0.16, 0], end=[x + h/2, y + 0.16, 0], color=COL_OK, stroke_width=2.0, max_tip_length_to_length_ratio=0.35)
+    t_top1 = Line([x - h/2 - 0.10, y + 0.16, 0], [x - h/2 + 0.10, y + 0.16, 0], color=COL_BAD, stroke_width=2.0)
+    t_top2 = Line([x - h/2, y + 0.16, 0], [x - h/2, y + 0.06, 0], color=COL_BAD, stroke_width=2.0)
+    t_bot1 = Line([x - h/2 - 0.10, y - 0.16, 0], [x - h/2 + 0.10, y - 0.16, 0], color=COL_BAD, stroke_width=2.0)
+    t_bot2 = Line([x - h/2, y - 0.16, 0], [x - h/2, y - 0.06, 0], color=COL_BAD, stroke_width=2.0)
+    sp_pts = [[x - h, y - 0.10, 0], [x - h - 0.08, y - 0.05, 0], [x - h, y, 0], [x - h - 0.08, y + 0.05, 0], [x - h, y + 0.10, 0]]
+    spring = VMobject(color=COL_SPRING, stroke_width=1.5).set_points_as_corners([np.array(p) for p in sp_pts])
+    act_stem = Line([x + h, y, 0], [x + h + 0.20, y + 0.15, 0], color=COL_METAL, stroke_width=2.0)
+    act_ball = Circle(radius=0.06, color=WHITE).set_fill(WHITE, 1.0).move_to([x + h + 0.20, y + 0.15, 0])
+    lbl = Text("EMERGENCY\nSHUT-OFF VALVE", font_size=7.5, color=COL_WARN, weight=BOLD).next_to(VGroup(b1, b2), DOWN, buff=0.10)
+
+    return VGroup(b1, b2, arr, t_top1, t_top2, t_bot1, t_bot2, spring, act_stem, act_ball, lbl)
+
+
+def _build_cylinder_27(x, y, retracted=False):
+    """Double-acting hydraulic cylinder."""
+    bw, bh = 1.35, 0.40
+    barrel = Rectangle(width=bw, height=bh, color=COL_METAL, stroke_width=2.0).set_fill("#0F172A", 1.0).move_to([x, y, 0])
+    px = x - 0.22 if not retracted else x - 0.48
+    piston = Rectangle(width=0.12, height=bh - 0.06, color=COL_METAL, stroke_width=1.5).set_fill("#64748B", 1.0).move_to([px, y, 0])
+    rod = Line([px, y, 0], [px + bw/2 + 0.65, y, 0], color=COL_METAL, stroke_width=3.5)
+    return VGroup(barrel, piston, rod)
+
+
+class H6_27_AccumulatorApps2(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–1.5: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_27_title("Accumulator Applications (ต่อ): ปิดชุด 4 การใช้งาน")
+        self.ref_m = _h6_27_page_ref("hydraulic06 น.30")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 1.5–5.0: Hook Question
+        # ======================================================================
+        hook_q = _h6_27_caption_top(
+            "Accumulator มีแค่ 2 หน้าที่ที่เรียนไปแล้ว (auxiliary power + leakage compensator) ก็ครบแล้วใช่ไหม?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 12.0)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.4)
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.6)
+
+        # ======================================================================
+        # BEAT 6.0–18.0: Application 3: Emergency Power Source
+        # ======================================================================
+        cap1 = _h6_27_caption_top("3. Emergency Power Source: สำรองพลังงานไว้ใช้ตอนปั๊มดับกะทันหัน")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Circuit 3 Assembly (Centered at x = -2.6, y = -0.40)
+        cx, cy = -2.6, -0.40
+
+        # Pump & Suction
+        res1 = _build_reservoir(cx - 1.2, cy - 1.55)
+        pipe_suct1 = Line([cx - 1.2, cy - 1.55, 0], [cx - 1.2, cy - 1.25, 0], color=COL_METAL, stroke_width=2)
+        strainer1 = _build_strainer(cx - 1.2, cy - 1.15)
+        pipe_str_pump1 = Line([cx - 1.2, cy - 1.00, 0], [cx - 1.2, cy - 0.75, 0], color=COL_METAL, stroke_width=2)
+        pump1 = _build_pump(cx - 1.2, cy - 0.50)
+
+        # Tee above pump & Relief valve
+        p_tee1 = Dot([cx - 1.2, cy - 0.15, 0], radius=0.045, color=COL_OIL_RED)
+        pipe_p_tee1 = Line([cx - 1.2, cy - 0.25, 0], [cx - 1.2, cy - 0.15, 0], color=COL_OIL_RED, stroke_width=2.5)
+        rv_branch1 = Line([cx - 1.2, cy - 0.15, 0], [cx - 0.45, cy - 0.15, 0], color=COL_OIL_RED, stroke_width=2.0)
+        relief1 = _build_relief_valve(cx - 0.22, cy - 0.15)
+
+        # Pilot sensing line to relief valve
+        rv_pilot_dot1 = Dot([cx - 0.85, cy - 0.15, 0], radius=0.04, color=COL_METAL)
+        rv_pilot_pts1 = [
+            [cx - 0.85, cy - 0.15, 0],
+            [cx - 0.85, cy - 0.38, 0],
+            [cx - 0.22, cy - 0.38, 0]
+        ]
+        rv_pilot_line1 = VMobject(color=COL_METAL, stroke_width=1.5).set_points_as_corners([np.array(p) for p in rv_pilot_pts1])
+
+        # Line from pump tee up to DCV port P
+        dcv_in_pts = [
+            [cx - 1.2, cy - 0.15, 0],
+            [cx - 1.2, cy + 0.10, 0],
+            [cx - 0.42, cy + 0.10, 0],
+            [cx - 0.42, cy + 0.35, 0]
+        ]
+        line_to_dcv = VMobject(color=COL_OIL_RED, stroke_width=2.2).set_points_as_corners([np.array(p) for p in dcv_in_pts])
+
+        # DCV
+        dcv1 = _build_dcv_emergency(cx - 0.20, cy + 0.55)
+
+        # Cylinder
+        cyl1 = _build_cylinder_27(cx - 0.35, cy + 1.70)
+
+        # Lines connecting DCV to Cylinder and Accumulator
+        port_a_pts = [
+            [cx - 0.42, cy + 0.77, 0],
+            [cx - 1.10, cy + 0.77, 0],
+            [cx - 1.10, cy + 1.20, 0]
+        ]
+        line_port_a = VMobject(color=COL_OIL_RED, stroke_width=2.2).set_points_as_corners([np.array(p) for p in port_a_pts])
+        line_to_cap = Line([cx - 1.10, cy + 1.20, 0], [cx - 1.10, cy + 1.50, 0], color=COL_OIL_RED, stroke_width=2.2)
+
+        # Horizontal bridging line with Check Valve pointing left (<O) to lock energy
+        h_line_left = Line([cx - 1.10, cy + 1.20, 0], [cx - 0.50, cy + 1.20, 0], color=COL_OIL_RED, stroke_width=2.2)
+        check_valve3 = _build_check_valve_27(cx - 0.40, cy + 1.20, direction="left")
+        h_line_mid = Line([cx - 0.30, cy + 1.20, 0], [cx + 0.40, cy + 1.20, 0], color=COL_OIL_RED, stroke_width=2.2)
+
+        # Line from rod end down to bridge line
+        line_from_rod = Line([cx + 0.40, cy + 1.50, 0], [cx + 0.40, cy + 1.20, 0], color=COL_OIL_RED, stroke_width=2.2)
+
+        # Branch to Accumulator
+        acc_tee = Dot([cx + 1.05, cy + 1.20, 0], radius=0.045, color=COL_OK)
+        h_line_to_acc = Line([cx + 0.40, cy + 1.20, 0], [cx + 1.05, cy + 1.20, 0], color=COL_OK, stroke_width=2.2)
+        acc_up_line = Line([cx + 1.05, cy + 1.20, 0], [cx + 1.05, cy + 1.35, 0], color=COL_OK, stroke_width=2.2)
+        accum3 = _build_accumulator_symbol(cx + 1.05, cy + 1.70, label="")
+
+        # Secondary Relief Valve protecting accumulator circuit
+        h_line_to_rv2 = Line([cx + 1.05, cy + 1.20, 0], [cx + 1.60, cy + 1.20, 0], color=COL_METAL, stroke_width=2.0)
+        relief3_2 = _build_relief_valve(cx + 1.83, cy + 1.20)
+        rv2_pilot_dot = Dot([cx + 1.40, cy + 1.20, 0], radius=0.04, color=COL_METAL)
+        rv2_pilot_pts = [
+            [cx + 1.40, cy + 1.20, 0],
+            [cx + 1.40, cy + 0.95, 0],
+            [cx + 1.83, cy + 0.95, 0]
+        ]
+        rv2_pilot_line = VMobject(color=COL_METAL, stroke_width=1.5).set_points_as_corners([np.array(p) for p in rv2_pilot_pts])
+
+        # Subtitle
+        sub_c3 = Text("Accumulator as an emergency power source", font_size=11, color=WHITE, weight=BOLD).move_to([cx, cy - 1.95, 0])
+
+        circuit3_grp = VGroup(
+            res1, pipe_suct1, strainer1, pipe_str_pump1, pump1,
+            p_tee1, pipe_p_tee1, rv_branch1, relief1, rv_pilot_dot1, rv_pilot_line1,
+            line_to_dcv, dcv1, cyl1,
+            line_port_a, line_to_cap, h_line_left, check_valve3, h_line_mid,
+            line_from_rod, acc_tee, h_line_to_acc, acc_up_line, accum3,
+            h_line_to_rv2, relief3_2, rv2_pilot_dot, rv2_pilot_line, sub_c3
+        )
+
+        # Right Side: Explanation Card
+        card3_box = RoundedRectangle(
+            width=5.2, height=3.8, corner_radius=0.14,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([3.4, -0.25, 0])
+
+        card3_head = _h6_27_badge("Emergency Power Source: แหล่งพลังงานฉุกเฉิน", COL_OK).move_to([3.4, 1.30, 0])
+
+        # Status box
+        status3_box = RoundedRectangle(width=4.6, height=0.45, corner_radius=0.08, color=COL_OK, fill_color="#0F766E").set_fill("#0F766E", 0.8).move_to([3.4, 0.80, 0])
+        status3_txt = Text("สถานะ 1: ปั๊มทำงานปกติ ชาร์จน้ำมันเก็บใน Accumulator", font_size=9.5, color=WHITE, weight=BOLD).move_to(status3_box.get_center())
+        status3_grp = VGroup(status3_box, status3_txt)
+
+        card3_bullets = VGroup(
+            Text("• เหตุฉุกเฉิน: ไฟฟ้าดับ หรือปั๊มไฮดรอลิกพังหยุดเดินเครื่อง", font_size=10.5, color=COL_WARN, weight=BOLD),
+            Text("• เช็ควาล์ว (Check Valve): ล็อกกักแรงดันไว้ ไม่ให้ไหลย้อนผ่านปั๊ม", font_size=10.5, color=YELLOW),
+            Text("• Accumulator ทำหน้าที่แบตเตอรี่สำรองฉุกเฉิน:", font_size=10.5, color=WHITE),
+            Text("  คายน้ำมันแรงดันสูงดึงกระบอกสูบกลับสู่ 'ตำแหน่งปลอดภัย' (Safe)", font_size=10.5, color=COL_OK, weight=BOLD),
+            Text("• การใช้งานสำคัญ: ป้องกันแม่พิมพ์กระแทก ประตูเตาหลอมปิดทันที", font_size=10.0, color=COL_GRAY),
+            Text("  หรือป้องกันลิฟต์/แขนกลค้าง ช่วยชีวิตและลดความเสียหาย", font_size=10.0, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.10, aligned_edge=LEFT).move_to([3.4, -0.65, 0])
+        fit_width(card3_bullets, 4.8)
+
+        card3_grp = VGroup(card3_box, card3_head, status3_grp, card3_bullets)
+
+        banner1 = _h6_27_banner(
+            "เช็ควาล์วกักพลังงานที่ accumulator สะสมไว้ไม่ให้ไหลย้อนผ่านปั๊ม — แม้ปั๊มดับกะทันหัน ยังมีแรงดันเหลือพอดันกระบอกสูบไปตำแหน่งปลอดภัยได้",
+            COL_OK
+        )
+
+        # Red cross for pump failure
+        pump_fail_x = VGroup(
+            Line([cx - 1.45, cy - 0.75, 0], [cx - 0.95, cy - 0.25, 0], color=COL_BAD, stroke_width=4.0),
+            Line([cx - 1.45, cy - 0.25, 0], [cx - 0.95, cy - 0.75, 0], color=COL_BAD, stroke_width=4.0)
+        )
+        lbl_pump_fail = Text("ปั๊มดับ!", font_size=10, color=COL_BAD, weight=BOLD).next_to(pump1, LEFT, buff=0.08)
+
+        # Arrow indicating safe retracted motion
+        cyl_safe_arrow = Arrow(
+            start=[cx + 0.8, cy + 1.95, 0],
+            end=[cx - 0.2, cy + 1.95, 0],
+            color=COL_OK, stroke_width=3.5, max_tip_length_to_length_ratio=0.25
+        )
+        lbl_cyl_safe = Text("ดึงกลับสู่ตำแหน่งปลอดภัย (Safe Home)", font_size=9, color=COL_OK, weight=BOLD).next_to(cyl_safe_arrow, UP, buff=0.05)
+        safe_action_grp = VGroup(cyl_safe_arrow, lbl_cyl_safe)
+
+        # Retracted piston version of cylinder for animation
+        cyl1_retracted = _build_cylinder_27(cx - 0.35, cy + 1.70, retracted=True)
+
+        self.play(FadeIn(circuit3_grp), FadeIn(card3_grp), FadeIn(banner1), run_time=1.0)
+        self.wait(2.5)
+
+        # Pump failure occurs!
+        status3_txt_p2 = Text("สถานะ 2: ไฟดับ! ปั๊มหยุด → Accumulator คายน้ำมันดึงสูบปลอดภัย", font_size=9.2, color=YELLOW, weight=BOLD).move_to(status3_box.get_center())
+
+        self.play(
+            pump1.animate.set_opacity(0.25),
+            FadeIn(pump_fail_x),
+            FadeIn(lbl_pump_fail),
+            status3_box.animate.set_fill(COL_WARN, 0.85),
+            Transform(status3_txt, status3_txt_p2),
+            run_time=0.8
+        )
+        self.play(Indicate(check_valve3, color=COL_WARN), run_time=0.8)
+        self.play(
+            Indicate(accum3, color=COL_OK),
+            Transform(cyl1, cyl1_retracted),
+            FadeIn(safe_action_grp),
+            run_time=1.2
+        )
+        self.wait(4.7)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 18.6–32.0: Application 4: Hydraulic Shock Absorber (Water Hammer)
+        # ======================================================================
+        cap2 = _h6_27_caption_top("4. Hydraulic Shock Absorber: ดูดซับแรงกระแทกตอนวาล์วปิดกะทันหัน")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Circuit 4 Assembly (Left side: centered at cx = -3.4, cy = -0.45 for clean spacing)
+        cx4, cy4 = -3.4, -0.45
+
+        res4 = _build_reservoir(cx4 - 1.4, cy4 - 1.45)
+        pipe_suct4 = Line([cx4 - 1.4, cy4 - 1.45, 0], [cx4 - 1.4, cy4 - 1.15, 0], color=COL_METAL, stroke_width=2)
+        strainer4 = _build_strainer(cx4 - 1.4, cy4 - 1.05)
+        pipe_str_pump4 = Line([cx4 - 1.4, cy4 - 0.90, 0], [cx4 - 1.4, cy4 - 0.65, 0], color=COL_METAL, stroke_width=2)
+        pump4 = _build_pump(cx4 - 1.4, cy4 - 0.40)
+
+        p_tee4 = Dot([cx4 - 1.4, cy4 - 0.05, 0], radius=0.045, color=COL_OIL_RED)
+        pipe_p_tee4 = Line([cx4 - 1.4, cy4 - 0.15, 0], [cx4 - 1.4, cy4 - 0.05, 0], color=COL_OIL_RED, stroke_width=2.5)
+        rv_branch4 = Line([cx4 - 1.4, cy4 - 0.05, 0], [cx4 - 0.65, cy4 - 0.05, 0], color=COL_OIL_RED, stroke_width=2.0)
+        relief4 = _build_relief_valve(cx4 - 0.42, cy4 - 0.05)
+
+        rv_pilot_dot4 = Dot([cx4 - 1.05, cy4 - 0.05, 0], radius=0.04, color=COL_METAL)
+        rv_pilot_pts4 = [
+            [cx4 - 1.05, cy4 - 0.05, 0],
+            [cx4 - 1.05, cy4 - 0.28, 0],
+            [cx4 - 0.42, cy4 - 0.28, 0]
+        ]
+        rv_pilot_line4 = VMobject(color=COL_METAL, stroke_width=1.5).set_points_as_corners([np.array(p) for p in rv_pilot_pts4])
+
+        # Main horizontal pressure line from pump tee to shutoff valve
+        line_to_check4 = Line([cx4 - 1.4, cy4 + 0.45, 0], [cx4 - 0.20, cy4 + 0.45, 0], color=COL_OIL_RED, stroke_width=2.5)
+        line_up_to_check4 = Line([cx4 - 1.4, cy4 - 0.05, 0], [cx4 - 1.4, cy4 + 0.45, 0], color=COL_OIL_RED, stroke_width=2.5)
+
+        check_valve4 = _build_check_valve_27(cx4 - 0.10, cy4 + 0.45, direction="right")
+
+        line_to_acc4 = Line([cx4 + 0.0, cy4 + 0.45, 0], [cx4 + 0.70, cy4 + 0.45, 0], color=COL_OIL_RED, stroke_width=2.5)
+        acc_tee4 = Dot([cx4 + 0.70, cy4 + 0.45, 0], radius=0.045, color=COL_OK)
+        acc_up4 = Line([cx4 + 0.70, cy4 + 0.45, 0], [cx4 + 0.70, cy4 + 0.85, 0], color=COL_OK, stroke_width=2.5)
+        accum4 = _build_accumulator_symbol(cx4 + 0.70, cy4 + 1.25, label="")
+
+        # Line to EMERGENCY SHUT-OFF VALVE
+        line_to_sov = Line([cx4 + 0.70, cy4 + 0.45, 0], [cx4 + 1.80, cy4 + 0.45, 0], color=COL_OIL_RED, stroke_width=2.5)
+        sov_valve = _build_shutoff_valve(cx4 + 2.05, cy4 + 0.45)
+
+        # Outlet line TO SYSTEM
+        line_out1 = Line([cx4 + 2.29, cy4 + 0.69, 0], [cx4 + 2.29, cy4 + 1.40, 0], color=COL_OIL_RED, stroke_width=2.5)
+        line_out2 = Line([cx4 + 2.29, cy4 + 1.40, 0], [cx4 + 2.95, cy4 + 1.40, 0], color=COL_OIL_RED, stroke_width=2.5)
+        arr_to_sys = Arrow(start=[cx4 + 2.75, cy4 + 1.40, 0], end=[cx4 + 3.25, cy4 + 1.40, 0], color=COL_OIL_RED, stroke_width=2.5, max_tip_length_to_length_ratio=0.35)
+        lbl_to_sys = Text("TO SYSTEM", font_size=8.5, color=WHITE, weight=BOLD).next_to(arr_to_sys, UP, buff=0.06)
+
+        sub_c4 = Text("Accumulator as a hydraulic shock absorber", font_size=11, color=WHITE, weight=BOLD).move_to([cx4 + 0.8, cy4 - 1.95, 0])
+
+        circuit4_grp = VGroup(
+            res4, pipe_suct4, strainer4, pipe_str_pump4, pump4,
+            p_tee4, pipe_p_tee4, rv_branch4, relief4, rv_pilot_dot4, rv_pilot_line4,
+            line_up_to_check4, line_to_check4, check_valve4,
+            line_to_acc4, acc_tee4, acc_up4, accum4,
+            line_to_sov, sov_valve,
+            line_out1, line_out2, arr_to_sys, lbl_to_sys, sub_c4
+        )
+
+        # Right Side: Water Hammer Shock Wave Graph Card
+        card4_box = RoundedRectangle(
+            width=5.6, height=4.1, corner_radius=0.14,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([3.6, -0.28, 0])
+
+        card4_head = _h6_27_badge("Hydraulic Shock Absorber: ดูดซับแรงกระแทก", COL_OK).move_to([3.6, 1.45, 0])
+
+        # Coordinate Axes for Pressure vs Time
+        gx0, gy0 = 1.35, -1.75
+        x_axis = Arrow(start=[gx0, gy0, 0], end=[gx0 + 4.3, gy0, 0], color=COL_METAL, stroke_width=2.0, max_tip_length_to_length_ratio=0.18)
+        y_axis = Arrow(start=[gx0, gy0, 0], end=[gx0, gy0 + 2.1, 0], color=COL_METAL, stroke_width=2.0, max_tip_length_to_length_ratio=0.18)
+        lbl_p = Text("แรงดัน P", font_size=9.5, color=WHITE, weight=BOLD).next_to(y_axis, UP, buff=0.06)
+        lbl_t = Text("เวลา t", font_size=9.5, color=WHITE, weight=BOLD).next_to(x_axis, RIGHT, buff=0.06)
+        axes_grp = VGroup(x_axis, y_axis, lbl_p, lbl_t)
+
+        # Valve Closure Event Marker
+        t_close_x = gx0 + 0.85
+        line_close = DashedLine([t_close_x, gy0, 0], [t_close_x, gy0 + 1.85, 0], color=COL_WARN, stroke_width=1.5, dash_length=0.06)
+        lbl_close = Text("วาล์วปิดกะทันหัน!", font_size=8.5, color=COL_WARN, weight=BOLD).next_to(line_close, UP, buff=0.05)
+        marker_close_grp = VGroup(line_close, lbl_close)
+
+        # ----------------------------------------------------------------------
+        # §34 GEOMETRY REQUIREMENT: TWO GENUINELY DIFFERENT CURVE SHAPES!
+        # 1) graph_no_acc: Sharp, tall, violent spike + oscillating ringing
+        # 2) graph_with_acc: Much lower, gentle, smooth rounded curve
+        # ----------------------------------------------------------------------
+        y_norm = gy0 + 0.40  # normal operating pressure
+
+        # Curve 1: Sharp Spike (No Accumulator) - destructive water hammer
+        pts_no_acc = [
+            [gx0, y_norm, 0],
+            [t_close_x, y_norm, 0],
+            [t_close_x + 0.10, gy0 + 1.85, 0],   # Extreme sharp spike (peak near top!)
+            [t_close_x + 0.25, gy0 + 0.15, 0],   # Steep drop
+            [t_close_x + 0.45, gy0 + 1.25, 0],   # 2nd sharp bounce
+            [t_close_x + 0.65, gy0 + 0.25, 0],   # 2nd drop
+            [t_close_x + 0.90, gy0 + 0.85, 0],   # 3rd bounce
+            [t_close_x + 1.15, gy0 + 0.32, 0],
+            [t_close_x + 1.50, y_norm, 0],
+            [gx0 + 4.1, y_norm, 0]
+        ]
+        graph_no_acc = VMobject(color=COL_BAD, stroke_width=3.0).set_points_as_corners([np.array(p) for p in pts_no_acc])
+
+        badge_no_acc = RoundedRectangle(width=5.0, height=0.38, corner_radius=0.08, color=COL_BAD, fill_color="#7F1D1D").set_fill("#7F1D1D", 0.9).move_to([3.6, 0.95, 0])
+        lbl_no_acc = Text("ไม่มี Accumulator: แรงดันพุ่งแหลมสูง (Water Hammer ท่อเสี่ยงแตก!)", font_size=8.0, color=WHITE, weight=BOLD).move_to(badge_no_acc.get_center())
+        card_no_acc_grp = VGroup(badge_no_acc, lbl_no_acc)
+
+        # Curve 2: Smooth, Lower Damped Curve (With Accumulator) - absorbed
+        pts_with_acc = [
+            [gx0, y_norm, 0],
+            [t_close_x, y_norm, 0],
+            [t_close_x + 0.20, y_norm + 0.20, 0],
+            [t_close_x + 0.55, y_norm + 0.45, 0],  # Soft rounded crest (only +0.45, vs +1.45 spike!)
+            [t_close_x + 0.95, y_norm + 0.45, 0],  # Broad rounded top
+            [t_close_x + 1.45, y_norm + 0.30, 0],
+            [t_close_x + 2.00, y_norm + 0.12, 0],
+            [t_close_x + 2.60, y_norm + 0.02, 0],
+            [gx0 + 4.1, y_norm, 0]
+        ]
+        graph_with_acc = VMobject(color=COL_OK, stroke_width=3.5).set_points_smoothly([np.array(p) for p in pts_with_acc])
+
+        badge_with_acc = RoundedRectangle(width=5.0, height=0.38, corner_radius=0.08, color=COL_OK, fill_color="#0F766E").set_fill("#0F766E", 0.9).move_to([3.6, 0.95, 0])
+        lbl_with_acc = Text("มี Accumulator: แก๊สยุบตัวดูดซับแรงกระแทก คลื่นราบเรียบปลอดภัย", font_size=8.0, color=WHITE, weight=BOLD).move_to(badge_with_acc.get_center())
+        card_with_acc_grp = VGroup(badge_with_acc, lbl_with_acc)
+
+        banner2 = _h6_27_banner(
+            "วาล์วปิดกะทันหัน = คลื่นกระแทกแรงดัน (Water Hammer) ในท่อ — แก๊สอัดตัวได้ใน accumulator ดูดซับแรงกระแทกทันที ป้องกันท่อ/อุปกรณ์เสียหาย",
+            COL_OK
+        )
+
+        card4_base_grp = VGroup(card4_box, card4_head, axes_grp, marker_close_grp)
+
+        self.play(FadeIn(circuit4_grp), FadeIn(card4_base_grp), FadeIn(banner2), run_time=1.0)
+        self.play(Indicate(sov_valve, color=COL_WARN), run_time=0.8)
+        self.wait(1.4)
+
+        # Show Curve 1: Shock spike without accumulator
+        self.play(FadeIn(card_no_acc_grp), Create(graph_no_acc), run_time=1.2)
+        self.wait(2.2)
+
+        # Transition to Curve 2: Absorbed smooth curve with accumulator
+        self.play(
+            Indicate(accum4, color=COL_OK),
+            Transform(card_no_acc_grp, card_with_acc_grp),
+            Transform(graph_no_acc, graph_with_acc),
+            run_time=1.6
+        )
+        self.wait(4.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 32.6–37.0: All 4 Applications Overview (Complete Set)
+        # ======================================================================
+        cap3 = _h6_27_caption_top("ครบทั้ง 4 การใช้งานหลักของ Accumulator แล้ว!")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        card_list_box = RoundedRectangle(
+            width=11.2, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        list_head = Text("4 การใช้งานหลักของ Accumulator ในระบบไฮดรอลิก (ครบชุดสมบูรณ์)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+
+        rows_all = [
+            ("1. As an auxiliary power source (แหล่งพลังงานเสริม)", "[ ✓ ครบถ้วน ]"),
+            ("2. As a leakage compensator (ตัวชดเชยการรั่วซึม)", "[ ✓ ครบถ้วน ]"),
+            ("3. As an emergency power source (แหล่งพลังงานฉุกเฉิน)", "[ ✓ ครบถ้วน ]"),
+            ("4. As a hydraulic shock absorber (ตัวดูดซับแรงกระแทก)", "[ ✓ ครบถ้วน ]"),
+        ]
+
+        app_items = []
+        for title_th, status_lbl in rows_all:
+            t = Text(title_th, font_size=12.0, color=WHITE, weight=BOLD)
+            s = _h6_27_badge(status_lbl, COL_OK)
+            item = VGroup(t, s).arrange(RIGHT, buff=0.50)
+            app_items.append(item)
+
+        list_rows = VGroup(*app_items).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.18, 0.0])
+        fit_width(list_rows, 10.4)
+        applist_final_grp = VGroup(card_list_box, list_head, list_rows)
+
+        banner3 = _h6_27_banner(
+            "1) เสริมกำลังพีค  2) ชดเชยรั่วซึม  3) สำรองฉุกเฉิน  4) ดูดซับแรงกระแทก — ครบสมบูรณ์ทั้ง 4 การใช้งานของ Accumulator",
+            COL_OK
+        )
+
+        self.play(FadeIn(applist_final_grp, shift=UP * 0.3), FadeIn(banner3), run_time=0.8)
+        self.wait(3.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 37.6–40.5: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: Accumulator Applications (hydraulic06 น.29-30) — จบสมบูรณ์ 27 คลิป!", font_size=13.0, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. Emergency Power: เช็ควาล์วกักพลังงานสะสม ไม่ให้ไหลย้อนผ่านปั๊ม — ดันสูบสู่จุดปลอดภัยตอนไฟดับ",
+            "2. Shock Absorber: แก๊สใน Accumulator ยุบตัวดูดซับคลื่นกระแทก (Water Hammer) ป้องกันท่อแตก",
+            "3. บทสรุปภาพรวม: จาก 3 ชนิดโครงสร้าง (น.25-28) สู่ 4 การใช้งานหลัก (น.29-30) ครบถ้วนสมบูรณ์!"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11.5, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        fit_width(s_rows, 10.8)
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.7)
+        self.wait(2.2)
+
+        # ======================================================================
+        # BEAT 40.5–43.5: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ทำไม Emergency Power Source ต้องมีเช็ควาล์วกันไม่ให้พลังงานไหลย้อนกลับผ่านปั๊มตอนปั๊มดับ?",
+            font_size=12.0, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        fit_width(q_body, 10.6)
+        q_ans = Text(
+            "(คำตอบ: หากไม่มีเช็ควาล์ว น้ำมันแรงดันสูงใน Accumulator จะไหลย้อนกลับผ่านช่องว่างภายในปั๊มลงสู่ถังพักทันที\nทำให้สูญเสียแรงดันสะสมไปจนหมด และไม่มีน้ำมันเหลือดันกระบอกสูบไปยังตำแหน่งที่ปลอดภัย)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        fit_width(q_ans, 10.6)
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.9)
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
+
