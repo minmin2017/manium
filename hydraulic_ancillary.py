@@ -3399,6 +3399,361 @@ class H6_08_TubeFittings(SafeScene):
         self.fade_out_all(run_time=0.8)
 
 
+# ==============================================================================
+# SCENE 9: H6_09_FlexibleHoses1 (hydraulic06.pdf page 12)
+# Duration: ~39.5 seconds | 2D SafeScene
+# Pedagogical Focus: SAE 100R1-R5 Flexible Hose Construction & Reinforcement
+# AHA Moment: SAE ratings differ by number/type of reinforcement layers —
+#             more wire braid layers = higher working pressure (just like thicker wall in H6_04)
+# High-Risk Check: R1 (1 wire braid layer) vs R2 (2 wire braid layers) visibly distinct & countable!
+# Material Distinction: Wire braid (METAL) vs Textile yarn (OK) visually distinct!
+# ==============================================================================
+class H6_09_FlexibleHoses1(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [m for m in self.mobjects if m not in (self.title_m, self.ref_m)]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def make_mesh_pattern(self, x_min, x_max, y_min, y_max, color, spacing=0.22, stroke_width=1.5):
+        h = y_max - y_min
+        lines = []
+        if h <= 0 or x_max <= x_min:
+            return VGroup()
+
+        # Positive slope (+45 deg): line equation (x + t*h, y_min + t*h) for t in [0, 1]
+        x = x_min - h
+        while x <= x_max:
+            t_start = max(0.0, (x_min - x) / h)
+            t_end = min(1.0, (x_max - x) / h)
+            if t_start < t_end:
+                pt_a = np.array([x + t_start * h, y_min + t_start * h, 0])
+                pt_b = np.array([x + t_end * h, y_min + t_end * h, 0])
+                lines.append(Line(pt_a, pt_b, color=color, stroke_width=stroke_width))
+            x += spacing
+
+        # Negative slope (-45 deg): line equation (x - t*h, y_min + t*h) for t in [0, 1]
+        x = x_min
+        while x <= x_max + h:
+            t_start = max(0.0, (x - x_max) / h)
+            t_end = min(1.0, (x - x_min) / h)
+            if t_start < t_end:
+                pt_a = np.array([x - t_start * h, y_min + t_start * h, 0])
+                pt_b = np.array([x - t_end * h, y_min + t_end * h, 0])
+                lines.append(Line(pt_a, pt_b, color=color, stroke_width=stroke_width))
+            x += spacing
+
+        return VGroup(*lines)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ----------------------------------------------------------------------
+        self.title_m = title("สายไฮดรอลิกยืดหยุ่น (SAE 100R1-R5)")
+        self.ref_m = page_ref("hydraulic06 น.12")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.5)
+        self.wait(0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–4.6: Hook Question
+        # ----------------------------------------------------------------------
+        hook_q = caption_top("สาย SAE 100R1 กับ 100R2 เลขต่างกัน — ต่างกันตรงไหนจริงๆ?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.8)
+        self.wait(1.3)
+        self.play(FadeOut(hook_q), run_time=0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 4.6–10.5: 3-Layer Construction Cutaway
+        # ----------------------------------------------------------------------
+        cap1 = caption_top("โครงสร้างสายไฮดรอลิก 3 ชั้นหลัก")
+        sub1 = Text(
+            "ประกอบด้วย ท่อในยางทนน้ำมัน + ชั้นเสริมแรงรับแรงดัน + เปลือกนอกทนสภาพอากาศ",
+            font_size=11, color=COL_GRAY
+        ).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap1, shift=UP * 0.3), FadeIn(sub1), run_time=0.7)
+
+        y_c = -0.15
+        # 1. Outer Cover (charcoal rubber)
+        cov_w, cov_h = 3.2, 2.0
+        cov_box = Rectangle(width=cov_w, height=cov_h, color=COL_GRAY, stroke_width=1.5).set_fill("#263238", 0.95).move_to([-3.4, y_c, 0])
+        cov_lbl = VGroup(
+            Text("1. เปลือกนอก (Outer Cover)", font_size=13, color=COL_GRAY),
+            Text("ยางสังเคราะห์ทนสภาพอากาศ & รอยขีดข่วน", font_size=11, color=WHITE)
+        ).arrange(DOWN, buff=0.08).move_to([-3.4, -1.65, 0])
+        cov_line = Line([-3.4, -1.05, 0], [-3.4, -1.35, 0], color=COL_GRAY, stroke_width=1.5)
+        cov_grp = VGroup(cov_box, cov_line, cov_lbl)
+
+        # 2. Reinforcement Layer (wire braid mesh)
+        brd_w, brd_h = 3.0, 1.5
+        brd_box = Rectangle(width=brd_w, height=brd_h, color=COL_METAL, stroke_width=1.5).set_fill("#37474F", 0.90).move_to([-0.3, y_c, 0])
+        mesh_lines = self.make_mesh_pattern(-1.8, 1.2, y_c - brd_h / 2, y_c + brd_h / 2, color="#CFD8DC", spacing=0.20, stroke_width=1.8)
+        brd_lbl = VGroup(
+            Text("2. ชั้นเสริมแรง (Reinforcement)", font_size=13, color=COL_CURR),
+            Text("ลวดเหล็กถัก / ผ้าถัก — ตัวกำหนดความดัน", font_size=11, color=WHITE)
+        ).arrange(DOWN, buff=0.08).move_to([-0.3, 1.45, 0])
+        brd_line = Line([-0.3, 0.65, 0], [-0.3, 1.15, 0], color=COL_CURR, stroke_width=1.5)
+        brd_grp = VGroup(brd_box, mesh_lines, brd_line, brd_lbl)
+
+        # 3. Inner Tube (oil resistant rubber)
+        inn_w, inn_h = 2.6, 1.0
+        inn_box = Rectangle(width=inn_w, height=inn_h, color=COL_FIELD, stroke_width=1.5).set_fill("#1565C0", 0.90).move_to([2.5, y_c, 0])
+        inn_lbl = VGroup(
+            Text("3. ท่อใน (Inner Tube)", font_size=13, color=COL_FIELD),
+            Text("ยางสังเคราะห์ทนการกัดกร่อนของน้ำมัน", font_size=11, color=WHITE)
+        ).arrange(DOWN, buff=0.08).move_to([2.5, -1.65, 0])
+        inn_line = Line([2.5, -0.65, 0], [2.5, -1.35, 0], color=COL_FIELD, stroke_width=1.5)
+
+        # Open Bore & Fluid Flow
+        bore_end = Ellipse(width=0.25, height=0.6, color=SUPPLY).set_fill(SUPPLY, 0.85).move_to([3.8, y_c, 0])
+        bore_lip = Arc(radius=0.5, start_angle=-PI / 2, angle=PI, color=COL_FIELD, stroke_width=2.0).move_to([3.8, y_c, 0])
+        flow_arr = Arrow(start=[5.8, y_c, 0], end=[4.3, y_c, 0], color=SUPPLY, stroke_width=3.0, max_tip_length_to_length_ratio=0.3)
+        flow_lbl = Text("น้ำมันไฮดรอลิก (Oil Flow)", font_size=11, color=SUPPLY).move_to([5.05, y_c + 0.35, 0])
+
+        inn_grp = VGroup(inn_box, bore_end, bore_lip, flow_arr, flow_lbl, inn_line, inn_lbl)
+
+        hose_3layer = VGroup(cov_grp, brd_grp, inn_grp)
+
+        self.play(
+            LaggedStart(
+                FadeIn(inn_grp, shift=UP * 0.2),
+                FadeIn(brd_grp, shift=UP * 0.2),
+                FadeIn(cov_grp, shift=UP * 0.2),
+                lag_ratio=0.35
+            ),
+            run_time=2.4
+        )
+        self.play(Indicate(brd_box, color=COL_CURR), run_time=0.8)
+        self.wait(2.2)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 10.5–17.5: High-Risk Check — SAE 100R1 vs 100R2 Layer Count (§41/§44)
+        # ----------------------------------------------------------------------
+        cap2 = caption_top("SAE 100R1 → 100R2: เพิ่มชั้นลวดถัก = รับความดันได้มากขึ้น")
+        sub2 = Text(
+            "เลข SAE ไม่ใช่แค่ชื่อรุ่น แต่บอกโครงสร้างชั้นเสริมแรงอย่างเจาะจง",
+            font_size=11, color=COL_GRAY
+        ).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap2, shift=UP * 0.3), FadeIn(sub2), run_time=0.7)
+
+        # --------------------
+        # SAE 100R1: 1 Wire Braid Layer (t = 13.5s Checkpoint)
+        # --------------------
+        badge_r1 = VGroup(
+            Text("SAE 100R1 — ลวดถัก 1 ชั้น (1 Wire Braid)", font_size=16, color=COL_METAL),
+            Text("ความดันใช้งาน: ปานกลาง (Medium Pressure)  |  นับชั้นลวดได้: 1 ชั้น", font_size=12, color=WHITE)
+        ).arrange(DOWN, buff=0.1).move_to([0, 1.40, 0])
+        box_badge_r1 = SurroundingRectangle(badge_r1, color=COL_METAL, buff=0.15, corner_radius=0.1)
+
+        # Hose R1 model
+        cov_r1 = Rectangle(width=3.2, height=1.9, color=COL_GRAY, stroke_width=1.5).set_fill("#263238", 0.95).move_to([-3.4, y_c, 0])
+        brd_r1 = Rectangle(width=3.0, height=1.45, color=COL_METAL, stroke_width=1.5).set_fill("#37474F", 0.90).move_to([-0.3, y_c, 0])
+        mesh_r1 = self.make_mesh_pattern(-1.8, 1.2, y_c - 1.45 / 2, y_c + 1.45 / 2, color="#CFD8DC", spacing=0.20, stroke_width=1.8)
+        inn_r1 = Rectangle(width=2.6, height=1.0, color=COL_FIELD, stroke_width=1.5).set_fill("#1565C0", 0.90).move_to([2.5, y_c, 0])
+        lip_r1 = Ellipse(width=0.25, height=0.6, color=SUPPLY).set_fill(SUPPLY, 0.85).move_to([3.8, y_c, 0])
+
+        count_lbl_r1 = Text("ลวดถัก 1 ชั้น (Single Wire Braid)", font_size=13, color=COL_METAL).move_to([-0.3, -1.35, 0])
+        count_arrow_r1 = Arrow(start=[-0.3, -1.05, 0], end=[-0.3, -0.65, 0], color=COL_METAL, stroke_width=2.5, max_tip_length_to_length_ratio=0.3)
+
+        grp_r1 = VGroup(cov_r1, brd_r1, mesh_r1, inn_r1, lip_r1, count_lbl_r1, count_arrow_r1, badge_r1, box_badge_r1)
+
+        self.play(FadeIn(grp_r1, shift=UP * 0.25), run_time=1.0)
+        self.wait(1.5)
+
+        # Fade out R1 count label first before transforming to R2 to prevent overlap
+        self.play(
+            FadeOut(count_lbl_r1),
+            FadeOut(count_arrow_r1),
+            run_time=0.35
+        )
+
+        # --------------------
+        # Transform to SAE 100R2: 2 Stepped Wire Braid Layers (t = 16.0s Checkpoint)
+        # Countable layers: Layer 1 (inner) and Layer 2 (outer)!
+        # --------------------
+        badge_r2 = VGroup(
+            Text("SAE 100R2 — ลวดถัก 2 ชั้น (2 Wire Braids)", font_size=16, color=COL_WARN),
+            Text("ความดันใช้งาน: สูง (High Pressure)  |  รับแรงดันได้สูงขึ้น ~1.5–2 เท่า!", font_size=12, color=COL_OK)
+        ).arrange(DOWN, buff=0.1).move_to([0, 1.40, 0])
+        box_badge_r2 = SurroundingRectangle(badge_r2, color=COL_WARN, buff=0.15, corner_radius=0.1)
+
+        # Hose R2 stepped model
+        cov_r2 = Rectangle(width=2.6, height=2.05, color=COL_GRAY, stroke_width=1.5).set_fill("#263238", 0.95).move_to([-3.7, y_c, 0])
+
+        # Layer 2 (Outer Wire Braid) - highlighted in WARN bronze
+        brd_l2 = Rectangle(width=1.6, height=1.65, color=COL_WARN, stroke_width=1.5).set_fill("#4E342E", 0.90).move_to([-1.6, y_c, 0])
+        mesh_l2 = self.make_mesh_pattern(-2.4, -0.8, y_c - 1.65 / 2, y_c + 1.65 / 2, color="#FFB74D", spacing=0.18, stroke_width=1.8)
+        lbl_l2 = Text("ชั้นที่ 2 (นอก)", font_size=12, color=COL_WARN).move_to([-1.6, -1.35, 0])
+        arr_l2 = Arrow(start=[-1.6, -1.05, 0], end=[-1.6, -0.65, 0], color=COL_WARN, stroke_width=2.5, max_tip_length_to_length_ratio=0.3)
+
+        # Layer 1 (Inner Wire Braid) - in standard steel METAL
+        brd_l1 = Rectangle(width=2.0, height=1.35, color=COL_METAL, stroke_width=1.5).set_fill("#37474F", 0.90).move_to([0.2, y_c, 0])
+        mesh_l1 = self.make_mesh_pattern(-0.8, 1.2, y_c - 1.35 / 2, y_c + 1.35 / 2, color="#CFD8DC", spacing=0.18, stroke_width=1.8)
+        lbl_l1 = Text("ชั้นที่ 1 (ใน)", font_size=12, color=COL_METAL).move_to([0.2, -1.35, 0])
+        arr_l1 = Arrow(start=[0.2, -1.05, 0], end=[0.2, -0.55, 0], color=COL_METAL, stroke_width=2.5, max_tip_length_to_length_ratio=0.3)
+
+        inn_r2 = Rectangle(width=2.6, height=1.0, color=COL_FIELD, stroke_width=1.5).set_fill("#1565C0", 0.90).move_to([2.5, y_c, 0])
+        lip_r2 = Ellipse(width=0.25, height=0.6, color=SUPPLY).set_fill(SUPPLY, 0.85).move_to([3.8, y_c, 0])
+
+        grp_r2_layers = VGroup(cov_r2, brd_l2, mesh_l2, lbl_l2, arr_l2, brd_l1, mesh_l1, lbl_l1, arr_l1, inn_r2, lip_r2)
+
+        self.play(
+            ReplacementTransform(badge_r1, badge_r2),
+            ReplacementTransform(box_badge_r1, box_badge_r2),
+            ReplacementTransform(cov_r1, cov_r2),
+            ReplacementTransform(brd_r1, VGroup(brd_l2, brd_l1)),
+            ReplacementTransform(mesh_r1, VGroup(mesh_l2, mesh_l1)),
+            FadeIn(lbl_l2), FadeIn(arr_l2),
+            FadeIn(lbl_l1), FadeIn(arr_l1),
+            ReplacementTransform(inn_r1, inn_r2),
+            ReplacementTransform(lip_r1, lip_r2),
+            run_time=1.6
+        )
+        self.play(Indicate(brd_l2, color=COL_WARN), Indicate(lbl_l2, color=COL_WARN), run_time=0.8)
+        self.wait(1.5)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 17.5–23.2: Material Distinction — SAE 100R3–R5 Textile Braid (§34/§45)
+        # ----------------------------------------------------------------------
+        cap3 = caption_top("SAE 100R3 – 100R5: เสริมแรงด้วยผ้าถัก (Textile Yarn)")
+        sub3 = Text(
+            "เปลี่ยนจากลวดโลหะ (Metal) เป็นเส้นใยผ้าถัก (Textile) เพื่อความยืดหยุ่นสูง",
+            font_size=11, color=COL_GRAY
+        ).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap3, shift=UP * 0.3), FadeIn(sub3), run_time=0.7)
+
+        # Hose model with Textile weave
+        cov_r3 = Rectangle(width=3.2, height=1.9, color=COL_GRAY, stroke_width=1.5).set_fill("#263238", 0.95).move_to([-3.4, y_c, 0])
+        brd_r3 = Rectangle(width=3.0, height=1.45, color=COL_OK, stroke_width=1.5).set_fill("#004D40", 0.90).move_to([-0.3, y_c, 0])
+        # Dense fine fabric weave
+        mesh_r3 = self.make_mesh_pattern(-1.8, 1.2, y_c - 1.45 / 2, y_c + 1.45 / 2, color=COL_OK, spacing=0.12, stroke_width=1.2)
+        inn_r3 = Rectangle(width=2.6, height=1.0, color=COL_FIELD, stroke_width=1.5).set_fill("#1565C0", 0.90).move_to([2.5, y_c, 0])
+        lip_r3 = Ellipse(width=0.25, height=0.6, color=SUPPLY).set_fill(SUPPLY, 0.85).move_to([3.8, y_c, 0])
+
+        tag_textile = Text("เส้นใยผ้าถัก (Textile Yarn Braid)", font_size=13, color=COL_OK).move_to([-0.3, -1.35, 0])
+        tag_arr = Arrow(start=[-0.3, -1.05, 0], end=[-0.3, -0.65, 0], color=COL_OK, stroke_width=2.5, max_tip_length_to_length_ratio=0.3)
+
+        hose_textile = VGroup(cov_r3, brd_r3, mesh_r3, inn_r3, lip_r3, tag_textile, tag_arr)
+
+        # Feature badges
+        badge_adv = VGroup(
+            Text("✓ ข้อเด่น: อ่อนตัวสูง ดัดโค้งง่าย", font_size=14, color=COL_OK),
+            Text("รัศมีดัดงอแคบ (Small Bend Radius) ไม่ล้าเมื่อขยับบ่อย", font_size=11, color=WHITE)
+        ).arrange(DOWN, buff=0.08).move_to([-3.2, 1.40, 0])
+        box_adv = SurroundingRectangle(badge_adv, color=COL_OK, buff=0.12, corner_radius=0.08)
+
+        badge_lim = VGroup(
+            Text("⚠️ ข้อจำกัด: ทนความดันได้ต่ำกว่า", font_size=14, color=COL_WARN),
+            Text("รับแรงดันได้น้อยกว่าลวดเหล็ก เหมาะกับระบบ Return / Low-Pressure", font_size=11, color=WHITE)
+        ).arrange(DOWN, buff=0.08).move_to([3.2, 1.40, 0])
+        box_lim = SurroundingRectangle(badge_lim, color=COL_WARN, buff=0.12, corner_radius=0.08)
+
+        self.play(FadeIn(hose_textile, shift=UP * 0.25), run_time=1.0)
+        self.play(Indicate(brd_r3, color=COL_OK), run_time=0.7)
+        self.play(
+            FadeIn(badge_adv, shift=UP * 0.15), Create(box_adv),
+            FadeIn(badge_lim, shift=UP * 0.15), Create(box_lim),
+            run_time=1.2
+        )
+        self.wait(2.2)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 23.2–29.2: Callback to H6_04 (Schedule Number) Comparison Table
+        # ----------------------------------------------------------------------
+        cap4 = caption_top("หลักการเดียวกับ H6_04 (Pipe Schedule Number)")
+        sub4 = Text(
+            "วัสดุต่างกัน (ท่อเหล็กแข็ง vs สายยืดหยุ่น) แต่หลักการวิศวกรรมเหมือนกันทุกประการ",
+            font_size=11, color=COL_GRAY
+        ).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap4, shift=UP * 0.3), FadeIn(sub4), run_time=0.8)
+
+        card_w, card_h = 5.8, 3.4
+        c_y = -0.30
+
+        # Left: Rigid Steel Pipe (H6_04)
+        b_rigid = RoundedRectangle(corner_radius=0.12, width=card_w, height=card_h, color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.92).move_to([-3.2, c_y, 0])
+        h_rigid = Text("ท่อเหล็กแข็ง (Steel Pipe — H6_04)", font_size=13, color=COL_METAL).move_to([-3.2, c_y + 1.30, 0])
+        div_r = Line([-5.8, c_y + 1.05, 0], [-0.6, c_y + 1.05, 0], color=COL_METAL, stroke_width=1.2)
+        r1 = Text("• วิธีเสริมแรง: เพิ่มความหนาผนังท่อ t", font_size=11, color=WHITE).move_to([-3.2, c_y + 0.75, 0])
+        r2 = Text("• ระดับมาตรฐาน: Schedule 40 → Sch 80 → Sch 160", font_size=11, color=WHITE).move_to([-3.2, c_y + 0.30, 0])
+        r3 = Text("• การรับความดัน: BP = 2tS / Di (ยิ่งผนังหนา ยิ่งทนสูง)", font_size=11, color=WHITE).move_to([-3.2, c_y - 0.15, 0])
+        r4 = Text("• ข้อจำกัด: ดัดงอไม่ได้ / แข็งเกร็ง / หนักขึ้นตาม Schedule", font_size=11, color=COL_WARN).move_to([-3.2, c_y - 0.60, 0])
+        r5 = Text("• การใช้งาน: ท่อเมนหลัก โครงสร้างเครื่องจักรคงที่", font_size=11, color=COL_GRAY).move_to([-3.2, c_y - 1.05, 0])
+        card_rigid = VGroup(b_rigid, h_rigid, div_r, r1, r2, r3, r4, r5)
+
+        # Right: Flexible Hose (H6_09)
+        b_flex = RoundedRectangle(corner_radius=0.12, width=card_w, height=card_h, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.92).move_to([3.2, c_y, 0])
+        h_flex = Text("สายยืดหยุ่น (Flexible Hose — คลิปนี้)", font_size=13, color=COL_OK).move_to([3.2, c_y + 1.30, 0])
+        div_f = Line([0.6, c_y + 1.05, 0], [5.8, c_y + 1.05, 0], color=COL_OK, stroke_width=1.2)
+        f1 = Text("• วิธีเสริมแรง: เพิ่มจำนวนชั้นลวดถัก / ผ้าถัก", font_size=11, color=WHITE).move_to([3.2, c_y + 0.75, 0])
+        f2 = Text("• ระดับมาตรฐาน: SAE 100R1 (1 ชั้น) → 100R2 (2 ชั้น)", font_size=11, color=WHITE).move_to([3.2, c_y + 0.30, 0])
+        f3 = Text("• การรับความดัน: ชั้นลวดรับแรงดึงในแนวเส้นรอบวง", font_size=11, color=WHITE).move_to([3.2, c_y - 0.15, 0])
+        f4 = Text("• ข้อได้เปรียบ: ดัดโค้งงอได้ ซับแรงสั่นสะเทือนได้ดีเยี่ยม", font_size=11, color=COL_OK).move_to([3.2, c_y - 0.60, 0])
+        f5 = Text("• การใช้งาน: แขนกล กระบอกสูบที่เคลื่อนที่ อุปกรณ์ขยับ", font_size=11, color=COL_GRAY).move_to([3.2, c_y - 1.05, 0])
+        card_flex = VGroup(b_flex, h_flex, div_f, f1, f2, f3, f4, f5)
+
+        self.play(FadeIn(card_rigid, shift=UP * 0.25), FadeIn(card_flex, shift=UP * 0.25), run_time=1.0)
+        self.wait(3.0)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 29.2–34.2: Summary Card
+        # ----------------------------------------------------------------------
+        sum_box = RoundedRectangle(
+            corner_radius=0.15, width=11.4, height=3.5,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.25, 0])
+
+        s_head = Text("สรุปสำคัญ: สายไฮดรอลิกยืดหยุ่น (hydraulic06 น.12)", font_size=16, color=COL_OK).move_to([0, 1.15, 0])
+        s1 = Text("1. โครงสร้างพื้นฐาน 3 ชั้น: ท่อในยางทนน้ำมัน + ชั้นเสริมแรง + เปลือกนอกทนสภาพอากาศ", font_size=13, color=WHITE).move_to([0, 0.55, 0])
+        s2 = Text("2. SAE 100R1 vs 100R2: ต่างกันที่จำนวนชั้นลวดถัก (1 ชั้น vs 2 ชั้น — รับความดันต่างกัน ~1.5–2 เท่า)", font_size=13, color=WHITE).move_to([0, 0.05, 0])
+        s3 = Text("3. SAE 100R3–R5: เสริมแรงด้วยผ้าถัก (Textile) ดัดโค้งรัศมีแคบได้ดี แต่นิยมใช้ในระบบความดันต่ำ", font_size=13, color=WHITE).move_to([0, -0.45, 0])
+        s4 = Text("4. หลักการเดียวกับ H6_04: เสริมแรงมากขึ้น (ลวดมากขึ้น / ผนังหนาขึ้น) = รับความดันได้มากขึ้น", font_size=12, color=COL_CURR).move_to([0, -0.95, 0])
+
+        sum_grp = VGroup(sum_box, s_head, s1, s2, s3, s4)
+
+        self.play(FadeIn(sum_grp, shift=UP * 0.35), run_time=0.8)
+        self.wait(3.2)
+
+        self.clear_stage(run_time=0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 34.2–39.2: Review Question Card & Outro
+        # ----------------------------------------------------------------------
+        q_box = RoundedRectangle(
+            corner_radius=0.15, width=11.2, height=2.6,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.35, 0.0])
+        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0.0, 0.50, 0.0])
+        q_body = Text(
+            "งานที่ต้องขยับงอสายไปมาบ่อยๆ ความดันไม่สูงมาก ควรเลือกสายลวดถัก (R1/R2) หรือผ้าถัก (R3–R5) ดีกว่า?",
+            font_size=14, color=WHITE
+        ).move_to([0.0, 0.05, 0.0])
+        q_ans = Text(
+            "(คำตอบ: ควรเลือกสายผ้าถัก R3–R5 เพราะยืดหยุ่น ดัดโค้งรัศมีแคบได้ง่าย และทนต่อความล้าจากการเคลื่อนที่ต่อเนื่องได้ดีกว่า)",
+            font_size=12, color=COL_GRAY
+        ).move_to([0.0, -0.65, 0.0])
+
+        q_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.4)
+
+        self.play(FadeOut(q_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+
+
+
 
 
 
