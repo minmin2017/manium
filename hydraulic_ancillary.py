@@ -8100,3 +8100,360 @@ class H6_20_WiperRings(SafeScene):
         self.wait(0.2)
         self.fade_out_all(run_time=0.6)
         self.wait(0.5)
+
+
+# ==============================================================================
+# SCENE 21: H6_21_Intensifier (hydraulic06.pdf page 24)
+# Duration: ~48 seconds | 2D SafeScene
+# Pedagogical Focus: Pressure Intensifier principle (P2 = P1 * A1/A2, F1 = F2)
+# Aha Moment: High pressure generated without changing the pump, but flow rate drops
+# Proportional Consistency (§34): Swept volumes Q1 and Q2 match A1 and A2 sizes
+# Schematic Symbol: Circle with "INT" replaces full double-cylinder mechanism
+# ==============================================================================
+COL_OIL_LOW     = "#CBD5E1"  # Light gray (Low Pressure Oil)
+COL_OIL_HIGH    = "#0F172A"  # Black / dark navy with border (High Pressure Oil)
+COL_OIL_EXHAUST = "#FFFFFF"  # White / outline (Exhaust Oil)
+
+
+def _h6_21_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_21_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_21_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_21_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_21_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class H6_21_Intensifier(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_21_title("Pressure Intensifier: ตัวเพิ่มแรงดัน")
+        self.ref_m = _h6_21_page_ref("hydraulic06 น.24")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 2.0–5.5: Hook Question
+        # ======================================================================
+        hook_q = _h6_21_caption_top("อยากได้แรงดันสูงกว่าที่ปั๊มสร้างได้ ต้องเปลี่ยนปั๊มตัวใหม่ที่แรงกว่าเท่านั้นจริงไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 6.0–20.0: Piston Cross-Section (A1 Big vs A2 Small, Common Rod, F1 = F2)
+        # ======================================================================
+        cap1 = _h6_21_caption_top("1. แรง (Force) เท่ากันผ่านก้านร่วม แต่พื้นที่ต่างกัน = แรงดันเปลี่ยน")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Geometric constants for cross-beat consistency (§34 rule):
+        # Big piston A1 (left):
+        H_A1 = 2.10        # Big piston height (bore diameter)
+        W_P1 = 0.35        # Big piston thickness
+        # Small piston A2 (right):
+        H_A2 = 0.85        # Small piston height (bore diameter)
+        W_P2 = 0.35        # Small piston thickness
+        # Common Rod:
+        H_ROD = 0.32       # Common rod height
+        Y_AXIS = 0.42      # Raised vertical centerline offset to avoid overlap below
+
+        # Left Chamber Housing (Big Cylinder):
+        cyl_left_box = Rectangle(width=3.2, height=H_A1 + 0.26, color=COL_METAL, stroke_width=2.0).set_fill("#1E293B", 0.85).move_to([-2.6, Y_AXIS, 0.0])
+        cyl_right_box = Rectangle(width=2.8, height=H_A2 + 0.26, color=COL_METAL, stroke_width=2.0).set_fill("#1E293B", 0.85).move_to([2.4, Y_AXIS, 0.0])
+
+        # Piston & Rod Assembly at initial position:
+        x_p1 = -2.8
+        x_p2 = 1.6
+        rod_center_x = (x_p1 + x_p2) / 2
+
+        piston_big = Rectangle(width=W_P1, height=H_A1, color=COL_FIELD, stroke_width=2.5).set_fill(COL_FIELD, 0.95).move_to([x_p1, Y_AXIS, 0.0])
+        piston_small = Rectangle(width=W_P2, height=H_A2, color=COL_WARN, stroke_width=2.5).set_fill(COL_WARN, 0.95).move_to([x_p2, Y_AXIS, 0.0])
+        common_rod = Rectangle(width=x_p2 - x_p1, height=H_ROD, color=COL_METAL, stroke_width=2.0).set_fill(COL_METAL, 0.95).move_to([rod_center_x, Y_AXIS, 0.0])
+
+        assembly_initial = VGroup(common_rod, piston_big, piston_small)
+
+        # Fluid fills in chambers:
+        # 1. LOW PRESSURE OIL (left of big piston, pushing right):
+        oil_low = Rectangle(width=1.2, height=H_A1, color=COL_OIL_LOW, stroke_width=1.5).set_fill(COL_OIL_LOW, 0.85).align_to(cyl_left_box, LEFT).shift(RIGHT * 0.14).align_to(piston_big, UP)
+        # 2. EXHAUST OIL (right of big piston, draining):
+        oil_exhaust = Rectangle(width=1.2, height=H_A1, color=WHITE, stroke_width=1.0).set_fill(WHITE, 0.12).next_to(piston_big, RIGHT, buff=0).align_to(piston_big, UP)
+        # 3. HIGH PRESSURE OIL (right of small piston, pushed out):
+        oil_high = Rectangle(width=1.4, height=H_A2, color=WHITE, stroke_width=1.8).set_fill(COL_OIL_HIGH, 0.95).next_to(piston_small, RIGHT, buff=0).align_to(piston_small, UP)
+
+        lbl_a1 = Text("พื้นที่ A1 (ใหญ่)", font_size=11, color=COL_FIELD).next_to(cyl_left_box, DOWN, buff=0.10)
+        lbl_a2 = Text("พื้นที่ A2 (เล็ก)", font_size=11, color=COL_WARN).next_to(cyl_right_box, DOWN, buff=0.10)
+        lbl_rod = Text("ก้านสูบร่วม (Common Rod)", font_size=10, color=COL_GRAY).next_to(common_rod, UP, buff=0.12)
+
+        # Legend badges matching slide 24:
+        leg_low = _h6_21_badge("LOW PRESSURE OIL (P1 ต่ำ)", COL_OIL_LOW).move_to([-3.2, 2.00, 0.0])
+        leg_high = _h6_21_badge("HIGH PRESSURE OIL (P2 สูง)", COL_WARN).move_to([2.6, 2.00, 0.0])
+
+        cross_section_grp = VGroup(
+            cyl_left_box, cyl_right_box,
+            oil_low, oil_exhaust, oil_high,
+            assembly_initial,
+            lbl_a1, lbl_a2, lbl_rod,
+            leg_low, leg_high
+        )
+
+        banner1 = _h6_21_banner(
+            "แรงที่ลูกสูบใหญ่รับ = แรงที่ส่งผ่านก้านร่วมไปลูกสูบเล็ก แต่พื้นที่เล็กกว่า → แรงดันฝั่งขวาสูงขึ้นจริง (P2 = P1 × A1/A2)",
+            COL_OK
+        )
+
+        self.play(FadeIn(cross_section_grp, shift=UP * 0.2), FadeIn(banner1), run_time=1.2)
+
+        # Equal Force Arrows: F1 right = F2 left
+        # §34: F1 and F2 must have the exact same size/length because F1 = F2 through the common rod!
+        f_len = 1.3
+        arr_f1 = Arrow(start=[-4.0, Y_AXIS, 0.0], end=[-4.0 + f_len, Y_AXIS, 0.0], color=COL_FORCE, stroke_width=4.0, buff=0)
+        lbl_f1 = MathTex("F_1 = P_1 A_1", font_size=19, color=COL_FORCE).next_to(arr_f1, UP, buff=0.08)
+        f1_grp = VGroup(arr_f1, lbl_f1)
+
+        arr_f2 = Arrow(start=[3.4, Y_AXIS, 0.0], end=[3.4 - f_len, Y_AXIS, 0.0], color=COL_FORCE, stroke_width=4.0, buff=0)
+        lbl_f2 = MathTex("F_2 = P_2 A_2", font_size=19, color=COL_FORCE).next_to(arr_f2, UP, buff=0.08)
+        f2_grp = VGroup(arr_f2, lbl_f2)
+
+        force_arrows_grp = VGroup(f1_grp, f2_grp)
+        self.play(FadeIn(force_arrows_grp), run_time=0.8)
+
+        # Mathematical Derivation Callout Box at bottom center (placed safely below cylinders):
+        formula1 = MathTex("P_2 = P_1 \\times \\frac{A_1}{A_2}", font_size=25, color=COL_WARN).move_to([0.0, -1.95, 0.0])
+        box_f1 = SurroundingRectangle(formula1, color=COL_WARN, buff=0.14, corner_radius=0.08)
+        eq_force = MathTex("F_1 = F_2 \\implies P_1 A_1 = P_2 A_2", font_size=17, color=WHITE).next_to(box_f1, UP, buff=0.10)
+        derivation_grp = VGroup(eq_force, box_f1, formula1)
+
+        self.play(FadeIn(derivation_grp, shift=UP * 0.15), run_time=0.8)
+        # Sequentially Indicate High Pressure side (Lesson 5: after FadeIn)
+        self.play(Indicate(leg_high, color=COL_WARN, scale_factor=1.08), run_time=0.8)
+        self.wait(5.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 20.6–34.0: Flow Rate Tradeoff & Swept Volume Q1 vs Q2
+        # ======================================================================
+        cap2 = _h6_21_caption_top("2. แลกมาด้วย: อัตราการไหลฝั่งแรงดันสูงลดลงตามสัดส่วนเป๊ะ")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Piston & Rod Assembly re-created at base position (reusing EXACT H_A1, H_A2, H_ROD, Y_AXIS):
+        piston_big_b2 = Rectangle(width=W_P1, height=H_A1, color=COL_FIELD, stroke_width=2.5).set_fill(COL_FIELD, 0.95).move_to([-3.4, Y_AXIS, 0.0])
+        piston_small_b2 = Rectangle(width=W_P2, height=H_A2, color=COL_WARN, stroke_width=2.5).set_fill(COL_WARN, 0.95).move_to([1.0, Y_AXIS, 0.0])
+        common_rod_b2 = Rectangle(width=4.4, height=H_ROD, color=COL_METAL, stroke_width=2.0).set_fill(COL_METAL, 0.95).move_to([-1.2, Y_AXIS, 0.0])
+
+        assembly_b2 = VGroup(common_rod_b2, piston_big_b2, piston_small_b2)
+
+        lbl_disp_rod = Text("ก้านร่วมเลื่อนไปทางขวาเป็นระยะทาง d เท่ากัน", font_size=11, color=YELLOW).move_to([0.0, 1.95, 0.0])
+
+        self.play(FadeIn(assembly_b2), FadeIn(lbl_disp_rod), run_time=0.8)
+
+        # Stroke displacement:
+        stroke_d = 1.70
+
+        # Swept Volume Rectangles (§34 Rule: exact proportional consistency):
+        swept_q1 = Rectangle(
+            width=stroke_d, height=H_A1,
+            color=COL_FIELD, fill_color=COL_FIELD, fill_opacity=0.40,
+            stroke_width=2.0
+        ).next_to(piston_big_b2, RIGHT, buff=0.0).align_to(piston_big_b2, UP)
+
+        lbl_q1 = VGroup(
+            MathTex("Q_1 = A_1 \\times d", font_size=16, color=COL_FIELD),
+            Text("(ปริมาตรกวาดใหญ่)", font_size=10, color=COL_FIELD)
+        ).arrange(DOWN, buff=0.06).move_to(swept_q1.get_center())
+
+        swept_q2 = Rectangle(
+            width=stroke_d, height=H_A2,
+            color=COL_WARN, fill_color=COL_WARN, fill_opacity=0.40,
+            stroke_width=2.0
+        ).next_to(piston_small_b2, RIGHT, buff=0.0).align_to(piston_small_b2, UP)
+
+        lbl_q2 = VGroup(
+            MathTex("Q_2 = A_2 \\times d", font_size=16, color=COL_WARN),
+            Text("(ปริมาตรกวาดเล็ก)", font_size=10, color=COL_WARN)
+        ).arrange(DOWN, buff=0.06).move_to(swept_q2.get_center())
+
+        # Motion arrows for stroke displacement d (positioned cleanly below swept boxes):
+        arr_stroke1 = Arrow(start=[-3.4, Y_AXIS - H_A1/2 - 0.22, 0], end=[-3.4 + stroke_d, Y_AXIS - H_A1/2 - 0.22, 0], color=YELLOW, stroke_width=2.2, buff=0)
+        lbl_d1 = MathTex("d", font_size=15, color=YELLOW).next_to(arr_stroke1, DOWN, buff=0.05)
+
+        arr_stroke2 = Arrow(start=[1.0, Y_AXIS - H_A2/2 - 0.22, 0], end=[1.0 + stroke_d, Y_AXIS - H_A2/2 - 0.22, 0], color=YELLOW, stroke_width=2.2, buff=0)
+        lbl_d2 = MathTex("d", font_size=15, color=YELLOW).next_to(arr_stroke2, DOWN, buff=0.05)
+
+        banner2 = _h6_21_banner(
+            "ก้านร่วมเลื่อนระยะเท่ากันทั้ง 2 ฝั่ง แต่พื้นที่เล็กกวาดปริมาตรได้น้อยกว่า — แรงดันเพิ่มกี่เท่า อัตราการไหลก็ลดลงเท่านั้นเท่า (Q2 = Q1 × A2/A1)",
+            COL_OK
+        )
+
+        self.play(
+            assembly_b2.animate.shift(RIGHT * stroke_d),
+            FadeIn(swept_q1), FadeIn(swept_q2),
+            FadeIn(arr_stroke1), FadeIn(lbl_d1),
+            FadeIn(arr_stroke2), FadeIn(lbl_d2),
+            FadeIn(banner2),
+            run_time=2.0
+        )
+        self.play(FadeIn(lbl_q1), FadeIn(lbl_q2), run_time=0.6)
+
+        # Unified Flow-Pressure Tradeoff Formula:
+        flow_formula = MathTex("\\frac{P_2}{P_1} = \\frac{A_1}{A_2} = \\frac{Q_1}{Q_2}", font_size=25, color=COL_OK).move_to([0.0, -1.95, 0.0])
+        box_flow = SurroundingRectangle(flow_formula, color=COL_OK, buff=0.14, corner_radius=0.08)
+        lbl_tradeoff = Text("กฎการอนุรักษ์กำลัง (Hydraulic Power Tradeoff: P × Q = คงที่)", font_size=11, color=WHITE).next_to(box_flow, UP, buff=0.08)
+        flow_grp = VGroup(lbl_tradeoff, box_flow, flow_formula)
+
+        self.play(FadeIn(flow_grp, shift=UP * 0.15), run_time=0.8)
+        self.wait(5.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 34.6–40.0: Hydraulic Schematic Symbol "INT" (Circuit Connection)
+        # ======================================================================
+        cap3 = _h6_21_caption_top("3. ในผังวงจรไฮดรอลิกจริง ใช้สัญลักษณ์วงกลม \"INT\" แทนกลไกทั้งหมดนี้")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        # Simplified circuit diagram from slide 24:
+        # Pump -> DCV -> INT symbol -> Cylinder with F_LOAD
+        # 1. Pump symbol at bottom left:
+        p_center = np.array([-4.2, -1.05, 0.0])
+        pump_circle = Circle(radius=0.40, color=COL_METAL, stroke_width=2.0).move_to(p_center)
+        pump_tri = Polygon(
+            p_center + np.array([-0.18, -0.20, 0]),
+            p_center + np.array([0.18, -0.20, 0]),
+            p_center + np.array([0.0, 0.25, 0]),
+            color=COL_METAL, fill_color=COL_METAL, fill_opacity=1.0
+        )
+        pump_lbl = Text("PUMP", font_size=9, color=COL_METAL).next_to(pump_circle, DOWN, buff=0.10)
+        pump_grp = VGroup(pump_circle, pump_tri, pump_lbl)
+
+        # 2. DCV symbol (Directional Control Valve 4/3) in center:
+        dcv_box = Rectangle(width=2.1, height=1.0, color=COL_METAL, stroke_width=2.0).move_to([-1.2, -1.05, 0.0])
+        dcv_div1 = Line([-1.2 - 0.35, -1.55, 0], [-1.2 - 0.35, -0.55, 0], color=COL_METAL, stroke_width=1.5)
+        dcv_div2 = Line([-1.2 + 0.35, -1.55, 0], [-1.2 + 0.35, -0.55, 0], color=COL_METAL, stroke_width=1.5)
+        dcv_lbl = Text("DCV 4/3", font_size=9.5, color=COL_METAL).next_to(dcv_box, DOWN, buff=0.10)
+        dcv_grp = VGroup(dcv_box, dcv_div1, dcv_div2, dcv_lbl)
+
+        # 3. INT Symbol (Circle with "INT" text inside):
+        int_center = np.array([1.2, 0.15, 0.0])
+        int_circle = Circle(radius=0.60, color=COL_OK, stroke_width=2.8).set_fill(COL_BG_BOX, 0.95).move_to(int_center)
+        int_txt = Text("INT", font_size=20, color=COL_OK, weight=BOLD).move_to(int_center)
+        int_sub = Text("Pressure Intensifier", font_size=9.5, color=COL_OK).next_to(int_circle, DOWN, buff=0.10)
+        int_symbol = VGroup(int_circle, int_txt, int_sub)
+
+        # 4. Load Cylinder at top right (cap end on right, rod extends left, matching slide):
+        cyl_load_box = Rectangle(width=2.4, height=0.75, color=COL_METAL, stroke_width=2.0).move_to([3.8, 1.30, 0.0])
+        rod_load = Rectangle(width=1.6, height=0.22, color=COL_METAL).set_fill(COL_METAL, 0.95).next_to(cyl_load_box, LEFT, buff=-0.2)
+        f_load_arr = Arrow(start=[1.4, 1.30, 0], end=[2.5, 1.30, 0], color=COL_WARN, stroke_width=3.2, buff=0)
+        f_load_lbl = MathTex("F_{LOAD}", font_size=16, color=COL_WARN).next_to(f_load_arr, UP, buff=0.08)
+        cyl_load_grp = VGroup(cyl_load_box, rod_load, f_load_arr, f_load_lbl)
+
+        # Connecting Hydraulic lines:
+        line_pump_dcv = Line(pump_circle.get_right(), dcv_box.get_left(), color=COL_OIL_LOW, stroke_width=2.5)
+        line_dcv_int = Line([-1.2, -0.55, 0], [-1.2, 0.15, 0], color=COL_OIL_LOW, stroke_width=2.5)
+        line_horiz_int = Line([-1.2, 0.15, 0], int_circle.get_left(), color=COL_OIL_LOW, stroke_width=2.5)
+        line_int_cyl = Line(int_circle.get_top(), [1.2, 0.92, 0], color=COL_WARN, stroke_width=2.8)
+        line_int_cyl2 = Line([1.2, 0.92, 0], [3.8, 0.92, 0], color=COL_WARN, stroke_width=2.8)
+        line_int_cyl3 = Line([3.8, 0.92, 0], cyl_load_box.get_bottom(), color=COL_WARN, stroke_width=2.8)
+
+        circuit_lines = VGroup(line_pump_dcv, line_dcv_int, line_horiz_int, line_int_cyl, line_int_cyl2, line_int_cyl3)
+
+        banner3 = _h6_21_banner(
+            "ในผังวงจรจริงไม่ต้องวาดกลไกภายในซ้ำทุกครั้ง — ใช้สัญลักษณ์ \"INT\" แทนได้เลย",
+            COL_OK
+        )
+
+        mini_circuit_grp = VGroup(pump_grp, dcv_grp, circuit_lines, cyl_load_grp, int_symbol)
+
+        self.play(FadeIn(mini_circuit_grp, shift=UP * 0.2), FadeIn(banner3), run_time=1.0)
+        # Sequentially Indicate INT symbol (Lesson 5: after FadeIn)
+        self.play(Indicate(int_symbol, color=COL_OK, scale_factor=1.12), run_time=0.8)
+        self.wait(2.8)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 40.6–44.0: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: ตัวเพิ่มแรงดัน (Pressure Intensifier - hydraulic06 น.24)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. แรงเท่ากันผ่านก้านร่วม: พื้นที่ต่างกันทำให้ P2 = P1 × (A1 / A2) ได้แรงดันขาออกสูงขึ้นโดยไม่ต้องเปลี่ยนปั๊ม",
+            "2. แลกด้วยอัตราการไหลลดลง: ปริมาตรที่กวาดได้ลดลงตามสัดส่วนพื้นที่ (P2/P1 = A1/A2 = Q1/Q2 ตามกฎคงที่ของกำลัง)",
+            "3. สัญลักษณ์ในผังวงจรจริง: ใช้สัญลักษณ์วงกลมตัวอักษร \"INT\" แทนกลไกลูกสูบคู่ทั้งหมด"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(2.6)
+
+        # ======================================================================
+        # BEAT 44.0–47.5: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ถ้า A1 ใหญ่กว่า A2 อยู่ 4 เท่า แรงดันขาออกจะเป็นกี่เท่าของแรงดันขาเข้า แล้วอัตราการไหลขาออกเพิ่มขึ้นหรือลดลง กี่เท่า?",
+            font_size=12.5, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: แรงดันขาออก P2 เพิ่มเป็น 4 เท่าของ P1 | แต่อัตราการไหลขาออก Q2 จะลดลงเหลือ 1/4 ของ Q1\nตามสมการ P2/P1 = A1/A2 = Q1/Q2 โดยที่กำลังงานไฮดรอลิก P × Q คงที่)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.9)
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
