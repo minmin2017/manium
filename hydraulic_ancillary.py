@@ -8297,8 +8297,9 @@ class H6_21_Intensifier(SafeScene):
 
         lbl_q1 = VGroup(
             MathTex("Q_1 = A_1 \\times d", font_size=16, color=COL_FIELD),
-            Text("(ปริมาตรกวาดใหญ่)", font_size=10, color=COL_FIELD)
+            Text("(ใหญ่)", font_size=10, color=COL_FIELD)
         ).arrange(DOWN, buff=0.06).move_to(swept_q1.get_center())
+        fit_width(lbl_q1, stroke_d * 0.85)
 
         swept_q2 = Rectangle(
             width=stroke_d, height=H_A2,
@@ -8308,8 +8309,9 @@ class H6_21_Intensifier(SafeScene):
 
         lbl_q2 = VGroup(
             MathTex("Q_2 = A_2 \\times d", font_size=16, color=COL_WARN),
-            Text("(ปริมาตรกวาดเล็ก)", font_size=10, color=COL_WARN)
+            Text("(เล็ก)", font_size=10, color=COL_WARN)
         ).arrange(DOWN, buff=0.06).move_to(swept_q2.get_center())
+        fit_width(lbl_q2, stroke_d * 0.85)
 
         # Motion arrows for stroke displacement d (positioned cleanly below swept boxes):
         arr_stroke1 = Arrow(start=[-3.4, Y_AXIS - H_A1/2 - 0.22, 0], end=[-3.4 + stroke_d, Y_AXIS - H_A1/2 - 0.22, 0], color=YELLOW, stroke_width=2.2, buff=0)
