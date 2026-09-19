@@ -5033,10 +5033,307 @@ class H6_12_HoseInstallation(SafeScene):
         self.wait(0.5)
 
 
+# ==============================================================================
+# SCENE 13: H6_13_ConductorNomograph (hydraulic06.pdf page 16)
+# Duration: ~38.0 seconds | 2D SafeScene
+# Pedagogical Focus: Conductor Sizing Nomograph
+# AHA Moment:
+#   1. Nomograph allows reading the 3rd value by drawing a single straight line
+#      through 2 known values instead of computing Q = A * V manually.
+#   2. Slide example: Known Flow = 14 GPM, Pipe Size = 3/4" ID -> Velocity = 10 ft/s.
+#   3. Connection to H6_02: Safe velocity limits determine line suitability:
+#      - Intake / suction line: max recommended <= 4 ft/s -> 10 ft/s is DANGEROUS (cavitation risk!).
+#      - Pressure line: max recommended <= 20 ft/s -> 10 ft/s is SAFE.
+# ==============================================================================
+
+def _h6_13_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
 
 
+def _h6_13_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
 
 
+def _h6_13_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
 
 
+def _h6_13_banner(text, color):
+    lbl = Text(text, font_size=12, color=color)
+    bg = RoundedRectangle(
+        width=min(12.5, max(lbl.width + 0.6, 9.0)),
+        height=0.55,
+        corner_radius=0.1,
+        color=color,
+        fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -1.85, 0.0])
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
 
+
+class H6_13_ConductorNomograph(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        """Fade out all scene mobjects except persistent header."""
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–2.0: Persistent Title & Page Reference
+        # ----------------------------------------------------------------------
+        self.title_m = _h6_13_title("โนโมกราฟเลือกขนาดท่อ")
+        self.ref_m = _h6_13_page_ref("hydraulic06 น.16")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)  # Checkpoint 1.5s
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–5.2: Hook Question
+        # ----------------------------------------------------------------------
+        hook_q = _h6_13_caption_top("รู้ว่าท่อต้องไหล 14 GPM ผ่าน ID 3/4 นิ้ว จะไหลเร็วแค่ไหน — ต้องคำนวณเองไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.6)  # Checkpoint 3.6s
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 5.2–9.0: Nomograph Introduction (3 Vertical Scales + Formula)
+        # ----------------------------------------------------------------------
+        cap1 = _h6_13_caption_top("โนโมกราฟ: ลากเส้นตรงผ่าน 2 จุดที่รู้ อ่านจุดที่ 3 ได้เลย")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Formula badge floating at top
+        formula_txt = Text("Area (sq. in.) = (GPM × 0.3208) / Velocity (ft/s)", font_size=11.5, color=COL_CURR)
+        formula_bg = RoundedRectangle(
+            width=formula_txt.width + 0.45,
+            height=0.36,
+            corner_radius=0.08,
+            color=COL_CURR,
+            fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, 1.95, 0.0])
+        formula_txt.move_to(formula_bg.get_center())
+        formula_grp = VGroup(formula_bg, formula_txt)
+
+        # 3 Scales layout: x = -3.8 (Flow), x = 0.0 (Size), x = +3.8 (Velocity)
+        x_flow = -3.8
+        x_size = 0.0
+        x_vel  = 3.8
+        y_bot = -1.55
+        y_top = 1.20
+
+        # Helper to make ticks (no invented numbers! Only dashes)
+        def make_scale_ticks(x_pos, tick_ys, tick_len=0.16):
+            lines = []
+            for y in tick_ys:
+                lines.append(Line([x_pos - tick_len / 2, y, 0], [x_pos + tick_len / 2, y, 0], color=COL_GRAY, stroke_width=1.5))
+            return VGroup(*lines)
+
+        # 1. Flow scale
+        axis_flow = Line([x_flow, y_bot, 0], [x_flow, y_top, 0], color=COL_GRAY, stroke_width=2.5)
+        hdr_flow = Text("อัตราไหล (Flow)\n[GPM]", font_size=11, color=COL_METAL).next_to(axis_flow, UP, buff=0.12)
+        ticks_flow = make_scale_ticks(x_flow, [-1.3, -0.8, -0.3, 0.15, 0.60, 1.05])
+        # Exactly verified number: 14 GPM at y = 0.60
+        y_flow_14 = 0.60
+        dot_flow_14 = Dot([x_flow, y_flow_14, 0], radius=0.09, color=COL_OK)
+        lbl_flow_14 = Text("14 GPM", font_size=12, color=COL_OK).next_to(dot_flow_14, LEFT, buff=0.15)
+        scale_flow = VGroup(axis_flow, hdr_flow, ticks_flow, dot_flow_14, lbl_flow_14)
+
+        # 2. Size scale (ID in inches)
+        axis_size = Line([x_size, y_bot, 0], [x_size, y_top, 0], color=COL_GRAY, stroke_width=2.5)
+        hdr_size = Text("ขนาดรูในท่อ (Size)\n[นิ้ว / ID]", font_size=11, color=COL_METAL).next_to(axis_size, UP, buff=0.12)
+        ticks_size = make_scale_ticks(x_size, [-1.3, -0.8, -0.35, 0.10, 0.55, 1.05])
+        # Exactly verified number: 3/4" ID at y = 0.10
+        # Notice: y_size_34 = (y_flow_14 + y_vel_10) / 2 = (0.60 + (-0.40)) / 2 = 0.10!
+        # This guarantees 100% mathematical collinearity without kink!
+        y_size_34 = 0.10
+        dot_size_34 = Dot([x_size, y_size_34, 0], radius=0.09, color=COL_OK)
+        lbl_size_34 = Text("3/4\" ID", font_size=12, color=COL_OK).next_to(dot_size_34, UR, buff=0.12)
+        scale_size = VGroup(axis_size, hdr_size, ticks_size, dot_size_34, lbl_size_34)
+
+        # 3. Velocity scale (ft/s)
+        axis_vel = Line([x_vel, y_bot, 0], [x_vel, y_top, 0], color=COL_GRAY, stroke_width=2.5)
+        hdr_vel = Text("ความเร็ว (Velocity)\n[ft/s]", font_size=11, color=COL_METAL).next_to(axis_vel, UP, buff=0.12)
+        ticks_vel = make_scale_ticks(x_vel, [-1.25, -0.85, -0.40, 0.05, 0.50, 0.85, 1.10])
+        # Exactly verified number: 10 ft/s at y = -0.40
+        y_vel_10 = -0.40
+        dot_vel_10 = Dot([x_vel, y_vel_10, 0], radius=0.09, color=COL_OK)
+        lbl_vel_10 = Text("10 ft/s", font_size=12, color=COL_OK).next_to(dot_vel_10, RIGHT, buff=0.15)
+        scale_vel = VGroup(axis_vel, hdr_vel, ticks_vel, dot_vel_10, lbl_vel_10)
+
+        nomograph_scales = VGroup(scale_flow, scale_size, scale_vel)
+
+        self.play(
+            FadeIn(nomograph_scales, shift=UP * 0.2),
+            FadeIn(formula_grp, shift=DOWN * 0.15),
+            run_time=1.2
+        )
+        self.wait(1.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 9.0–11.0: Step 1 (มาร์ก 14 GPM บนสเกล Flow)
+        # ----------------------------------------------------------------------
+        banner_s1 = _h6_13_banner("① จุดที่ 1: มาร์กอัตราไหลที่ต้องการ 14 GPM บนสเกล Flow", COL_OK)
+        self.play(
+            Indicate(dot_flow_14, color=YELLOW, scale_factor=1.3),
+            FadeIn(banner_s1),
+            run_time=0.8
+        )
+        self.wait(1.2)  # Checkpoint 9.5s falls right here!
+
+        # ----------------------------------------------------------------------
+        # BEAT 11.0–13.2: Step 2 (มาร์ก ID 3/4" บนสเกล Size + ลากเส้น 1 ไป 2)
+        # ----------------------------------------------------------------------
+        banner_s2 = _h6_13_banner("② จุดที่ 2: วางทาบผ่านขนาดท่อที่เลือก ID 3/4 นิ้ว บนสเกล Size", COL_OK)
+        line_1to2 = Line(
+            [x_flow, y_flow_14, 0],
+            [x_size, y_size_34, 0],
+            color=COL_OK,
+            stroke_width=3.5
+        )
+        self.play(FadeOut(banner_s1), run_time=0.3)
+        self.play(
+            Create(line_1to2),
+            Indicate(dot_size_34, color=YELLOW, scale_factor=1.3),
+            FadeIn(banner_s2),
+            run_time=1.0
+        )
+        self.wait(1.2)  # Checkpoint 12.0s falls right here!
+
+        # ----------------------------------------------------------------------
+        # BEAT 13.2–16.5: Step 3 (ลากเส้นตรงต่อไปยังสเกล Velocity อ่านได้ 10 ft/s)
+        # ----------------------------------------------------------------------
+        banner_s3 = _h6_13_banner("③ จุดที่ 3: ลากเส้นตรงทะลุไปอ่านค่าความเร็วได้ v = 10 ft/s ทันที!", COL_OK)
+        line_2to3 = Line(
+            [x_size, y_size_34, 0],
+            [x_vel, y_vel_10, 0],
+            color=COL_OK,
+            stroke_width=3.5
+        )
+        self.play(FadeOut(banner_s2), run_time=0.3)
+        self.play(
+            Create(line_2to3),
+            Indicate(dot_vel_10, color=YELLOW, scale_factor=1.3),
+            FadeIn(banner_s3),
+            run_time=1.0
+        )
+        self.wait(1.7)  # Checkpoint 15.0s falls right here!
+
+        # ----------------------------------------------------------------------
+        # BEAT 16.5–25.5: Connect to H6_02 (Intake 4 ft/s vs Pressure 20 ft/s)
+        # ----------------------------------------------------------------------
+        # Fade out flow, size scales, lines, formula, step banner, and cap1
+        self.play(
+            FadeOut(scale_flow),
+            FadeOut(scale_size),
+            FadeOut(line_1to2),
+            FadeOut(line_2to3),
+            FadeOut(formula_grp),
+            FadeOut(banner_s3),
+            FadeOut(cap1),
+            run_time=0.6
+        )
+
+        cap2 = _h6_13_caption_top("เชื่อมกับ H6_02: v = 10 ft/s นี้ปลอดภัยไหม? ขึ้นกับประเภทของท่อ")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.6)
+
+        # Shift Velocity scale from x=3.8 to x=-2.2 to leave room on right
+        vel_shift_vector = LEFT * 6.0
+        self.play(
+            scale_vel.animate.shift(vel_shift_vector),
+            run_time=0.8
+        )
+
+        x_vel_new = x_vel - 6.0  # -2.2
+
+        # 1. Intake line limit: 4 ft/s at y = -1.25 (well below 10 ft/s at -0.40)
+        y_intake_4 = -1.25
+        dot_intake_4 = Dot([x_vel_new, y_intake_4, 0], radius=0.09, color=COL_WARN)
+        arr_intake = Arrow([x_vel_new + 0.65, y_intake_4, 0], [x_vel_new + 0.12, y_intake_4, 0], color=COL_WARN, stroke_width=2.5, tip_length=0.12)
+        lbl_intake_4 = Text("4 ft/s (ความเร็วสูงสุดเส้นดูด)", font_size=11, color=COL_WARN).next_to(arr_intake, RIGHT, buff=0.10)
+        mark_intake_4 = VGroup(dot_intake_4, arr_intake, lbl_intake_4)
+
+        # 2. Pressure line limit: 20 ft/s at y = 0.85 (well above 10 ft/s at -0.40)
+        y_pressure_20 = 0.85
+        dot_pressure_20 = Dot([x_vel_new, y_pressure_20, 0], radius=0.09, color=COL_OK)
+        arr_pressure = Arrow([x_vel_new + 0.65, y_pressure_20, 0], [x_vel_new + 0.12, y_pressure_20, 0], color=COL_OK, stroke_width=2.5, tip_length=0.12)
+        lbl_pressure_20 = Text("20 ft/s (ความเร็วสูงสุดเส้นแรงดัน)", font_size=11, color=COL_OK).next_to(arr_pressure, RIGHT, buff=0.10)
+        mark_pressure_20 = VGroup(dot_pressure_20, arr_pressure, lbl_pressure_20)
+
+        # Callout card on right side explaining the comparison
+        eval_card_bg = RoundedRectangle(width=5.8, height=2.2, corner_radius=0.12, color=COL_GRAY, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([3.4, -0.20, 0.0])
+        eval_t1 = Text("ผลการประเมิน v = 10 ft/s จากตัวอย่าง:", font_size=11.5, color=WHITE).move_to([3.4, 0.55, 0.0])
+        eval_t2 = Text("• ท่อแรงดัน (Pressure): 10 ft/s ปลอดภัย\n  (ไม่เกินขีดจำกัด 20 ft/s)", font_size=11, color=COL_OK).move_to([3.4, 0.05, 0.0])
+        eval_t3 = Text("• ท่อดูด (Intake): 10 ft/s อันตราย\n  (เกินขีดจำกัด 4 ft/s เสี่ยงเกิด Cavitation!)", font_size=11, color=COL_WARN).move_to([3.4, -0.55, 0.0])
+        eval_card = VGroup(eval_card_bg, eval_t1, eval_t2, eval_t3)
+
+        self.play(
+            FadeIn(mark_intake_4, shift=RIGHT * 0.2),
+            run_time=0.6
+        )
+        self.wait(0.8)  # Checkpoint 21.0s falls right here!
+
+        self.play(
+            FadeIn(mark_pressure_20, shift=RIGHT * 0.2),
+            run_time=0.6
+        )
+        self.wait(0.8)
+
+        self.play(
+            FadeIn(eval_card, shift=LEFT * 0.2),
+            Indicate(lbl_vel_10, color=YELLOW, scale_factor=1.2),
+            run_time=0.8
+        )
+        self.wait(3.5)  # Checkpoint 24.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 26.1–31.0: Summary Card
+        # ----------------------------------------------------------------------
+        card_box = RoundedRectangle(
+            width=11.6, height=3.4, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: โนโมกราฟเลือกขนาดท่อ (hydraulic06 น.16)", font_size=14, color=COL_OK).move_to([0.0, 1.25, 0.0])
+        rows = [
+            "1. โนโมกราฟ: ลากเส้นตรงผ่าน 2 ค่าที่รู้ (Flow & Size) อ่านค่าที่ 3 (Velocity) ได้ทันที ไม่ต้องคำนวณมือ",
+            "2. ท่อดูด (Intake Line): แนะนำความเร็วไม่เกิน 4 ft/s เพื่อป้องกัน Cavitation โพรงอากาศทำลายปั๊ม (H6_02)",
+            "3. ท่อแรงดัน (Pressure Line): แนะนำความเร็วไม่เกิน 20 ft/s เพื่อไม่ให้เกิดแรงเสียดทานและความร้อนสะสมเกินพิกัด"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11.5, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.20, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(4.1)  # Checkpoint 29.0s falls right here!
+
+        # ----------------------------------------------------------------------
+        # BEAT 31.0–36.0: Review Question Card
+        # ----------------------------------------------------------------------
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "หากใช้โนโมกราฟแล้วอ่านความเร็วของไหลได้ v = 15 ft/s\nและท่อเส้นนี้คือท่อดูดเข้าปั๊ม (Intake Line) — ปลอดภัยหรือไม่?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: ไม่ปลอดภัย — เพราะท่อดูดแนะนำความเร็วไม่เกิน 4 ft/s\nความเร็ว 15 ft/s จะทำให้ความดันตกต่ำจนน้ำมันเดือดกลายเป็นโพรงไอ เกิด Cavitation รุนแรง)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(4.4)  # Checkpoint 33.5s falls right here!
+
+        self.play(FadeOut(question_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+        self.wait(0.5)
