@@ -30,6 +30,7 @@ COL_GRAY  = GRAYTXT     # #B0BEC5 (labels / auxiliary)
 COL_CURR  = CURRENT     # #FFB300 (flow / duty)
 COL_FORCE = FORCE       # #66BB6A (force vectors)
 COL_BG_BOX = "#1E293B"  # Dark slate card background
+COL_BAD   = "#DC2626"   # Wrong/elastomer-fails contrast color (H6_19+)
 
 
 class H6_01_Reservoir(SafeThreeDScene):
