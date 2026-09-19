@@ -16,6 +16,7 @@ import numpy as np
 from manim import *
 from mlib import *
 from hydraulic_valves import SUPPLY, RETURN, BLOCKED, SECONDARY
+from hydraulic_circuits import pipe, elbow_pts, flow_dots, rotor_symbol, tank_symbol
 
 # Font configuration
 Text.set_default(font=os.environ.get("MANIM_THAI_FONT", "Leelawadee UI"))
@@ -569,3 +570,532 @@ class H6_01_Reservoir(SafeThreeDScene):
         self.wait(3.0)
 
         self.fade_out_all(run_time=0.8)
+
+
+# ==============================================================================
+# Scene: H6_02_Conductors (ตัวนำไฮดรอลิก และขีดจำกัดความเร็ว)
+# Lecture slides: hydraulic06.pdf page 5 ("Hydraulic Conductors")
+# Duration: ~68s
+# Pedagogical Objective:
+# - Correct misconception: "ท่อดูดกับท่อจ่ายใช้ท่อขนาดเดียวกันก็ได้"
+# - 4 Conductor types: Steel pipe, Steel tubing, Plastic tubing, Flexible hose
+# - Continuity principle: Q = A * v (Q constant, constricting A spikes v)
+# - Suction pipe velocity limit (1.2 m/s / 4 ft/s): prevents Delta P drop below
+#   oil vapor pressure causing destructive cavitation implosion in pump
+# - Discharge pipe velocity limit (6.1 m/s / 20 ft/s): high pressure line,
+#   limited by friction loss and fluid heating, not cavitation
+# - Sizing comparison (Q = 30 L/min): D_suc ≈ 23.0 mm vs D_dis ≈ 10.2 mm
+#   D_suc / D_dis = sqrt(v_dis / v_suc) ≈ 2.25x (Area ratio 5.08x)
+# ==============================================================================
+
+class H6_02_Conductors(SafeScene):
+    def clear_stage(self, keep=(), run_time=0.6):
+        """Fade out active stage objects while preserving persistent title badges."""
+        targets = [m for m in self.mobjects if m not in keep and m not in getattr(self, "keep_mobs", ())]
+        if targets:
+            self.play(FadeOut(Group(*targets)), run_time=run_time)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # SETUP PERSISTENT ELEMENTS
+        # ----------------------------------------------------------------------
+        title_mob = title("ตัวนำไฮดรอลิก")
+        page_ref_mob = page_ref("hydraulic06 น.5")
+        self.keep_mobs = (title_mob, page_ref_mob)
+
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–2.0: Title & Page Reference Entrance
+        # ----------------------------------------------------------------------
+        self.play(
+            FadeIn(title_mob, shift=UP * 0.4),
+            FadeIn(page_ref_mob),
+            run_time=1.0
+        )
+        self.wait(0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–4.6: Question Hook & Thought Hold
+        # ----------------------------------------------------------------------
+        hook_q = caption_top("ท่อดูดกับท่อจ่าย ใช้ท่อขนาดเดียวกันได้ไหม?", color=COL_GRAY)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.4)
+        self.play(FadeOut(hook_q), run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 4.6–13.2: 4 Types of Hydraulic Conductors
+        # ----------------------------------------------------------------------
+        cap1 = caption_top("4 ชนิดของตัวนำไฮดรอลิก")
+        self.play(FadeIn(cap1, shift=UP * 0.4), run_time=0.6)
+
+        # 4 Showcase Cards across width
+        xs = [-4.35, -1.45, 1.45, 4.35]
+        card_w, card_h = 2.65, 4.25
+        cy = -0.65
+
+        # Card 1: Steel pipe
+        c1_box = RoundedRectangle(corner_radius=0.12, width=card_w, height=card_h,
+                                  color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[0], cy, 0])
+        p1_body = Rectangle(width=1.65, height=0.36, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.45).move_to([xs[0], cy + 1.25, 0])
+        p1_flange_l = Rectangle(width=0.14, height=0.62, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.90).move_to([xs[0] - 0.82, cy + 1.25, 0])
+        p1_flange_r = Rectangle(width=0.14, height=0.62, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.90).move_to([xs[0] + 0.82, cy + 1.25, 0])
+        icon1 = VGroup(p1_body, p1_flange_l, p1_flange_r)
+        t1_title = Text("Steel pipe", font_size=18, color=WHITE).move_to([xs[0], cy + 0.35, 0])
+        t1_th = Text("ท่อเหล็กแข็ง", font_size=15, color=COL_CURR).move_to([xs[0], cy - 0.05, 0])
+        t1_d1 = Text("• แข็งแรง รับแรงดันสูง", font_size=13, color=COL_GRAY).move_to([xs[0], cy - 0.60, 0])
+        t1_d2 = Text("• ราคาประหยัดสุด", font_size=13, color=COL_GRAY).move_to([xs[0], cy - 1.05, 0])
+        t1_d3 = Text("• งานติดตั้งถาวร", font_size=13, color=COL_OK).move_to([xs[0], cy - 1.50, 0])
+        card1 = VGroup(c1_box, icon1, t1_title, t1_th, t1_d1, t1_d2, t1_d3)
+
+        # Card 2: Steel tubing
+        c2_box = RoundedRectangle(corner_radius=0.12, width=card_w, height=card_h,
+                                  color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[1], cy, 0])
+        tube_pts = [
+            [xs[1] - 0.75, cy + 0.95, 0],
+            [xs[1], cy + 0.95, 0],
+            [xs[1] + 0.55, cy + 1.50, 0],
+            [xs[1] + 0.75, cy + 1.50, 0]
+        ]
+        icon2_line = VMobject(color=COL_METAL, stroke_width=6).set_points_as_corners(
+            [np.asarray(p, dtype=float) for p in tube_pts]
+        )
+        icon2_f1 = Circle(radius=0.12, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.90).move_to([xs[1] - 0.75, cy + 0.95, 0])
+        icon2_f2 = Circle(radius=0.12, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.90).move_to([xs[1] + 0.75, cy + 1.50, 0])
+        icon2 = VGroup(icon2_line, icon2_f1, icon2_f2)
+        t2_title = Text("Steel tubing", font_size=18, color=WHITE).move_to([xs[1], cy + 0.35, 0])
+        t2_th = Text("ท่อเหล็กดัด", font_size=15, color=COL_CURR).move_to([xs[1], cy - 0.05, 0])
+        t2_d1 = Text("• ดัดโค้งได้ แม่นยำ", font_size=13, color=COL_GRAY).move_to([xs[1], cy - 0.60, 0])
+        t2_d2 = Text("• ข้อต่อน้อยลง รั่วยาก", font_size=13, color=COL_GRAY).move_to([xs[1], cy - 1.05, 0])
+        t2_d3 = Text("• เดินท่อซับซ้อน", font_size=13, color=COL_OK).move_to([xs[1], cy - 1.50, 0])
+        card2 = VGroup(c2_box, icon2, t2_title, t2_th, t2_d1, t2_d2, t2_d3)
+
+        # Card 3: Plastic tubing
+        c3_box = RoundedRectangle(corner_radius=0.12, width=card_w, height=card_h,
+                                  color=COL_FIELD, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[2], cy, 0])
+        p3_outer = Rectangle(width=1.65, height=0.34, color=COL_FIELD, stroke_width=2.5,
+                             fill_color=COL_FIELD).set_fill(COL_FIELD, 0.25).move_to([xs[2], cy + 1.25, 0])
+        p3_fluid = Line([xs[2] - 0.75, cy + 1.25, 0], [xs[2] + 0.75, cy + 1.25, 0],
+                        color=COL_FIELD, stroke_width=4)
+        icon3 = VGroup(p3_outer, p3_fluid)
+        t3_title = Text("Plastic tubing", font_size=18, color=WHITE).move_to([xs[2], cy + 0.35, 0])
+        t3_th = Text("ท่อพลาสติก", font_size=15, color=COL_CURR).move_to([xs[2], cy - 0.05, 0])
+        t3_d1 = Text("• ใช้กับความดันต่ำ", font_size=13, color=COL_GRAY).move_to([xs[2], cy - 0.60, 0])
+        t3_d2 = Text("• ราคาถูก น้ำหนักเบา", font_size=13, color=COL_GRAY).move_to([xs[2], cy - 1.05, 0])
+        t3_d3 = Text("• สังเกตการไหลได้", font_size=13, color=COL_OK).move_to([xs[2], cy - 1.50, 0])
+        card3 = VGroup(c3_box, icon3, t3_title, t3_th, t3_d1, t3_d2, t3_d3)
+
+        # Card 4: Flexible hose
+        c4_box = RoundedRectangle(corner_radius=0.12, width=card_w, height=card_h,
+                                  color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[3], cy, 0])
+        hose_curve = CubicBezier(
+            [xs[3] - 0.75, cy + 1.05, 0],
+            [xs[3] - 0.25, cy + 1.65, 0],
+            [xs[3] + 0.25, cy + 0.85, 0],
+            [xs[3] + 0.75, cy + 1.45, 0],
+            color=COL_METAL, stroke_width=6
+        )
+        crimp_l = Rectangle(width=0.20, height=0.45, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.90).move_to([xs[3] - 0.75, cy + 1.05, 0])
+        crimp_r = Rectangle(width=0.20, height=0.45, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.90).move_to([xs[3] + 0.75, cy + 1.45, 0])
+        icon4 = VGroup(hose_curve, crimp_l, crimp_r)
+        t4_title = Text("Flexible hose", font_size=18, color=WHITE).move_to([xs[3], cy + 0.35, 0])
+        t4_th = Text("สายไฮดรอลิกถัก", font_size=15, color=COL_CURR).move_to([xs[3], cy - 0.05, 0])
+        t4_d1 = Text("• ทนแรงสั่นสะเทือน", font_size=13, color=COL_GRAY).move_to([xs[3], cy - 0.60, 0])
+        t4_d2 = Text("• ยืดหยุ่นสูง โค้งงอ", font_size=13, color=COL_GRAY).move_to([xs[3], cy - 1.05, 0])
+        t4_d3 = Text("• ต่อชิ้นส่วนที่ขยับ", font_size=13, color=COL_OK).move_to([xs[3], cy - 1.50, 0])
+        card4 = VGroup(c4_box, icon4, t4_title, t4_th, t4_d1, t4_d2, t4_d3)
+
+        self.play(FadeIn(card1, shift=RIGHT * 0.3), run_time=0.7)
+        self.wait(1.1)
+        self.play(FadeIn(card2, shift=RIGHT * 0.3), run_time=0.7)
+        self.wait(1.1)
+        self.play(FadeIn(card3, shift=RIGHT * 0.3), run_time=0.7)
+        self.wait(1.1)
+        self.play(FadeIn(card4, shift=RIGHT * 0.3), run_time=0.7)
+        self.wait(1.1)
+
+        self.clear_stage(run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 13.2–20.6: Continuity Equation Q = A * v (Constriction Speedup)
+        # ----------------------------------------------------------------------
+        cap2 = caption_top("โซ่เหตุผล: Q คงที่ แต่ A เปลี่ยน")
+        self.play(FadeIn(cap2, shift=UP * 0.4), run_time=0.6)
+
+        lbl_Q_card = RoundedRectangle(corner_radius=0.12, width=5.2, height=1.1,
+                                      color=COL_CURR, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([3.8, 1.4, 0])
+        lbl_Q_t1 = Text("Q = 30 L/min (อัตราไหลคงที่)", font_size=16, color=COL_CURR).move_to([3.8, 1.65, 0])
+        lbl_Q_t2 = Text("Q = A × v  →  v = Q / A", font_size=16, color=WHITE).move_to([3.8, 1.15, 0])
+        grp_Q = VGroup(lbl_Q_card, lbl_Q_t1, lbl_Q_t2)
+
+        # Straight wide pipe geometry (Y = -0.5)
+        pipe_w_top = Line([-5.5, 0.0, 0], [5.5, 0.0, 0], color=COL_METAL, stroke_width=3.5)
+        pipe_w_bot = Line([-5.5, -1.0, 0], [5.5, -1.0, 0], color=COL_METAL, stroke_width=3.5)
+        pipe_fluid_rect = Rectangle(width=11.0, height=1.0, color=COL_FIELD,
+                                    fill_color=COL_FIELD, stroke_width=0).set_fill(COL_FIELD, 0.22).move_to([0, -0.5, 0])
+        pipe_wide_grp = VGroup(pipe_fluid_rect, pipe_w_top, pipe_w_bot)
+
+        self.play(
+            Create(pipe_wide_grp),
+            FadeIn(grp_Q, shift=DOWN * 0.2),
+            run_time=1.2
+        )
+        self.wait(1.0)
+
+        # Exact physical velocity model for dots in constricted nozzle:
+        # Segment 1 (wide left): x in [-5.5, -1.8], v1 = 2.4 units/s
+        # Segment 2 (narrow mid): x in [-1.8, 1.8], v2 = 6.0 units/s (2.5x speedup!)
+        # Segment 3 (wide right): x in [1.8, 5.5], v1 = 2.4 units/s
+        t1_end = 3.7 / 2.4       # 1.5417 s
+        t2_dur = 3.6 / 6.0       # 0.6000 s
+        t2_end = t1_end + t2_dur # 2.1417 s
+        t3_dur = 3.7 / 2.4       # 1.5417 s
+        t_cycle = t1_end + t2_dur + t3_dur # 3.6833 s
+
+        def get_pos_x(t_mod):
+            if t_mod < t1_end:
+                return -5.5 + 2.4 * t_mod
+            elif t_mod < t2_end:
+                return -1.8 + 6.0 * (t_mod - t1_end)
+            else:
+                return 1.8 + 2.4 * (t_mod - t2_end)
+
+        pts_c_top = [
+            [-5.5, 0.0, 0], [-2.2, 0.0, 0], [-1.6, -0.32, 0],
+            [1.6, -0.32, 0], [2.2, 0.0, 0], [5.5, 0.0, 0]
+        ]
+        pts_c_bot = [
+            [-5.5, -1.0, 0], [-2.2, -1.0, 0], [-1.6, -0.68, 0],
+            [1.6, -0.68, 0], [2.2, -1.0, 0], [5.5, -1.0, 0]
+        ]
+        pipe_c_top = VMobject(color=COL_METAL, stroke_width=3.5).set_points_as_corners([np.asarray(p, dtype=float) for p in pts_c_top])
+        pipe_c_bot = VMobject(color=COL_METAL, stroke_width=3.5).set_points_as_corners([np.asarray(p, dtype=float) for p in pts_c_bot])
+        poly_pts = pts_c_top + pts_c_bot[::-1]
+        pipe_c_fluid = Polygon(*poly_pts, color=COL_FIELD, fill_color=COL_FIELD, stroke_width=0).set_fill(COL_FIELD, 0.22)
+        pipe_constrict_grp = VGroup(pipe_c_fluid, pipe_c_top, pipe_c_bot)
+
+        # Dynamic velocity live indicator
+        v_tracker = ValueTracker(1.2)
+        v_row = live_row("v =", "m/s", lambda: v_tracker.get_value(), anchor=[-2.8, 1.4, 0],
+                         num_color=COL_CURR, label_color=WHITE, unit_color=COL_CURR, decimals=1)
+
+        sub_constrict = Text("บีบ A ให้เล็กลง → v ต้องพุ่งขึ้น (Q เท่าเดิม)", font_size=16, color=COL_CURR).move_to([0, -1.8, 0])
+
+        time_tracker = ValueTracker(0.0)
+        num_dots = 6
+        dots_grp = VGroup()
+        for i in range(num_dots):
+            dt_offset = i * (t_cycle / num_dots)
+            dot = Dot(radius=0.08, color=COL_CURR)
+            def make_upd(off):
+                return lambda m: m.move_to([get_pos_x((time_tracker.get_value() + off) % t_cycle), -0.5, 0])
+            dot.add_updater(make_upd(dt_offset))
+            dots_grp.add(dot)
+
+        self.add(v_row, dots_grp)
+        self.play(
+            Transform(pipe_wide_grp, pipe_constrict_grp),
+            v_tracker.animate.set_value(6.1),
+            time_tracker.animate.set_value(3.2),
+            FadeIn(sub_constrict, shift=UP * 0.2),
+            run_time=3.2,
+            rate_func=linear
+        )
+
+        dots_grp.clear_updaters()
+        v_row.clear_updaters()
+        self.clear_stage(run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 20.6–33.5: Suction Pipe & Cavitation Danger (v <= 1.2 m/s)
+        # ----------------------------------------------------------------------
+        cap3 = caption_top("ทำไมท่อดูดจำกัดแค่ 1.2 m/s")
+        self.play(FadeIn(cap3, shift=UP * 0.4), run_time=0.6)
+
+        # Tank symbol (left), Pump rotor (right), Suction pipe in between
+        tank_grp, t_ports = tank_symbol([-4.8, -0.65, 0], w=1.1, h=1.0, color=COL_METAL)
+        t_lbl = Text("ถังพักน้ำมัน", font_size=13, color=COL_GRAY).next_to(tank_grp, DOWN, buff=0.12)
+
+        pump_grp, p_ports = rotor_symbol([3.6, -0.65, 0], angle=0, r=0.45, color=COL_METAL, filled=True)
+        p_lbl = Text("ปั๊มไฮดรอลิก", font_size=13, color=COL_GRAY).next_to(pump_grp, DOWN, buff=0.12)
+
+        suction_pts = [
+            [-4.25, -0.65, 0],
+            [3.15, -0.65, 0]
+        ]
+        pipe_suction = pipe(suction_pts, color=COL_WARN, width=5.0)
+        pipe_suc_lbl = Text("ท่อดูด (Suction Line): ความดันต่ำกว่าบรรยากาศ", font_size=15, color=COL_WARN).move_to([-0.5, -0.25, 0])
+
+        self.play(
+            FadeIn(tank_grp), FadeIn(t_lbl),
+            FadeIn(pump_grp), FadeIn(p_lbl),
+            Create(pipe_suction),
+            FadeIn(pipe_suc_lbl),
+            run_time=1.4
+        )
+        self.play(Indicate(pipe_suction, color=COL_WARN), run_time=1.2)
+
+        # Pressure graph along suction pipe
+        axes = Axes(
+            x_range=[0, 6, 1],
+            y_range=[-0.2, 1.8, 0.5],
+            x_length=6.2,
+            y_length=2.0,
+            axis_config={"color": COL_METAL, "stroke_width": 2}
+        ).move_to([0.2, 1.25, 0])
+        ax_lbl_x = Text("ระยะทางท่อ →", font_size=12, color=COL_GRAY).next_to(axes.x_axis, DOWN, buff=0.1)
+        ax_lbl_y = Text("ความดัน P", font_size=12, color=COL_GRAY).next_to(axes.y_axis, LEFT, buff=0.1)
+
+        p_vap_val = 0.55
+        vapor_line = DashedLine(axes.c2p(0, p_vap_val), axes.c2p(6, p_vap_val),
+                                color=COL_WARN, stroke_width=2.5, dash_length=0.10)
+        lbl_vapor = Text("ความดันไอ P_vap", font_size=12, color=COL_WARN).next_to(vapor_line, RIGHT, buff=0.15)
+
+        # Safe curve: P_safe(x) = 1.45 - 0.10 * x (stays above vapor_line everywhere)
+        curve_safe = axes.plot(lambda x: 1.45 - 0.10 * x, x_range=[0, 6], color=COL_CURR, stroke_width=3)
+        lbl_curve_safe = Text("ความดันปกติ (v ≤ 1.2 m/s)", font_size=12, color=COL_CURR).move_to(axes.c2p(2.2, 1.55))
+
+        self.play(
+            Create(axes), FadeIn(ax_lbl_x), FadeIn(ax_lbl_y),
+            Create(vapor_line), FadeIn(lbl_vapor),
+            Create(curve_safe), FadeIn(lbl_curve_safe),
+            run_time=1.8
+        )
+        self.wait(1.2)
+
+        # High velocity curve dips below vapor line:
+        # P_steep(x) = 1.40 - 0.28 * x
+        # 1.40 - 0.28 * x_cross = 0.55 => 0.28 * x_cross = 0.85 => x_cross = 3.0357
+        x_cross = (1.40 - p_vap_val) / 0.28  # 3.035714...
+        curve_steep = axes.plot(lambda x: 1.40 - 0.28 * x, x_range=[0, 6], color=COL_WARN, stroke_width=3)
+        lbl_curve_steep = Text("v สูงเกินไป → ΔP ตกฮวบ จน P ≤ P_vap!", font_size=12, color=COL_WARN).move_to(axes.c2p(2.4, 1.55))
+
+        pt_intersect = axes.c2p(x_cross, p_vap_val)
+        dot_cross = Dot(pt_intersect, radius=0.09, color=WHITE)
+
+        # Physical location in pipe below matching x_cross:
+        frac_cross = x_cross / 6.0
+        pipe_cross_x = -4.25 + frac_cross * (3.15 - (-4.25))
+
+        bubble_list = []
+        for bx in np.linspace(pipe_cross_x, 2.8, 12):
+            b_r = 0.05 + 0.03 * np.sin(bx * 7.0)
+            by = -0.65 + 0.12 * np.cos(bx * 9.0)
+            b_dot = Circle(radius=b_r, color=WHITE, fill_color=WHITE, stroke_width=1).set_fill(WHITE, 0.85).move_to([bx, by, 0])
+            bubble_list.append(b_dot)
+        bubbles_grp = VGroup(*bubble_list)
+
+        cap_cav = Text("น้ำมันเดือดเป็นฟองในของเหลว = Cavitation", font_size=16, color=COL_WARN).move_to([0, -1.8, 0])
+
+        self.play(
+            ReplacementTransform(curve_safe, curve_steep),
+            ReplacementTransform(lbl_curve_safe, lbl_curve_steep),
+            FadeIn(dot_cross),
+            FadeIn(bubbles_grp, shift=UP * 0.1),
+            FadeIn(cap_cav, shift=UP * 0.2),
+            run_time=2.5
+        )
+        self.wait(1.0)
+
+        # Bubbles travel into pump and implode -> pump vibration
+        self.play(
+            bubbles_grp.animate.shift(RIGHT * 1.0).set_opacity(0.0),
+            Indicate(pump_grp, color=COL_WARN, scale_factor=1.28),
+            run_time=2.0
+        )
+        warn_txt = Text("ฟองยุบตัวในปั๊ม → กัดกร่อนใบพัด เสียงดัง และพังเร็ว!", font_size=16, color=COL_WARN).move_to([0, -1.8, 0])
+        self.play(ReplacementTransform(cap_cav, warn_txt), run_time=0.6)
+        self.wait(0.6)
+
+        self.clear_stage(run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 34.3–41.6: Discharge Pipe & Heat / Friction Limit (v <= 6.1 m/s)
+        # ----------------------------------------------------------------------
+        cap4 = caption_top("ท่อจ่ายปล่อยถึง 6.1 m/s ได้ยังไง")
+        self.play(FadeIn(cap4, shift=UP * 0.4), run_time=0.6)
+
+        pump_dis_grp, _ = rotor_symbol([-4.0, -0.65, 0], angle=0, r=0.45, color=COL_METAL, filled=True)
+        dis_pts = [[-3.55, -0.65, 0], [4.5, -0.65, 0]]
+        pipe_discharge = pipe(dis_pts, color=COL_FIELD, width=5.0)
+
+        pipe_dis_lbl = Text("ท่อจ่าย (Discharge Line): ความดันสูงมาก (100–300 bar)", font_size=15, color=COL_FIELD).move_to([0, -0.25, 0])
+        pipe_dis_safe = Text("ความดันสูงกว่า Vapor Pressure มหาศาล — ไม่มีทางเกิด Cavitation!", font_size=14, color=WHITE).move_to([0, -1.05, 0])
+
+        self.play(
+            FadeIn(pump_dis_grp),
+            Create(pipe_discharge),
+            FadeIn(pipe_dis_lbl),
+            FadeIn(pipe_dis_safe),
+            run_time=1.6
+        )
+
+        dots_dis, anims_dis = flow_dots(dis_pts, color=COL_FIELD, n=6, run_time=1.3)
+        self.play(Indicate(pipe_discharge, color=COL_FIELD), *anims_dis, run_time=1.3)
+
+        # Fade out discharge labels before heat dissipation arrows appear
+        self.play(FadeOut(pipe_dis_lbl), FadeOut(pipe_dis_safe), run_time=0.4)
+
+        # Heat dissipation arrows radiating from pipe wall
+        heat_arrows = VGroup()
+        for hx in np.linspace(-2.5, 3.5, 7):
+            heat_arrows.add(Arrow([hx, -0.40, 0], [hx, 0.20, 0], color=COL_WARN, stroke_width=2.5, tip_length=0.15))
+            heat_arrows.add(Arrow([hx, -0.90, 0], [hx, -1.50, 0], color=COL_WARN, stroke_width=2.5, tip_length=0.15))
+
+        friction_card = RoundedRectangle(corner_radius=0.12, width=8.8, height=1.1,
+                                         color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([0, 1.25, 0])
+        f_t1 = Text("ตัวจำกัดความเร็วคือ ความร้อน & การสูญเสียแรงดัน (ΔP ∝ v²)", font_size=15, color=COL_WARN).move_to([0, 1.50, 0])
+        f_t2 = Text("ไม่ใช่ Cavitation จึงยอมให้ไหลเร็วได้ถึง 6.1 m/s (20 ft/s)", font_size=14, color=WHITE).move_to([0, 1.05, 0])
+        friction_grp = VGroup(friction_card, f_t1, f_t2, heat_arrows)
+
+        self.play(FadeIn(friction_grp, shift=UP * 0.2), run_time=1.2)
+        self.wait(1.6)
+
+        self.clear_stage(run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 41.6–50.6: Worked Sizing Example (Q = 30 L/min)
+        # ----------------------------------------------------------------------
+        cap5 = caption_top("ตัวอย่างคำนวณ: Q = 30 L/min")
+        self.play(FadeIn(cap5, shift=UP * 0.4), run_time=0.6)
+
+        prob_box = RoundedRectangle(corner_radius=0.12, width=8.8, height=1.1,
+                                    color=COL_CURR, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([0, 1.45, 0])
+        pr_t1 = Text("โจทย์: อัตราการไหล Q = 30 L/min", font_size=16, color=COL_CURR).move_to([0, 1.70, 0])
+        pr_t2 = Text("แปลงหน่วย SI: Q = 30 / (60 × 1000) = 0.0005 m³/s", font_size=15, color=WHITE).move_to([0, 1.25, 0])
+        prob_grp = VGroup(prob_box, pr_t1, pr_t2)
+        self.play(FadeIn(prob_grp, shift=DOWN * 0.2), run_time=0.6)
+        self.wait(1.0)
+
+        # Step 1: Suction pipe calculation (Left column, WARN)
+        suc_box = RoundedRectangle(corner_radius=0.12, width=5.6, height=2.7,
+                                   color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([-3.4, -0.65, 0])
+        sc_h = Text("1. ท่อดูด (จำกัด v ≤ 1.2 m/s)", font_size=16, color=COL_WARN).move_to([-3.4, 0.35, 0])
+        sc_l1 = Text("A_suc = Q / v = 0.0005 / 1.2", font_size=15, color=WHITE).move_to([-3.4, -0.10, 0])
+        sc_l2 = Text("A_suc = 4.17 × 10⁻⁴ m²", font_size=15, color=WHITE).move_to([-3.4, -0.55, 0])
+        sc_l3 = Text("D_suc = √(4A/π) ≈ 23.0 mm", font_size=16, color=COL_WARN).move_to([-3.4, -1.05, 0])
+        suc_calc_grp = VGroup(suc_box, sc_h, sc_l1, sc_l2, sc_l3)
+
+        self.play(FadeIn(suc_calc_grp, shift=RIGHT * 0.3), run_time=1.5)
+        self.wait(1.5)
+
+        # Step 2: Discharge pipe calculation (Right column, FIELD)
+        dis_box = RoundedRectangle(corner_radius=0.12, width=5.6, height=2.7,
+                                   color=COL_FIELD, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([3.4, -0.65, 0])
+        dc_h = Text("2. ท่อจ่าย (จำกัด v ≤ 6.1 m/s)", font_size=16, color=COL_FIELD).move_to([3.4, 0.35, 0])
+        dc_l1 = Text("A_dis = Q / v = 0.0005 / 6.1", font_size=15, color=WHITE).move_to([3.4, -0.10, 0])
+        dc_l2 = Text("A_dis = 8.20 × 10⁻⁵ m²", font_size=15, color=WHITE).move_to([3.4, -0.55, 0])
+        dc_l3 = Text("D_dis = √(4A/π) ≈ 10.2 mm", font_size=16, color=COL_FIELD).move_to([3.4, -1.05, 0])
+        dis_calc_grp = VGroup(dis_box, dc_h, dc_l1, dc_l2, dc_l3)
+
+        self.play(FadeIn(dis_calc_grp, shift=LEFT * 0.3), run_time=1.5)
+        self.wait(1.5)
+
+        self.clear_stage(run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 50.6–57.0: Visual Comparison — Bar Chart & Sized Cross-Sections
+        # ----------------------------------------------------------------------
+        cap_comp = caption_top("เปรียบเทียบขนาด: ท่อดูดต้องอ้วนกว่า ~2.25 เท่า")
+        self.play(FadeIn(cap_comp, shift=UP * 0.4), run_time=0.6)
+
+        # Exact mathematical radius ratio verification per High-Risk Check (c)
+        D_SUC_MM = 23.0
+        D_DIS_MM = 10.2
+        RATIO_ACTUAL = D_SUC_MM / D_DIS_MM  # 2.25490196...
+
+        r_dis = 0.65
+        r_suc = r_dis * RATIO_ACTUAL  # 1.465686...
+        assert abs((r_suc / r_dis) - (D_SUC_MM / D_DIS_MM)) < 1e-6, "Radii ratio must match 23.0/10.2 exactly!"
+
+        # Bar chart on left
+        base_line = Line([-5.5, -1.9, 0], [-1.0, -1.9, 0], color=COL_METAL, stroke_width=2.5)
+
+        bar_h_dis = 1.15
+        bar_h_suc = bar_h_dis * RATIO_ACTUAL  # 2.593...
+        assert abs((bar_h_suc / bar_h_dis) - (D_SUC_MM / D_DIS_MM)) < 1e-6, "Bar heights ratio must match 23.0/10.2 exactly!"
+
+        bar_suc = Rectangle(width=1.2, height=bar_h_suc, color=COL_WARN, fill_color=COL_WARN).set_fill(COL_WARN, 0.88).move_to([-4.4, -1.9 + bar_h_suc / 2, 0])
+        bar_suc_lbl = Text("23.0 mm", font_size=15, color=COL_WARN).next_to(bar_suc, UP, buff=0.1)
+        bar_suc_sub = Text("D ท่อดูด", font_size=13, color=COL_GRAY).next_to(bar_suc, DOWN, buff=0.15)
+
+        bar_dis = Rectangle(width=1.2, height=bar_h_dis, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.88).move_to([-2.2, -1.9 + bar_h_dis / 2, 0])
+        bar_dis_lbl = Text("10.2 mm", font_size=15, color=COL_FIELD).next_to(bar_dis, UP, buff=0.1)
+        bar_dis_sub = Text("D ท่อจ่าย", font_size=13, color=COL_GRAY).next_to(bar_dis, DOWN, buff=0.15)
+
+        # Cross section circles on right
+        c_suc = Circle(radius=r_suc, color=COL_WARN, fill_color=COL_WARN, stroke_width=3).set_fill(COL_WARN, 0.35).move_to([1.5, -0.4, 0])
+        c_suc_lbl = Text("หน้าตัดท่อดูด", font_size=14, color=COL_WARN).next_to(c_suc, UP, buff=0.15)
+        c_suc_dim = Text("D ≈ 23.0 mm", font_size=15, color=WHITE).move_to(c_suc.get_center())
+
+        c_dis = Circle(radius=r_dis, color=COL_FIELD, fill_color=COL_FIELD, stroke_width=3).set_fill(COL_FIELD, 0.35).move_to([4.6, -0.4, 0])
+        c_dis_lbl = Text("หน้าตัดท่อจ่าย", font_size=14, color=COL_FIELD).next_to(c_dis, UP, buff=0.15)
+        c_dis_dim = Text("D ≈ 10.2 mm", font_size=15, color=WHITE).move_to(c_dis.get_center())
+
+        ratio_banner = Text("อัตราส่วนเส้นผ่านศูนย์กลาง = 23.0 / 10.2 ≈ 2.25 เท่า (พื้นที่ใหญ่กว่า 5.08 เท่า!)",
+                            font_size=16, color=COL_OK).move_to([0, -2.5, 0])
+
+        self.play(
+            Create(base_line),
+            GrowFromEdge(bar_suc, DOWN), FadeIn(bar_suc_lbl), FadeIn(bar_suc_sub),
+            GrowFromEdge(bar_dis, DOWN), FadeIn(bar_dis_lbl), FadeIn(bar_dis_sub),
+            Create(c_suc), FadeIn(c_suc_lbl), FadeIn(c_suc_dim),
+            Create(c_dis), FadeIn(c_dis_lbl), FadeIn(c_dis_dim),
+            FadeIn(ratio_banner, shift=UP * 0.2),
+            run_time=4.5
+        )
+        self.wait(1.9)
+
+        # Clear comparison objects before introducing theoretical formula
+        self.clear_stage(run_time=0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 57.0–60.0: Theoretical Ratio Formula
+        # ----------------------------------------------------------------------
+        formula_box = RoundedRectangle(corner_radius=0.14, width=9.2, height=1.6,
+                                       color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.4, 0])
+        f_line1 = Text("D_suc / D_dis = √(v_dis / v_suc)", font_size=18, color=WHITE).move_to([0, 0.05, 0])
+        f_line2 = Text("= √(6.1 / 1.2) = √5.08 ≈ 2.25", font_size=19, color=COL_OK).move_to([0, -0.45, 0])
+        formula_grp = VGroup(formula_box, f_line1, f_line2)
+
+        self.play(
+            FadeIn(formula_grp, shift=UP * 0.3),
+            run_time=1.8
+        )
+        self.wait(1.2)
+
+        self.clear_stage(run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 60.6–63.0: Executive Summary Card
+        # ----------------------------------------------------------------------
+        cap_sum = caption_top("สรุปหลักการสำคัญ: ตัวนำไฮดรอลิก", color=COL_OK)
+        self.play(FadeIn(cap_sum, shift=UP * 0.4), run_time=0.6)
+
+        sum_box = RoundedRectangle(corner_radius=0.16, width=10.6, height=3.3,
+                                   color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.45, 0])
+        s1 = Text("1. 4 ชนิดตัวนำ: Steel pipe (ถาวร), Steel tubing (แม่นยำ), Plastic (เบา), Flexible hose (ขยับ)", font_size=15, color=WHITE).move_to([0, 0.65, 0])
+        s2 = Text("2. ความต่อเนื่อง: Q = A × v  (เมื่อบีบ A ให้เล็กลง ความเร็ว v จะพุ่งสูงขึ้น)", font_size=15, color=COL_CURR).move_to([0, 0.15, 0])
+        s3 = Text("3. ท่อดูด v ≤ 1.2 m/s: ความดันต่ำ เสี่ยง Cavitation (เดือดเป็นฟองกัดกร่อนปั๊ม)", font_size=15, color=COL_WARN).move_to([0, -0.35, 0])
+        s4 = Text("4. ท่อจ่าย v ≤ 6.1 m/s: ความดันสูง ไม่เกิดฟอง ตัวจำกัดคือความร้อน & สูญเสียแรงดัน", font_size=15, color=COL_FIELD).move_to([0, -0.85, 0])
+        s5 = Text("5. สัดส่วนขนาด: D ∝ √(1/v) → ท่อดูดต้องมีเส้นผ่านศูนย์กลางโตกว่าท่อจ่าย ~2.25 เท่า", font_size=15, color=COL_OK).move_to([0, -1.35, 0])
+        sum_grp = VGroup(sum_box, s1, s2, s3, s4, s5)
+
+        self.play(FadeIn(sum_grp, shift=UP * 0.35), run_time=0.8)
+        self.wait(1.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 63.0–68.0: Review Question Card & Conclusion
+        # ----------------------------------------------------------------------
+        self.play(FadeOut(sum_grp), run_time=0.5)
+
+        q_box = RoundedRectangle(corner_radius=0.15, width=10.2, height=2.3,
+                                 color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.45, 0])
+        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0, 0.25, 0])
+        q_body = Text("ถ้าต้องการเพิ่มอัตราไหล Q เป็น 2 เท่า โดยรักษาความเร็ว v เท่าเดิม\nเส้นผ่านศูนย์กลางท่อดูดต้องโตขึ้นกี่เท่า?", font_size=16, color=WHITE).move_to([0, -0.25, 0])
+        q_hint = Text("(คิดในใจตามสูตร: A ∝ Q และ D ∝ √A  →  คำตอบ: √2 ≈ 1.41 เท่า)", font_size=14, color=COL_GRAY).move_to([0, -0.85, 0])
+        q_grp = VGroup(q_box, q_head, q_body, q_hint)
+
+        self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.4)
+
+        self.fade_out_all(run_time=0.8)
+
