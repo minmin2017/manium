@@ -8839,6 +8839,7 @@ class H6_22_Accumulators1(SafeScene):
             "ถ้าต้องการแรงดันคงที่เป๊ะตลอดการทำงาน (ไม่ขึ้นกับปริมาตรน้ำมันที่เหลือ) ควรเลือก accumulator แบบไหนระหว่าง weighted กับ spring-loaded เพราะอะไร?",
             font_size=12.0, color=WHITE
         ).move_to([0.0, 0.20, 0.0])
+        fit_width(q_body, 10.6)
         q_ans = Text(
             "(คำตอบ: ควรเลือกแบบ Weighted Accumulator เพราะแรงดันคำนวณจากน้ำหนักถ่วงคงที่ P = W / A\nขณะที่แบบสปริง แรงดันจะลดลงเรื่อยๆ เมื่อน้ำมันถูกปล่อยออกและสปริงคลายตัวตามกฎของฮุค)",
             font_size=11.5, color=COL_GRAY
