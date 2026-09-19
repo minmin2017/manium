@@ -6431,4 +6431,570 @@ class H6_16_CompressionPackings1(SafeScene):
         self.wait(0.5)
 
 
+# ==============================================================================
+# SCENE 17: H6_17_CompressionPackings2 (hydraulic06.pdf page 20)
+# Duration: ~50.0 seconds | 2D SafeScene
+# Pedagogical Focus: Gland Assembly Vocabulary & 3 Adjustment Mechanisms
+# AHA Moment:
+#   Compression packings wear and relax over time. An adjustment mechanism is
+#   essential to re-compress the stack without disassembly:
+#   1. Threaded Follower: Screws into housing directly; compact but manual check needed.
+#   2. Flanged Follower: Multiple bolts around flange; uniform pressure distribution.
+#   3. Spring Loaded: Constant mechanical coil spring; automatic self-adjusting preload.
+#   Single Ring Dimensional Vocabulary: Nominal I.D., Nominal O.D., Stack Height,
+#   Heel Clearance, Interference.
+# ==============================================================================
+
+def _h6_17_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_17_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_17_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_17_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_17_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -1.95, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class H6_17_CompressionPackings2(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_17_title("Compression Packing: กลไกปรับความแน่น")
+        self.ref_m = _h6_17_page_ref("hydraulic06 น.20")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)  # Checkpoint 1.5s falls here
+
+        # ======================================================================
+        # BEAT 2.0–5.5: Hook Question
+        # ======================================================================
+        hook_q = _h6_17_caption_top("ขันแน่นตอนติดตั้งครั้งเดียว ก็ใช้ได้ตลอดไปไม่ต้องยุ่งอีกจริงไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.5)  # Checkpoint 3.6s falls here
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 5.5–13.6: Gland Assembly Vocabulary (Cross Section)
+        # ======================================================================
+        cap1 = _h6_17_caption_top("ส่วนประกอบชุด Gland: ตัวรองรับ + ปะเก็น + ตัวกด")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Main Shaft / Rod through center
+        rod = Rectangle(width=7.8, height=0.9, color=COL_METAL).set_fill("#475569", 0.95).move_to([-0.8, 0.0, 0.0])
+        rod_axis = DashedLine([-4.7, 0.0, 0.0], [3.1, 0.0, 0.0], color="#94A3B8", stroke_width=1.5, dash_length=0.15)
+
+        # Upper Stuffing Box Housing
+        house_top = Polygon(
+            [-4.2, 0.45, 0], [-4.2, 1.45, 0], [0.3, 1.45, 0], [0.3, 1.15, 0],
+            [-0.7, 1.15, 0], [-0.7, 0.45, 0],
+            color=COL_METAL, fill_color="#334155", fill_opacity=0.95
+        )
+        # Lower Stuffing Box Housing
+        house_bot = Polygon(
+            [-4.2, -0.45, 0], [-4.2, -1.45, 0], [0.3, -1.45, 0], [0.3, -1.15, 0],
+            [-0.7, -1.15, 0], [-0.7, -0.45, 0],
+            color=COL_METAL, fill_color="#334155", fill_opacity=0.95
+        )
+        housing_grp = VGroup(house_top, house_bot)
+
+        # 1. Male Supporting Ring (left end of cavity, supporting back of packings)
+        male_t = Polygon(
+            [-3.6, 0.45, 0], [-3.6, 1.15, 0], [-3.25, 1.15, 0], [-3.05, 0.80, 0], [-3.25, 0.45, 0],
+            color=COL_OK, fill_color="#064E3B", fill_opacity=0.95
+        ).set_stroke(COL_OK, 1.8)
+        male_b = Polygon(
+            [-3.6, -0.45, 0], [-3.6, -1.15, 0], [-3.25, -1.15, 0], [-3.05, -0.80, 0], [-3.25, -0.45, 0],
+            color=COL_OK, fill_color="#064E3B", fill_opacity=0.95
+        ).set_stroke(COL_OK, 1.8)
+        male_ring = VGroup(male_t, male_b)
+
+        # 2. Packings (stack of 3 V-rings, chevron facing left < < <)
+        pack_t_list, pack_b_list = [], []
+        x_starts = [-3.15, -2.75, -2.35]
+        for xs in x_starts:
+            pt = Polygon(
+                [xs, 0.45, 0], [xs + 0.20, 0.80, 0], [xs, 1.15, 0],
+                [xs + 0.35, 1.15, 0], [xs + 0.55, 0.80, 0], [xs + 0.35, 0.45, 0],
+                color=COL_FIELD, fill_color="#0284C7", fill_opacity=0.95
+            ).set_stroke(COL_FIELD, 1.5)
+            pb = Polygon(
+                [xs, -0.45, 0], [xs + 0.20, -0.80, 0], [xs, -1.15, 0],
+                [xs + 0.35, -1.15, 0], [xs + 0.55, -0.80, 0], [xs + 0.35, -0.45, 0],
+                color=COL_FIELD, fill_color="#0284C7", fill_opacity=0.95
+            ).set_stroke(COL_FIELD, 1.5)
+            pack_t_list.append(pt)
+            pack_b_list.append(pb)
+        packings_grp = VGroup(*pack_t_list, *pack_b_list)
+
+        # 3. Female Support Ring (outer adapter mating with V-groove)
+        fem_t = Polygon(
+            [-1.95, 0.45, 0], [-1.75, 0.80, 0], [-1.95, 1.15, 0],
+            [-1.55, 1.15, 0], [-1.55, 0.45, 0],
+            color="#A855F7", fill_color="#581C87", fill_opacity=0.95
+        ).set_stroke("#A855F7", 1.8)
+        fem_b = Polygon(
+            [-1.95, -0.45, 0], [-1.75, -0.80, 0], [-1.95, -1.15, 0],
+            [-1.55, -1.15, 0], [-1.55, -0.45, 0],
+            color="#A855F7", fill_color="#581C87", fill_opacity=0.95
+        ).set_stroke("#A855F7", 1.8)
+        female_ring = VGroup(fem_t, fem_b)
+
+        # 4. Shim (thin spacer strip at housing face, x from 0.3 to 0.45)
+        shim_t = Rectangle(width=0.15, height=0.55, color=YELLOW).set_fill(YELLOW, 0.95).move_to([0.38, 1.42, 0.0])
+        shim_b = Rectangle(width=0.15, height=0.55, color=YELLOW).set_fill(YELLOW, 0.95).move_to([0.38, -1.42, 0.0])
+        shim_grp = VGroup(shim_t, shim_b)
+
+        # 5. Gland Follower Ring (nose pushes against female ring, flange bolted outside)
+        fol_nose_t = Rectangle(width=1.9, height=0.68, color=COL_METAL).set_fill("#64748B", 0.95).move_to([-0.50, 0.80, 0.0])
+        fol_flange_t = Rectangle(width=0.40, height=0.75, color=COL_METAL).set_fill("#64748B", 0.95).move_to([0.65, 1.42, 0.0])
+        fol_nose_b = Rectangle(width=1.9, height=0.68, color=COL_METAL).set_fill("#64748B", 0.95).move_to([-0.50, -0.80, 0.0])
+        fol_flange_b = Rectangle(width=0.40, height=0.75, color=COL_METAL).set_fill("#64748B", 0.95).move_to([0.65, -1.42, 0.0])
+        # Follower clamping studs & nuts
+        stud_t = Rectangle(width=1.1, height=0.14, color=WHITE).set_fill("#E2E8F0", 1.0).move_to([0.45, 1.42, 0.0])
+        nut_t = Rectangle(width=0.22, height=0.30, color=WHITE).set_fill("#CBD5E1", 1.0).move_to([0.95, 1.42, 0.0])
+        stud_b = Rectangle(width=1.1, height=0.14, color=WHITE).set_fill("#E2E8F0", 1.0).move_to([0.45, -1.42, 0.0])
+        nut_b = Rectangle(width=0.22, height=0.30, color=WHITE).set_fill("#CBD5E1", 1.0).move_to([0.95, -1.42, 0.0])
+        follower_ring = VGroup(fol_nose_t, fol_flange_t, fol_nose_b, fol_flange_b, stud_t, nut_t, stud_b, nut_b)
+
+        # Dimension: Gland Width (depth of cavity, from -3.6 to -0.7)
+        dim_gw = DoubleArrow([-3.6, -1.35, 0], [-0.7, -1.35, 0], color=COL_OK, stroke_width=2.5, tip_length=0.12)
+        lbl_gw = Text("GLAND WIDTH", font_size=10, color=COL_OK).next_to(dim_gw, DOWN, buff=0.08)
+        gland_width_grp = VGroup(dim_gw, lbl_gw)
+
+        # Callout Badges & Pointer Lines
+        lbl_male = _h6_17_badge("Male Supporting Ring", COL_OK).move_to([-3.4, 1.85, 0.0])
+        arr_male = Arrow([-3.4, 1.68, 0], [-3.35, 1.18, 0], color=COL_OK, stroke_width=2.0, tip_length=0.10)
+        call_male = VGroup(lbl_male, arr_male)
+
+        lbl_pack = _h6_17_badge("Packings", COL_FIELD).move_to([-1.8, 1.85, 0.0])
+        arr_pack = Arrow([-1.8, 1.68, 0], [-2.35, 1.18, 0], color=COL_FIELD, stroke_width=2.0, tip_length=0.10)
+        call_pack = VGroup(lbl_pack, arr_pack)
+
+        lbl_shim = _h6_17_badge("Shim", YELLOW).move_to([0.4, 2.05, 0.0])
+        arr_shim = Arrow([0.4, 1.88, 0], [0.38, 1.70, 0], color=YELLOW, stroke_width=2.0, tip_length=0.10)
+        call_shim = VGroup(lbl_shim, arr_shim)
+
+        lbl_fem = _h6_17_badge("Female Support Ring", "#A855F7").move_to([2.7, 0.75, 0.0])
+        arr_fem = Arrow([1.7, 0.75, 0], [-1.55, 0.80, 0], color="#A855F7", stroke_width=2.0, tip_length=0.10)
+        call_fem = VGroup(lbl_fem, arr_fem)
+
+        lbl_fol = _h6_17_badge("Gland Follower Ring", COL_METAL).move_to([2.7, -0.65, 0.0])
+        arr_fol = Arrow([1.7, -0.65, 0], [0.85, -0.80, 0], color=COL_METAL, stroke_width=2.0, tip_length=0.10)
+        call_fol = VGroup(lbl_fol, arr_fol)
+
+        assembly_mobs = VGroup(
+            rod, rod_axis, housing_grp,
+            male_ring, packings_grp, female_ring,
+            shim_grp, follower_ring, gland_width_grp,
+            call_male, call_pack, call_shim, call_fem, call_fol
+        )
+
+        banner1 = _h6_17_banner(
+            "ชุด gland มีตัวรองรับ (support ring) ประกบปะเก็น packing ไว้ แล้วมี follower ring กดอัดจากนอก",
+            COL_OK
+        )
+
+        self.play(FadeIn(assembly_mobs, shift=UP * 0.2), FadeIn(banner1), run_time=1.0)
+        # Sequential indicate of the 5 distinct parts (Lesson 5: strictly sequenced after FadeIn)
+        self.play(
+            LaggedStart(
+                Indicate(call_male, color=COL_OK, scale_factor=1.08),
+                Indicate(call_pack, color=COL_FIELD, scale_factor=1.08),
+                Indicate(call_fem, color="#A855F7", scale_factor=1.08),
+                Indicate(call_shim, color=YELLOW, scale_factor=1.08),
+                Indicate(call_fol, color=COL_METAL, scale_factor=1.08),
+                lag_ratio=0.35
+            ),
+            run_time=2.2
+        )
+        self.wait(3.9)  # Checkpoint 10.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 13.6–20.0: Method 1 - Threaded Follower (Real Thread Lines!)
+        # ======================================================================
+        cap2 = _h6_17_caption_top("Packing สึกหรอ/คลายตัวตามเวลา — ต้องมีกลไกปรับเพิ่มได้ (3 วิธี)")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Cross section of Threaded Follower mechanism on the left (x=-2.6)
+        m1_house_l = Rectangle(width=0.9, height=3.2, color=COL_METAL).set_fill("#334155", 0.95).move_to([-3.9, 0.05, 0.0])
+        m1_house_r = Rectangle(width=0.9, height=3.2, color=COL_METAL).set_fill("#334155", 0.95).move_to([-1.3, 0.05, 0.0])
+        m1_cavity_bg = Rectangle(width=1.7, height=3.2, color=BLACK).set_fill("#0F172A", 1.0).move_to([-2.6, 0.05, 0.0])
+
+        # Packing rings at bottom of cavity
+        m1_p1 = Rectangle(width=1.65, height=0.32, color=COL_FIELD).set_fill("#0284C7", 0.95).move_to([-2.6, -1.25, 0.0])
+        m1_p2 = Rectangle(width=1.65, height=0.32, color=COL_FIELD).set_fill("#0284C7", 0.95).move_to([-2.6, -0.90, 0.0])
+        m1_p3 = Rectangle(width=1.65, height=0.32, color=COL_FIELD).set_fill("#0284C7", 0.95).move_to([-2.6, -0.55, 0.0])
+        m1_packings = VGroup(m1_p1, m1_p2, m1_p3)
+
+        # Threaded Follower Body
+        m1_fol_body = Rectangle(width=1.65, height=1.30, color=COL_OK).set_fill("#1E293B", 0.95).move_to([-2.6, 0.35, 0.0])
+        m1_fol_cap = Rectangle(width=2.10, height=0.40, color=COL_OK).set_fill("#0F766E", 1.0).move_to([-2.6, 1.15, 0.0])
+        m1_cap_txt = Text("HEX HEAD", font_size=9, color=WHITE).move_to(m1_fol_cap.get_center())
+
+        # REAL THREAD LINES: Angled parallel helical lines along both flanks!
+        thread_lines = []
+        for y_t in np.linspace(-0.15, 0.85, 7):
+            tl = Line([-3.45, y_t - 0.06, 0], [-2.75, y_t + 0.06, 0], color=COL_OK, stroke_width=2.5)
+            tr = Line([-2.45, y_t - 0.06, 0], [-1.75, y_t + 0.06, 0], color=COL_OK, stroke_width=2.5)
+            thread_lines.extend([tl, tr])
+        m1_threads = VGroup(*thread_lines)
+
+        m1_follower = VGroup(m1_fol_body, m1_fol_cap, m1_cap_txt, m1_threads)
+
+        # Right explanatory panel (x = 2.4)
+        m1_card = RoundedRectangle(width=5.8, height=3.3, corner_radius=0.12, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([2.5, 0.05, 0.0])
+        m1_head = _h6_17_badge("1. Threaded Follower (ขันเกลียวกดอัด)", COL_OK).move_to([2.5, 1.35, 0.0])
+        m1_points = VGroup(
+            Text("• มีเกลียวสกรูรอบตัว Follower ขันเข้ากับเกลียวเรือนสูบ", font_size=11, color=WHITE),
+            Text("• เมื่อเริ่มหลวม ช่างใช้ประแจขันหมุนให้ลึกขึ้นเพื่อเพิ่มแรงกด", font_size=11, color=WHITE),
+            Text("• ข้อดี: กะทัดรัด ประหยัดพื้นที่ เหมาะกับกระบอกขนาดเล็ก", font_size=11, color=COL_OK),
+            Text("• ข้อจำกัด: ต้องมีช่างคอยตรวจเช็คและขันกวดเป็นประจำ", font_size=11, color=COL_WARN),
+        ).arrange(DOWN, buff=0.16, aligned_edge=LEFT).move_to([2.5, 0.05, 0.0])
+        m1_panel = VGroup(m1_card, m1_head, m1_points)
+
+        banner2 = _h6_17_banner(
+            "1. Threaded Follower: ขันเกลียวให้ลึกขึ้นเพื่อเพิ่มแรงกด — ต้องมีคนคอยตรวจ/ขันเป็นระยะ",
+            COL_OK
+        )
+
+        m1_all = VGroup(m1_house_l, m1_house_r, m1_cavity_bg, m1_packings, m1_follower, m1_panel)
+        self.play(FadeIn(m1_all, shift=UP * 0.25), FadeIn(banner2), run_time=0.8)
+
+        # Tightening animation: Follower shifts DOWN to re-compress packings
+        down_arrow = Arrow([-2.6, 1.70, 0], [-2.6, 1.38, 0], color=COL_CURR, stroke_width=4.0, tip_length=0.12)
+        rot_badge = _h6_17_badge("ขันเกลียวลง ↷", COL_CURR).move_to([-2.6, 1.95, 0.0])
+        tighten_cue = VGroup(down_arrow, rot_badge)
+
+        self.play(FadeIn(tighten_cue), run_time=0.4)
+        self.play(
+            m1_follower.animate.shift(DOWN * 0.16),
+            m1_packings.animate.stretch(0.90, dim=1, about_point=[-2.6, -1.4, 0]),
+            run_time=1.0
+        )
+        self.wait(3.5)  # Checkpoint 17.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 20.6–26.0: Method 2 - Flanged Follower (Distinct Bolt Shapes!)
+        # ======================================================================
+        cap_f = _h6_17_caption_top("2. Flanged Follower: ขันน็อตรอบหน้าแปลน (แรงกดสม่ำเสมอ)")
+        self.play(FadeIn(cap_f, shift=UP * 0.35), run_time=0.5)
+
+        # Mechanism on Left: Flanged stuffing box with distinct hex bolts (x = -2.6)
+        m2_house_l = Rectangle(width=0.9, height=3.0, color=COL_METAL).set_fill("#334155", 0.95).move_to([-3.9, -0.15, 0.0])
+        m2_house_r = Rectangle(width=0.9, height=3.0, color=COL_METAL).set_fill("#334155", 0.95).move_to([-1.3, -0.15, 0.0])
+        m2_cavity_bg = Rectangle(width=1.7, height=3.0, color=BLACK).set_fill("#0F172A", 1.0).move_to([-2.6, -0.15, 0.0])
+
+        # Packings at bottom
+        m2_p1 = Rectangle(width=1.65, height=0.32, color=COL_FIELD).set_fill("#0284C7", 0.95).move_to([-2.6, -1.35, 0.0])
+        m2_p2 = Rectangle(width=1.65, height=0.32, color=COL_FIELD).set_fill("#0284C7", 0.95).move_to([-2.6, -1.00, 0.0])
+        m2_p3 = Rectangle(width=1.65, height=0.32, color=COL_FIELD).set_fill("#0284C7", 0.95).move_to([-2.6, -0.65, 0.0])
+        m2_packings = VGroup(m2_p1, m2_p2, m2_p3)
+
+        # Flanged Follower: T-shape with wide flange wings
+        m2_stem = Rectangle(width=1.65, height=1.0, color=COL_OK).set_fill("#1E293B", 0.95).move_to([-2.6, -0.05, 0.0])
+        m2_flange = Rectangle(width=3.60, height=0.38, color=COL_OK).set_fill("#0F766E", 1.0).move_to([-2.6, 0.60, 0.0])
+
+        # DISTINCT BOLT SHAPES (Lesson 1: Must show multiple distinct bolt shapes!)
+        # Bolt 1 (Left): Hex head, washer, threaded stud into housing
+        b1_head = Polygon([-4.25, 0.80, 0], [-4.05, 1.05, 0], [-3.75, 1.05, 0], [-3.55, 0.80, 0], color=WHITE, fill_color="#E2E8F0", fill_opacity=1.0)
+        b1_stud = Rectangle(width=0.18, height=1.10, color=WHITE).set_fill("#94A3B8", 1.0).move_to([-3.90, 0.35, 0.0])
+        b1_lbl = Text("Bolt 1", font_size=9, color=YELLOW).next_to(b1_head, UP, buff=0.08)
+        bolt1 = VGroup(b1_head, b1_stud, b1_lbl)
+
+        # Bolt 2 (Right): Hex head, washer, threaded stud into housing
+        b2_head = Polygon([-1.65, 0.80, 0], [-1.45, 1.05, 0], [-1.15, 1.05, 0], [-0.95, 0.80, 0], color=WHITE, fill_color="#E2E8F0", fill_opacity=1.0)
+        b2_stud = Rectangle(width=0.18, height=1.10, color=WHITE).set_fill("#94A3B8", 1.0).move_to([-1.30, 0.35, 0.0])
+        b2_lbl = Text("Bolt 2", font_size=9, color=YELLOW).next_to(b2_head, UP, buff=0.08)
+        bolt2 = VGroup(b2_head, b2_stud, b2_lbl)
+
+        # Flange Face Pattern (Top/Front circular view with 4 distinct perimeter bolts)
+        flange_circle = Circle(radius=0.65, color=COL_OK).set_fill("#1E293B", 0.95).move_to([-2.6, 1.55, 0.0])
+        rod_hole = Circle(radius=0.25, color=COL_METAL).set_fill("#0F172A", 1.0).move_to([-2.6, 1.55, 0.0])
+        b_dots = []
+        for ang in [0, 90, 180, 270]:
+            bx = -2.6 + 0.45 * np.cos(ang * DEGREES)
+            by = 1.55 + 0.45 * np.sin(ang * DEGREES)
+            b_dots.append(Dot([bx, by, 0], radius=0.07, color=YELLOW))
+        lbl_4bolts = Text("4 Bolts รอบหน้าแปลน", font_size=8.5, color=YELLOW).next_to(flange_circle, UP, buff=0.06)
+        flange_face_view = VGroup(flange_circle, rod_hole, *b_dots, lbl_4bolts)
+
+        m2_mech = VGroup(m2_house_l, m2_house_r, m2_cavity_bg, m2_packings, m2_stem, m2_flange, bolt1, bolt2, flange_face_view)
+
+        # Right explanatory panel (x = 2.5)
+        m2_card = RoundedRectangle(width=5.8, height=3.3, corner_radius=0.12, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([2.5, 0.05, 0.0])
+        m2_head = _h6_17_badge("2. Flanged Follower (หน้าแปลนขันน็อต)", COL_OK).move_to([2.5, 1.35, 0.0])
+        m2_points = VGroup(
+            Text("• ใช้แผ่นหน้าแปลนยึดด้วยน็อตหลายตัวรอบขอบ (Bolted Flange)", font_size=11, color=WHITE),
+            Text("• การขันน็อตกระจายแรงกดได้สม่ำเสมอทั่วหน้าตัดรอบทิศทาง", font_size=11, color=WHITE),
+            Text("• ข้อดี: แรงกดสมดุล ไม่เกิดการเอียงเบียดแกนก้านสูบ", font_size=11, color=COL_OK),
+            Text("• ข้อควรระวัง: ต้องขันน็อตทแยงสลับกันให้หน้าแปลนขนานพอดี", font_size=11, color=COL_WARN),
+        ).arrange(DOWN, buff=0.16, aligned_edge=LEFT).move_to([2.5, 0.05, 0.0])
+        m2_panel = VGroup(m2_card, m2_head, m2_points)
+
+        banner3 = _h6_17_banner(
+            "2. Flanged Follower: ขันน็อตรอบหน้าแปลนให้แน่นสม่ำเสมอ — กระจายแรงกดทั่วถึงกว่าแบบเกลียวเดี่ยว",
+            COL_OK
+        )
+
+        self.play(FadeIn(m2_mech, shift=UP * 0.25), FadeIn(m2_panel), FadeIn(banner3), run_time=0.8)
+        # Sequentially indicate the 4 perimeter bolts and the 2 cross-section bolts
+        self.play(
+            LaggedStart(
+                Indicate(bolt1, color=YELLOW, scale_factor=1.12),
+                Indicate(bolt2, color=YELLOW, scale_factor=1.12),
+                Indicate(flange_face_view, color=YELLOW, scale_factor=1.08),
+                lag_ratio=0.3
+            ),
+            run_time=1.2
+        )
+        self.wait(3.0)  # Checkpoint 23.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 26.6–33.0: Method 3 - Spring Loaded (Real Coiled Zigzag Spring!)
+        # ======================================================================
+        cap_s = _h6_17_caption_top("3. Spring Loaded: สปริงกดอัตโนมัติ (ชดเชยการสึกหรอตลอดเวลา)")
+        self.play(FadeIn(cap_s, shift=UP * 0.35), run_time=0.5)
+
+        # Mechanism on Left: Stuffing box with internal coil spring (x = -2.6)
+        m3_house_l = Rectangle(width=0.9, height=3.4, color=COL_METAL).set_fill("#334155", 0.95).move_to([-3.9, 0.0, 0.0])
+        m3_house_r = Rectangle(width=0.9, height=3.4, color=COL_METAL).set_fill("#334155", 0.95).move_to([-1.3, 0.0, 0.0])
+        m3_cavity_bg = Rectangle(width=1.7, height=3.4, color=BLACK).set_fill("#0F172A", 1.0).move_to([-2.6, 0.0, 0.0])
+
+        # Packings at bottom of cavity
+        m3_p1 = Rectangle(width=1.65, height=0.30, color=COL_FIELD).set_fill("#0284C7", 0.95).move_to([-2.6, -1.45, 0.0])
+        m3_p2 = Rectangle(width=1.65, height=0.30, color=COL_FIELD).set_fill("#0284C7", 0.95).move_to([-2.6, -1.12, 0.0])
+        m3_p3 = Rectangle(width=1.65, height=0.30, color=COL_FIELD).set_fill("#0284C7", 0.95).move_to([-2.6, -0.79, 0.0])
+        m3_packings = VGroup(m3_p1, m3_p2, m3_p3)
+
+        # Pressure plate between spring and packings
+        m3_plate = Rectangle(width=1.65, height=0.15, color=WHITE).set_fill("#CBD5E1", 1.0).move_to([-2.6, -0.55, 0.0])
+
+        # REAL COIL SPRING (Lesson 1: Must show real zigzag/coil shape!)
+        n_coils = 12
+        y_pts = np.linspace(-0.45, 0.85, n_coils)
+        spring_coords = []
+        for idx, y_val in enumerate(y_pts):
+            x_val = -3.15 if idx % 2 == 0 else -2.05
+            spring_coords.append([x_val, y_val, 0.0])
+        spring_pts = [[-2.6, -0.47, 0.0]] + spring_coords + [[-2.6, 0.87, 0.0]]
+        m3_spring = VMobject(color=YELLOW, stroke_width=4.0).set_points_as_corners([np.array(p) for p in spring_pts])
+
+        # Gland Follower / Top Bushing holding spring in place
+        m3_gland_cap = Rectangle(width=1.65, height=0.50, color=COL_OK).set_fill("#0F766E", 1.0).move_to([-2.6, 1.15, 0.0])
+        m3_cap_txt = Text("GLAND", font_size=10, color=WHITE).move_to(m3_gland_cap.get_center())
+
+        lbl_spring = _h6_17_badge("Coil Spring (สปริงกด)", YELLOW).move_to([-2.6, 1.65, 0.0])
+
+        m3_mech = VGroup(m3_house_l, m3_house_r, m3_cavity_bg, m3_packings, m3_plate, m3_spring, m3_gland_cap, m3_cap_txt, lbl_spring)
+
+        # Right explanatory panel (x = 2.5)
+        m3_card = RoundedRectangle(width=5.8, height=3.3, corner_radius=0.12, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([2.5, 0.05, 0.0])
+        m3_head = _h6_17_badge("3. Spring Loaded (สปริงกดอัตโนมัติ)", COL_OK).move_to([2.5, 1.35, 0.0])
+        m3_points = VGroup(
+            Text("• มีสปริงขดดันอัดรักษาแรงกดบนหน้าสัมผัสอย่างต่อเนื่อง", font_size=11, color=WHITE),
+            Text("• เมื่อ Packing ค่อยๆ สึกหรอ สปริงจะยืดตัวชดเชยให้เองทันที", font_size=11, color=WHITE),
+            Text("• ข้อดีเด่น: ปรับแรงกดอัตโนมัติ (Self-Adjusting) ไม่ต้องคอยขัน", font_size=11, color=COL_OK),
+            Text("• เหมาะสมที่สุด: จุดที่เข้าถึงยาก หรืองานเดินเครื่องต่อเนื่อง", font_size=11, color=COL_CURR),
+        ).arrange(DOWN, buff=0.16, aligned_edge=LEFT).move_to([2.5, 0.05, 0.0])
+        m3_panel = VGroup(m3_card, m3_head, m3_points)
+
+        banner4 = _h6_17_banner(
+            "3. Spring Loaded: สปริงดันแรงกดให้อัตโนมัติตลอดเวลา แม้ packing สึกไปก็ยังคงแรงกดได้เอง ไม่ต้องคอยขัน",
+            COL_OK
+        )
+
+        self.play(FadeIn(m3_mech, shift=UP * 0.25), FadeIn(m3_panel), FadeIn(banner4), run_time=0.8)
+
+        # Dynamic compression and release animation of spring!
+        force_arrow = Arrow([-2.6, 0.35, 0], [-2.6, -0.45, 0], color=YELLOW, stroke_width=4.0, tip_length=0.14)
+        lbl_force = Text("F_spring", font_size=11, color=YELLOW).next_to(force_arrow, LEFT, buff=0.10)
+        f_grp = VGroup(force_arrow, lbl_force)
+
+        self.play(
+            m3_spring.animate.stretch(0.85, dim=1, about_point=[-2.6, 0.85, 0]),
+            FadeIn(f_grp),
+            run_time=1.0
+        )
+        self.play(
+            m3_spring.animate.stretch(1.0 / 0.85, dim=1, about_point=[-2.6, 0.85, 0]),
+            run_time=0.8
+        )
+        self.wait(3.0)  # Checkpoint 29.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 33.6–40.0: Single Packing Ring Dimensional Vocabulary
+        # ======================================================================
+        cap3 = _h6_17_caption_top("ศัพท์มิติของแหวน Packing แต่ละวง (Ring Dimension Vocabulary)")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        # Single V-Packing Ring Cross-Section (Bottom of slide 20)
+        ring_l = Polygon(
+            [-3.65, 0.40, 0], [-3.10, -0.30, 0], [-2.55, 0.40, 0],
+            [-2.80, 0.40, 0], [-3.10, 0.05, 0], [-3.40, 0.40, 0],
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.95
+        ).set_stroke(COL_OK, 2.0)
+
+        ring_r = Polygon(
+            [2.55, 0.40, 0], [3.10, -0.30, 0], [3.65, 0.40, 0],
+            [3.40, 0.40, 0], [3.10, 0.05, 0], [2.80, 0.40, 0],
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.95
+        ).set_stroke(COL_OK, 2.0)
+
+        ring_body_top = Line([-2.80, 0.40, 0], [2.80, 0.40, 0], color="#64748B", stroke_width=1.5)
+        ring_body_bot = Line([-3.10, -0.30, 0], [3.10, -0.30, 0], color="#64748B", stroke_width=1.5)
+        ring_graphic = VGroup(ring_l, ring_r, ring_body_top, ring_body_bot)
+
+        # FIVE DIMENSION CALLOUTS (Slide 20 bottom: NO NUMBERS, ONLY LABELS!)
+        # 1. Nominal I.D. (Inside Diameter between inner lips)
+        dim_id = DoubleArrow([-2.55, 0.95, 0], [2.55, 0.95, 0], color=WHITE, stroke_width=2.5, tip_length=0.12)
+        id_ext_l = DashedLine([-2.55, 0.45, 0], [-2.55, 1.15, 0], color=COL_GRAY, stroke_width=1.0)
+        id_ext_r = DashedLine([2.55, 0.45, 0], [2.55, 1.15, 0], color=COL_GRAY, stroke_width=1.0)
+        lbl_id = _h6_17_badge("NOMINAL I.D. (เส้นผ่านศูนย์กลางใน)", WHITE).move_to([0.0, 1.30, 0.0])
+        grp_id = VGroup(dim_id, id_ext_l, id_ext_r, lbl_id)
+
+        # 2. Nominal O.D. (Outside Diameter between outer lip tips)
+        dim_od = DoubleArrow([-3.65, -0.85, 0], [3.65, -0.85, 0], color=WHITE, stroke_width=2.5, tip_length=0.12)
+        od_ext_l = DashedLine([-3.65, -0.35, 0], [-3.65, -1.05, 0], color=COL_GRAY, stroke_width=1.0)
+        od_ext_r = DashedLine([3.65, -0.35, 0], [3.65, -1.05, 0], color=COL_GRAY, stroke_width=1.0)
+        lbl_od = _h6_17_badge("NOMINAL O.D. (เส้นผ่านศูนย์กลางนอก)", WHITE).move_to([0.0, -1.25, 0.0])
+        grp_od = VGroup(dim_od, od_ext_l, od_ext_r, lbl_od)
+
+        # 3. Stack Height (Vertical dimension on far left)
+        dim_sh = DoubleArrow([-4.30, -0.30, 0], [-4.30, 0.40, 0], color=COL_OK, stroke_width=2.5, tip_length=0.10)
+        sh_ext_top = DashedLine([-3.65, 0.40, 0], [-4.45, 0.40, 0], color=COL_GRAY, stroke_width=1.0)
+        sh_ext_bot = DashedLine([-3.10, -0.30, 0], [-4.45, -0.30, 0], color=COL_GRAY, stroke_width=1.0)
+        lbl_sh = _h6_17_badge("STACK HEIGHT\n(ความสูงซ้อน)", COL_OK).next_to(dim_sh, LEFT, buff=0.15)
+        grp_sh = VGroup(dim_sh, sh_ext_top, sh_ext_bot, lbl_sh)
+
+        # 4. Heel Clearance & 5. Interference on Right side matching slide 20
+        ext_lip = DashedLine([3.65, 0.40, 0], [3.65, -0.65, 0], color=COL_GRAY, stroke_width=1.0)
+        ext_heel = DashedLine([3.10, -0.30, 0], [3.10, -0.65, 0], color=COL_GRAY, stroke_width=1.0)
+        ext_bore = DashedLine([4.15, 0.40, 0], [4.15, -0.65, 0], color=COL_GRAY, stroke_width=1.0)
+
+        # Interference arrow & badge (flared lip interference fit)
+        dim_inf = DoubleArrow([3.10, -0.45, 0], [3.65, -0.45, 0], color=COL_WARN, stroke_width=2.0, tip_length=0.08)
+        lbl_inf = _h6_17_badge("INTERFERENCE\n(ระยะเบียดอัดแน่น)", COL_WARN).move_to([5.3, 0.60, 0.0])
+        arr_inf = Arrow([3.95, 0.60, 0], [3.65, 0.42, 0], color=COL_WARN, stroke_width=1.8, tip_length=0.08)
+        grp_inf = VGroup(ext_lip, ext_heel, dim_inf, lbl_inf, arr_inf)
+
+        # Heel clearance arrow & badge (clearance gap to prevent binding)
+        dim_hc = DoubleArrow([3.65, -0.55, 0], [4.15, -0.55, 0], color=YELLOW, stroke_width=2.0, tip_length=0.08)
+        lbl_hc = _h6_17_badge("HEEL CLEARANCE\n(ระยะเผื่อสันส้น)", YELLOW).move_to([5.3, -0.55, 0.0])
+        arr_hc = Arrow([3.95, -0.55, 0], [3.10, -0.32, 0], color=YELLOW, stroke_width=1.8, tip_length=0.08)
+        grp_hc = VGroup(ext_bore, dim_hc, lbl_hc, arr_hc)
+
+        banner5 = _h6_17_banner(
+            "มิติสำคัญของแหวนแต่ละวง: เส้นผ่านศูนย์กลางใน-นอก, ความสูง, ระยะเผื่อขอบ, ระยะเบียด",
+            COL_OK
+        )
+
+        dim_labels = [grp_id, grp_od, grp_sh, grp_hc, grp_inf]
+
+        self.play(FadeIn(ring_graphic, shift=UP * 0.25), FadeIn(banner5), run_time=0.8)
+        self.play(
+            LaggedStart(*[FadeIn(lbl, shift=UP * 0.15) for lbl in dim_labels], lag_ratio=0.3),
+            run_time=1.5
+        )
+        self.wait(3.5)  # Checkpoint 37.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 40.6–45.0: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: กลไกปรับความแน่นและศัพท์มิติ Compression Packing (hydraulic06 น.20)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. ส่วนประกอบ Gland: Male Supporting Ring, Packings (V-rings), Female Support Ring, Follower, และ Shim",
+            "2. วิธีปรับ 1: Threaded Follower ขันเกลียวโดยตรง ตัวกะทัดรัด แต่ต้องอาศัยช่างคอยตรวจขันกวดเป็นระยะ",
+            "3. วิธีปรับ 2: Flanged Follower ขันน็อตรอบหน้าแปลน กระจายแรงกดทั่วถึงและสม่ำเสมอกว่าแบบเกลียวเดี่ยว",
+            "4. วิธีปรับ 3: Spring Loaded สปริงดันแรงกดชดเชยการสึกหรออัตโนมัติตลอดเวลา เหมาะกับจุดที่เข้าถึงยาก",
+            "5. ศัพท์มิติแหวน: Nominal I.D. / Nominal O.D. / Stack Height / Heel Clearance / Interference"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.16, aligned_edge=LEFT).move_to([0.0, -0.18, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(3.6)  # Checkpoint 42.0s falls here
+
+        # ======================================================================
+        # BEAT 45.0–49.5: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "งานที่เข้าถึงยาก ไม่สะดวกส่งคนไปตรวจและขันปรับความแน่นบ่อยๆ\nควรเลือกใช้กลไกปรับ Gland Follower แบบใด?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: Spring Loaded Follower เพราะสปริงจะยุบตัวสะสมแรงและคอยดันชดเชยการสึกหรอ\nของ Packing ให้อัตโนมัติตลอดเวลา โดยไม่ต้องพึ่งพาคนคอยขันกวด)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.5)  # Checkpoint 47.0s falls here
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
+
+
+
 
