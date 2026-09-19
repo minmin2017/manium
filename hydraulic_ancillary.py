@@ -10866,7 +10866,8 @@ class H6_27_AccumulatorApps2(SafeScene):
             end=[cx - 0.2, cy + 1.95, 0],
             color=COL_OK, stroke_width=3.5, max_tip_length_to_length_ratio=0.25
         )
-        lbl_cyl_safe = Text("ดึงกลับสู่ตำแหน่งปลอดภัย (Safe Home)", font_size=9, color=COL_OK, weight=BOLD).next_to(cyl_safe_arrow, UP, buff=0.05)
+        lbl_cyl_safe = Text("ดึงกลับสู่ตำแหน่งปลอดภัย (Safe Home)", font_size=9, color=COL_OK, weight=BOLD).move_to([cx + 0.3, cy + 2.15, 0])
+        fit_width(lbl_cyl_safe, 2.4)
         safe_action_grp = VGroup(cyl_safe_arrow, lbl_cyl_safe)
 
         # Retracted piston version of cylinder for animation
