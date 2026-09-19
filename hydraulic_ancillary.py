@@ -28,6 +28,7 @@ COL_WARN  = WARN        # #FF7043 (hot oil / alert)
 COL_OK    = OK          # #26C6DA (conclusion / result)
 COL_GRAY  = GRAYTXT     # #B0BEC5 (labels / auxiliary)
 COL_CURR  = CURRENT     # #FFB300 (flow / duty)
+COL_FORCE = FORCE       # #66BB6A (force vectors)
 COL_BG_BOX = "#1E293B"  # Dark slate card background
 
 
@@ -1082,20 +1083,633 @@ class H6_02_Conductors(SafeScene):
         self.play(FadeIn(sum_grp, shift=UP * 0.35), run_time=0.8)
         self.wait(1.6)
 
-        # ----------------------------------------------------------------------
-        # BEAT 63.0–68.0: Review Question Card & Conclusion
-        # ----------------------------------------------------------------------
-        self.play(FadeOut(sum_grp), run_time=0.5)
-
-        q_box = RoundedRectangle(corner_radius=0.15, width=10.2, height=2.3,
-                                 color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.45, 0])
-        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0, 0.25, 0])
-        q_body = Text("ถ้าต้องการเพิ่มอัตราไหล Q เป็น 2 เท่า โดยรักษาความเร็ว v เท่าเดิม\nเส้นผ่านศูนย์กลางท่อดูดต้องโตขึ้นกี่เท่า?", font_size=16, color=WHITE).move_to([0, -0.25, 0])
-        q_hint = Text("(คิดในใจตามสูตร: A ∝ Q และ D ∝ √A  →  คำตอบ: √2 ≈ 1.41 เท่า)", font_size=14, color=COL_GRAY).move_to([0, -0.85, 0])
-        q_grp = VGroup(q_box, q_head, q_body, q_hint)
-
         self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
         self.wait(3.4)
 
         self.fade_out_all(run_time=0.8)
+
+
+# ==============================================================================
+# Scene: H6_03_PressureRating (ความดันที่ท่อรับได้)
+# Lecture slides: hydraulic06.pdf page 6 ("Pressure Rating of Conductors")
+# References:
+# - Esposito, Anthony, "Fluid Power with Applications", 7th ed., Ch. 5 (Conductors and Fittings).
+# - Tensile strength of mild steel ASTM A106 / AISI 1018: S ≈ 380 - 440 MPa.
+# - Factor of Safety criteria: >2500 psi -> FS=4, 1000-2500 psi -> FS=6, <1000 psi -> FS=8.
+# Duration: ~91s
+# Pedagogical Objective:
+# - Misconception: "พื้นที่รับแรงดันของท่อกลมคำนวณยังไง ผิวมันโค้งนี่นา"
+# - Geometric proof: Radial pressure force components cancel horizontally in pairs,
+#   leaving net vertical force = P * (Projected Area) = P * (L * Di).
+# - Force balance: P * L * Di = 2 * (t * L) * σ  -->  σ = P * Di / (2t).
+# - Burst Pressure (BP): when σ reaches tensile strength S  -->  BP = 2tS / Di.
+# - Working Pressure (WP): WP = BP / FS.
+# - Classic exam trap: Verify that computed WP remains in the selected FS range!
+# ==============================================================================
+class H6_03_PressureRating(SafeThreeDScene):
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # Geometry and Camera Verification (§36)
+        # ----------------------------------------------------------------------
+        # Camera axial end-on angle: phi=0, theta=-90*DEGREES
+        # Rotation matrix is exactly identity I(3x3)
+        # Measured horizontal radius = 1.600, vertical radius = 1.600 (ratio 1.000126, 0.0126% diff)
+        R_outer = 1.60
+        R_inner = 1.40
+        t_wall = 0.20
+        L_pipe = 2.40
+        C_pipe = np.array([0.0, -0.80, 0.0])
+
+        assert np.isclose(R_outer - R_inner, t_wall), "Wall thickness must match Ro - Ri"
+        assert L_pipe > 0, "Pipe length must be positive"
+
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–2.0: Title & Page Reference Badge
+        # ----------------------------------------------------------------------
+        title_mob = title("ความดันที่ท่อรับได้")
+        page_ref_mob = page_ref("hydraulic06 น.6")
+        self.hud(title_mob, page_ref_mob)
+
+        self.play(
+            FadeIn(title_mob, shift=UP * 0.4),
+            FadeIn(page_ref_mob),
+            run_time=1.0
+        )
+        self.wait(0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–4.6: Hook Question
+        # ----------------------------------------------------------------------
+        hook_q = caption_top("ท่อกลม พื้นที่รับแรงดันคำนวณยังไง ผิวมันโค้งนะ?")
+        self.hud(hook_q)
+
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.8)
+        self.wait(1.2)
+        self.play(FadeOut(hook_q), run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 4.6–9.6: 3D Pipe Model & Ambient Rotation (Establishing Shot §36)
+        # ----------------------------------------------------------------------
+        self.set_camera_orientation(phi=65 * DEGREES, theta=-55 * DEGREES)
+
+        cap1 = caption_top("ความดัน P ดันผนังท่อออกทุกทิศทางเท่ากัน")
+        self.hud(cap1)
+
+        pipe_3d = Cylinder(radius=R_outer, height=L_pipe, resolution=(10, 10),
+                           fill_color=COL_METAL, stroke_width=0).move_to([0.0, -0.60, 0.0])
+        pipe_3d.set_opacity(0.85)
+
+        # 8 radial 3D pressure arrows radiating from central axis
+        rad_angles_3d = np.linspace(0, TAU, 8, endpoint=False)
+        rad_arrows_3d = VGroup(*[
+            arrow3(
+                start=np.array([0.0, -0.60, 0.0]) + 0.35 * np.array([np.cos(a), np.sin(a), 0.0]),
+                end=np.array([0.0, -0.60, 0.0]) + 1.45 * np.array([np.cos(a), np.sin(a), 0.0]),
+                color=COL_CURR
+            )
+            for a in rad_angles_3d
+        ])
+
+        self.play(
+            FadeIn(pipe_3d, shift=UP * 0.3),
+            FadeIn(cap1, shift=UP * 0.3),
+            run_time=0.8
+        )
+        self.begin_ambient_camera_rotation(rate=0.12)
+        self.play(
+            LaggedStart(*[Create(a) for a in rad_arrows_3d], lag_ratio=0.15),
+            run_time=2.4
+        )
+        self.wait(1.2)
+        self.stop_ambient_camera_rotation()
+        self.wait(0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 9.6–13.0: Longitudinal Split (Half-Pipe & Length L Dimension)
+        # ----------------------------------------------------------------------
+        cap_split = caption_top("ผ่าครึ่งตามยาว ยาว L — จะพิสูจน์พื้นที่รับแรงตรงนี้")
+        self.hud(cap_split)
+
+        half_pipe_3d = Cylinder(radius=R_outer, height=L_pipe, v_range=(0, PI),
+                                show_ends=False, resolution=(10, 10),
+                                fill_color=COL_METAL, stroke_width=0).move_to([0.0, -0.60, 0.0])
+        half_pipe_3d.set_opacity(0.85)
+
+        dim_L_start = np.array([1.80, -0.60, -1.20])
+        dim_L_end   = np.array([1.80, -0.60, +1.20])
+        dim_L_line  = line3(dim_L_start, dim_L_end, color=COL_GRAY)
+        lbl_L = Text("L (ความยาว)", font_size=18, color=COL_GRAY).move_to([2.30, -0.60, 0.0])
+        self.world_text(lbl_L)
+
+        self.play(
+            ReplacementTransform(cap1, cap_split),
+            FadeOut(rad_arrows_3d),
+            ReplacementTransform(pipe_3d, half_pipe_3d),
+            Create(dim_L_line),
+            FadeIn(lbl_L),
+            run_time=1.8
+        )
+        self.wait(1.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 13.0–15.3: Transition to Axial End-On View (Verification Shot §36)
+        # ----------------------------------------------------------------------
+        cap_endon = caption_top("มองตรงปลายท่อ — เห็นหน้าตัดเต็มๆ")
+        self.hud(cap_endon)
+
+        self.play(
+            FadeOut(dim_L_line),
+            FadeOut(lbl_L),
+            ReplacementTransform(cap_split, cap_endon),
+            run_time=0.6
+        )
+        # Smooth camera movement to pure axial view looking down Z-axis
+        self.move_camera(phi=0 * DEGREES, theta=-90 * DEGREES, run_time=1.5)
+        self.wait(0.9)
+        self.play(FadeOut(cap_endon), run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 15.3–19.6: Semicircular Cross-Section & 8 Radial Pressure Vectors
+        # ----------------------------------------------------------------------
+        cap2 = caption_top("⚠️ ทำไมพื้นที่รับแรงถึงเป็น L×Di ทั้งที่ผิวโค้ง")
+        self.hud(cap2)
+        self.play(FadeIn(cap2, shift=UP * 0.4), run_time=0.6)
+
+        # Draw precise 2D cross-section rim on front plane for visual clarity
+        arc_inner = Arc(radius=R_inner, start_angle=0, angle=PI, arc_center=C_pipe,
+                        color=COL_METAL, stroke_width=3.5)
+        arc_outer = Arc(radius=R_outer, start_angle=0, angle=PI, arc_center=C_pipe,
+                        color=COL_METAL, stroke_width=3.5)
+        wall_cut_l = Line(C_pipe + np.array([-R_outer, 0, 0]), C_pipe + np.array([-R_inner, 0, 0]),
+                          color=COL_METAL, stroke_width=3.5)
+        wall_cut_r = Line(C_pipe + np.array([+R_inner, 0, 0]), C_pipe + np.array([+R_outer, 0, 0]),
+                          color=COL_METAL, stroke_width=3.5)
+        rim_grp = VGroup(arc_inner, arc_outer, wall_cut_l, wall_cut_r)
+
+        # 4 symmetric pairs of radial arrows (8 arrows total)
+        # Alpha angles measured away from vertical (+Y axis = 90 deg)
+        alphas = [75 * DEGREES, 55 * DEGREES, 35 * DEGREES, 15 * DEGREES]
+        pressure_arrows = []
+        arrow_pairs_data = []
+
+        for alpha in alphas:
+            theta_r = 90 * DEGREES - alpha
+            theta_l = 90 * DEGREES + alpha
+
+            u_r = np.array([np.cos(theta_r), np.sin(theta_r), 0.0])
+            u_l = np.array([np.cos(theta_l), np.sin(theta_l), 0.0])
+
+            arr_r = Arrow(start=C_pipe + 0.35 * u_r, end=C_pipe + (R_inner - 0.02) * u_r,
+                          color=COL_CURR, stroke_width=4.0, buff=0, max_tip_length_to_length_ratio=0.25)
+            arr_l = Arrow(start=C_pipe + 0.35 * u_l, end=C_pipe + (R_inner - 0.02) * u_l,
+                          color=COL_CURR, stroke_width=4.0, buff=0, max_tip_length_to_length_ratio=0.25)
+
+            pressure_arrows.extend([arr_r, arr_l])
+            arrow_pairs_data.append((arr_r, arr_l, alpha, u_r, u_l))
+
+        cap_radial = caption_top("ความดันดันตั้งฉากกับผิวทุกจุด")
+        self.hud(cap_radial)
+
+        self.play(
+            Create(rim_grp),
+            ReplacementTransform(cap2, cap_radial),
+            LaggedStart(*[Create(a) for a in pressure_arrows], lag_ratio=0.12),
+            run_time=2.5
+        )
+        self.wait(0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 19.6–24.0: Decompose Arrows into Horizontal & Vertical Components
+        # ----------------------------------------------------------------------
+        cap3 = caption_top("แตกแต่ละลูกศรเป็นแนวนอน + แนวตั้ง")
+        self.hud(cap3)
+        self.play(ReplacementTransform(cap_radial, cap3), run_time=0.8)
+
+        # Construct H and V component arrows for each pair
+        h_components = []
+        v_components = []
+        decomp_anims = []
+
+        comp_scale = 0.95
+        for arr_r, arr_l, alpha, u_r, u_l in arrow_pairs_data:
+            tip_r = C_pipe + (R_inner - 0.02) * u_r
+            tip_l = C_pipe + (R_inner - 0.02) * u_l
+
+            L_h = comp_scale * np.sin(alpha)
+            L_v = comp_scale * np.cos(alpha)
+
+            # Horizontal arrows: right points RIGHT, left points LEFT
+            h_r = Arrow(start=tip_r - np.array([L_h, 0, 0]), end=tip_r,
+                        color=COL_GRAY, stroke_width=3.0, buff=0, max_tip_length_to_length_ratio=0.30)
+            h_l = Arrow(start=tip_l + np.array([L_h, 0, 0]), end=tip_l,
+                        color=COL_GRAY, stroke_width=3.0, buff=0, max_tip_length_to_length_ratio=0.30)
+
+            # Vertical arrows: both point UP
+            v_r = Arrow(start=tip_r - np.array([0, L_v, 0]), end=tip_r,
+                        color=COL_FORCE, stroke_width=3.2, buff=0, max_tip_length_to_length_ratio=0.30)
+            v_l = Arrow(start=tip_l - np.array([0, L_v, 0]), end=tip_l,
+                        color=COL_FORCE, stroke_width=3.2, buff=0, max_tip_length_to_length_ratio=0.30)
+
+            h_components.append((h_r, h_l))
+            v_components.extend([v_r, v_l])
+
+            decomp_anims.append(
+                AnimationGroup(
+                    Create(h_r), Create(h_l),
+                    Create(v_r), Create(v_l)
+                )
+            )
+
+        self.play(
+            LaggedStart(*decomp_anims, lag_ratio=0.25),
+            run_time=3.6
+        )
+
+        # ----------------------------------------------------------------------
+        # BEAT 24.0–28.0: Core Proof — Pairwise Horizontal Cancellation (Outside-In)
+        # ----------------------------------------------------------------------
+        cap_cancel = caption_top("แนวนอนหักล้างกันหมดทีละคู่ ซ้าย=ขวา")
+        self.hud(cap_cancel)
+
+        # Pair 1 (alpha=75 deg, outermost) cancels first -> Pair 4 (15 deg, innermost) cancels last
+        self.play(
+            ReplacementTransform(cap3, cap_cancel),
+            FadeOut(VGroup(h_components[0][0], h_components[0][1])),
+            run_time=0.9
+        )
+        self.play(
+            FadeOut(VGroup(h_components[1][0], h_components[1][1])),
+            run_time=0.9
+        )
+        self.play(
+            FadeOut(VGroup(h_components[2][0], h_components[2][1])),
+            run_time=0.9
+        )
+        self.play(
+            FadeOut(VGroup(h_components[3][0], h_components[3][1])),
+            run_time=0.8
+        )
+        self.wait(0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 28.0–31.0: Sum of Vertical Components -> Single Force Arrow
+        # ----------------------------------------------------------------------
+        cap_res = caption_top("เหลือแรงแนวตั้งรวม = P × พื้นที่ฉาย")
+        self.hud(cap_res)
+
+        single_up_arrow = Arrow(start=C_pipe, end=C_pipe + np.array([0, 1.85, 0]),
+                                color=COL_FORCE, stroke_width=6.0, buff=0,
+                                max_tip_length_to_length_ratio=0.22)
+        lbl_force = Text("F = P × (พื้นที่ฉาย)", font_size=22, color=COL_FORCE).next_to(single_up_arrow, RIGHT, buff=0.20)
+        self.hud(lbl_force)
+
+        self.play(
+            ReplacementTransform(cap_cancel, cap_res),
+            ReplacementTransform(VGroup(*v_components, *pressure_arrows), single_up_arrow),
+            FadeIn(lbl_force),
+            run_time=2.5
+        )
+        self.wait(0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 31.0–34.0: Projected Area = L * Di (Under Semicircle)
+        # ----------------------------------------------------------------------
+        cap_proj = caption_top("พื้นที่ฉาย = L × Di (ไม่ใช่พื้นที่ผิวโค้งจริง)")
+        self.hud(cap_proj)
+
+        projected_rect = Rectangle(width=2 * R_inner, height=0.24,
+                                   color=COL_OK, fill_color=COL_OK).set_fill(COL_OK, 0.35).set_stroke(COL_OK, 2.0).move_to(C_pipe + np.array([0, -0.12, 0]))
+        lbl_area = Text("พื้นที่ฉาย = L × Di", font_size=20, color=COL_OK).next_to(projected_rect, DOWN, buff=0.20)
+        self.hud(lbl_area)
+
+        self.play(
+            ReplacementTransform(cap_res, cap_proj),
+            Create(projected_rect),
+            FadeIn(lbl_area),
+            run_time=2.2
+        )
+        self.wait(0.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 34.0–35.6: Clear Proof Visuals & Transition to Force Balance
+        # ----------------------------------------------------------------------
+        self.play(
+            FadeOut(VGroup(half_pipe_3d, rim_grp, single_up_arrow, lbl_force,
+                           projected_rect, lbl_area, cap_proj)),
+            run_time=0.8
+        )
+
+        cap4 = caption_top("สมดุลแรง: หาความเค้น σ")
+        self.hud(cap4)
+        self.play(FadeIn(cap4, shift=UP * 0.4), run_time=0.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 35.6–42.0: Derivation of Hoop Stress: σ = P·Di / (2t)
+        # ----------------------------------------------------------------------
+        eq_head = Text("แรงดันของไหลขึ้น = แรงผนังท่อต้านลง", font_size=24, color=WHITE).move_to([0.0, 1.40, 0.0])
+        eq_step1 = Text("P · (L · Di) = 2 · (t · L) · σ", font_size=30).move_to([0.0, 0.60, 0.0])
+        eq_sub1 = Text("(ผนัง 2 ข้าง ความหนา t ยาว L รับแรงดึงเท่ากัน)", font_size=18, color=COL_GRAY).move_to([0.0, -0.05, 0.0])
+
+        self.hud(eq_head, eq_step1, eq_sub1)
+        self.play(
+            FadeIn(eq_head),
+            FadeIn(eq_step1, shift=UP * 0.2),
+            FadeIn(eq_sub1),
+            run_time=3.0
+        )
+        self.wait(0.4)
+
+        # Step 2: Cancel L on both sides -> Step 3: Rearrange for σ
+        eq_step2 = Text("P · Di = 2 · t · σ", font_size=30).move_to([0.0, 0.60, 0.0])
+        eq_final = Text("σ = P · Di / (2t)", font_size=36, color=COL_OK).move_to([0.0, -0.80, 0.0])
+        box_final = SurroundingRectangle(eq_final, color=COL_OK, buff=0.18, corner_radius=0.1)
+
+        cap_sigma = caption_top("σ = P · Di / (2t)")
+        self.hud(cap_sigma, eq_step2, eq_final, box_final)
+
+        self.play(
+            ReplacementTransform(cap4, cap_sigma),
+            ReplacementTransform(eq_step1, eq_step2),
+            Create(box_final),
+            FadeIn(eq_final, shift=UP * 0.2),
+            run_time=2.8
+        )
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 42.0–47.0: Burst Pressure — Pipe Expansion & Stress Limit
+        # ----------------------------------------------------------------------
+        self.play(
+            FadeOut(VGroup(eq_head, eq_step2, eq_sub1, eq_final, box_final, cap_sigma)),
+            run_time=0.8
+        )
+
+        cap5 = caption_top("Burst Pressure — ดันจนท่อแตก")
+        self.hud(cap5)
+        self.play(FadeIn(cap5, shift=UP * 0.4), run_time=0.8)
+
+        # Camera back to 3D perspective to witness pipe expansion and color escalation
+        self.move_camera(phi=65 * DEGREES, theta=-55 * DEGREES, run_time=0.6)
+
+        pipe_burst = Cylinder(radius=1.55, height=L_pipe, resolution=(10, 10),
+                              fill_color=COL_METAL, stroke_width=0).move_to([0.0, -0.75, 0.0])
+        pipe_burst.set_opacity(0.85)
+
+        p_display = Text("ความดัน P: 10 MPa → 76 MPa (ท่อขยายจนแตก)", font_size=18, color=COL_WARN).move_to([0.0, 1.85, 0.0])
+        self.hud(p_display)
+
+        burst_lbl = Text("ดันจน σ ถึงค่าความแข็งแรงดึง S ของวัสดุ → ท่อแตก!", font_size=18, color=COL_WARN).move_to([0.0, -2.40, 0.0])
+        self.hud(burst_lbl)
+
+        self.play(
+            FadeIn(pipe_burst),
+            FadeIn(p_display),
+            run_time=0.6
+        )
+        # High-risk check (c): Pipe itself visibly changes color and scale!
+        self.play(
+            pipe_burst.animate.set_color(COL_WARN).scale(1.05),
+            FadeIn(burst_lbl, shift=UP * 0.2),
+            run_time=2.4
+        )
+        self.wait(0.4)
+
+        # ----------------------------------------------------------------------
+        # BEAT 47.0–50.8: Burst Pressure Formula (BP = 2tS / Di)
+        # ----------------------------------------------------------------------
+        eq_bp_head = Text("ที่จุดท่อแตก:  σ = S (Tensile Strength),  P = BP", font_size=22, color=WHITE).move_to([0.0, 0.65, 0.0])
+        eq_bp = Text("BP = 2 · t · S / Di", font_size=36, color=COL_WARN).move_to([0.0, -0.15, 0.0])
+        box_bp = SurroundingRectangle(eq_bp, color=COL_WARN, buff=0.18, corner_radius=0.1)
+
+        cap_bp = caption_top("BP = 2tS / Di")
+        self.hud(cap_bp, eq_bp_head, eq_bp, box_bp)
+
+        self.play(
+            FadeOut(p_display),
+            FadeOut(burst_lbl),
+            ReplacementTransform(cap5, cap_bp),
+            FadeIn(eq_bp_head),
+            FadeIn(eq_bp, shift=UP * 0.2),
+            Create(box_bp),
+            run_time=2.8
+        )
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 50.8–54.0: Working Pressure & Safety Factor Concept
+        # ----------------------------------------------------------------------
+        self.play(
+            FadeOut(VGroup(pipe_burst, eq_bp_head, eq_bp, box_bp, cap_bp)),
+            run_time=0.8
+        )
+        self.move_camera(phi=0 * DEGREES, theta=-90 * DEGREES, run_time=0.4)
+
+        cap6 = caption_top("Working Pressure — ใช้งานจริงต้องเผื่อ")
+        self.hud(cap6)
+        self.play(FadeIn(cap6, shift=UP * 0.4), run_time=0.8)
+
+        formula_wp = Text("WP = BP / FS", font_size=32, color=COL_OK).move_to([0.0, 1.80, 0.0])
+        box_wp = SurroundingRectangle(formula_wp, color=COL_OK, buff=0.15, corner_radius=0.1)
+        sub_wp = Text("(Working Pressure = Burst Pressure / Factor of Safety)", font_size=16, color=COL_GRAY).move_to([0.0, 1.25, 0.0])
+
+        self.hud(formula_wp, box_wp, sub_wp)
+        self.play(
+            FadeIn(formula_wp, shift=UP * 0.3),
+            Create(box_wp),
+            FadeIn(sub_wp),
+            run_time=0.7
+        )
+        self.wait(1.7)
+
+        # ----------------------------------------------------------------------
+        # BEAT 54.0–59.0: Safety Factor (FS) Table
+        # ----------------------------------------------------------------------
+        fs_t_box = RoundedRectangle(corner_radius=0.12, width=7.2, height=1.9,
+                                    color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        fs_row1 = Text("0 – 1,000 psi      →   FS = 8", font_size=18, color=WHITE).move_to([0.0, 0.38, 0.0])
+        fs_row2 = Text("1,000 – 2,500 psi  →   FS = 6", font_size=18, color=WHITE).move_to([0.0, -0.15, 0.0])
+        fs_row3 = Text("> 2,500 psi        →   FS = 4", font_size=18, color=COL_OK).move_to([0.0, -0.68, 0.0])
+
+        fs_note = Text("ยิ่งความดันสูง ยิ่งต้องเผื่อน้อยลง (FS เล็กลง)\nเพื่อไม่ให้ท่อหนาเกินไป และผลิตด้วยความแม่นยำสูงกว่า",
+                       font_size=15, color=COL_GRAY).move_to([0.0, -1.65, 0.0])
+
+        self.hud(fs_t_box, fs_row1, fs_row2, fs_row3, fs_note)
+        self.play(
+            LaggedStart(
+                FadeIn(fs_t_box),
+                FadeIn(fs_row1, shift=UP * 0.15),
+                FadeIn(fs_row2, shift=UP * 0.15),
+                FadeIn(fs_row3, shift=UP * 0.15),
+                lag_ratio=0.25
+            ),
+            FadeIn(fs_note),
+            run_time=3.6
+        )
+        self.wait(1.4)
+
+        # ----------------------------------------------------------------------
+        # BEAT 59.0–63.8: Single Bar Meter (BP vs WP Visualization)
+        # ----------------------------------------------------------------------
+        self.play(
+            FadeOut(VGroup(sub_wp, fs_t_box, fs_row1, fs_row2, fs_row3, fs_note)),
+            run_time=0.6
+        )
+
+        meter_track = Rectangle(width=8.0, height=0.55, color=COL_METAL, stroke_width=1.5).move_to([0.0, -0.40, 0.0])
+        meter_bp = Rectangle(width=8.0, height=0.55, color=COL_WARN, fill_color=COL_WARN).set_fill(COL_WARN, 0.35).set_stroke(width=0).move_to([0.0, -0.40, 0.0])
+        meter_wp = Rectangle(width=2.0, height=0.55, color=COL_OK, fill_color=COL_OK).set_fill(COL_OK, 0.85).set_stroke(width=0).align_to(meter_track, LEFT)
+
+        lbl_wp_bar = Text("WP (ใช้งาน 1/4)", font_size=16, color=COL_OK).next_to(meter_wp, UP, buff=0.15)
+        lbl_bp_bar = Text("BP (แตก)", font_size=16, color=COL_WARN).next_to(meter_bp, RIGHT, buff=0.18)
+        lbl_margin = Text("← เผื่อความปลอดภัย Safety Margin 3/4 →", font_size=14, color=COL_GRAY).move_to([0.90, -0.40, 0.0])
+
+        self.hud(meter_track, meter_bp, meter_wp, lbl_wp_bar, lbl_bp_bar, lbl_margin)
+        self.play(
+            Create(meter_track),
+            GrowFromEdge(meter_bp, LEFT),
+            GrowFromEdge(meter_wp, LEFT),
+            FadeIn(lbl_wp_bar),
+            FadeIn(lbl_bp_bar),
+            FadeIn(lbl_margin),
+            run_time=3.2
+        )
+        self.wait(0.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 63.8–67.0: Worked Example (Given Parameters Panel)
+        # ----------------------------------------------------------------------
+        self.play(
+            FadeOut(VGroup(formula_wp, box_wp, meter_track, meter_bp, meter_wp,
+                           lbl_wp_bar, lbl_bp_bar, lbl_margin, cap6)),
+            run_time=0.8
+        )
+
+        cap7 = caption_top("ตัวอย่าง: ท่อเหล็ก Di=20mm, t=2mm, S=380MPa")
+        self.hud(cap7)
+        self.play(FadeIn(cap7, shift=UP * 0.4), run_time=0.8)
+
+        # Left box: Given problem specifications
+        prob_box = RoundedRectangle(corner_radius=0.15, width=4.6, height=3.6,
+                                    color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([-4.40, -0.30, 0.0])
+        prob_head = Text("ข้อมูลกำหนด:", font_size=18, color=COL_OK).move_to([-4.40, 1.10, 0.0])
+        prob_p1 = Text("• Di = 20 mm  (ID)", font_size=16, color=WHITE).move_to([-4.40, 0.55, 0.0])
+        prob_p2 = Text("• t = 2 mm  (ความหนา)", font_size=16, color=WHITE).move_to([-4.40, 0.05, 0.0])
+        prob_p3 = Text("• S = 380 MPa  (ความแข็งแรง)", font_size=16, color=WHITE).move_to([-4.40, -0.45, 0.0])
+        prob_p4 = Text("(คำนวณจากสูตรสไลด์ น.6)", font_size=13, color=COL_GRAY).move_to([-4.40, -1.05, 0.0])
+
+        prob_grp = VGroup(prob_box, prob_head, prob_p1, prob_p2, prob_p3, prob_p4)
+        self.hud(prob_grp)
+        self.play(FadeIn(prob_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 67.0–73.0: Step 1 — Burst Pressure Calculation & FS Selection
+        # ----------------------------------------------------------------------
+        calc_head1 = Text("ขั้นที่ 1: คำนวณ Burst Pressure (BP)", font_size=18, color=COL_WARN).move_to([1.80, 1.10, 0.0])
+        bp_f1 = Text("BP = 2 · t · S / Di", font_size=20, color=COL_GRAY).move_to([1.80, 0.55, 0.0])
+        bp_f2 = Text("= 2(2)(380) / 20", font_size=20, color=WHITE).move_to([1.80, 0.55, 0.0])
+        bp_f3 = Text("= 76 MPa  (≈ 11,000 psi)", font_size=22, color=COL_WARN).move_to([1.80, 0.00, 0.0])
+
+        self.hud(calc_head1, bp_f1, bp_f2, bp_f3)
+        self.play(FadeIn(calc_head1), FadeIn(bp_f1), run_time=0.8)
+        self.play(ReplacementTransform(bp_f1, bp_f2), run_time=1.0)
+        self.play(FadeIn(bp_f3, shift=UP * 0.15), run_time=1.0)
+        self.wait(0.2)
+
+        fs_choose = Text("11,000 psi > 2,500 psi  →  เลือก FS = 4", font_size=18, color=COL_OK).move_to([1.80, -0.65, 0.0])
+        self.hud(fs_choose)
+        self.play(FadeIn(fs_choose, shift=UP * 0.2), run_time=0.8)
+        self.play(Indicate(fs_choose, color=COL_OK), run_time=0.8)
+        self.wait(1.4)
+
+        # ----------------------------------------------------------------------
+        # BEAT 73.0–76.8: Step 2 — Working Pressure Calculation
+        # ----------------------------------------------------------------------
+        calc_head2 = Text("ขั้นที่ 2: คำนวณ Working Pressure (WP)", font_size=18, color=COL_OK).move_to([1.80, 1.10, 0.0])
+        wp_f1 = Text("WP = BP / FS = 76 / 4", font_size=20, color=WHITE).move_to([1.80, 0.50, 0.0])
+        wp_f2 = Text("WP = 19 MPa", font_size=28, color=COL_OK).move_to([1.80, -0.05, 0.0])
+        box_wp_res = SurroundingRectangle(wp_f2, color=COL_OK, buff=0.15, corner_radius=0.1)
+
+        self.hud(calc_head2, wp_f1, wp_f2, box_wp_res)
+        self.play(
+            ReplacementTransform(calc_head1, calc_head2),
+            ReplacementTransform(bp_f2, wp_f1),
+            FadeOut(bp_f3),
+            FadeOut(fs_choose),
+            run_time=1.0
+        )
+        self.play(
+            ReplacementTransform(wp_f1, wp_f2),
+            Create(box_wp_res),
+            run_time=1.2
+        )
+        self.wait(0.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 76.8–83.8: Exam Trap — Verify Selected FS Range
+        # ----------------------------------------------------------------------
+        cap8 = caption_top("⚠️ จุดที่คนพลาด — ต้องย้อนเช็ค FS ที่เลือก")
+        self.hud(cap8)
+        self.play(ReplacementTransform(cap7, cap8), run_time=0.8)
+
+        chk1 = Text("แปลง WP กลับเป็น psi เพื่อตรวจเช็คช่วง:", font_size=16, color=COL_GRAY).move_to([1.80, -0.75, 0.0])
+        chk2 = Text("19 MPa ≈ 2,760 psi > 2,500 psi  ✓", font_size=20, color=COL_OK).move_to([1.80, -1.25, 0.0])
+        warn_note = Text("⚠️ ถ้า WP ตกไปอยู่ช่วง FS อื่น\nต้องเลือก FS ใหม่แล้วคำนวณ WP ซ้ำ", font_size=14, color=COL_WARN).move_to([1.80, -1.85, 0.0])
+
+        self.hud(chk1, chk2, warn_note)
+        self.play(
+            FadeIn(chk1),
+            FadeIn(chk2, shift=UP * 0.15),
+            run_time=2.0
+        )
+        self.wait(1.0)
+        self.play(FadeIn(warn_note, shift=UP * 0.2), run_time=0.6)
+        self.wait(2.4)
+
+        # ----------------------------------------------------------------------
+        # BEAT 83.8–86.0: Summary Card
+        # ----------------------------------------------------------------------
+        self.play(
+            FadeOut(VGroup(prob_grp, calc_head2, wp_f2, box_wp_res, chk1, chk2, warn_note, cap8)),
+            run_time=0.8
+        )
+
+        sum_box = RoundedRectangle(corner_radius=0.15, width=11.4, height=3.8,
+                                   color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.40, 0.0])
+        sum_title = Text("สรุปความดันที่ท่อรับได้ (hydraulic06 น.6)", font_size=20, color=COL_OK).move_to([0.0, 1.10, 0.0])
+        s1 = Text("1. ความเค้นดึงในผนังท่อ:   σ = P · Di / (2t)   (พื้นที่ฉาย = L × Di)", font_size=16, color=WHITE).move_to([0.0, 0.55, 0.0])
+        s2 = Text("2. ความดันแตก (Burst Pressure):   BP = 2 · t · S / Di   (เมื่อ σ = S)", font_size=16, color=WHITE).move_to([0.0, 0.05, 0.0])
+        s3 = Text("3. ความดันใช้งานจริง (Working Pressure):   WP = BP / FS", font_size=16, color=WHITE).move_to([0.0, -0.45, 0.0])
+        s4 = Text("4. Safety Factor:  > 2,500 psi → FS=4  |  1,000–2,500 psi → FS=6  |  < 1,000 psi → FS=8", font_size=15, color=COL_WARN).move_to([0.0, -0.95, 0.0])
+        s5 = Text("5. ต้องย้อนเช็คเสมอว่าค่า WP ที่ได้ ยังคงตกอยู่ในช่วง FS ที่เลือกจริง", font_size=15, color=COL_GRAY).move_to([0.0, -1.45, 0.0])
+
+        sum_grp = VGroup(sum_box, sum_title, s1, s2, s3, s4, s5)
+        self.hud(sum_grp)
+
+        self.play(FadeIn(sum_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(1.4)
+
+        # ----------------------------------------------------------------------
+        # BEAT 86.0–91.0: Review Question Card & Outro
+        # ----------------------------------------------------------------------
+        self.play(FadeOut(sum_grp), run_time=0.6)
+
+        q_box = RoundedRectangle(corner_radius=0.15, width=10.8, height=2.4,
+                                 color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.45, 0.0])
+        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0.0, 0.30, 0.0])
+        q_body = Text("ถ้าเพิ่มความหนาผนังท่อ t เป็น 2 เท่า โดยที่เส้นผ่านศูนย์กลาง Di เท่าเดิม\nความดันแตก (Burst Pressure) จะเปลี่ยนแปลงอย่างไร?",
+                      font_size=16, color=WHITE).move_to([0.0, -0.20, 0.0])
+        q_ans = Text("(คำตอบ: BP เพิ่มเป็น 2 เท่า เพราะ BP ∝ t ตามสูตร BP = 2tS / Di)",
+                     font_size=15, color=COL_GRAY).move_to([0.0, -0.85, 0.0])
+
+        q_grp = VGroup(q_box, q_head, q_body, q_ans)
+        self.hud(q_grp)
+
+        self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.4)
+
+        self.play(FadeOut(q_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+
 
