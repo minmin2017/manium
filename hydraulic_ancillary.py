@@ -7620,7 +7620,7 @@ class H6_19_PistonRings(SafeScene):
             color=COL_OK, fill_color="#0284C7", fill_opacity=0.9,
             stroke_width=1.8, stroke_color=COL_OK
         ).move_to([0.05, 1.78, 0.0])
-        pr_badge = _h6_19_badge("PISTON RING: มีรอยผ่า (ฝั่งแรงดัน)", COL_OK).move_to([1.6, 1.78, 0.0])
+        pr_badge = _h6_19_badge("PISTON RING: มีรอยผ่า (ฝั่งแรงดัน)", COL_OK).next_to(pr_icon_ring, RIGHT, buff=0.3)
         pr_arrow = Arrow([0.45, 1.62, 0.0], [0.22, 1.15, 0.0], color=COL_OK, stroke_width=2.2, tip_length=0.11)
         piston_ring_mob = VGroup(pr_block_t, pr_block_b, pr_icon_ring, pr_badge, pr_arrow)
 
