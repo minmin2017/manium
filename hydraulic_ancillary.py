@@ -2794,6 +2794,300 @@ class H6_06_PipeFittings(SafeScene):
         self.fade_out_all(run_time=0.8)
 
 
+# ==============================================================================
+# Scene: H6_07_SteelTubeSizes (ตารางไซส์ท่อเหล็กมาตรฐาน และการเชื่อมโยงสู่ของจริง)
+# Lecture slides: hydraulic06.pdf page 10 ("Steel Tube Sizes")
+# Duration: ~33s
+# Pedagogical Objective:
+# - Connect theoretical sizing (H6_02: D_suction ≈ 23.0 mm at Q=30 L/min)
+#   to real commercial standards: Table row OD=28 mm, Wall=2.5 mm -> ID=23.0 mm.
+# - Understand why a single OD has multiple wall thicknesses: outer diameter is
+#   fixed for standard fittings while wall thickness varies with Working Pressure.
+# - Distinguish between Imperial (inches) and Metric (mm) tubing standards.
+# - Richness: Thin (clean reference table presentation, 2D SafeScene).
+# ==============================================================================
+
+class H6_07_SteelTubeSizes(SafeScene):
+    def clear_stage(self, keep=(), run_time=0.6):
+        """Fade out active stage objects while preserving persistent title badges."""
+        targets = [m for m in self.mobjects if m not in keep and m not in getattr(self, "keep_mobs", ())]
+        if targets:
+            self.play(FadeOut(Group(*targets)), run_time=run_time)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # SETUP PERSISTENT BADGES (0.0–1.5s)
+        # ----------------------------------------------------------------------
+        title_mob = title("ตารางไซส์ท่อเหล็ก")
+        page_ref_mob = page_ref("hydraulic06 น.10")
+        self.keep_mobs = (title_mob, page_ref_mob)
+
+        self.play(
+            FadeIn(title_mob, shift=UP * 0.4),
+            FadeIn(page_ref_mob),
+            run_time=1.0
+        )
+        self.wait(0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–5.0: Hook Question — Callback to H6_02 Suction Pipe
+        # ----------------------------------------------------------------------
+        hook_q = caption_top("จำได้ไหม H6_02 คำนวณ D ท่อดูด ≈ 23.0 mm — จะไปหาซื้อไซส์ไหนจริง?", color=COL_GRAY)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.4)
+        self.play(FadeOut(hook_q), run_time=0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 5.0–15.0: Metric Table Excerpt (OD 20-30 mm) & Exact Match Highlight
+        # ----------------------------------------------------------------------
+        cap1 = caption_top("ตารางไซส์ท่อ (Steel Tube) หน่วย mm")
+        partial_note = Text("(แสดงเฉพาะช่วง OD 20–30 mm จากตารางมาตรฐานหน้า 10)", font_size=12, color=COL_GRAY).move_to([0, 2.25, 0])
+        self.play(FadeIn(cap1, shift=UP * 0.3), FadeIn(partial_note), run_time=0.8)
+
+        # Table Container Box (width=9.8, height=3.8, center at y=-0.15)
+        table_box = RoundedRectangle(
+            corner_radius=0.12, width=9.8, height=3.8,
+            color=COL_METAL, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.92).move_to([0, -0.15, 0])
+
+        col_xs = [-2.8, 0.0, 2.8]
+        h_y = 1.35
+        h_od = Text("OD ท่อ (mm)", font_size=13, color=COL_OK).move_to([col_xs[0], h_y, 0])
+        h_wall = Text("ความหนาผนัง (mm)", font_size=13, color=COL_OK).move_to([col_xs[1], h_y, 0])
+        h_id = Text("ID ท่อ (mm)", font_size=13, color=COL_OK).move_to([col_xs[2], h_y, 0])
+        h_div = Line([-4.5, 1.15, 0], [4.5, 1.15, 0], color=COL_METAL, stroke_width=1.5)
+
+        # Real data rows from hydraulic06.pdf page 10 (OD 20-30mm)
+        raw_rows = [
+            (20, 2.0, 16.0),
+            (20, 2.5, 15.0),
+            (22, 1.5, 19.0),
+            (25, 3.0, 19.0),
+            (28, 2.0, 24.0),
+            (28, 2.5, 23.0),  # Target match row!
+            (30, 3.0, 24.0)
+        ]
+
+        row_groups = []
+        target_row_idx = 5
+        target_row_grp = None
+
+        y_top_row = 0.92
+        dy = 0.38
+        for i, (od, wall, tid) in enumerate(raw_rows):
+            cur_y = y_top_row - i * dy
+            t_od = Text(f"{od}", font_size=13, color=WHITE).move_to([col_xs[0], cur_y, 0])
+            t_wall = Text(f"{wall:.1f}", font_size=13, color=WHITE).move_to([col_xs[1], cur_y, 0])
+            t_id = Text(f"{tid:.0f}" if tid.is_integer() else f"{tid:.1f}", font_size=13, color=WHITE).move_to([col_xs[2], cur_y, 0])
+            r_grp = VGroup(t_od, t_wall, t_id)
+            if i == target_row_idx:
+                target_row_grp = r_grp
+            row_groups.append(r_grp)
+
+        # Target highlight background bar
+        highlight_bar = RoundedRectangle(
+            corner_radius=0.06, width=9.2, height=0.34,
+            color=COL_WARN, fill_color=COL_WARN
+        ).set_fill(COL_WARN, 0.25).set_stroke(COL_WARN, 1.5).move_to([0, y_top_row - target_row_idx * dy, 0])
+
+        table_mobs = VGroup(table_box, h_od, h_wall, h_id, h_div, *row_groups)
+
+        self.play(FadeIn(table_mobs, shift=UP * 0.3), run_time=1.0)
+        self.wait(3.2)
+
+        # 10.0–10.8s: Indicate target row (OD=28, Wall=2.5, ID=23)
+        self.play(
+            FadeIn(highlight_bar),
+            Indicate(target_row_grp, color=COL_WARN, scale_factor=1.06),
+            run_time=0.8
+        )
+
+        # 10.8–14.5s: Match banner callout
+        match_box = RoundedRectangle(
+            corner_radius=0.10, width=11.4, height=0.68,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0, -2.60, 0])
+        match_txt = Text(
+            "OD = 28 mm, Wall = 2.5 mm → ID = 23 mm (ตรงกับท่อดูดที่คำนวณใน H6_02 พอดี!)",
+            font_size=13, color=COL_OK
+        ).move_to([0, -2.60, 0])
+        match_grp = VGroup(match_box, match_txt)
+
+        self.play(FadeIn(match_grp, shift=UP * 0.25), run_time=0.8)
+        self.wait(2.9)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 15.0–20.8: Same OD, Multiple Wall Thicknesses (ความหนาผนังกับความดัน)
+        # ----------------------------------------------------------------------
+        cap2 = caption_top("ทำไมต้องมีหลายความหนาในไซส์เดียวกัน?")
+        sub2 = Text(
+            "OD เท่ากัน (20 mm) เพื่อต่อกับข้อต่อขนาดเดียวกัน — ความหนาเพิ่มขึ้นเพื่อรับแรงดันสูงขึ้น",
+            font_size=12, color=COL_GRAY
+        ).move_to([0, 2.25, 0])
+        self.play(FadeIn(cap2, shift=UP * 0.3), FadeIn(sub2), run_time=0.8)
+
+        # 3 Cards for OD=20 mm (Wall=1.5, 2.0, 3.0 from slide)
+        c_xs = [-4.0, 0.0, 4.0]
+        c_y = -0.25
+        card_w, card_h = 3.6, 3.3
+
+        cards_od20 = []
+        od20_data = [
+            ("Wall = 1.5 mm", "ID = 17.0 mm", "แรงดันปานกลาง (Standard)", COL_FIELD, 1.5, 0.55),
+            ("Wall = 2.0 mm", "ID = 16.0 mm", "แรงดันสูง (High Pressure)", COL_CURR, 2.0, 0.45),
+            ("Wall = 3.0 mm", "ID = 14.0 mm", "แรงดันสูงพิเศษ (Heavy Duty)", COL_WARN, 3.0, 0.32)
+        ]
+
+        for idx, (w_str, id_str, duty_str, col_theme, wall_val, inner_r) in enumerate(od20_data):
+            x_pos = c_xs[idx]
+            bx = RoundedRectangle(
+                corner_radius=0.12, width=card_w, height=card_h,
+                color=col_theme, fill_color=COL_BG_BOX
+            ).set_fill(COL_BG_BOX, 0.90).move_to([x_pos, c_y, 0])
+
+            # Cross section graphic: fixed OD outer ring, variable ID inner bore
+            outer_ring = Circle(radius=0.55, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.70).move_to([x_pos, c_y + 0.52, 0])
+            inner_hole = Circle(radius=inner_r * 0.75, color=COL_BG_BOX, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 1.0).move_to([x_pos, c_y + 0.52, 0])
+            dim_od = Text("OD 20 mm", font_size=11, color=COL_GRAY).move_to([x_pos, c_y + 1.22, 0])
+            tube_gfx = VGroup(dim_od, outer_ring, inner_hole)
+
+            t_w = Text(w_str, font_size=14, color=col_theme).move_to([x_pos, c_y - 0.28, 0])
+            t_id = Text(id_str, font_size=13, color=WHITE).move_to([x_pos, c_y - 0.62, 0])
+            t_duty = Text(duty_str, font_size=11, color=COL_GRAY).move_to([x_pos, c_y - 0.98, 0])
+
+            cd = VGroup(bx, tube_gfx, t_w, t_id, t_duty)
+            cards_od20.append(cd)
+
+        self.play(
+            LaggedStart(*[FadeIn(c, shift=UP * 0.25) for c in cards_od20], lag_ratio=0.2),
+            run_time=1.0
+        )
+        self.wait(3.0)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 20.8–25.8: Imperial (Inch) vs Metric (mm) Standards
+        # ----------------------------------------------------------------------
+        cap3 = caption_top("มีทั้งมาตรฐานหน่วยนิ้ว (Inch) และ มิลลิเมตร (mm)")
+        sub3 = Text(
+            "ตารางหน้า 10 มี 2 มาตรฐาน: นิ้ว (US / SAE) และ mm (ISO) — ห้ามใช้สลับกัน",
+            font_size=12, color=COL_GRAY
+        ).move_to([0, 2.25, 0])
+        self.play(FadeIn(cap3, shift=UP * 0.3), FadeIn(sub3), run_time=0.8)
+
+        # Side by side cards
+        card_w3, card_h3 = 5.8, 3.4
+        xs3 = [-3.2, 3.2]
+        y3 = -0.30
+
+        # Left: Inch Table (from top table in slide 10)
+        box_in = RoundedRectangle(
+            corner_radius=0.12, width=card_w3, height=card_h3,
+            color=COL_FIELD, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.90).move_to([xs3[0], y3, 0])
+        head_in = Text("หน่วยนิ้ว (Fractional Inch)", font_size=13, color=COL_FIELD).move_to([xs3[0], y3 + 1.32, 0])
+        col_in = Text("OD (in.)    Wall (in.)    ID (in.)", font_size=11, color=COL_GRAY).move_to([xs3[0], y3 + 0.95, 0])
+        div_in = Line([-5.8, y3 + 0.76, 0], [-0.6, y3 + 0.76, 0], color=COL_FIELD, stroke_width=1.2)
+
+        rows_in_txt = [
+            ("1/4", "0.035", "0.180"),
+            ("3/8", "0.049", "0.277"),
+            ("1/2", "0.049", "0.402"),
+            ("3/4", "0.065", "0.620"),
+            ("1", "0.065", "0.870")
+        ]
+        in_mobs = []
+        for idx, (od_i, w_i, id_i) in enumerate(rows_in_txt):
+            r_y = y3 + 0.50 - idx * 0.32
+            row_t = Text(f"{od_i:<6}      {w_i:<7}      {id_i:<6}", font_size=11, color=WHITE).move_to([xs3[0], r_y, 0])
+            in_mobs.append(row_t)
+
+        card_inch = VGroup(box_in, head_in, col_in, div_in, *in_mobs)
+
+        # Right: Metric Table (from bottom table in slide 10)
+        box_mm = RoundedRectangle(
+            corner_radius=0.12, width=card_w3, height=card_h3,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.90).move_to([xs3[1], y3, 0])
+        head_mm = Text("หน่วยมิลลิเมตร (Metric mm)", font_size=13, color=COL_OK).move_to([xs3[1], y3 + 1.32, 0])
+        col_mm = Text("OD (mm)    Wall (mm)    ID (mm)", font_size=11, color=COL_GRAY).move_to([xs3[1], y3 + 0.95, 0])
+        div_mm = Line([0.6, y3 + 0.76, 0], [5.8, y3 + 0.76, 0], color=COL_OK, stroke_width=1.2)
+
+        rows_mm_txt = [
+            ("6", "1.0", "4.0"),
+            ("10", "1.5", "7.0"),
+            ("12", "1.5", "9.0"),
+            ("20", "2.0", "16.0"),
+            ("28", "2.5", "23.0")
+        ]
+        mm_mobs = []
+        for idx, (od_m, w_m, id_m) in enumerate(rows_mm_txt):
+            r_y = y3 + 0.50 - idx * 0.32
+            row_t = Text(f"{od_m:<6}      {w_m:<7}      {id_m:<6}", font_size=11, color=WHITE).move_to([xs3[1], r_y, 0])
+            mm_mobs.append(row_t)
+
+        card_mm = VGroup(box_mm, head_mm, col_mm, div_mm, *mm_mobs)
+
+        self.play(FadeIn(card_inch, shift=UP * 0.25), FadeIn(card_mm, shift=UP * 0.25), run_time=1.0)
+        self.wait(2.4)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 25.8–28.0: Summary Card (การ์ดสรุป 3 ข้อ)
+        # ----------------------------------------------------------------------
+        sum_box = RoundedRectangle(
+            corner_radius=0.15, width=11.4, height=3.5,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.25, 0])
+
+        s_head = Text("สรุปสำคัญ: การเลือกขนาดท่อเหล็ก (Steel Tube Sizes)", font_size=16, color=COL_OK).move_to([0, 1.15, 0])
+        s1 = Text("1. ค่าที่คำนวณจากสูตร (Q = A·v) ต้องนำมาเทียบกับตารางไซส์มาตรฐานที่มีจำหน่ายจริง", font_size=13, color=WHITE).move_to([0, 0.55, 0])
+        s2 = Text("2. OD เดียวกันมีหลายความหนา — เลือกความหนาผนังตาม Working Pressure (สูตร σ = P·Di/2t)", font_size=13, color=WHITE).move_to([0, 0.05, 0])
+        s3 = Text("3. มาตรฐานมีทั้งระบบนิ้ว (SAE) และมิลลิเมตร (ISO) — ห้ามใช้สลับกันเพราะเกลียวและขนาดต่างกัน", font_size=13, color=WHITE).move_to([0, -0.45, 0])
+        s4 = Text("(เช่น ท่อดูด Q=30 L/min: คำนวณได้ D≈23 mm เลือกท่อมาตรฐาน OD=28 mm, Wall=2.5 mm, ID=23 mm)", font_size=12, color=COL_CURR).move_to([0, -0.95, 0])
+
+        sum_grp = VGroup(sum_box, s_head, s1, s2, s3, s4)
+
+        self.play(FadeIn(sum_grp, shift=UP * 0.35), run_time=0.8)
+        self.wait(1.4)
+
+        self.clear_stage(run_time=0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 28.0–33.0: Review Question Card
+        # ----------------------------------------------------------------------
+        q_box = RoundedRectangle(
+            corner_radius=0.15, width=11.2, height=2.6,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.35, 0.0])
+        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0.0, 0.50, 0.0])
+        q_body = Text(
+            "ถ้าคำนวณ D ท่อจ่าย ≈ 10.2 mm จาก H6_02 ควรมองหาแถวไหนในตารางนี้?\n(ใบ้: ดูช่วง OD ใกล้เคียง 12–15 mm)",
+            font_size=14, color=WHITE
+        ).move_to([0.0, 0.0, 0.0])
+        q_ans = Text(
+            "(ในตารางหน้า 10: ท่อ OD 12 mm Wall 1.0 mm ได้ ID = 10.0 mm หรือ OD 15 mm Wall 2.0 mm ได้ ID = 11.0 mm)",
+            font_size=12, color=COL_GRAY
+        ).move_to([0.0, -0.65, 0.0])
+
+        q_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.4)
+
+        self.play(FadeOut(q_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+
+
+
 
 
 
