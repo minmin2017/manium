@@ -9686,3 +9686,388 @@ class H6_24_GasAccumulatorsDiaphragm(SafeScene):
         self.fade_out_all(run_time=0.6)
         self.wait(0.5)
 
+
+# ======================================================================
+# SCENE: H6_25_GasAccumulatorsBladder
+# hydraulic06.pdf — Page 28: Gas-loaded Bladder Type Accumulators
+# ======================================================================
+
+def _h6_25_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_25_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_25_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_25_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_25_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    fit_width(lbl, 11.4)
+    return VGroup(bg, lbl)
+
+
+def _create_balloon_bladder(cx, cy, scale_w=1.0, scale_h=1.0, color=COL_OK, fill_color=COL_GAS, fill_opacity=0.92):
+    """Creates a genuine balloon/curved sack bladder outline suspended from top neck."""
+    right_pts = [
+        [cx, cy + 1.45 * scale_h, 0],
+        [cx + 0.14 * scale_w, cy + 1.45 * scale_h, 0],
+        [cx + 0.32 * scale_w, cy + 1.25 * scale_h, 0],
+        [cx + 0.65 * scale_w, cy + 0.95 * scale_h, 0],
+        [cx + 0.83 * scale_w, cy + 0.50 * scale_h, 0],
+        [cx + 0.86 * scale_w, cy + 0.05 * scale_h, 0],
+        [cx + 0.83 * scale_w, cy - 0.40 * scale_h, 0],
+        [cx + 0.72 * scale_w, cy - 0.80 * scale_h, 0],
+        [cx + 0.52 * scale_w, cy - 1.15 * scale_h, 0],
+        [cx + 0.28 * scale_w, cy - 1.32 * scale_h, 0],
+        [cx, cy - 1.38 * scale_h, 0]
+    ]
+    left_pts = [[2 * cx - p[0], p[1], 0] for p in reversed(right_pts[1:-1])]
+    all_pts = right_pts + left_pts + [right_pts[0]]
+
+    balloon = Polygon(
+        *[np.array(p) for p in all_pts],
+        color=color,
+        stroke_width=3.5,
+        fill_color=fill_color,
+        fill_opacity=fill_opacity
+    )
+    balloon.round_corners(radius=0.18)
+    return balloon
+
+
+def _create_poppet_valve(cx, cy):
+    """Creates the poppet valve at the bottom port: mushroom disc + return spring."""
+    p_head = Polygon(
+        [cx - 0.30, cy - 1.48, 0],
+        [cx + 0.30, cy - 1.48, 0],
+        [cx + 0.18, cy - 1.58, 0],
+        [cx - 0.18, cy - 1.58, 0],
+        color=COL_WARN, fill_color=COL_WARN, fill_opacity=1.0, stroke_width=1.5
+    )
+    p_stem = Line([cx, cy - 1.58, 0], [cx, cy - 1.95, 0], color=COL_METAL, stroke_width=3.0)
+
+    sy_start = cy - 1.60
+    sy_end = cy - 1.92
+    num_coils = 4
+    dy = (sy_end - sy_start) / (num_coils * 2)
+    curr_y = sy_start
+    sw = 0.14
+    pts = [[cx, curr_y, 0]]
+    for i in range(num_coils):
+        pts.append([cx + sw, curr_y + dy, 0])
+        pts.append([cx - sw, curr_y + 2 * dy, 0])
+        curr_y += 2 * dy
+    pts.append([cx, sy_end, 0])
+    spring = VMobject(color=COL_SPRING, stroke_width=2.2)
+    spring.set_points_as_corners([np.array(p) for p in pts])
+
+    seat = Rectangle(width=0.48, height=0.12, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([cx, cy - 1.58, 0])
+
+    return VGroup(seat, p_stem, spring, p_head)
+
+
+class H6_25_GasAccumulatorsBladder(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–1.5: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_25_title("Bladder Type Accumulator: ตอบสนองไวที่สุด")
+        self.ref_m = _h6_25_page_ref("hydraulic06 น.28")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 1.5–5.5: Hook Question
+        # ======================================================================
+        hook_q = _h6_25_caption_top(
+            "Bladder type ก็เหมือน diaphragm type ที่เพิ่งเรียนไป (H6_24) แค่เปลี่ยนชื่อ ทำงานเหมือนกันทุกอย่างจริงไหม?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 12.0)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.4)
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.4)
+
+        # ======================================================================
+        # BEAT 5.5–19.0: Inverted Structure: Balloon Bladder with Oil Outside
+        # ======================================================================
+        cap1 = _h6_25_caption_top("1. โครงสร้างสลับกัน: แก๊สอยู่ในถุง น้ำมันอยู่นอกถุง")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Main Vessel Geometry (Left center: x = -2.8, y = -0.15)
+        vx = -2.8
+        vy = -0.15
+        vw = 2.5
+        vh = 3.6
+
+        # Outer Steel Shell
+        outer_shell = RoundedRectangle(
+            width=vw, height=vh, corner_radius=1.0,
+            color=COL_METAL, stroke_width=3.5
+        ).set_fill("#0F172A", 0.95).move_to([vx, vy, 0])
+
+        # Hydraulic Oil Fluid Layer (Inside shell, surrounding bladder)
+        oil_chamber = RoundedRectangle(
+            width=vw - 0.20, height=vh - 0.20, corner_radius=0.90,
+            color=COL_OIL_RED, stroke_width=0
+        ).set_fill(COL_OIL_RED, 0.65).move_to([vx, vy, 0])
+
+        # Bladder (Balloon shape inside, filled with Gas sky blue)
+        bladder_mob = _create_balloon_bladder(
+            vx, vy, scale_w=1.0, scale_h=1.0,
+            color=COL_OK, fill_color=COL_GAS, fill_opacity=0.92
+        )
+
+        # Top Gas Valve Assembly
+        g_neck = Rectangle(width=0.28, height=0.30, color=COL_METAL, stroke_width=1.5).set_fill("#64748B", 1.0).move_to([vx, vy + vh/2 + 0.12, 0])
+        g_cap = Rectangle(width=0.40, height=0.12, color=COL_METAL, stroke_width=1.5).set_fill(COL_METAL, 1.0).next_to(g_neck, UP, buff=0)
+        lbl_g_valve = Text("GAS VALVE", font_size=8.5, color=WHITE, weight=BOLD).next_to(g_cap, UP, buff=0.06)
+        top_valve = VGroup(g_neck, g_cap, lbl_g_valve)
+
+        # Bottom Port & Poppet Valve Assembly
+        bot_port_pipe = Rectangle(width=0.46, height=0.35, color=COL_OIL_RED, stroke_width=1.5).set_fill(COL_OIL_RED, 0.95).move_to([vx, vy - vh/2 - 0.15, 0])
+        poppet_assembly = _create_poppet_valve(vx, vy)
+        lbl_poppet = Text("POPPET VALVE (กันถุงฉีก)", font_size=8.5, color=COL_WARN, weight=BOLD).next_to(bot_port_pipe, DOWN, buff=0.08)
+        bot_assembly = VGroup(bot_port_pipe, poppet_assembly, lbl_poppet)
+
+        # Interior Labels
+        lbl_gas_inside = VGroup(
+            Text("N2 GAS", font_size=12, color=WHITE, weight=BOLD),
+            Text("(อยู่ในถุงบอลลูน)", font_size=10, color=WHITE)
+        ).arrange(DOWN, buff=0.06).move_to([vx, vy + 0.10, 0])
+
+        lbl_oil_outside = VGroup(
+            Text("HYDRAULIC OIL", font_size=9.5, color=WHITE, weight=BOLD),
+            Text("(น้ำมันรอบนอกถุง)", font_size=9.0, color="#FCA5A5")
+        ).arrange(DOWN, buff=0.04)
+
+        oil_pointer = Arrow(start=[-4.30, vy - 0.65, 0], end=[-3.35, vy - 0.65, 0], color=WHITE, stroke_width=2.5, max_tip_length_to_length_ratio=0.25)
+        lbl_oil_outside.next_to(oil_pointer, LEFT, buff=0.12)
+        oil_annotation = VGroup(lbl_oil_outside, oil_pointer)
+
+        shell_lbl = Text("STEEL SHELL", font_size=8.5, color=COL_GRAY, weight=BOLD).move_to([vx + 0.82, vy + 1.25, 0])
+
+        vessel_grp = VGroup(
+            outer_shell, oil_chamber, bladder_mob,
+            top_valve, bot_assembly,
+            lbl_gas_inside, oil_annotation, shell_lbl
+        )
+
+        # ----------------------------------------------------------------------
+        # Top-Right: Mini Recall of H6_24 Diaphragm (Explicit Contrast)
+        # ----------------------------------------------------------------------
+        mini_box = RoundedRectangle(
+            width=5.0, height=1.75, corner_radius=0.12,
+            color=COL_GRAY, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([2.7, 1.25, 0])
+
+        mini_badge = _h6_25_badge("ย้อนดู H6_24: Diaphragm Type", COL_GRAY).move_to([2.7, 1.95, 0])
+
+        m_shell = RoundedRectangle(width=1.2, height=1.1, corner_radius=0.3, color=COL_METAL, stroke_width=1.5).move_to([0.9, 1.15, 0])
+        m_gas = Rectangle(width=1.16, height=0.52, color=COL_GAS, stroke_width=0).set_fill(COL_GAS, 0.6).move_to([0.9, 1.40, 0])
+        m_oil = Rectangle(width=1.16, height=0.52, color=COL_OIL_RED, stroke_width=0).set_fill(COL_OIL_RED, 0.6).move_to([0.9, 0.90, 0])
+        m_line = Line([0.32, 1.15, 0], [1.48, 1.15, 0], color=WHITE, stroke_width=2.5)
+        m_lbl_g = Text("แก๊สบน", font_size=7.5, color=WHITE).move_to([0.9, 1.40, 0])
+        m_lbl_o = Text("น้ำมันล่าง", font_size=7.5, color=WHITE).move_to([0.9, 0.90, 0])
+        m_diag = VGroup(m_shell, m_gas, m_oil, m_line, m_lbl_g, m_lbl_o)
+
+        m_desc = VGroup(
+            Text("• แผ่นยางแบนกั้นกลางถัง", font_size=10, color=WHITE),
+            Text("• บน = แก๊ส / ล่าง = น้ำมัน", font_size=10, color=COL_WARN),
+            Text("• กั้นแบ่งบน-ล่างแบบครึ่งต่อครึ่ง", font_size=9.5, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.10, aligned_edge=LEFT).move_to([3.4, 1.15, 0])
+        fit_width(m_desc, 3.1)
+
+        mini_diaphragm_recall = VGroup(mini_box, mini_badge, m_diag, m_desc)
+
+        # ----------------------------------------------------------------------
+        # Bottom-Right: Bladder Structure & Poppet Valve Explanation Card
+        # ----------------------------------------------------------------------
+        card_b_box = RoundedRectangle(
+            width=5.0, height=1.85, corner_radius=0.12,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([2.7, -0.75, 0])
+
+        card_b_badge = _h6_25_badge("Bladder Type: โครงสร้างสลับกัน!", COL_OK).move_to([2.7, 0.05, 0])
+
+        card_b_text = VGroup(
+            Text("• ถุงยางรูปบอลลูน (ทรงโค้งมน ไม่ใช่แผ่นแบน)", font_size=10.5, color=WHITE),
+            Text("• แก๊ส N2 อยู่ 'ในถุง' / น้ำมันอยู่ 'รอบนอกถุง'", font_size=10.5, color=COL_OK, weight=BOLD),
+            Text("• มี Poppet Valve สปริงปิดกั้นที่รูพอร์ตล่าง", font_size=10.5, color=WHITE),
+            Text("• ป้องกันถุงบอลลูนถูกดันเข้ารูพอร์ตจนฉีกขาด", font_size=10.0, color=COL_WARN)
+        ).arrange(DOWN, buff=0.10, aligned_edge=LEFT).move_to([2.7, -0.85, 0])
+        fit_width(card_b_text, 4.6)
+
+        bladder_card_grp = VGroup(card_b_box, card_b_badge, card_b_text)
+
+        banner1 = _h6_25_banner(
+            "ถุงยางรูปบอลลูน แก๊สอยู่ข้างในถุง น้ำมันอยู่ข้างนอกถุง (สลับจาก diaphragm ที่เพิ่งเรียนไป) Poppet Valve ป้องกันถุงโดนดันเข้ารูพอร์ต",
+            COL_OK
+        )
+
+        self.play(
+            FadeIn(vessel_grp),
+            FadeIn(mini_diaphragm_recall),
+            FadeIn(bladder_card_grp),
+            FadeIn(banner1),
+            run_time=1.0
+        )
+        self.play(Indicate(bladder_mob, color=COL_OK), run_time=0.8)
+        self.wait(9.6)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 19.0–30.5: Why Bladder Type is Fastest & Most Popular
+        # ======================================================================
+        cap2 = _h6_25_caption_top("2. ทำไมตอบสนองไวที่สุด และเป็นที่นิยมมากที่สุด?")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # 3 Comparison Cards: Bladder (Winner) vs Diaphragm vs Piston
+        cw = 3.7
+        ch = 3.6
+        c_y = -0.15
+
+        # Card 1: Bladder (Fastest ✓ - Highlighted)
+        c1_box = RoundedRectangle(width=cw, height=ch, corner_radius=0.14, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([-3.9, c_y, 0])
+        c1_head = _h6_25_badge("1. Bladder Type [ ไวสุด ✓ ]", COL_OK).move_to([-3.9, c_y + ch/2 - 0.28, 0])
+        c1_star = RoundedRectangle(width=3.2, height=0.34, corner_radius=0.06, color=COL_OK, fill_color="#0F766E").set_fill("#0F766E", 0.7).move_to([-3.9, c_y + 0.95, 0])
+        c1_star_lbl = Text("★ นิยมใช้มากที่สุดในอุตสาหกรรม ★", font_size=9.5, color=WHITE, weight=BOLD).move_to(c1_star.get_center())
+        c1_star_grp = VGroup(c1_star, c1_star_lbl)
+
+        c1_bullets = VGroup(
+            Text("• ผนังยางบาง มวลน้อยมาก", font_size=10.5, color=WHITE),
+            Text("• เคลื่อนไหวตอบสนองแรงดันฉับไว", font_size=10.5, color=COL_OK, weight=BOLD),
+            Text("• ไร้แรงเสียดทานเชิงกล ไม่มีซีลเลื่อน", font_size=10.5, color=WHITE),
+            Text("• รองรับอัตราการไหลเข้า-ออกได้เร็ว", font_size=10.5, color=COL_OK),
+            Text("• ดูดซับแรงกระแทก (Shock) ได้ยอดเยี่ยม", font_size=10.0, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to([-3.9, c_y - 0.45, 0])
+        fit_width(c1_bullets, 3.4)
+        card_bladder = VGroup(c1_box, c1_head, c1_star_grp, c1_bullets)
+
+        # Card 2: Diaphragm (Medium)
+        c2_box = RoundedRectangle(width=cw, height=ch, corner_radius=0.14, color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, c_y, 0])
+        c2_head = _h6_25_badge("2. Diaphragm Type [ ปานกลาง ]", COL_GRAY).move_to([0.0, c_y + ch/2 - 0.28, 0])
+        c2_sub = Text("แผ่นยางยึดขอบตายตัว", font_size=10, color=COL_GRAY).move_to([0.0, c_y + 0.95, 0])
+
+        c2_bullets = VGroup(
+            Text("• แผ่นยางแบนยึดรอบกึ่งกลางถัง", font_size=10.5, color=WHITE),
+            Text("• ระยะยืดตัวมีจำกัด (Displacement เล็ก)", font_size=10.5, color=COL_WARN),
+            Text("• ความจุจำกัด มักเป็นทรงกลมเล็ก", font_size=10.5, color=WHITE),
+            Text("• ตอบสนองความดันได้ปานกลาง", font_size=10.5, color=COL_GRAY),
+            Text("• เหมาะกับวงจรย่อย / อุปกรณ์พกพา", font_size=10.0, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to([0.0, c_y - 0.45, 0])
+        fit_width(c2_bullets, 3.4)
+        card_diaphragm = VGroup(c2_box, c2_head, c2_sub, c2_bullets)
+
+        # Card 3: Piston (Slowest response)
+        c3_box = RoundedRectangle(width=cw, height=ch, corner_radius=0.14, color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([3.9, c_y, 0])
+        c3_head = _h6_25_badge("3. Piston Type [ ช้ากว่า ]", COL_GRAY).move_to([3.9, c_y + ch/2 - 0.28, 0])
+        c3_sub = Text("ลูกสูบโลหะ + ซีลเลื่อน", font_size=10, color=COL_GRAY).move_to([3.9, c_y + 0.95, 0])
+
+        c3_bullets = VGroup(
+            Text("• ลูกสูบโลหะชิ้นหนามีน้ำหนักมาก", font_size=10.5, color=WHITE),
+            Text("• มีความเฉื่อย (Inertia) สูงกว่าแผ่นยาง", font_size=10.5, color=COL_BAD),
+            Text("• ซีลยางมีแรงเสียดทานสถิต (Friction)", font_size=10.5, color=COL_WARN),
+            Text("• ตอบสนองช้ากว่าแบบถุงลม/ไดอะแฟรม", font_size=10.5, color=WHITE),
+            Text("• เหมาะกับงานปริมาตรใหญ่ แรงดันสูงมาก", font_size=10.0, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to([3.9, c_y - 0.45, 0])
+        fit_width(c3_bullets, 3.4)
+        card_piston = VGroup(c3_box, c3_head, c3_sub, c3_bullets)
+
+        banner2 = _h6_25_banner(
+            "ผนังถุง bladder มีมวลน้อย เคลื่อนไหวตอบสนองแรงดันที่เปลี่ยนแปลงได้ไวที่สุด — จึงเป็นแบบที่นิยมใช้มากที่สุดในงานอุตสาหกรรมทั่วไป",
+            COL_OK
+        )
+
+        cards_grp = VGroup(card_bladder, card_diaphragm, card_piston)
+        self.play(FadeIn(cards_grp, shift=UP * 0.25), FadeIn(banner2), run_time=1.0)
+        self.play(Indicate(card_bladder, color=COL_OK), run_time=0.8)
+        self.wait(8.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 30.5–33.8: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: Bladder Type Accumulator (hydraulic06 น.28)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. โครงสร้าง: ถุงยางรูปบอลลูน แก๊ส N2 อยู่ในถุง น้ำมันอยู่นอกถุง (สลับตำแหน่งกับ Diaphragm)",
+            "2. Poppet Valve: วาล์วสปริงที่พอร์ตล่าง ป้องกันถุงยางพองตัวถูกดูด/ดันเข้าไปในรูท่อจนฉีกขาด",
+            "3. ความไว: ผนังถุงบาง มวลน้อย ไร้แรงเสียดทานกลไก จึงตอบสนองไวสุด และนิยมใช้มากที่สุดในอุตสาหกรรม"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        fit_width(s_rows, 10.8)
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.7)
+        self.wait(2.2)
+
+        # ======================================================================
+        # BEAT 33.8–36.5: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ทำไมผนังที่มีมวลน้อยกว่าถึงตอบสนองต่อการเปลี่ยนแปลงแรงดันได้เร็วกว่าชิ้นส่วนที่มีมวลมาก?",
+            font_size=12.0, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        fit_width(q_body, 10.6)
+        q_ans = Text(
+            "(คำตอบ: วัตถุที่มีมวลน้อยจะมีความเฉื่อย (Inertia) ต่ำกว่า จึงเร่งและขยับตัวตามแรงดันน้ำมันที่เปลี่ยนไปได้ทันที\nขณะที่ชิ้นส่วนมวลมากอย่างลูกสูบโลหะ มีความเฉื่อยและแรงเสียดทานซีลสูง ต้องใช้เวลาสะสมแรงมากกว่าจึงจะเริ่มเคลื่อนที่)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        fit_width(q_ans, 10.6)
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.5)
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
+
+
