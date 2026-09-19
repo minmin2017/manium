@@ -4290,49 +4290,121 @@ class H6_11_HoseSizeFittings(SafeScene):
         self.wait(0.8)
 
         # Over-Bent Kink Hose with Severe Visible Damage (§41/§44)
-        p_apex_out_l = np.array([-0.28, 0.75, 0])
-        p_apex_out_r = np.array([0.28, 0.75, 0])
-        p_crease_in = np.array([0.0, 0.70, 0])
+        p_apex_out_l = np.array([-0.32, 0.68, 0])
+        p_apex_out_r = np.array([0.32, 0.68, 0])
+        p_crease_in = np.array([0.0, 0.55, 0])
 
+        # 1. Outer rubber walls (thick dark jacket #334155, stroke 6)
         ob_l_out = Line([-0.90, y_bot, 0], p_apex_out_l, stroke_color="#334155", stroke_width=6)
-        ob_l_wire = Line([-0.80, y_bot, 0], [-0.22, 0.75, 0], stroke_color=COL_METAL, stroke_width=3)
-        ob_l_fluid = Line([-0.62, y_bot, 0], [-0.10, 0.73, 0], stroke_color="#0284C7", stroke_width=18)
-        ob_l_in = Line([-0.42, y_bot, 0], p_crease_in, stroke_color="#334155", stroke_width=6)
-
-        ob_r_in = Line([0.42, y_bot, 0], p_crease_in, stroke_color="#334155", stroke_width=6)
-        ob_r_fluid = Line([0.62, y_bot, 0], [0.10, 0.73, 0], stroke_color="#0284C7", stroke_width=18)
-        ob_r_wire = Line([0.80, y_bot, 0], [0.22, 0.75, 0], stroke_color=COL_METAL, stroke_width=3)
         ob_r_out = Line([0.90, y_bot, 0], p_apex_out_r, stroke_color="#334155", stroke_width=6)
 
-        # Pinched fluid throat at apex (choked to tiny width 4)
-        ob_choke = Line([-0.10, 0.73, 0], [0.10, 0.73, 0], stroke_color="#0284C7", stroke_width=4)
+        # Torn rubber jacket jagged edges (dark outer cover torn apart)
+        tear_l_jacket = VMobject(stroke_color="#334155", stroke_width=6).set_points_as_corners([
+            p_apex_out_l, [-0.28, 0.82, 0], [-0.24, 0.76, 0], [-0.18, 0.90, 0]
+        ])
+        tear_r_jacket = VMobject(stroke_color="#334155", stroke_width=6).set_points_as_corners([
+            p_apex_out_r, [0.28, 0.82, 0], [0.24, 0.76, 0], [0.18, 0.90, 0]
+        ])
+
+        # Outer rubber jagged rupture crack lines (RED zigzag lightning with clear 0.36 GAP in middle)
+        crack_l = VMobject(stroke_color=RED, stroke_width=4).set_points_as_corners([
+            [-0.34, 0.66, 0], [-0.28, 0.84, 0], [-0.23, 0.77, 0], [-0.18, 0.92, 0], [-0.12, 0.82, 0]
+        ])
+        crack_r = VMobject(stroke_color=RED, stroke_width=4).set_points_as_corners([
+            [0.34, 0.66, 0], [0.28, 0.84, 0], [0.23, 0.77, 0], [0.18, 0.92, 0], [0.12, 0.82, 0]
+        ])
+
+        # 2. Wire braid with frayed / jagged broken tips at the damage point (COL_METAL, stroke 3.5)
+        wire_l_stem = Line([-0.80, y_bot, 0], [-0.26, 0.62, 0], stroke_color=COL_METAL, stroke_width=3.5)
+        wire_l_strand1 = VMobject(stroke_color=COL_METAL, stroke_width=3.5).set_points_as_corners([
+            [-0.26, 0.62, 0], [-0.20, 0.80, 0], [-0.15, 0.98, 0], [-0.10, 1.05, 0]
+        ])
+        wire_l_strand2 = VMobject(stroke_color=COL_METAL, stroke_width=3).set_points_as_corners([
+            [-0.26, 0.62, 0], [-0.15, 0.72, 0], [-0.09, 0.80, 0], [-0.04, 0.77, 0]
+        ])
+        wire_l_strand3 = VMobject(stroke_color=COL_METAL, stroke_width=3).set_points_as_corners([
+            [-0.26, 0.62, 0], [-0.20, 0.68, 0], [-0.14, 0.64, 0]
+        ])
+        ob_l_wire = VGroup(wire_l_stem, wire_l_strand1, wire_l_strand2, wire_l_strand3)
+
+        wire_r_stem = Line([0.80, y_bot, 0], [0.26, 0.62, 0], stroke_color=COL_METAL, stroke_width=3.5)
+        wire_r_strand1 = VMobject(stroke_color=COL_METAL, stroke_width=3.5).set_points_as_corners([
+            [0.26, 0.62, 0], [0.20, 0.80, 0], [0.15, 0.98, 0], [0.10, 1.05, 0]
+        ])
+        wire_r_strand2 = VMobject(stroke_color=COL_METAL, stroke_width=3).set_points_as_corners([
+            [0.26, 0.62, 0], [0.15, 0.72, 0], [0.09, 0.80, 0], [0.04, 0.77, 0]
+        ])
+        wire_r_strand3 = VMobject(stroke_color=COL_METAL, stroke_width=3).set_points_as_corners([
+            [0.26, 0.62, 0], [0.20, 0.68, 0], [0.14, 0.64, 0]
+        ])
+        ob_r_wire = VGroup(wire_r_stem, wire_r_strand1, wire_r_strand2, wire_r_strand3)
+
+        # Snapped wire flying shards hovering in the rupture gap
+        shard1 = Line([-0.05, 0.90, 0], [-0.01, 0.96, 0], color=COL_METAL, stroke_width=3)
+        shard2 = Line([0.02, 0.86, 0], [0.06, 0.93, 0], color="#F59E0B", stroke_width=3)
+        spark1 = Dot([-0.10, 1.05, 0], radius=0.04, color="#FEF08A")
+        spark2 = Dot([0.10, 1.05, 0], radius=0.04, color="#FEF08A")
+        spark3 = Dot([-0.04, 0.77, 0], radius=0.035, color="#FEF08A")
+        spark4 = Dot([0.04, 0.77, 0], radius=0.035, color="#FEF08A")
+
+        rupture_grp = VGroup(
+            tear_l_jacket, tear_r_jacket, crack_l, crack_r,
+            shard1, shard2, spark1, spark2, spark3, spark4
+        )
+
+        # 3. Inner wall creasing sharply upward
+        ob_l_in = Line([-0.42, y_bot, 0], p_crease_in, stroke_color="#334155", stroke_width=6)
+        ob_r_in = Line([0.42, y_bot, 0], p_crease_in, stroke_color="#334155", stroke_width=6)
+
+        # 4. Fluid channel: healthy wide channel (width 22), taper, and severely choked warning throat
+        ob_l_fluid_main = Line([-0.62, y_bot, 0], [-0.38, 0.20, 0], stroke_color="#0284C7", stroke_width=22)
+        ob_l_fluid_taper = Line([-0.38, 0.20, 0], [-0.20, 0.55, 0], stroke_color="#0284C7", stroke_width=13)
+        ob_l_fluid = VGroup(ob_l_fluid_main, ob_l_fluid_taper)
+
+        ob_r_fluid_main = Line([0.62, y_bot, 0], [0.38, 0.20, 0], stroke_color="#0284C7", stroke_width=22)
+        ob_r_fluid_taper = Line([0.38, 0.20, 0], [0.20, 0.55, 0], stroke_color="#0284C7", stroke_width=13)
+        ob_r_fluid = VGroup(ob_r_fluid_main, ob_r_fluid_taper)
+
+        # Choked throat (severely pinched to width 4 in warning orange/red)
+        ob_choke = VMobject(stroke_color="#F97316", stroke_width=4).set_points_as_corners([
+            [-0.20, 0.55, 0], [-0.10, 0.62, 0], [0.0, 0.64, 0], [0.10, 0.62, 0], [0.20, 0.55, 0]
+        ])
+
+        # Squeeze force indicators directly on throat
+        squeeze_top = Arrow(start=[0.0, 0.82, 0], end=[0.0, 0.68, 0], color=RED, buff=0, stroke_width=3, tip_length=0.14)
+        squeeze_bot = Arrow(start=[0.0, 0.40, 0], end=[0.0, 0.52, 0], color=RED, buff=0, stroke_width=3, tip_length=0.14)
+        squeeze_grp = VGroup(squeeze_top, squeeze_bot)
+
+        # Direct geometry width-comparison indicators
+        dim_norm_bar = Line([-0.90, -0.30, 0], [-0.90, -0.10, 0], color=COL_OK, stroke_width=2)
+        tick_l1 = Line([-0.95, -0.30, 0], [-0.85, -0.30, 0], color=COL_OK, stroke_width=2)
+        tick_l2 = Line([-0.95, -0.10, 0], [-0.85, -0.10, 0], color=COL_OK, stroke_width=2)
+        lbl_norm = Text("ปกติ 100%", font_size=11, color=COL_OK).next_to(dim_norm_bar, LEFT, buff=0.08)
+        dim_norm_grp = VGroup(dim_norm_bar, tick_l1, tick_l2, lbl_norm)
+
+        dim_choke_bar = Line([0.42, 0.58, 0], [0.42, 0.68, 0], color="#F97316", stroke_width=2)
+        tick_c1 = Line([0.38, 0.58, 0], [0.46, 0.58, 0], color="#F97316", stroke_width=2)
+        tick_c2 = Line([0.38, 0.68, 0], [0.46, 0.68, 0], color="#F97316", stroke_width=2)
+        lbl_choke = Text("ตีบตัน ~20%", font_size=11, color="#F97316").next_to(VGroup(dim_choke_bar, tick_c1, tick_c2), RIGHT, buff=0.12)
+        dim_choke_grp = VGroup(dim_choke_bar, tick_c1, tick_c2, lbl_choke)
 
         # Crimps at bottom
         ob_crimp_l = Rectangle(width=0.75, height=0.35, color=COL_GRAY, fill_color="#475569", fill_opacity=0.9).move_to([-0.62, y_bot + 0.15, 0])
         ob_crimp_r = Rectangle(width=0.75, height=0.35, color=COL_GRAY, fill_color="#475569", fill_opacity=0.9).move_to([0.62, y_bot + 0.15, 0])
-
-        # Visible wire rupture splinters at outer apex
-        splinter1 = Line([-0.28, 0.75, 0], [-0.22, 0.98, 0], color=COL_WARN, stroke_width=3)
-        splinter2 = Line([-0.28, 0.75, 0], [-0.08, 0.88, 0], color="#F59E0B", stroke_width=2.5)
-        splinter3 = Line([0.28, 0.75, 0], [0.22, 0.98, 0], color=COL_WARN, stroke_width=3)
-        splinter4 = Line([0.28, 0.75, 0], [0.08, 0.88, 0], color="#F59E0B", stroke_width=2.5)
-        fracture_arc = Arc(radius=0.32, start_angle=PI*0.8, angle=-PI*0.6, arc_center=[0.0, 0.70, 0], stroke_color=RED, stroke_width=2.5)
-
-        rupture_grp = VGroup(splinter1, splinter2, splinter3, splinter4, fracture_arc)
 
         # Callouts pointing to damage
         call_wire_txt = VGroup(
             Text("⚠️ ลวดเสริมแรงหักขาด / ฉีกขาด", font_size=13, color=COL_WARN),
             Text("(Wire Fatigue / Braid Rupture)", font_size=11, color=COL_GRAY)
         ).arrange(DOWN, buff=0.06, aligned_edge=LEFT).move_to([3.45, 1.45, 0])
-        call_wire_arr = Arrow(start=[2.0, 1.45, 0], end=[0.32, 0.95, 0], color=COL_WARN, buff=0.08, stroke_width=2.5)
+        call_wire_arr = Arrow(start=[2.0, 1.45, 0], end=[0.35, 0.98, 0], color=COL_WARN, buff=0.08, stroke_width=2.5, tip_length=0.18)
         call_wire = VGroup(call_wire_txt, call_wire_arr)
 
         call_pinch_txt = VGroup(
             Text("⚠️ รูในถูกบีบตีบแคบ (Flow Pinch)", font_size=13, color=COL_WARN),
             Text("(ทางไหลแคบลง 80% / ความดันตกฮวบ)", font_size=11, color=COL_GRAY)
         ).arrange(DOWN, buff=0.06, aligned_edge=RIGHT).move_to([-3.45, 0.45, 0])
-        call_pinch_arr = Arrow(start=[-1.8, 0.45, 0], end=[-0.12, 0.72, 0], color=COL_WARN, buff=0.08, stroke_width=2.5)
+        call_pinch_arr = Arrow(start=[-1.8, 0.45, 0], end=[-0.16, 0.64, 0], color=COL_WARN, buff=0.08, stroke_width=2.5, tip_length=0.18)
         call_pinch = VGroup(call_pinch_txt, call_pinch_arr)
 
         badge_danger = VGroup(
@@ -4341,16 +4413,19 @@ class H6_11_HoseSizeFittings(SafeScene):
         )
 
         overbent_grp = VGroup(
-            ob_l_out, ob_l_wire, ob_l_fluid, ob_l_in,
-            ob_r_in, ob_r_fluid, ob_r_wire, ob_r_out, ob_choke,
-            ob_crimp_l, ob_crimp_r, rupture_grp,
+            ob_l_out, ob_r_out, rupture_grp,
+            ob_l_wire, ob_r_wire,
+            ob_l_in, ob_r_in,
+            ob_l_fluid, ob_r_fluid, ob_choke,
+            squeeze_grp, dim_norm_grp, dim_choke_grp,
+            ob_crimp_l, ob_crimp_r,
             call_wire, call_pinch, badge_danger
         )
 
         # Sequential fade to eliminate cross-fade badge text collision
         self.play(FadeOut(normal_hose_grp), run_time=0.4)
         self.play(FadeIn(overbent_grp, shift=DOWN * 0.1), run_time=0.8)
-        self.play(Indicate(rupture_grp, color=RED), Indicate(ob_choke, color=COL_WARN), run_time=0.8)
+        self.play(Indicate(rupture_grp, color=RED, scale_factor=1.05), Indicate(ob_choke, color=COL_WARN, scale_factor=1.0), Indicate(squeeze_grp, color=RED, scale_factor=1.0), run_time=0.8)
         self.wait(1.5)  # Checkpoint 8.5s falls right here! Full damage visible!
 
         self.clear_stage(run_time=0.6)
