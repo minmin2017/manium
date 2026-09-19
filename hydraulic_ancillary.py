@@ -4199,6 +4199,368 @@ class H6_10_FlexibleHoses2(SafeScene):
         self.wait(0.5)
 
 
+# ==============================================================================
+# SCENE 11: H6_11_HoseSizeFittings (hydraulic06.pdf page 14)
+# Duration: ~39.2 seconds | 2D SafeScene
+# Pedagogical Focus: Hose Minimum Bend Radius (R_min) & Verified Slide Table Specs
+# AHA Moment: Hoses cannot be bent arbitrarily tight. Over-bending causes outer wire mesh rupture
+#             and inner flow throat pinch. Double-wire braid has thicker walls and is stiffer,
+#             requiring ~45% LARGER minimum bend radius than single-wire braid (9-1/2" vs 6-9/16").
+# Animated Mechanism:
+#   - Beat 5.2-11.0s: Normal bend hose (R >= R_min) -> acute over-bent kink (R < R_min).
+#   - High-Risk Check (§41/§44, t=8.5s): Visibly ruptured wire mesh with jagged fragments + pinched throat (0.5 down to 0.12).
+#   - Beat 11.0-17.2s: Table card with verified Slide 14 values for Size 12 (3/4" OD tube).
+#   - Beat 17.2-23.2s: Side-by-side bend comparison (Single Braid R=6-9/16" vs Double Braid R=9-1/2").
+#   - Beat 23.2-29.2s: 3 Standard fitting angles (Straight, 45° Elbow, 90° Elbow) to eliminate hose over-bending.
+#   - Beat 29.2-39.2s: Summary & Review Question cards.
+# ==============================================================================
+class H6_11_HoseSizeFittings(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [m for m in self.mobjects if m not in (self.title_m, self.ref_m)]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–2.0: Persistent Title & Page Reference
+        # ----------------------------------------------------------------------
+        self.title_m = title("ไซส์สายและรัศมีดัดโค้งขั้นต่ำ")
+        self.ref_m = page_ref("hydraulic06 น.14")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.5)
+        self.wait(0.5)  # Checkpoint 1.5s - 2.0s
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–5.2: Hook Question
+        # ----------------------------------------------------------------------
+        hook_q = caption_top("สายยืดหยุ่นดัดโค้งได้ — ดัดแคบแค่ไหนก็ได้จริงไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=1.0)
+        self.wait(1.6)  # Checkpoint 3.6s
+        self.play(FadeOut(hook_q), run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 5.2–11.0: Over-Bent Hose Damage & Flow Pinch Mechanism (§41/§44)
+        # ----------------------------------------------------------------------
+        cap1 = caption_top("ดัดแคบเกินไป — ชั้นเสริมแรงเสียหายและรูในตีบแคบ")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.6)
+
+        # Normal Bend Hose (Safe state)
+        c_norm = [0.0, 0.10, 0.0]
+        r_out = 1.95
+        r_wire = 1.83
+        r_fluid = 1.55
+        r_in = 1.25
+
+        arc_out_norm = Arc(radius=r_out, start_angle=PI, angle=-PI, arc_center=c_norm, stroke_color="#334155", stroke_width=6)
+        arc_wire_norm = Arc(radius=r_wire, start_angle=PI, angle=-PI, arc_center=c_norm, stroke_color=COL_METAL, stroke_width=3)
+        arc_fluid_norm = Arc(radius=r_fluid, start_angle=PI, angle=-PI, arc_center=c_norm, stroke_color="#0284C7", stroke_width=22)
+        arc_in_norm = Arc(radius=r_in, start_angle=PI, angle=-PI, arc_center=c_norm, stroke_color="#334155", stroke_width=6)
+
+        # Stems extending down
+        y_bot = -1.35
+        stem_l_out = Line([-r_out, c_norm[1], 0], [-r_out, y_bot, 0], stroke_color="#334155", stroke_width=6)
+        stem_l_wire = Line([-r_wire, c_norm[1], 0], [-r_wire, y_bot, 0], stroke_color=COL_METAL, stroke_width=3)
+        stem_l_fluid = Line([-r_fluid, c_norm[1], 0], [-r_fluid, y_bot, 0], stroke_color="#0284C7", stroke_width=22)
+        stem_l_in = Line([-r_in, c_norm[1], 0], [-r_in, y_bot, 0], stroke_color="#334155", stroke_width=6)
+
+        stem_r_in = Line([r_in, c_norm[1], 0], [r_in, y_bot, 0], stroke_color="#334155", stroke_width=6)
+        stem_r_fluid = Line([r_fluid, c_norm[1], 0], [r_fluid, y_bot, 0], stroke_color="#0284C7", stroke_width=22)
+        stem_r_wire = Line([r_wire, c_norm[1], 0], [r_wire, y_bot, 0], stroke_color=COL_METAL, stroke_width=3)
+        stem_r_out = Line([r_out, c_norm[1], 0], [r_out, y_bot, 0], stroke_color="#334155", stroke_width=6)
+
+        crimp_l = Rectangle(width=0.75, height=0.35, color=COL_GRAY, fill_color="#475569", fill_opacity=0.9).move_to([-r_fluid, y_bot + 0.15, 0])
+        crimp_r = Rectangle(width=0.75, height=0.35, color=COL_GRAY, fill_color="#475569", fill_opacity=0.9).move_to([r_fluid, y_bot + 0.15, 0])
+
+        r_dot = Dot(c_norm, color=COL_OK, radius=0.06)
+        r_arr = Arrow(start=c_norm, end=[c_norm[0] + 0.85, c_norm[1], 0], color=COL_OK, buff=0, stroke_width=2.5)
+        r_lbl = Text("R ≥ R_min (ปลอดภัย)", font_size=12, color=COL_OK).move_to([c_norm[0] + 0.50, c_norm[1] + 0.30, 0])
+
+        badge_norm = VGroup(
+            RoundedRectangle(width=8.0, height=0.55, corner_radius=0.1, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.92).move_to([0.0, -1.75, 0.0]),
+            Text("✅ รัศมีดัดโค้งปกติ: ลวดเสริมแรงไม่ล้า รูในกลมสม่ำเสมอ ของไหลไหลสะดวก", font_size=13, color=COL_OK).move_to([0.0, -1.75, 0.0])
+        )
+
+        normal_hose_grp = VGroup(
+            arc_out_norm, arc_wire_norm, arc_fluid_norm, arc_in_norm,
+            stem_l_out, stem_l_wire, stem_l_fluid, stem_l_in,
+            stem_r_in, stem_r_fluid, stem_r_wire, stem_r_out,
+            crimp_l, crimp_r, r_dot, r_arr, r_lbl, badge_norm
+        )
+
+        self.play(FadeIn(normal_hose_grp, shift=UP * 0.25), run_time=1.0)
+        self.wait(0.8)
+
+        # Over-Bent Kink Hose with Severe Visible Damage (§41/§44)
+        p_apex_out_l = np.array([-0.28, 0.75, 0])
+        p_apex_out_r = np.array([0.28, 0.75, 0])
+        p_crease_in = np.array([0.0, 0.70, 0])
+
+        ob_l_out = Line([-0.90, y_bot, 0], p_apex_out_l, stroke_color="#334155", stroke_width=6)
+        ob_l_wire = Line([-0.80, y_bot, 0], [-0.22, 0.75, 0], stroke_color=COL_METAL, stroke_width=3)
+        ob_l_fluid = Line([-0.62, y_bot, 0], [-0.10, 0.73, 0], stroke_color="#0284C7", stroke_width=18)
+        ob_l_in = Line([-0.42, y_bot, 0], p_crease_in, stroke_color="#334155", stroke_width=6)
+
+        ob_r_in = Line([0.42, y_bot, 0], p_crease_in, stroke_color="#334155", stroke_width=6)
+        ob_r_fluid = Line([0.62, y_bot, 0], [0.10, 0.73, 0], stroke_color="#0284C7", stroke_width=18)
+        ob_r_wire = Line([0.80, y_bot, 0], [0.22, 0.75, 0], stroke_color=COL_METAL, stroke_width=3)
+        ob_r_out = Line([0.90, y_bot, 0], p_apex_out_r, stroke_color="#334155", stroke_width=6)
+
+        # Pinched fluid throat at apex (choked to tiny width 4)
+        ob_choke = Line([-0.10, 0.73, 0], [0.10, 0.73, 0], stroke_color="#0284C7", stroke_width=4)
+
+        # Crimps at bottom
+        ob_crimp_l = Rectangle(width=0.75, height=0.35, color=COL_GRAY, fill_color="#475569", fill_opacity=0.9).move_to([-0.62, y_bot + 0.15, 0])
+        ob_crimp_r = Rectangle(width=0.75, height=0.35, color=COL_GRAY, fill_color="#475569", fill_opacity=0.9).move_to([0.62, y_bot + 0.15, 0])
+
+        # Visible wire rupture splinters at outer apex
+        splinter1 = Line([-0.28, 0.75, 0], [-0.22, 0.98, 0], color=COL_WARN, stroke_width=3)
+        splinter2 = Line([-0.28, 0.75, 0], [-0.08, 0.88, 0], color="#F59E0B", stroke_width=2.5)
+        splinter3 = Line([0.28, 0.75, 0], [0.22, 0.98, 0], color=COL_WARN, stroke_width=3)
+        splinter4 = Line([0.28, 0.75, 0], [0.08, 0.88, 0], color="#F59E0B", stroke_width=2.5)
+        fracture_arc = Arc(radius=0.32, start_angle=PI*0.8, angle=-PI*0.6, arc_center=[0.0, 0.70, 0], stroke_color=RED, stroke_width=2.5)
+
+        rupture_grp = VGroup(splinter1, splinter2, splinter3, splinter4, fracture_arc)
+
+        # Callouts pointing to damage
+        call_wire_txt = VGroup(
+            Text("⚠️ ลวดเสริมแรงหักขาด / ฉีกขาด", font_size=13, color=COL_WARN),
+            Text("(Wire Fatigue / Braid Rupture)", font_size=11, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.06, aligned_edge=LEFT).move_to([3.45, 1.45, 0])
+        call_wire_arr = Arrow(start=[2.0, 1.45, 0], end=[0.32, 0.95, 0], color=COL_WARN, buff=0.08, stroke_width=2.5)
+        call_wire = VGroup(call_wire_txt, call_wire_arr)
+
+        call_pinch_txt = VGroup(
+            Text("⚠️ รูในถูกบีบตีบแคบ (Flow Pinch)", font_size=13, color=COL_WARN),
+            Text("(ทางไหลแคบลง 80% / ความดันตกฮวบ)", font_size=11, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.06, aligned_edge=RIGHT).move_to([-3.45, 0.45, 0])
+        call_pinch_arr = Arrow(start=[-1.8, 0.45, 0], end=[-0.12, 0.72, 0], color=COL_WARN, buff=0.08, stroke_width=2.5)
+        call_pinch = VGroup(call_pinch_txt, call_pinch_arr)
+
+        badge_danger = VGroup(
+            RoundedRectangle(width=9.2, height=0.60, corner_radius=0.1, color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -1.75, 0.0]),
+            Text("❌ ดัดแคบกว่า R_min: ลวดหักขาด + รูในตีบแคบ → เสี่ยงสายระเบิดและปั๊มพัง!", font_size=13, color=COL_WARN).move_to([0.0, -1.75, 0.0])
+        )
+
+        overbent_grp = VGroup(
+            ob_l_out, ob_l_wire, ob_l_fluid, ob_l_in,
+            ob_r_in, ob_r_fluid, ob_r_wire, ob_r_out, ob_choke,
+            ob_crimp_l, ob_crimp_r, rupture_grp,
+            call_wire, call_pinch, badge_danger
+        )
+
+        # Sequential fade to eliminate cross-fade badge text collision
+        self.play(FadeOut(normal_hose_grp), run_time=0.4)
+        self.play(FadeIn(overbent_grp, shift=DOWN * 0.1), run_time=0.8)
+        self.play(Indicate(rupture_grp, color=RED), Indicate(ob_choke, color=COL_WARN), run_time=0.8)
+        self.wait(1.5)  # Checkpoint 8.5s falls right here! Full damage visible!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 11.0–17.2: Verified Dimension Table (Slide Page 14)
+        # ----------------------------------------------------------------------
+        cap2 = caption_top("ตัวเลขจริง: Hose Size 12 (OD tube 3/4 นิ้ว) — hydraulic06 น.14")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.6)
+
+        card_tab = RoundedRectangle(width=12.2, height=3.8, corner_radius=0.15, color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.30, 0])
+        h_tab = Text("ตารางเปรียบเทียบสเปกสาย Hose Size 12 (ท่อ OD 3/4 นิ้ว) — hydraulic06 น.14", font_size=14, color=COL_OK).move_to([0, 1.25, 0])
+
+        th_type = Text("ประเภทสาย (Type)", font_size=12, color=COL_GRAY).move_to([-4.4, 0.70, 0])
+        th_id   = Text("รูใน (Hose ID)", font_size=12, color=COL_GRAY).move_to([-2.2, 0.70, 0])
+        th_od   = Text("รูนอก (Hose OD)", font_size=12, color=COL_GRAY).move_to([-0.4, 0.70, 0])
+        th_bend = Text("รัศมีดัดขั้นต่ำ (Min Bend)", font_size=12, color=COL_OK).move_to([1.9, 0.70, 0])
+        th_note = Text("ผลต่อการติดตั้ง", font_size=12, color=COL_GRAY).move_to([4.4, 0.70, 0])
+        div_th = Line([-5.8, 0.45, 0], [5.8, 0.45, 0], color=COL_METAL, stroke_width=1.2)
+
+        # Row 1: Single-Wire Braid
+        r1_type = Text("Single-Wire Braid\n(ลวดถัก 1 ชั้น)", font_size=12, color=COL_METAL).move_to([-4.4, 0.05, 0])
+        r1_id   = Text("5/8 นิ้ว (15.9 mm)", font_size=12, color=WHITE).move_to([-2.2, 0.05, 0])
+        r1_od   = Text("1-5/64 นิ้ว (27.4 mm)", font_size=12, color=WHITE).move_to([-0.4, 0.05, 0])
+        r1_bend = Text("6-9/16 นิ้ว (167 mm)", font_size=13, color=COL_OK).move_to([1.9, 0.05, 0])
+        r1_note = Text("โค้งแคบได้ดี\nประหยัดพื้นที่", font_size=11, color=COL_OK).move_to([4.4, 0.05, 0])
+        div_r1  = Line([-5.8, -0.35, 0], [5.8, -0.35, 0], color=COL_METAL, stroke_width=0.8)
+        row1_grp = VGroup(r1_type, r1_id, r1_od, r1_bend, r1_note)
+
+        # Row 2: Double-Wire Braid
+        r2_type = Text("Double-Wire Braid\n(ลวดถัก 2 ชั้น)", font_size=12, color=COL_WARN).move_to([-4.4, -0.75, 0])
+        r2_id   = Text("3/4 นิ้ว (19.0 mm)", font_size=12, color=WHITE).move_to([-2.2, -0.75, 0])
+        r2_od   = Text("1-1/4 นิ้ว (31.8 mm)", font_size=12, color=WHITE).move_to([-0.4, -0.75, 0])
+        r2_bend = Text("9-1/2 นิ้ว (241 mm)", font_size=13, color=COL_WARN).move_to([1.9, -0.75, 0])
+        r2_note = Text("ต้องเผื่อรัศมีกว้าง\n(+45% รัศมีเพิ่ม)", font_size=11, color=COL_WARN).move_to([4.4, -0.75, 0])
+        row2_grp = VGroup(r2_type, r2_id, r2_od, r2_bend, r2_note)
+
+        box_r1_bend = SurroundingRectangle(r1_bend, color=COL_OK, buff=0.1, corner_radius=0.08)
+        box_r2_bend = SurroundingRectangle(r2_bend, color=COL_WARN, buff=0.1, corner_radius=0.08)
+
+        div_r2  = Line([-5.8, -1.15, 0], [5.8, -1.15, 0], color=COL_METAL, stroke_width=0.8)
+        tab_foot = Text("💡 ข้อสังเกตวิศวกรรม: ลวด 2 ชั้น ผนังหนาและแข็งกว่า (Stiffer) จึงต้องเผื่อรัศมีดัดโค้งกว้างกว่าถึง ~45%!", font_size=12, color=COL_CURR).move_to([0, -1.55, 0])
+
+        grp_table = VGroup(card_tab, h_tab, th_type, th_id, th_od, th_bend, th_note, div_th, row1_grp, div_r1, row2_grp, div_r2, tab_foot)
+
+        self.play(FadeIn(grp_table, shift=UP * 0.25), run_time=1.0)
+        self.play(Create(box_r1_bend), run_time=0.6)
+        self.play(Create(box_r2_bend), run_time=0.6)
+        self.wait(2.2)  # Checkpoint 15.0s falls right here! Table specs clearly readable
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 17.2–23.2: Side-by-Side Bend Radius Comparison (1 vs 2 Braids)
+        # ----------------------------------------------------------------------
+        cap3 = caption_top("เชื่อมกับ H6_09/H6_10: ลวดเยอะ = แข็งกว่า = โค้งแคบไม่ได้เท่า")
+        sub3 = Text("ไซส์เดียวกัน (Size 12): Single-Braid ดัดโค้งแคบได้ถึง 6-9/16\" ขณะที่ Double-Braid ต้องเผื่อถึง 9-1/2\"", font_size=12, color=COL_GRAY).move_to([0, 2.25, 0])
+        self.play(FadeIn(cap3, shift=UP * 0.3), FadeIn(sub3), run_time=0.6)
+
+        # Left Panel: Single-Wire Braid (Tighter loop R = 1.25)
+        c_left = [-3.4, -0.40, 0]
+        r_s_arc = 1.25
+        arc_s_fluid = Arc(radius=r_s_arc, start_angle=PI, angle=-PI, arc_center=c_left, stroke_color="#0284C7", stroke_width=18)
+        arc_s_wire = Arc(radius=r_s_arc + 0.16, start_angle=PI, angle=-PI, arc_center=c_left, stroke_color=COL_METAL, stroke_width=3)
+        arc_s_out = Arc(radius=r_s_arc + 0.24, start_angle=PI, angle=-PI, arc_center=c_left, stroke_color="#334155", stroke_width=4)
+
+        stem_s_l = Line([-3.4 - r_s_arc, c_left[1], 0], [-3.4 - r_s_arc, -1.05, 0], stroke_color="#0284C7", stroke_width=18)
+        stem_s_r = Line([-3.4 + r_s_arc, c_left[1], 0], [-3.4 + r_s_arc, -1.05, 0], stroke_color="#0284C7", stroke_width=18)
+
+        arr_s = Arrow(start=c_left, end=[-3.4, 0.15, 0], color=COL_OK, buff=0, stroke_width=2.2)
+        lbl_s_r = Text("R = 6-9/16\" (167 mm)", font_size=10.5, color=COL_OK).move_to([-3.4, 0.40, 0])
+
+        box_s = RoundedRectangle(width=5.4, height=1.2, corner_radius=0.1, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([-3.4, -1.65, 0])
+        txt_s = VGroup(
+            Text("Single-Wire Braid (ลวด 1 ชั้น)", font_size=13, color=COL_OK),
+            Text("• รัศมีดัดขั้นต่ำ: 6-9/16 นิ้ว (167 mm)\n• โค้งได้แคบกว่า เหมาะกับพื้นที่จำกัดและช่องแคบ", font_size=11, color=WHITE)
+        ).arrange(DOWN, buff=0.06, aligned_edge=LEFT).move_to([-3.4, -1.65, 0])
+        grp_s = VGroup(arc_s_fluid, arc_s_wire, arc_s_out, stem_s_l, stem_s_r, arr_s, lbl_s_r, box_s, txt_s)
+
+        # Right Panel: Double-Wire Braid (Wider loop R = 1.75)
+        c_right = [3.4, -0.40, 0]
+        r_d_arc = 1.75
+        arc_d_fluid = Arc(radius=r_d_arc, start_angle=PI, angle=-PI, arc_center=c_right, stroke_color="#0284C7", stroke_width=20)
+        arc_d_wire1 = Arc(radius=r_d_arc + 0.16, start_angle=PI, angle=-PI, arc_center=c_right, stroke_color=COL_METAL, stroke_width=3)
+        arc_d_wire2 = Arc(radius=r_d_arc + 0.25, start_angle=PI, angle=-PI, arc_center=c_right, stroke_color=COL_CURR, stroke_width=3)
+        arc_d_out = Arc(radius=r_d_arc + 0.34, start_angle=PI, angle=-PI, arc_center=c_right, stroke_color="#334155", stroke_width=4)
+
+        stem_d_l = Line([3.4 - r_d_arc, c_right[1], 0], [3.4 - r_d_arc, -1.05, 0], stroke_color="#0284C7", stroke_width=20)
+        stem_d_r = Line([3.4 + r_d_arc, c_right[1], 0], [3.4 + r_d_arc, -1.05, 0], stroke_color="#0284C7", stroke_width=20)
+
+        arr_d = Arrow(start=c_right, end=[3.4, 0.30, 0], color=COL_WARN, buff=0, stroke_width=2.2)
+        lbl_d_r = Text("R = 9-1/2\" (241 mm)", font_size=10.5, color=COL_WARN).move_to([3.4, 0.65, 0])
+
+        box_d = RoundedRectangle(width=5.4, height=1.2, corner_radius=0.1, color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([3.4, -1.65, 0])
+        txt_d = VGroup(
+            Text("Double-Wire Braid (ลวด 2 ชั้น)", font_size=13, color=COL_WARN),
+            Text("• รัศมีดัดขั้นต่ำ: 9-1/2 นิ้ว (241 mm) — กว้างกว่า +45%!\n• แข็งแรงทนแรงดันสูง แต่กินพื้นที่ติดตั้งมากกว่า", font_size=11, color=WHITE)
+        ).arrange(DOWN, buff=0.06, aligned_edge=LEFT).move_to([3.4, -1.65, 0])
+        grp_d = VGroup(arc_d_fluid, arc_d_wire1, arc_d_wire2, arc_d_out, stem_d_l, stem_d_r, arr_d, lbl_d_r, box_d, txt_d)
+
+        self.play(FadeIn(grp_s, shift=RIGHT * 0.25), FadeIn(grp_d, shift=LEFT * 0.25), run_time=1.2)
+        self.play(Indicate(lbl_s_r, color=COL_OK), Indicate(lbl_d_r, color=COL_WARN), run_time=0.8)
+        self.wait(2.2)  # Checkpoint 21.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 23.2–29.2: 3 Standard Fitting Angles (Straight, 45°, 90° Elbow)
+        # ----------------------------------------------------------------------
+        cap4 = caption_top("ตัวอย่างข้อต่อสำเร็จรูป (Fittings) 3 แบบมาตรฐาน")
+        sub4 = Text("เลือกมุมข้อต่อให้เหมาะกับทิศทางสาย — ลดจำนวนจุดโค้ง ป้องกันสายถูกดัดแคบเกินพิกัด", font_size=12, color=COL_GRAY).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap4, shift=UP * 0.3), FadeIn(sub4), run_time=0.6)
+
+        # Panel 1: Straight (0°) at x = -4.3
+        p1_base = Rectangle(width=1.8, height=0.30, color=COL_GRAY, fill_color="#1E293B", fill_opacity=0.9).move_to([-4.3, -0.70, 0])
+        p1_fit = Rectangle(width=0.55, height=0.6, color=COL_METAL, fill_color="#64748B", fill_opacity=0.9).move_to([-4.3, -0.25, 0])
+        p1_hose = Line([-4.3, 0.05, 0], [-4.3, 1.05, 0], color="#0284C7", stroke_width=16)
+        p1_out_l = Line([-4.42, 0.05, 0], [-4.42, 1.05, 0], color="#334155", stroke_width=3)
+        p1_out_r = Line([-4.18, 0.05, 0], [-4.18, 1.05, 0], color="#334155", stroke_width=3)
+        p1_title = Text("1. ข้อต่อตรง (Straight / 0°)", font_size=13, color=COL_METAL).move_to([-4.3, 1.45, 0])
+        p1_sub = Text("สำหรับทางเดินสายตรง\nต่อเข้าพอร์ตโดยตรง", font_size=11, color=COL_GRAY).move_to([-4.3, -1.15, 0])
+        panel1 = VGroup(p1_base, p1_fit, p1_hose, p1_out_l, p1_out_r, p1_title, p1_sub)
+
+        # Panel 2: 45° Elbow at x = 0.0
+        p2_base = Rectangle(width=1.8, height=0.30, color=COL_GRAY, fill_color="#1E293B", fill_opacity=0.9).move_to([0.0, -0.70, 0])
+        p2_fit_v = Rectangle(width=0.55, height=0.45, color=COL_FIELD, fill_color="#42A5F5", fill_opacity=0.85).move_to([0.0, -0.32, 0])
+        p2_fit_elbow = Line([0.0, -0.10, 0], [0.35, 0.25, 0], color=COL_FIELD, stroke_width=16)
+        p2_hose = Line([0.35, 0.25, 0], [1.05, 0.95, 0], color="#0284C7", stroke_width=16)
+        p2_arc = Arc(radius=0.40, start_angle=PI/2, angle=-PI/4, arc_center=[0.0, -0.10, 0], color=COL_FIELD, stroke_width=2)
+        p2_arc_lbl = Text("45°", font_size=11, color=COL_FIELD).move_to([0.35, 0.0, 0])
+        p2_title = Text("2. ข้องอ 45° (45° Elbow)", font_size=13, color=COL_FIELD).move_to([0.0, 1.45, 0])
+        p2_sub = Text("เปลี่ยนทิศทางเฉียง\nลดความเค้นดัดสาย", font_size=11, color=COL_GRAY).move_to([0.0, -1.15, 0])
+        panel2 = VGroup(p2_base, p2_fit_v, p2_fit_elbow, p2_hose, p2_arc, p2_arc_lbl, p2_title, p2_sub)
+
+        # Panel 3: 90° Elbow at x = +4.3
+        p3_base = Rectangle(width=1.8, height=0.30, color=COL_GRAY, fill_color="#1E293B", fill_opacity=0.9).move_to([4.3, -0.70, 0])
+        p3_fit_v = Rectangle(width=0.55, height=0.55, color=COL_OK, fill_color="#26C6DA", fill_opacity=0.85).move_to([4.3, -0.27, 0])
+        p3_fit_h = Rectangle(width=0.55, height=0.55, color=COL_OK, fill_color="#26C6DA", fill_opacity=0.85).move_to([4.60, 0.0, 0])
+        p3_hose = Line([4.88, 0.0, 0], [6.18, 0.0, 0], color="#0284C7", stroke_width=16)
+        p3_out_t = Line([4.88, 0.12, 0], [6.18, 0.12, 0], color="#334155", stroke_width=3)
+        p3_out_b = Line([4.88, -0.12, 0], [6.18, -0.12, 0], color="#334155", stroke_width=3)
+        p3_corner = Square(side_length=0.22, color=COL_OK, stroke_width=1.5).move_to([4.19, 0.11, 0])
+        p3_title = Text("3. ข้องอ 90° (90° Elbow)", font_size=13, color=COL_OK).move_to([4.3, 1.45, 0])
+        p3_sub = Text("เลี้ยวฉากในตัวข้อต่อ\nสายไม่ต้องถูกดัดโค้ง!", font_size=11, color=COL_OK).move_to([4.3, -1.15, 0])
+        panel3 = VGroup(p3_base, p3_fit_v, p3_fit_h, p3_hose, p3_out_t, p3_out_b, p3_corner, p3_title, p3_sub)
+
+        fittings_banner = VGroup(
+            RoundedRectangle(width=11.6, height=0.55, corner_radius=0.1, color=COL_CURR, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -1.75, 0]),
+            Text("💡 การเลือกข้อต่อมุมที่ถูกต้อง ช่วยกำจัดการดัดสายที่แคบเกินพิกัด (เชื่อมโยง H6_12 การติดตั้งสาย)", font_size=12, color=COL_CURR).move_to([0, -1.75, 0])
+        )
+
+        fittings3 = [panel1, panel2, panel3]
+        self.play(LaggedStart(*[FadeIn(fit, shift=UP * 0.2) for fit in fittings3], lag_ratio=0.35), FadeIn(fittings_banner), run_time=1.4)
+        self.play(Indicate(p2_fit_elbow, color=COL_FIELD), Indicate(p3_fit_h, color=COL_OK), run_time=0.8)
+        self.wait(2.0)  # Checkpoint 27.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 29.2–34.2: Summary Card
+        # ----------------------------------------------------------------------
+        sum_box = RoundedRectangle(
+            corner_radius=0.15, width=11.6, height=3.6,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.25, 0])
+
+        s_head = Text("สรุป: ไซส์สายและรัศมีดัดโค้งขั้นต่ำ (hydraulic06 น.14)", font_size=16, color=COL_OK).move_to([0, 1.20, 0])
+        s1 = Text("1. รัศมีดัดโค้งขั้นต่ำ (Min Bend Radius: R_min): พิกัดสำคัญที่สุดในการติดตั้งสายไฮดรอลิก ห้ามดัดแคบกว่านี้", font_size=12.5, color=WHITE).move_to([0, 0.65, 0])
+        s2 = Text("2. ผลเสียจากการดัดแคบเกินไป: ลวดถักล้าและฉีกขาด (Wire Fatigue/Rupture) และรูในถูกบีบตีบแคบ ขวางทางไหล", font_size=12.5, color=COL_WARN).move_to([0, 0.15, 0])
+        s3 = Text("3. ตัวเลขจริง (Size 12): ลวด 1 ชั้น R_min = 6-9/16\" (167 mm) ส่วนลวด 2 ชั้น R_min = 9-1/2\" (241 mm, +45%)", font_size=12.5, color=COL_OK).move_to([0, -0.35, 0])
+        s4 = Text("4. กฎฟิสิกส์: สายที่เสริมลวดมากขึ้นจะแข็งกว่า (Stiffer) จึงต้องเผื่อรัศมีดัดโค้งกว้างกว่าที่ไซส์เดียวกัน", font_size=12.5, color=WHITE).move_to([0, -0.85, 0])
+        s5 = Text("5. ใช้ข้อต่อมุมสำเร็จรูป (Straight / 45° / 90° Elbow) ช่วยรับมุมเลี้ยว ป้องกันสายหักงอเกินพิกัด", font_size=12.5, color=COL_FIELD).move_to([0, -1.35, 0])
+
+        sum_grp = VGroup(sum_box, s_head, s1, s2, s3, s4, s5)
+        self.play(FadeIn(sum_grp, shift=UP * 0.35), run_time=0.8)
+        self.wait(3.4)  # Checkpoint 32.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 34.2–39.2: Review Question Card & Outro
+        # ----------------------------------------------------------------------
+        q_box = RoundedRectangle(
+            corner_radius=0.15, width=11.2, height=2.6,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.35, 0.0])
+        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0.0, 0.50, 0.0])
+        q_body = Text(
+            "งานติดตั้งที่ต้องเดินสายผ่านช่องแคบมากๆ ซึ่งมีพื้นที่ดัดโค้งจำกัด\nควรเลือกใช้สาย Single-Wire Braid หรือ Double-Wire Braid?",
+            font_size=13.5, color=WHITE
+        ).move_to([0.0, 0.05, 0.0])
+        q_ans = Text(
+            "(คำตอบ: ควรเลือก Single-Wire Braid (หากความดันทนได้) เพราะมีรัศมีดัดโค้งขั้นต่ำแคบกว่าอย่างมาก\nตัวอย่าง Size 12: Single-Braid ดัดโค้งได้ถึง 6-9/16\" ขณะที่ Double-Braid ต้องเผื่อถึง 9-1/2\")",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.65, 0.0])
+
+        q_grp = VGroup(q_box, q_head, q_body, q_ans)
+        self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.4)  # Checkpoint 36.0s falls right here!
+
+        self.play(FadeOut(q_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+        self.wait(0.5)
+
+
 
 
 
