@@ -4646,7 +4646,7 @@ class H6_11_HoseSizeFittings(SafeScene):
 #   3. Bend Radius: Keep R >= R_min; tight bends cause outer wire rupture and flow pinch.
 #   4. Twisted Hose: 7" twist on large hose reduces pressure capability by up to 90%!
 #   5. Movement Plane: Flexing must occur in same plane as bend to prevent neck twist.
-#   6. Slack: Operating pressure changes length by +2% to -6%; adequate slack (5-10%) mandatory.
+#   6. Slack: Operating pressure changes length by +2% to -6%; adequate slack is mandatory.
 # ==============================================================================
 
 def _h6_12_title(text):
@@ -4781,7 +4781,7 @@ class H6_12_HoseInstallation(SafeScene):
         sleeve = RoundedRectangle(width=0.45, height=1.7, corner_radius=0.08, color="#E2E8F0", fill_color="#94A3B8", fill_opacity=0.75).move_to([0.8, 0.1, 0.0])
         sleeve_lbl = Text("ปลอกฉนวนกันความร้อน\n(Insulation Sleeve)", font_size=10, color=WHITE).move_to([2.7, 0.1, 0.0])
         gap_dim = DoubleArrow([-1.60, -0.2, 0], [0.55, -0.2, 0], color=COL_OK, stroke_width=2)
-        gap_lbl = Text("ระยะปลอดภัย > 50 mm", font_size=10, color=COL_OK).move_to([-0.5, 0.05, 0.0])
+        gap_lbl = Text("เว้นระยะห่างจากผิวร้อนชัดเจน", font_size=10, color=COL_OK).move_to([-0.5, 0.05, 0.0])
         badge_r2 = _h6_12_badge("✓ ถูก (เว้นระยะ + หุ้มฉนวน)", COL_OK).move_to([2.2, 1.15, 0.0])
         call_r2 = Text("✓ ดันสายห่างด้วยแคลมป์ + สวมปลอกฉนวนกันความร้อน", font_size=11.5, color=COL_OK).move_to([1.8, -1.35, 0.0])
         right2_grp = VGroup(hot_pipe_grp_r, hose_r2_out, hose_r2_in, clamp_bracket, sleeve, sleeve_lbl, gap_dim, gap_lbl, badge_r2, call_r2)
@@ -4972,7 +4972,7 @@ class H6_12_HoseInstallation(SafeScene):
         ]
         hose_r6_out = VMobject(stroke_color="#334155", stroke_width=10).set_points_smoothly(catenary_pts)
         hose_r6_in  = VMobject(stroke_color=COL_OK, stroke_width=6).set_points_smoothly(catenary_pts)
-        dim_r6 = Text("เผื่อความยาวสแลค (Slack) +5% ถึง +10%", font_size=11, color=COL_OK).move_to([0.0, 0.35, 0.0])
+        dim_r6 = Text("เผื่อความยาวสแลค (Slack) ให้เพียงพอ", font_size=11, color=COL_OK).move_to([0.0, 0.35, 0.0])
         badge_r6 = _h6_12_badge("✓ ถูก (เผื่อสแลคให้พอ)", COL_OK).move_to([0.0, 1.15, 0.0])
         call_r6 = Text("✓ เผื่อสแลครองรับการเปลี่ยนความยาว (+2% ถึง −6%) ได้อย่างอิสระ ไม่ดึงรั้งข้อต่อ", font_size=12, color=COL_OK).move_to([0.0, -1.25, 0.0])
         right6_grp = VGroup(mounts_grp_r, hose_r6_out, hose_r6_in, dim_r6, badge_r6, call_r6)
