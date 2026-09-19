@@ -5332,8 +5332,330 @@ class H6_13_ConductorNomograph(SafeScene):
 
         self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
         self.wait(4.4)  # Checkpoint 33.5s falls right here!
+        self.play(FadeOut(question_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+        self.wait(0.5)
+
+
+# ==============================================================================
+# SCENE 14: H6_14_SealingDevicesOverview (hydraulic06.pdf page 17)
+# Duration: ~37.0 seconds | 2D SafeScene
+# Pedagogical Focus: Sealing Devices Overview (Static vs Dynamic Seals)
+# AHA Moment:
+#   1. Classification criterion is relative motion between sealed mating surfaces:
+#      - Static seals: NO relative motion (e.g. flange gasket, static O-ring).
+#      - Dynamic seals: HAS relative motion (sliding rod, rotating shaft).
+#   2. O-rings appear in BOTH lists on slide 17! A seal's classification depends
+#      on its installation location and relative movement, not its inherent shape.
+#   3. Static flange joints: Basic Flange Joint (uses resilient gasket) vs
+#      Metal-to-Metal Joint (precision ground faces direct contact, no gasket).
+#   4. Roadmap scene: Names & groups only; detailed mechanisms covered in H6_15–H6_20.
+# ==============================================================================
+
+def _h6_14_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_14_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_14_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_14_banner(text, color):
+    lbl = Text(text, font_size=11.5, color=color)
+    bg = RoundedRectangle(
+        width=min(12.6, max(lbl.width + 0.6, 9.5)),
+        height=0.50,
+        corner_radius=0.1,
+        color=color,
+        fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.62, 0.0])
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_14_mini_badge(text, color):
+    lbl = Text(text, font_size=10.5, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.40,
+        height=0.34,
+        corner_radius=0.07,
+        color=color,
+        fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class H6_14_SealingDevicesOverview(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        """Fade out all scene mobjects except persistent header."""
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ----------------------------------------------------------------------
+        self.title_m = _h6_14_title("อุปกรณ์ผนึก (Sealing Devices): ภาพรวม")
+        self.ref_m = _h6_14_page_ref("hydraulic06 น.17")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)  # Checkpoint 1.5s
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–5.0: Hook Question
+        # ----------------------------------------------------------------------
+        hook_q = _h6_14_caption_top("ซีลทุกจุดในระบบไฮดรอลิกเหมือนกันหมดไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.5)  # Checkpoint 3.6s
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 5.0–13.0: 2 Columns (Static vs Dynamic)
+        # ----------------------------------------------------------------------
+        cap1 = _h6_14_caption_top("แบ่ง 2 กลุ่มตามการเคลื่อนที่สัมพัทธ์ของผิวที่ปิดผนึก")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Column Layout Dimensions
+        col_w = 5.8
+        col_h = 4.1
+        y_col = 0.05
+        x_left = -3.25
+        x_right = 3.25
+
+        # --- LEFT COLUMN: STATIC SEALS (NO MOTION) ---
+        box_static = RoundedRectangle(
+            width=col_w, height=col_h, corner_radius=0.12,
+            color=COL_FIELD, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.90).move_to([x_left, y_col, 0.0])
+
+        hdr_static = Text("1. ซีลสถิต (Static Seals)", font_size=13.5, color=COL_FIELD).move_to([x_left, y_col + 1.70, 0.0])
+        sub_static = Text("ไม่มีการเคลื่อนที่สัมพัทธ์ (No Relative Motion)", font_size=10, color=COL_GRAY).move_to([x_left, y_col + 1.38, 0.0])
+
+        # Icon/Diagram: Flange Joint firmly bolted, NO motion arrows! (§34)
+        f_top = Rectangle(width=2.5, height=0.26, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([x_left, y_col + 0.96, 0.0])
+        f_gasket = Rectangle(width=2.5, height=0.12, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 1.0).move_to([x_left, y_col + 0.77, 0.0])
+        f_bot = Rectangle(width=2.5, height=0.26, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([x_left, y_col + 0.58, 0.0])
+        bolt_l = Line([x_left - 0.90, y_col + 1.15, 0], [x_left - 0.90, y_col + 0.39, 0], color=COL_GRAY, stroke_width=2.5)
+        bolt_r = Line([x_left + 0.90, y_col + 1.15, 0], [x_left + 0.90, y_col + 0.39, 0], color=COL_GRAY, stroke_width=2.5)
+        lbl_diag_static = Text("[หน้าแปลนประกบนิ่ง — ไม่มีส่วนเคลื่อนที่]", font_size=9.5, color=COL_GRAY).move_to([x_left, y_col + 0.28, 0.0])
+        diag_static = VGroup(f_top, f_gasket, f_bot, bolt_l, bolt_r, lbl_diag_static)
+
+        # List of static seals (directly from slide 17)
+        item_s1 = Text("• Flange gasket (ปะเก็นหน้าแปลน)", font_size=11, color=WHITE).move_to([x_left - 0.20, y_col - 0.02, 0.0])
+        item_s2 = Text("• O-rings (โอริง)", font_size=11.5, color=COL_OK).move_to([x_left - 0.90, y_col - 0.38, 0.0])
+        note_s = Text("(ปิดผนึกชิ้นส่วนที่ขันแน่นอยู่กับที่)", font_size=10, color=COL_GRAY).move_to([x_left, y_col - 0.85, 0.0])
+
+        col_static = VGroup(box_static, hdr_static, sub_static, diag_static, item_s1, item_s2, note_s)
+
+        # --- RIGHT COLUMN: DYNAMIC SEALS (WITH MOTION) ---
+        box_dynamic = RoundedRectangle(
+            width=col_w, height=col_h, corner_radius=0.12,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.90).move_to([x_right, y_col, 0.0])
+
+        hdr_dynamic = Text("2. ซีลพลวัต (Dynamic Seals)", font_size=13.5, color=COL_WARN).move_to([x_right, y_col + 1.70, 0.0])
+        sub_dynamic = Text("มีการเคลื่อนที่สัมพัทธ์ (Relative Motion)", font_size=10, color=COL_GRAY).move_to([x_right, y_col + 1.38, 0.0])
+
+        # Icon/Diagram: Rod sliding through housing + BIDIRECTIONAL MOTION ARROWS! (§34)
+        housing_l = Rectangle(width=0.65, height=0.64, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([x_right - 0.85, y_col + 0.77, 0.0])
+        housing_r = Rectangle(width=0.65, height=0.64, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([x_right + 0.85, y_col + 0.77, 0.0])
+        rod = Rectangle(width=0.85, height=0.76, color=COL_FIELD, fill_color="#1E3A8A").set_fill("#1E3A8A", 0.85).move_to([x_right, y_col + 0.77, 0.0])
+        # Visible bidirectional motion arrows on rod: up & down arrows
+        arr_up = Arrow([x_right + 0.22, y_col + 0.55, 0], [x_right + 0.22, y_col + 1.00, 0], color=COL_WARN, stroke_width=2.5, tip_length=0.10)
+        arr_down = Arrow([x_right - 0.22, y_col + 1.00, 0], [x_right - 0.22, y_col + 0.55, 0], color=COL_WARN, stroke_width=2.5, tip_length=0.10)
+        lbl_diag_dynamic = Text("[ก้านสูบเลื่อนเข้า-ออก — มีผิวเสียดสีเคลื่อนที่]", font_size=9.5, color=COL_WARN).move_to([x_right, y_col + 0.28, 0.0])
+        diag_dynamic = VGroup(housing_l, housing_r, rod, arr_up, arr_down, lbl_diag_dynamic)
+
+        # List of dynamic seals (5 items directly from slide 17)
+        item_d1 = Text("• O-rings (โอริง)", font_size=11.5, color=COL_OK).move_to([x_right - 1.15, y_col - 0.38, 0.0])
+        item_d2 = Text("• Compression packings (V & U)", font_size=10.5, color=WHITE).move_to([x_right - 0.25, y_col - 0.68, 0.0])
+        item_d3 = Text("• Piston cup packings", font_size=10.5, color=WHITE).move_to([x_right - 0.72, y_col - 0.98, 0.0])
+        item_d4 = Text("• Piston rings", font_size=10.5, color=WHITE).move_to([x_right - 1.15, y_col - 1.28, 0.0])
+        item_d5 = Text("• Wiper rings", font_size=10.5, color=WHITE).move_to([x_right - 1.20, y_col - 1.58, 0.0])
+
+        col_dynamic = VGroup(box_dynamic, hdr_dynamic, sub_dynamic, diag_dynamic, item_d1, item_d2, item_d3, item_d4, item_d5)
+
+        self.play(
+            FadeIn(col_static, shift=RIGHT * 0.3),
+            FadeIn(col_dynamic, shift=LEFT * 0.3),
+            run_time=1.2
+        )
+        self.wait(5.0)  # Checkpoint 9.0s falls right here!
+
+        # ----------------------------------------------------------------------
+        # BEAT 13.0–20.0: Aha Moment — O-rings appear in BOTH lists!
+        # ----------------------------------------------------------------------
+        cap2 = _h6_14_caption_top("สังเกต: 'O-rings' อยู่ทั้ง 2 ฝั่ง! เป็นได้ทั้งสถิตและพลวัต", color=YELLOW)
+        # Avoid simultaneous cross-fade layout collision
+        self.play(FadeOut(cap1), run_time=0.25)
+        self.play(FadeIn(cap2, shift=UP * 0.25), run_time=0.45)
+
+        # Highlight boxes around O-rings in both columns
+        hl_box_s = SurroundingRectangle(item_s2, color=YELLOW, buff=0.08, corner_radius=0.06, stroke_width=2.5)
+        hl_box_d = SurroundingRectangle(item_d1, color=YELLOW, buff=0.08, corner_radius=0.06, stroke_width=2.5)
+
+        # Direct horizontal dashed link connecting the two highlighted boxes
+        link_line = DashedLine(
+            hl_box_s.get_right(), hl_box_d.get_left(),
+            color=YELLOW, stroke_width=2.5, dash_length=0.15
+        )
+
+        banner_aha = _h6_14_banner(
+            "การเป็นซีลสถิตหรือพลวัต ขึ้นกับจุดติดตั้งว่าขยับหรือไม่ — ไม่ใช่คุณสมบัติเฉพาะของตัวซีลเอง",
+            COL_OK
+        )
+
+        self.play(
+            Create(hl_box_s),
+            Create(hl_box_d),
+            Indicate(item_s2, color=YELLOW, scale_factor=1.15),
+            Indicate(item_d1, color=YELLOW, scale_factor=1.15),
+            Create(link_line),
+            FadeIn(banner_aha, shift=UP * 0.2),
+            run_time=1.0
+        )
+        self.wait(4.4)  # Checkpoint 16.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 20.6–27.0: Flange Joints Comparison (Static Seal Subtypes)
+        # ----------------------------------------------------------------------
+        cap3 = _h6_14_caption_top("ซีลสถิต: รอยต่อหน้าแปลน 2 แบบ (Flange Joints)")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.6)
+
+        card_w2 = 5.8
+        card_h2 = 4.1
+        y_joint = 0.05
+
+        # 1. BASIC FLANGE JOINTS (WITH GASKET)
+        box_j1 = RoundedRectangle(
+            width=card_w2, height=card_h2, corner_radius=0.12,
+            color=COL_CURR, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.90).move_to([x_left, y_joint, 0.0])
+        hdr_j1 = Text("1. Basic Flange Joint", font_size=13.5, color=COL_CURR).move_to([x_left, y_joint + 1.70, 0.0])
+        sub_j1 = Text("มีชั้นปะเก็น (Gasket) คั่นกลาง", font_size=11, color=WHITE).move_to([x_left, y_joint + 1.38, 0.0])
+
+        # Large detailed diagram of gasket joint
+        # Top flange
+        flange1_top = Rectangle(
+            width=3.2, height=0.42, color=COL_METAL, fill_color="#334155"
+        ).set_fill("#334155", 0.95).move_to([x_left, y_joint + 0.88, 0.0])
+        # VISIBLE GASKET LAYER (Yellow / Amber)
+        gasket_layer = Rectangle(
+            width=3.2, height=0.20, color=COL_CURR, fill_color=COL_CURR
+        ).set_fill(COL_CURR, 1.0).move_to([x_left, y_joint + 0.57, 0.0])
+        # Bottom flange
+        flange1_bot = Rectangle(
+            width=3.2, height=0.42, color=COL_METAL, fill_color="#334155"
+        ).set_fill("#334155", 0.95).move_to([x_left, y_joint + 0.26, 0.0])
+
+        # Clamping bolts
+        bolt1_l = Line([x_left - 1.15, y_joint + 1.18, 0], [x_left - 1.15, y_joint - 0.04, 0], color=COL_GRAY, stroke_width=2.5)
+        bolt1_r = Line([x_left + 1.15, y_joint + 1.18, 0], [x_left + 1.15, y_joint - 0.04, 0], color=COL_GRAY, stroke_width=2.5)
+
+        badge_j1 = _h6_14_mini_badge("ชั้นปะเก็น (Gasket Layer) สีเหลืองคั่นกลาง", COL_CURR).move_to([x_left, y_joint - 0.35, 0.0])
+        desc_j1 = Text("ปะเก็นถูกบีบอัดจนยุบตัวแทรกเต็มช่องว่าง\nป้องกันการรั่วซึมได้ดีแม้ผิวประกบไม่เรียบเนียนสนิท", font_size=10.5, color=WHITE).move_to([x_left, y_joint - 0.95, 0.0])
+
+        joint_gasket = VGroup(box_j1, hdr_j1, sub_j1, flange1_top, gasket_layer, flange1_bot, bolt1_l, bolt1_r, badge_j1, desc_j1)
+
+        # 2. METAL-TO-METAL JOINTS (WITHOUT GASKET)
+        box_j2 = RoundedRectangle(
+            width=card_w2, height=card_h2, corner_radius=0.12,
+            color=COL_FIELD, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.90).move_to([x_right, y_joint, 0.0])
+        hdr_j2 = Text("2. Metal-to-Metal Joint", font_size=13.5, color=COL_FIELD).move_to([x_right, y_joint + 1.70, 0.0])
+        sub_j2 = Text("ประกบโลหะชนโลหะ (ไม่ใช้ปะเก็น)", font_size=11, color=WHITE).move_to([x_right, y_joint + 1.38, 0.0])
+
+        # Diagram of metal-to-metal (2 flanges pressed directly together, NO gasket layer!)
+        flange2_top = Rectangle(
+            width=3.2, height=0.42, color=COL_METAL, fill_color="#334155"
+        ).set_fill("#334155", 0.95).move_to([x_right, y_joint + 0.78, 0.0])
+        # Direct mating interface line (NO gap, NO layer)
+        mating_line = Line([x_right - 1.6, y_joint + 0.57, 0], [x_right + 1.6, y_joint + 0.57, 0], color=COL_OK, stroke_width=2.5)
+        flange2_bot = Rectangle(
+            width=3.2, height=0.42, color=COL_METAL, fill_color="#334155"
+        ).set_fill("#334155", 0.95).move_to([x_right, y_joint + 0.36, 0.0])
+
+        bolt2_l = Line([x_right - 1.15, y_joint + 1.08, 0], [x_right - 1.15, y_joint + 0.06, 0], color=COL_GRAY, stroke_width=2.5)
+        bolt2_r = Line([x_right + 1.15, y_joint + 1.08, 0], [x_right + 1.15, y_joint + 0.06, 0], color=COL_GRAY, stroke_width=2.5)
+
+        badge_j2 = _h6_14_mini_badge("ผิวโลหะประกบแนบสนิท ไร้ปะเก็น", COL_OK).move_to([x_right, y_joint - 0.35, 0.0])
+        desc_j2 = Text("อาศัยการกลึงเจียระไนผิวเรียบละเอียดระดับไมครอน\nขันอัดโลหะแนบกันตรงๆ โดยไม่ต้องพึ่งพาปะเก็น", font_size=10.5, color=WHITE).move_to([x_right, y_joint - 0.95, 0.0])
+
+        joint_metal = VGroup(box_j2, hdr_j2, sub_j2, flange2_top, mating_line, flange2_bot, bolt2_l, bolt2_r, badge_j2, desc_j2)
+
+        banner_joints = _h6_14_banner(
+            "หน้าแปลนทั่วไปใช้ Gasket คั่น / หากผิวเรียบละเอียดสูงมาก สามารถใช้ Metal-to-Metal ได้",
+            COL_OK
+        )
+
+        self.play(
+            FadeIn(joint_gasket, shift=UP * 0.25),
+            FadeIn(joint_metal, shift=UP * 0.25),
+            FadeIn(banner_joints, shift=UP * 0.2),
+            run_time=1.0
+        )
+        self.wait(4.6)  # Checkpoint 24.0s falls right here!
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 27.6–32.0: Summary Card
+        # ----------------------------------------------------------------------
+        card_box = RoundedRectangle(
+            width=11.6, height=3.4, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: ภาพรวมอุปกรณ์ผนึก (hydraulic06 น.17)", font_size=14, color=COL_OK).move_to([0.0, 1.25, 0.0])
+        rows = [
+            "1. เกณฑ์จำแนก: มีการเคลื่อนที่สัมพัทธ์ของผิวสัมผัสหรือไม่ (สถิต = ไม่ขยับ, พลวัต = ขยับ)",
+            "2. O-rings เป็นได้ทั้งสองแบบ: ติดตั้งฝาประกบ = ซีลสถิต / ติดตั้งรอบก้านสูบเลื่อน = ซีลพลวัต",
+            "3. การเจาะลึกกลไก: O-rings, Packings, Piston Cups, Rings, Wiper ติดตามต่อใน H6_15–H6_20"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11.5, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.20, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(3.6)  # Checkpoint 29.0s falls right here!
+
+        # ----------------------------------------------------------------------
+        # BEAT 32.0–36.0: Review Question Card
+        # ----------------------------------------------------------------------
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ซีลรอบก้านสูบไฮดรอลิกที่เลื่อนเข้าออกตลอดเวลา\nควรจัดเป็นซีลสถิต (Static) หรือซีลพลวัต (Dynamic)?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: ซีลพลวัต (Dynamic Seal) — เพราะก้านสูบกับร่องเสื้อสูบมีการเคลื่อนที่สัมพัทธ์กันตลอดเวลา)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.4)  # Checkpoint 33.5s falls right here!
 
         self.play(FadeOut(question_grp), run_time=0.6)
         self.wait(0.4)
         self.fade_out_all(run_time=0.8)
         self.wait(0.5)
+
