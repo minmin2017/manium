@@ -8700,7 +8700,7 @@ class H6_22_Accumulators1(SafeScene):
             num_turns=5,
             center_x=cyl_s_x
         )
-        lbl_spring_rel = Text("SPRING (สปริงคลายตัว: แรง F ต่ำ)", font_size=10, color=COL_SPRING).next_to(spring_relaxed, RIGHT, buff=0.15)
+        lbl_spring_rel = Text("SPRING (สปริงคลายตัว: แรง F ต่ำ)", font_size=10, color=COL_SPRING).move_to([cyl_s_x, cyl_s_top_y + 0.28, 0])
 
         # Low pressure gauge (needle pointing low, angle 140 deg):
         gauge_s_low = _create_gauge(center=[-3.4, -1.0, 0], angle=140*DEGREES, status_text="P_min (แรงดันต่ำ)", color=COL_WARN)
@@ -8745,7 +8745,7 @@ class H6_22_Accumulators1(SafeScene):
             num_turns=10,
             center_x=cyl_s_x
         )
-        lbl_spring_comp = Text("SPRING (สปริงถูกอัดแน่น: แรง F สูง)", font_size=10, color=COL_WARN).next_to(spring_compressed, RIGHT, buff=0.15)
+        lbl_spring_comp = Text("SPRING (สปริงถูกอัดแน่น: แรง F สูง)", font_size=10, color=COL_WARN).move_to([cyl_s_x, cyl_s_top_y + 0.28, 0])
 
         # High pressure gauge (needle rotated to high, angle -15 deg):
         gauge_s_high = _create_gauge(center=[-3.4, -1.0, 0], angle=-15*DEGREES, status_text="P_max (แรงดันสูง)", color=COL_OK)
