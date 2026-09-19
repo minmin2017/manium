@@ -3753,6 +3753,453 @@ class H6_09_FlexibleHoses1(SafeScene):
         self.fade_out_all(run_time=0.8)
 
 
+# ==============================================================================
+# SCENE 10: H6_10_FlexibleHoses2 (hydraulic06.pdf page 13)
+# Duration: ~46.5 seconds | 2D SafeScene
+# Pedagogical Focus: SAE 100R6-R12 Flexible Hoses & Spiral-Wound Wire Physics
+# AHA Moment: R9-R12 wire plies are SPIRAL-wound (parallel diagonal), not braided (cross-hatch).
+#             Under high pressure, single-direction spiral creates net axial torque causing twist.
+#             Alternating winding directions (left vs right) cancels net torque, keeping hose straight!
+# Animated Proof (§32):
+#   - Beat 17.8-23.0s: Single-direction spiral hose under pressure -> net torque arrow -> hose end rotates 60° (twist!).
+#   - Beat 23.8-29.0s: Alternating layers in same frame (slanted left vs right) -> opposing torques cancel (Στ=0) -> hose stays straight!
+# High-Risk Check 1 (§41/§44): Hose end actually rotated between t=19.5s and t=21.5s (measured angle change).
+# High-Risk Check 2 (§41/§44): Layer 1 (slanted left) and Layer 2 (slanted right) visibly slant in opposite directions in same frame at t=27.0s.
+# ==============================================================================
+class H6_10_FlexibleHoses2(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [m for m in self.mobjects if m not in (self.title_m, self.ref_m)]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def make_mesh_pattern(self, x_min, x_max, y_min, y_max, color, spacing=0.20, stroke_width=1.5):
+        h = y_max - y_min
+        lines = []
+        if h <= 0 or x_max <= x_min:
+            return VGroup()
+        x = x_min - h
+        while x <= x_max:
+            t0 = max(0.0, (x_min - x) / h)
+            t1 = min(1.0, (x_max - x) / h)
+            if t0 < t1:
+                lines.append(Line([x + t0 * h, y_min + t0 * h, 0], [x + t1 * h, y_min + t1 * h, 0], color=color, stroke_width=stroke_width))
+            x += spacing
+        x = x_min
+        while x <= x_max + h:
+            t0 = max(0.0, (x - x_max) / h)
+            t1 = min(1.0, (x - x_min) / h)
+            if t0 < t1:
+                lines.append(Line([x - t0 * h, y_min + t0 * h, 0], [x - t1 * h, y_min + t1 * h, 0], color=color, stroke_width=stroke_width))
+            x += spacing
+        return VGroup(*lines)
+
+    def make_spiral_pattern(self, x_min, x_max, y_min, y_max, color, spacing=0.22, stroke_width=2.0, direction="right", slope_dx_ratio=1.25):
+        h = y_max - y_min
+        dx = h * slope_dx_ratio
+        lines = []
+        if h <= 0 or x_max <= x_min:
+            return VGroup()
+        if direction == "right":
+            x0 = x_min - dx
+            while x0 <= x_max:
+                t0 = max(0.0, (x_min - x0) / dx)
+                t1 = min(1.0, (x_max - x0) / dx)
+                if t0 < t1:
+                    lines.append(Line([x0 + t0 * dx, y_min + t0 * h, 0], [x0 + t1 * dx, y_min + t1 * h, 0], color=color, stroke_width=stroke_width))
+                x0 += spacing
+        else:
+            x0 = x_min
+            while x0 <= x_max + dx:
+                t0 = max(0.0, (x0 - x_max) / dx)
+                t1 = min(1.0, (x0 - x_min) / dx)
+                if t0 < t1:
+                    lines.append(Line([x0 - t0 * dx, y_min + t0 * h, 0], [x0 - t1 * dx, y_min + t1 * h, 0], color=color, stroke_width=stroke_width))
+                x0 += spacing
+        return VGroup(*lines)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–2.0: Title Header
+        # ----------------------------------------------------------------------
+        self.title_m = title("สายไฮดรอลิกยืดหยุ่น (SAE 100R6-R12)")
+        self.ref_m = page_ref("hydraulic06 น.13")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.0)
+        self.wait(1.0)  # Checkpoint 1.5s
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–5.0: SAE 100R6 (Textile Braid Recap)
+        # ----------------------------------------------------------------------
+        cap1 = caption_top("R6: ผ้าถัก 1 ชั้น (เหมือน R3-R5 ใน H6_09)")
+        sub1 = Text(
+            "สายผ้าถัก 1 ชั้น สำหรับระบบความดันต่ำ (Low Pressure / Return Line)",
+            font_size=11, color=COL_GRAY
+        ).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap1, shift=UP * 0.3), FadeIn(sub1), run_time=0.8)
+
+        # 3-Layer R6 Cutaway diagram
+        y_c = -0.35
+        # 1. Outer cover (rubber, charcoal)
+        c_cov_r6 = Rectangle(width=2.4, height=1.6, color="#37474F", fill_color="#37474F").set_fill("#37474F", 0.92).set_stroke(COL_METAL, 1.2).move_to([-3.0, y_c, 0])
+        lbl_cov_r6 = Text("เปลือกนอกยาง (Cover)", font_size=11, color=COL_GRAY).next_to(c_cov_r6, DOWN, buff=0.18)
+
+        # 2. Reinforcement: 1 textile braid ply (COL_OK, mesh texture)
+        c_brd_r6 = Rectangle(width=2.4, height=1.2, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.9).set_stroke(COL_OK, 1.5).move_to([-0.6, y_c, 0])
+        mesh_r6 = self.make_mesh_pattern(-1.8, 0.6, y_c - 0.6, y_c + 0.6, color=COL_OK, spacing=0.18, stroke_width=1.4)
+        lbl_brd_r6 = Text("ผ้าถัก 1 ชั้น (1 Textile Braid)", font_size=11, color=COL_OK).next_to(c_brd_r6, UP, buff=0.18)
+
+        # 3. Inner tube (synthetic rubber, COL_FIELD)
+        c_tube_r6 = Rectangle(width=2.4, height=0.8, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.85).set_stroke(WHITE, 1.0).move_to([1.8, y_c, 0])
+        lbl_tube_r6 = Text("ท่อในยาง (Rubber Tube)", font_size=11, color=COL_FIELD).next_to(c_tube_r6, DOWN, buff=0.18)
+
+        # 4. Fluid bore opening
+        c_bore_r6 = Ellipse(width=0.35, height=0.5, color=SUPPLY, fill_color=SUPPLY).set_fill(SUPPLY, 0.95).move_to([3.0, y_c, 0])
+
+        badge_r6 = VGroup(
+            Text("SAE 100R6 Spec:", font_size=13, color=COL_OK),
+            Text("• โครงสร้าง: ยางสังเคราะห์ + ผ้าถัก 1 ชั้น", font_size=11, color=WHITE),
+            Text("• ความดันใช้งาน: ต่ำ (Low Working Pressure ~30–70 bar)", font_size=11, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.08, aligned_edge=LEFT).move_to([0, -2.45, 0])
+        box_r6 = SurroundingRectangle(badge_r6, color=COL_OK, buff=0.15, corner_radius=0.1)
+
+        grp_r6 = VGroup(c_cov_r6, lbl_cov_r6, c_brd_r6, mesh_r6, lbl_brd_r6, c_tube_r6, lbl_tube_r6, c_bore_r6, badge_r6, box_r6)
+        self.play(FadeIn(grp_r6, shift=UP * 0.25), run_time=1.0)
+        self.wait(1.2)  # Checkpoint 3.5s
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 5.8–11.0: SAE 100R7/R8 (Thermoplastic Inner Tube)
+        # ----------------------------------------------------------------------
+        cap2 = caption_top("R7/R8: เปลี่ยนวัสดุท่อใน — เทอร์โมพลาสติก ไม่ใช่ยาง")
+        sub2 = Text(
+            "วัสดุสังเคราะห์พิเศษ (Thermoplastic): ทนสารเคมีและของเหลวสังเคราะห์ได้ดีกว่ายางธรรมดา",
+            font_size=11, color=COL_GRAY
+        ).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap2, shift=UP * 0.3), FadeIn(sub2), run_time=0.8)
+
+        # Cutaway diagram showing thermoplastic transformation
+        c_cov_r7 = Rectangle(width=2.4, height=1.6, color=COL_CURR, fill_color="#263238").set_fill("#263238", 0.92).set_stroke(COL_CURR, 1.2).move_to([-3.0, y_c, 0])
+        lbl_cov_r7 = Text("ปลอกเทอร์โมพลาสติก", font_size=11, color=COL_CURR).next_to(c_cov_r7, DOWN, buff=0.18)
+
+        c_brd_r7 = Rectangle(width=2.4, height=1.2, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.9).set_stroke(COL_OK, 1.5).move_to([-0.6, y_c, 0])
+        mesh_r7 = self.make_mesh_pattern(-1.8, 0.6, y_c - 0.6, y_c + 0.6, color=COL_OK, spacing=0.18, stroke_width=1.4)
+        lbl_brd_r7 = Text("เส้นใยสังเคราะห์ (Synthetic Fiber)", font_size=11, color=COL_OK).next_to(c_brd_r7, UP, buff=0.18)
+
+        # Start tube as rubber (FIELD) then transform to thermoplastic (CURR)
+        c_tube_r7 = Rectangle(width=2.4, height=0.8, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.85).set_stroke(WHITE, 1.0).move_to([1.8, y_c, 0])
+        lbl_tube_r7 = Text("ท่อใน: ยางสังเคราะห์ (เดิม)", font_size=11, color=COL_FIELD).next_to(c_tube_r7, DOWN, buff=0.18)
+        c_bore_r7 = Ellipse(width=0.35, height=0.5, color=SUPPLY, fill_color=SUPPLY).set_fill(SUPPLY, 0.95).move_to([3.0, y_c, 0])
+
+        self.play(FadeIn(VGroup(c_cov_r7, lbl_cov_r7, c_brd_r7, mesh_r7, lbl_brd_r7, c_tube_r7, lbl_tube_r7, c_bore_r7), shift=UP * 0.25), run_time=0.9)
+        self.wait(0.5)
+
+        # Material transformation: rubber -> thermoplastic
+        c_tube_tp = Rectangle(width=2.4, height=0.8, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.85).set_stroke(WHITE, 1.5).move_to([1.8, y_c, 0])
+        lbl_tube_tp = Text("ท่อใน: เทอร์โมพลาสติก (Thermoplastic)", font_size=11, color=COL_CURR).next_to(c_tube_tp, DOWN, buff=0.18)
+
+        card_tp_left = RoundedRectangle(corner_radius=0.12, width=5.6, height=1.3, color=COL_CURR, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([-3.2, -2.45, 0])
+        t_tp1 = Text("ท่อในเทอร์โมพลาสติก (Thermoplastic Tube):", font_size=12, color=COL_CURR).move_to([-3.2, -2.15, 0])
+        t_tp2 = Text("• ทนของเหลวไฮดรอลิกสังเคราะห์ ทนสารเคมีกัดกร่อน", font_size=10.5, color=WHITE).move_to([-3.2, -2.45, 0])
+        t_tp3 = Text("• ไม่บวมน้ำมัน น้ำหนักเบา ผิวในเรียบลื่น ลดความดันตก", font_size=10.5, color=COL_GRAY).move_to([-3.2, -2.75, 0])
+        grp_tp_left = VGroup(card_tp_left, t_tp1, t_tp2, t_tp3)
+
+        card_tp_right = RoundedRectangle(corner_radius=0.12, width=5.6, height=1.3, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([3.2, -2.45, 0])
+        t_tr1 = Text("ความแตกต่าง SAE 100R7 vs 100R8:", font_size=12, color=COL_OK).move_to([3.2, -2.15, 0])
+        t_tr2 = Text("• R7: เสริมเส้นใยสังเคราะห์ 1–2 ชั้น (Medium Pressure)", font_size=10.5, color=WHITE).move_to([3.2, -2.45, 0])
+        t_tr3 = Text("• R8: เสริมเส้นใยสังเคราะห์ความแข็งแรงสูง (High Pressure)", font_size=10.5, color=COL_GRAY).move_to([3.2, -2.75, 0])
+        grp_tp_right = VGroup(card_tp_right, t_tr1, t_tr2, t_tr3)
+
+        self.play(
+            ReplacementTransform(c_tube_r7, c_tube_tp),
+            ReplacementTransform(lbl_tube_r7, lbl_tube_tp),
+            FadeIn(grp_tp_left, shift=UP * 0.2),
+            FadeIn(grp_tp_right, shift=UP * 0.2),
+            run_time=1.4
+        )
+        self.play(Indicate(c_tube_tp, color=COL_CURR), run_time=0.8)
+        self.wait(1.4)  # Checkpoint 9.0s
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 11.8–17.0: SAE 100R9-R12 (Spiral Plies Introduction)
+        # ----------------------------------------------------------------------
+        cap3 = caption_top("R9-R12: ลวดพันเกลียว ไม่ใช่ถักไขว้")
+        sub3 = Text(
+            "Spiral Plies: เส้นลวดขนานเรียงตัวในทิศทางเดียว ไม่ขัดสานไขว้กันแบบลวดถัก (Braid)",
+            font_size=11, color=COL_GRAY
+        ).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap3, shift=UP * 0.3), FadeIn(sub3), run_time=0.8)
+
+        # Comparison side by side: Braid (left) vs Spiral (right)
+        y_comp = 0.0
+        # Left: Braided mesh (criss-cross)
+        box_braid = RoundedRectangle(corner_radius=0.12, width=5.6, height=3.0, color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([-3.3, y_comp, 0])
+        t_braid_h = Text("ลวดถักไขว้ (Braided Wire — R1/R2)", font_size=13, color=COL_METAL).move_to([-3.3, y_comp + 1.15, 0])
+        hose_body_b = Rectangle(width=4.4, height=1.2, color=COL_METAL, fill_color="#263238").set_fill("#263238", 0.9).move_to([-3.3, y_comp + 0.15, 0])
+        mesh_braid = self.make_mesh_pattern(-5.5, -1.1, y_comp + 0.15 - 0.6, y_comp + 0.15 + 0.6, color=COL_METAL, spacing=0.22, stroke_width=1.8)
+        t_b1 = Text("• เส้นลวดขัดไขว้กันเป็นตาราง (Criss-Cross)", font_size=10.5, color=COL_GRAY)
+        t_b2 = Text("• เกิดแรงเฉือนที่จุดตัดเมื่อรับแรงดันสูงมาก", font_size=10.5, color=COL_GRAY)
+        t_braid_sub = VGroup(t_b1, t_b2).arrange(DOWN, buff=0.10, aligned_edge=LEFT).move_to([-3.3, y_comp - 0.85, 0])
+        grp_braid_box = VGroup(box_braid, t_braid_h, hose_body_b, mesh_braid, t_braid_sub)
+
+        # Right: Spiral plies (parallel diagonal, NO criss-cross)
+        box_spiral = RoundedRectangle(corner_radius=0.12, width=5.6, height=3.0, color=COL_CURR, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([3.3, y_comp, 0])
+        t_spiral_h = Text("ลวดพันเกลียว (Spiral Plies — R9-R12)", font_size=13, color=COL_CURR).move_to([3.3, y_comp + 1.15, 0])
+        hose_body_s = Rectangle(width=4.4, height=1.2, color=COL_CURR, fill_color="#263238").set_fill("#263238", 0.9).move_to([3.3, y_comp + 0.15, 0])
+        spiral_lines_single = self.make_spiral_pattern(1.1, 5.5, y_comp + 0.15 - 0.6, y_comp + 0.15 + 0.6, color=COL_CURR, spacing=0.24, stroke_width=2.2, direction="right")
+        t_s1 = Text("• เส้นลวดขนานเรียงตัวแน่นในทิศทางเดียว (Parallel)", font_size=10.5, color=WHITE)
+        t_s2 = Text("• ไม่มีจุดตัดขัดกัน จึงทนแรงกระแทกและแรงดันสูงจัดได้ดี", font_size=10.5, color=WHITE)
+        t_spiral_sub = VGroup(t_s1, t_s2).arrange(DOWN, buff=0.10, aligned_edge=LEFT).move_to([3.3, y_comp - 0.85, 0])
+        grp_spiral_box = VGroup(box_spiral, t_spiral_h, hose_body_s, spiral_lines_single, t_spiral_sub)
+
+        self.play(FadeIn(grp_braid_box, shift=UP * 0.25), FadeIn(grp_spiral_box, shift=UP * 0.25), run_time=1.0)
+        self.play(Indicate(spiral_lines_single, color=COL_WARN), run_time=0.8)
+        self.wait(1.8)  # Checkpoint 15.0s
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 17.8–23.0: Animated Proof Part 1 — Single-Direction Spiral Twist (§32)
+        # ----------------------------------------------------------------------
+        cap4 = caption_top("⚠️ ปัญหา: พันทิศเดียวหมด สายจะบิดเอง (Twisting Issue)")
+        sub4 = Text(
+            "ความดันสูงดันผนังท่อออก → เส้นลวดเฉียงทิศเดียวเกิดแรงดึง → สร้างแรงบิดสุทธิหมุนรอบแกน",
+            font_size=11, color=COL_WARN
+        ).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap4, shift=UP * 0.3), FadeIn(sub4), run_time=0.8)
+
+        y_h = -0.20
+        # Left fixed anchor
+        anchor_rect = Rectangle(width=0.6, height=1.8, color=COL_METAL, fill_color="#37474F").set_fill("#37474F", 0.95).move_to([-3.7, y_h, 0])
+        t_anchor = Text("ยึดแน่นคงที่", font_size=10, color=COL_GRAY).next_to(anchor_rect, DOWN, buff=0.15)
+
+        # Hose body with single-direction spiral
+        hose_tube_single = Rectangle(width=5.8, height=1.2, color=COL_METAL, fill_color="#1E262C").set_fill("#1E262C", 0.9).move_to([-0.5, y_h, 0])
+        wires_single = self.make_spiral_pattern(-3.4, 2.4, y_h - 0.6, y_h + 0.6, color=COL_METAL, spacing=0.25, stroke_width=2.0, direction="right")
+
+        # Internal radial pressure outward arrows
+        p_arr1 = Arrow(start=[-2.0, y_h, 0], end=[-2.0, y_h + 0.5, 0], color=COL_CURR, stroke_width=2.5, buff=0)
+        p_arr2 = Arrow(start=[-2.0, y_h, 0], end=[-2.0, y_h - 0.5, 0], color=COL_CURR, stroke_width=2.5, buff=0)
+        p_arr3 = Arrow(start=[0.5, y_h, 0], end=[0.5, y_h + 0.5, 0], color=COL_CURR, stroke_width=2.5, buff=0)
+        p_arr4 = Arrow(start=[0.5, y_h, 0], end=[0.5, y_h - 0.5, 0], color=COL_CURR, stroke_width=2.5, buff=0)
+        lbl_p_in = Text("ความดัน P ดันออกทุกทิศทาง", font_size=12, color=COL_CURR).move_to([-0.75, y_h, 0])
+        grp_pressure = VGroup(p_arr1, p_arr2, p_arr3, p_arr4, lbl_p_in)
+
+        # Right rotatable fitting end (for measuring rotation angle)
+        center_fitting = np.array([2.7, y_h, 0])
+        flange_base = Rectangle(width=0.6, height=1.5, color=COL_METAL, fill_color="#455A64").set_fill("#455A64", 0.95).move_to(center_fitting)
+        flange_ring = Circle(radius=0.65, color=WHITE, stroke_width=2.0).move_to(center_fitting)
+        # Orientation marker: arrow pointing initially UP (0 deg twist)
+        pointer_line = Line(center_fitting, center_fitting + np.array([0, 0.65, 0]), color=COL_WARN, stroke_width=3.5)
+        pointer_tip = Dot(center_fitting + np.array([0, 0.65, 0]), radius=0.08, color=COL_WARN)
+        lbl_pointer = Text("มาร์กเกอร์ (0°)", font_size=11, color=WHITE).next_to(flange_ring, RIGHT, buff=0.25)
+        fitting_end = VGroup(flange_base, flange_ring, pointer_line, pointer_tip, lbl_pointer)
+
+        # Curved net torque arrow on the hose body (centered at x = -0.5)
+        arc_tau = Arc(radius=0.9, start_angle=-PI/3, angle=2*PI/3, color=COL_WARN, stroke_width=3.5, arc_center=[-0.5, y_h, 0])
+        arc_tau.add_tip(tip_length=0.22)
+        lbl_tau = Text("แรงบิดสุทธิ (Net Torque τ)", font_size=12, color=COL_WARN).next_to(arc_tau, UP, buff=0.15)
+
+        self.play(
+            FadeIn(anchor_rect), FadeIn(t_anchor),
+            FadeIn(hose_tube_single), FadeIn(wires_single),
+            FadeIn(grp_pressure),
+            FadeIn(fitting_end),
+            run_time=1.0
+        )
+        self.wait(0.5)  # t ~ 19.5s: orientation is 0°
+
+        # Rotation animation: fitting end rotates PI/3 (60 degrees) under net torque!
+        lbl_pointer_twisted = Text("บิดหมุน (+60°)", font_size=11, color=COL_WARN).next_to(flange_ring, RIGHT, buff=0.25)
+
+        banner_twist = Text(
+            "⚠️ ปลายสายบิดหมุนรอบแกน (Twist) → เกิดความเค้นเฉือน ข้อต่อคลายหลุด สายแตกระเบิด!",
+            font_size=12, color=COL_WARN
+        ).move_to([0, -2.45, 0])
+        box_banner_tw = SurroundingRectangle(banner_twist, color=COL_WARN, buff=0.12, corner_radius=0.08)
+
+        self.play(
+            Create(arc_tau), FadeIn(lbl_tau),
+            Rotating(VGroup(flange_base, flange_ring, pointer_line, pointer_tip), angle=PI/3, about_point=center_fitting, run_time=1.6),
+            Transform(lbl_pointer, lbl_pointer_twisted),
+            FadeIn(banner_twist, shift=UP * 0.2), Create(box_banner_tw),
+            run_time=1.6
+        )
+        self.wait(1.2)  # t ~ 21.5s: rotated by 60° (Checkpoint 20.5s check)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 23.8–29.0: Animated Proof Part 2 — Alternating Layers Torque Cancellation (§32)
+        # ----------------------------------------------------------------------
+        cap5 = caption_top("ทางแก้: พันสลับทิศทุกชั้น (Alternating Directions)")
+        sub5 = Text(
+            "พันชั้นที่ 1 เฉียงซ้าย + ชั้นที่ 2 เฉียงขวา → แรงบิดหักล้างกันพอดี (Torque Cancellation)",
+            font_size=11, color=COL_OK
+        ).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap5, shift=UP * 0.3), FadeIn(sub5), run_time=0.8)
+
+        # Dual alternating layers in the SAME frame (§41 high-risk visual distinction!)
+        y_alt = -0.15
+        # Left layer (Layer 1): Slanted LEFT in COL_METAL
+        box_lay1 = Rectangle(width=3.2, height=1.4, color=COL_METAL, fill_color="#1E262C").set_fill("#1E262C", 0.9).move_to([-2.0, y_alt, 0])
+        wires_lay1 = self.make_spiral_pattern(-3.6, -0.4, y_alt - 0.7, y_alt + 0.7, color=COL_METAL, spacing=0.22, stroke_width=2.2, direction="left")
+        lbl_lay1 = Text("ชั้นที่ 1: เฉียงซ้าย (Lay 1)", font_size=12, color=COL_METAL).next_to(box_lay1, UP, buff=0.18)
+
+        # Right layer (Layer 2): Slanted RIGHT in COL_CURR
+        box_lay2 = Rectangle(width=3.2, height=1.4, color=COL_CURR, fill_color="#1E262C").set_fill("#1E262C", 0.9).move_to([1.6, y_alt, 0])
+        wires_lay2 = self.make_spiral_pattern(0.0, 3.2, y_alt - 0.7, y_alt + 0.7, color=COL_CURR, spacing=0.22, stroke_width=2.2, direction="right")
+        lbl_lay2 = Text("ชั้นที่ 2: เฉียงขวา (Lay 2)", font_size=12, color=COL_CURR).next_to(box_lay2, UP, buff=0.18)
+
+        # Two opposing torque curved arrows (radius 0.55 inside spiral window to ensure clean separation)
+        tau1_arc = Arc(radius=0.55, start_angle=PI/6, angle=4*PI/3, color=COL_METAL, stroke_width=3.2, arc_center=[-2.0, y_alt, 0])
+        tau1_arc.add_tip(tip_length=0.18)
+        lbl_tau1 = Text("τ₁ (ทิศตามเข็ม)", font_size=11, color=COL_METAL).next_to(box_lay1, DOWN, buff=0.25)
+
+        tau2_arc = Arc(radius=0.55, start_angle=7*PI/6, angle=4*PI/3, color=COL_CURR, stroke_width=3.2, arc_center=[1.6, y_alt, 0])
+        tau2_arc.add_tip(tip_length=0.18)
+        lbl_tau2 = Text("τ₂ (ทิศทวนเข็ม)", font_size=11, color=COL_CURR).next_to(box_lay2, DOWN, buff=0.25)
+
+        # Stable fitting end at x = 3.6 (rock solid, 0° twist!)
+        c_fit_stable = np.array([3.6, y_alt, 0])
+        flange_stable = Rectangle(width=0.5, height=1.5, color=COL_OK, fill_color="#37474F").set_fill("#37474F", 0.95).move_to(c_fit_stable)
+        ring_stable = Circle(radius=0.65, color=COL_OK, stroke_width=2.0).move_to(c_fit_stable)
+        p_line_stable = Line(c_fit_stable, c_fit_stable + np.array([0, 0.65, 0]), color=COL_OK, stroke_width=3.5)
+        p_dot_stable = Dot(c_fit_stable + np.array([0, 0.65, 0]), radius=0.08, color=COL_OK)
+        lbl_stable = Text("ตรงนิ่ง (0°)", font_size=11, color=COL_OK).next_to(ring_stable, RIGHT, buff=0.20)
+        grp_stable_fit = VGroup(flange_stable, ring_stable, p_line_stable, p_dot_stable, lbl_stable)
+
+        self.play(
+            FadeIn(VGroup(box_lay1, wires_lay1, lbl_lay1)),
+            FadeIn(VGroup(box_lay2, wires_lay2, lbl_lay2)),
+            FadeIn(VGroup(tau1_arc, lbl_tau1)),
+            FadeIn(VGroup(tau2_arc, lbl_tau2)),
+            FadeIn(grp_stable_fit),
+            run_time=1.2
+        )
+        self.wait(1.0)  # Checkpoint 27.0s before cancellation (both opposite slant layers visible!)
+
+        # Torque cancellation: tau1 and tau2 merge and cancel into net torque = 0
+        eq_cancel = Text("Σ τ = τ₁ + (-τ₂) = 0  →  สมดุลแรงบิดสมบูรณ์ สายไม่บิดตัว", font_size=14, color=COL_OK).move_to([0, -1.75, 0])
+        box_eq = SurroundingRectangle(eq_cancel, color=COL_OK, buff=0.25, corner_radius=0.1)
+
+        banner_cancel = Text(
+            "✅ หลักการเดียวกับการพันลวดสลิง: สลับทิศทางในแต่ละชั้นเพื่อกำจัดแรงบิดสุทธิ",
+            font_size=11, color=WHITE
+        ).move_to([0, -2.55, 0])
+
+        self.play(
+            FadeOut(VGroup(tau1_arc, lbl_tau1, tau2_arc, lbl_tau2)),
+            FadeIn(eq_cancel, shift=UP * 0.15), Create(box_eq),
+            FadeIn(banner_cancel, shift=UP * 0.15),
+            run_time=1.2
+        )
+        self.play(Indicate(box_eq, color=COL_OK), run_time=0.8)
+        self.wait(1.2)  # Checkpoint 27.0s after cancellation
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 29.8–35.0: R9 vs R10 vs R11 Specification Matrix
+        # ----------------------------------------------------------------------
+        cap6 = caption_top("R9 → R10 → R11: เพิ่มชั้น/ความหนา = ทนแรงดันสูงขึ้น")
+        sub6 = Text(
+            "ตระกูลลวดพันเกลียว (Spiral Plies): ยิ่งเพิ่มจำนวนชั้น + ลวดหนาขึ้น = รับความดันใช้งานได้สูงขึ้น",
+            font_size=11, color=COL_GRAY
+        ).move_to([0, 2.15, 0])
+        self.play(FadeIn(cap6, shift=UP * 0.3), FadeIn(sub6), run_time=0.8)
+
+        # Matrix card with 3 rows
+        card_matrix = RoundedRectangle(corner_radius=0.15, width=11.6, height=3.6, color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.30, 0])
+        h_mat = Text("ตารางเปรียบเทียบมาตรฐานสายไฮดรอลิกลวดพันเกลียว (SAE 100R9 – R11)", font_size=14, color=COL_OK).move_to([0, 1.15, 0])
+        div_mat = Line([-5.4, 0.90, 0], [5.4, 0.90, 0], color=COL_METAL, stroke_width=1.2)
+
+        # Row 1: R9
+        r9_tag = Text("SAE 100R9", font_size=13, color=WHITE).move_to([-4.2, 0.45, 0])
+        r9_desc = Text("4 ชั้นลวดเกลียว (4-Spiral Plies) — ขนาดลวดปกติ (Normal Wire)", font_size=11, color=COL_GRAY).move_to([0.2, 0.45, 0])
+        r9_pres = Text("แรงดันสูง (~200–300 bar)", font_size=11, color=COL_METAL).move_to([4.3, 0.45, 0])
+        row_r9 = VGroup(r9_tag, r9_desc, r9_pres)
+
+        # Row 2: R10
+        r10_tag = Text("SAE 100R10", font_size=13, color=COL_CURR).move_to([-4.2, -0.10, 0])
+        r10_desc = Text("4 ชั้นลวดเกลียว (4-Spiral Plies) — ลวดหนาพิเศษ (Heavy Wire)", font_size=11, color=WHITE).move_to([0.2, -0.10, 0])
+        r10_pres = Text("แรงดันสูงมาก (~250–350 bar)", font_size=11, color=COL_CURR).move_to([4.3, -0.10, 0])
+        row_r10 = VGroup(r10_tag, r10_desc, r10_pres)
+
+        # Row 3: R11
+        r11_tag = Text("SAE 100R11", font_size=13, color=COL_WARN).move_to([-4.2, -0.65, 0])
+        r11_desc = Text("6 ชั้นลวดเกลียว (6-Spiral Plies) — ลวดหนาพิเศษ (Heavy Wire)", font_size=11, color=WHITE).move_to([0.2, -0.65, 0])
+        r11_pres = Text("แรงดันสูงสุด (~350–500 bar)", font_size=11, color=COL_WARN).move_to([4.3, -0.65, 0])
+        row_r11 = VGroup(r11_tag, r11_desc, r11_pres)
+
+        bot_note = Text(
+            "*หมายเหตุ: SAE 100R12 คล้าย R10 (4 ชั้นลวดหนา) แต่ปรับปรุงรัศมีดัดโค้งและตำแหน่งชั้นเสริม",
+            font_size=10, color=COL_GRAY
+        ).move_to([0, -1.35, 0])
+
+        grp_mat = VGroup(card_matrix, h_mat, div_mat, row_r9, row_r10, row_r11, bot_note)
+        self.play(FadeIn(grp_mat, shift=UP * 0.25), run_time=1.0)
+        self.play(Indicate(row_r11, color=COL_WARN), run_time=0.8)
+        self.wait(1.8)  # Checkpoint 33.0s
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 35.8–40.0: Summary Card
+        # ----------------------------------------------------------------------
+        sum_box = RoundedRectangle(
+            corner_radius=0.15, width=11.4, height=3.5,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.25, 0])
+
+        s_head = Text("สรุปสำคัญ: สายไฮดรอลิกยืดหยุ่น (hydraulic06 น.13)", font_size=16, color=COL_OK).move_to([0, 1.15, 0])
+        s1 = Text("1. SAE 100R6: ผ้าถัก 1 ชั้น (Textile Braid) สำหรับระบบไหลกลับ / ความดันต่ำ", font_size=12, color=WHITE).move_to([0, 0.60, 0])
+        s2 = Text("2. SAE 100R7/R8: ท่อในเทอร์โมพลาสติก (Thermoplastic) ทนสารเคมีและของเหลวสังเคราะห์ได้ดี", font_size=12, color=WHITE).move_to([0, 0.15, 0])
+        s3 = Text("3. SAE 100R9–R12: ลวดพันเกลียว (Spiral Plies) ลวดขนานทิศเดียว รับแรงกระแทกและความดันสูงจัด", font_size=12, color=WHITE).move_to([0, -0.30, 0])
+        s4 = Text("4. ทำไมต้องพันสลับทิศ: หักล้างแรงบิด (Torque Cancellation) ป้องกันสายบิดหมุนเกลียว (Twist) ตอนรับแรงดัน", font_size=12, color=COL_CURR).move_to([0, -0.75, 0])
+        s5 = Text("5. ยิ่งเพิ่มจำนวนชั้น (4 → 6 ชั้น) และความหนาลวด (Heavy Wire) ยิ่งรับความดันใช้งานได้สูงขึ้น", font_size=12, color=COL_OK).move_to([0, -1.20, 0])
+
+        sum_grp = VGroup(sum_box, s_head, s1, s2, s3, s4, s5)
+        self.play(FadeIn(sum_grp, shift=UP * 0.35), run_time=0.8)
+        self.wait(3.4)  # Checkpoint 38.0s
+
+        self.clear_stage(run_time=0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 40.0–44.0: Review Question Card & Outro
+        # ----------------------------------------------------------------------
+        q_box = RoundedRectangle(
+            corner_radius=0.15, width=11.2, height=2.6,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.35, 0.0])
+        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0.0, 0.50, 0.0])
+        q_body = Text(
+            "ถ้าลวดทุกชั้นของสายไฮดรอลิกพันไปในทิศทางเดียวกันหมด (ไม่สลับทิศ) จะเกิดอะไรขึ้นตอนใช้งานจริง?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.05, 0.0])
+        q_ans = Text(
+            "(คำตอบ: เมื่อความดันภายในสูงขึ้น ลวดจะสร้างแรงบิดสุทธิหมุนรอบแกน ทำให้สายบิดตัว (Twist/Corkscrew) ข้อต่อคลาย หรือสายฉีกขาดได้)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.65, 0.0])
+
+        q_grp = VGroup(q_box, q_head, q_body, q_ans)
+        self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.4)  # Checkpoint 42.0s
+
+        self.play(FadeOut(q_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+        self.wait(0.5)
+
+
+
 
 
 
