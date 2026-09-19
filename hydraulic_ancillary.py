@@ -5659,3 +5659,373 @@ class H6_14_SealingDevicesOverview(SafeScene):
         self.fade_out_all(run_time=0.8)
         self.wait(0.5)
 
+
+# ==============================================================================
+# SCENE 15: H6_15_ORings (O-Ring: ซีลแบบ Self-Energizing)
+# hydraulic06.pdf page 18
+# ==============================================================================
+
+COL_ORING_H6_15 = "#1E293B"  # Dark rubber ring with distinct border
+COL_FLUID_H6_15 = "#EF4444"  # Red hydraulic fluid under pressure
+
+
+def _h6_15_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_15_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_15_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_15_banner(text, color):
+    lbl = Text(text, font_size=11.5, color=color)
+    bg = RoundedRectangle(
+        width=min(12.6, max(lbl.width + 0.6, 9.5)),
+        height=0.50,
+        corner_radius=0.1,
+        color=color,
+        fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.62, 0.0])
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_15_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.40,
+        height=0.36,
+        corner_radius=0.08,
+        color=color,
+        fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class H6_15_ORings(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        """Fade out all scene mobjects except persistent header."""
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ----------------------------------------------------------------------
+        self.title_m = _h6_15_title("O-Ring: ซีลแบบ Self-Energizing")
+        self.ref_m = _h6_15_page_ref("hydraulic06 น.18")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)  # Checkpoint 1.5s falls here
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–5.5: Hook Question
+        # ----------------------------------------------------------------------
+        hook_q = _h6_15_caption_top("O-ring บีบแน่นแค่ตอนติดตั้ง แรงดันเพิ่มขึ้นไม่มีผลอะไรกับความแน่นของซีลจริงไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.9)  # Checkpoint 3.6s falls here
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 5.5–13.6: State 1 (Installed, Initial Squeeze, No Pressure)
+        # ----------------------------------------------------------------------
+        cap1 = _h6_15_caption_top("1. ติดตั้ง: บีบอัดใน Annular Groove ทั้ง 2 ด้าน (ยังไม่มีแรงดัน)")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Base Cross-Section Geometry: Groove in metal housing
+        # Center of groove cavity is at [0.0, 0.0]
+        # Groove cavity: width = 3.6 (-1.8 to +1.8), height = 2.0 (-1.0 to +1.0)
+        # Upper metal block: y from +1.0 to +1.8
+        metal_top = Rectangle(width=7.2, height=0.8, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([0.0, 1.40, 0.0])
+        metal_bot_l = Rectangle(width=1.8, height=1.6, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([-2.7, 0.20, 0.0])
+        metal_bot_floor = Rectangle(width=7.2, height=0.8, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([0.0, -1.40, 0.0])
+        metal_bot_r = Rectangle(width=1.8, height=1.6, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([2.7, 0.20, 0.0])
+
+        groove_housing = VGroup(metal_top, metal_bot_l, metal_bot_floor, metal_bot_r)
+
+        # O-Ring State 1: Centered at x=0.0, squeezed vertically (width=2.1, height=1.92)
+        # Natural O-ring would be circle diameter ~2.15, but squeezed between floor (-1.0) and roof (+1.0)
+        # Visibly flattened at top and bottom contacts!
+        oring_s1 = Ellipse(
+            width=2.10, height=1.94,
+            color="#38BDF8", stroke_width=3.5,
+            fill_color="#0F172A", fill_opacity=0.95
+        ).move_to([0.0, 0.0, 0.0])
+
+        # Squeeze indicator arrows top and bottom
+        arr_sq_top = Arrow([0.0, 1.8, 0], [0.0, 1.05, 0], color=COL_CURR, stroke_width=2.5, tip_length=0.10)
+        arr_sq_bot = Arrow([0.0, -1.8, 0], [0.0, -1.05, 0], color=COL_CURR, stroke_width=2.5, tip_length=0.10)
+        lbl_sq = Text("บีบอัดบน-ล่างตอนติดตั้ง (Initial Squeeze)", font_size=10.5, color=COL_CURR).move_to([0.0, -2.10, 0.0])
+        squeeze_indicators = VGroup(arr_sq_top, arr_sq_bot, lbl_sq)
+
+        lbl_gap_l = Text("ช่องว่างซ้าย", font_size=9.5, color=COL_GRAY).move_to([-1.35, 0.0, 0.0])
+        lbl_gap_r = Text("ช่องว่างขวา", font_size=9.5, color=COL_GRAY).move_to([1.35, 0.0, 0.0])
+        clearance_labels = VGroup(lbl_gap_l, lbl_gap_r)
+
+        banner1 = _h6_15_banner("แม้ยังไม่มีแรงดันของไหล การบีบอัดตอนประกอบก็ปิดผนึกได้ระดับหนึ่งแล้ว", COL_OK)
+
+        self.play(
+            FadeIn(groove_housing, shift=UP * 0.2),
+            FadeIn(oring_s1),
+            FadeIn(squeeze_indicators),
+            FadeIn(clearance_labels),
+            FadeIn(banner1),
+            run_time=1.0
+        )
+        self.wait(5.9)  # Checkpoint 10.0s falls here
+
+        # ----------------------------------------------------------------------
+        # BEAT 13.6–24.0: State 2 (Pressure Applied, Self-Energizing)
+        # ----------------------------------------------------------------------
+        self.play(
+            FadeOut(cap1),
+            FadeOut(squeeze_indicators),
+            FadeOut(clearance_labels),
+            FadeOut(banner1),
+            run_time=0.4
+        )
+
+        cap2 = _h6_15_caption_top("2. แรงดันของไหลเข้า — ยิ่งดันยิ่งซีลแน่น (Self-Energizing Action)")
+        self.play(FadeIn(cap2, shift=UP * 0.25), run_time=0.4)
+
+        # Red hydraulic fluid enters from the left
+        fluid_rect = Rectangle(
+            width=1.85, height=1.92,
+            color=COL_FLUID_H6_15, fill_color=COL_FLUID_H6_15, fill_opacity=0.35, stroke_width=0
+        ).move_to([-1.35, 0.0, 0.0])
+
+        flow_a1 = Arrow([-2.1, 0.50, 0], [-1.0, 0.50, 0], color=COL_FLUID_H6_15, stroke_width=3, tip_length=0.12)
+        flow_a2 = Arrow([-2.2, 0.00, 0], [-0.9, 0.00, 0], color=COL_FLUID_H6_15, stroke_width=3.5, tip_length=0.14)
+        flow_a3 = Arrow([-2.1, -0.50, 0], [-1.0, -0.50, 0], color=COL_FLUID_H6_15, stroke_width=3, tip_length=0.12)
+        badge_fluid_p = _h6_15_badge("แรงดันของไหล (P)", COL_FLUID_H6_15).move_to([-4.85, 0.0, 0.0])
+        arr_fluid_in = Arrow([-3.65, 0.0, 0], [-2.35, 0.0, 0], color=COL_FLUID_H6_15, stroke_width=3.5, tip_length=0.14)
+        flow_arrows = VGroup(flow_a1, flow_a2, flow_a3, badge_fluid_p, arr_fluid_in)
+
+        # O-ring physically MOVES to the right wall (from x=0.0 to x=0.72)
+        # Contacting right wall (x=+1.80)
+        # Ellipse right edge at 0.72 + 2.10/2 = 1.77 -> firmly pressed against 1.80!
+        oring_target_pos = np.array([0.72, 0.0, 0.0])
+
+        # Sealing contact force arrows at the 3rd surface (right wall) + top + bottom
+        f_right1 = Arrow([1.80, 0.40, 0], [1.35, 0.40, 0], color=COL_WARN, stroke_width=2.5, tip_length=0.10)
+        f_right2 = Arrow([1.80, 0.00, 0], [1.30, 0.00, 0], color=COL_WARN, stroke_width=3.0, tip_length=0.12)
+        f_right3 = Arrow([1.80, -0.40, 0], [1.35, -0.40, 0], color=COL_WARN, stroke_width=2.5, tip_length=0.10)
+        lbl_3rd = Text("ผิวที่ 3 (Third Surface)\nถูกอัดแน่นตามแรงดัน", font_size=10, color=COL_WARN).next_to(f_right2, RIGHT, buff=0.45)
+        third_surface_grp = VGroup(f_right1, f_right2, f_right3, lbl_3rd)
+
+        banner2 = _h6_15_banner(
+            "แรงดันของไหลดัน O-ring แนบชิดผิวที่ 3 แน่นขึ้น — ยิ่งแรงดันสูง ยิ่งปิดผนึกแน่นสนิทเอง!",
+            COL_OK
+        )
+
+        self.play(
+            FadeIn(fluid_rect),
+            FadeIn(flow_arrows),
+            oring_s1.animate.move_to(oring_target_pos),
+            FadeIn(banner2),
+            run_time=1.0
+        )
+        self.play(FadeIn(third_surface_grp), run_time=0.6)
+        self.wait(5.8)  # Checkpoint 20.0s falls here
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 24.6–34.0: State 3 (Excessive Pressure -> Extrusion Failure)
+        # ----------------------------------------------------------------------
+        cap3 = _h6_15_caption_top("3. ปัญหา: แรงดันสูงเกินไป → O-ring ทะลักเข้าช่องว่าง (Extrusion)", color=COL_WARN)
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.6)
+
+        # Housing with CLEARANCE GAP on top-right (exaggerated for explanation)
+        gap_metal_top = Rectangle(width=7.2, height=0.8, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([0.0, 1.40, 0.0])
+        gap_metal_bot_l = Rectangle(width=1.8, height=1.6, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([-2.7, 0.20, 0.0])
+        gap_metal_bot_floor = Rectangle(width=7.2, height=0.8, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([0.0, -1.40, 0.0])
+        # Right shoulder: height 1.2 (top at y=0.60 instead of 1.00), leaving clear gap of 0.40 between 0.60 and 1.00
+        gap_metal_bot_r = Rectangle(width=1.8, height=1.2, color=COL_METAL, fill_color="#334155").set_fill("#334155", 0.95).move_to([2.7, 0.00, 0.0])
+
+        gap_housing = VGroup(gap_metal_top, gap_metal_bot_l, gap_metal_bot_floor, gap_metal_bot_r)
+
+        # Clearance gap highlight / label placed cleanly in the open right margin
+        gap_box = Rectangle(width=1.6, height=0.40, color=YELLOW, stroke_width=2, fill_opacity=0.15, fill_color=YELLOW).move_to([2.6, 0.80, 0.0])
+        arr_gap = Arrow([4.3, 0.80, 0], [3.45, 0.80, 0], color=YELLOW, stroke_width=2.5, tip_length=0.10)
+        lbl_gap = Text("Clearance Gap\n(ช่องว่างระหว่างชิ้นส่วน)", font_size=10.5, color=YELLOW).next_to(arr_gap, RIGHT, buff=0.15)
+        gap_callout = VGroup(gap_box, arr_gap, lbl_gap)
+
+        # Normal O-ring sitting in groove right side before extrusion
+        oring_pre_ext = Ellipse(
+            width=2.10, height=1.94,
+            color="#38BDF8", stroke_width=3.5,
+            fill_color="#0F172A", fill_opacity=0.95
+        ).move_to([0.72, 0.0, 0.0])
+
+        # Intense high-pressure fluid arrows and callout
+        fluid_rect_high = Rectangle(
+            width=2.5, height=1.92,
+            color=COL_FLUID_H6_15, fill_color=COL_FLUID_H6_15, fill_opacity=0.45, stroke_width=0
+        ).move_to([-1.0, 0.0, 0.0])
+        h_arr1 = Arrow([-2.2, 0.45, 0], [-0.5, 0.45, 0], color=COL_FLUID_H6_15, stroke_width=4.5, tip_length=0.18)
+        h_arr2 = Arrow([-2.2, -0.45, 0], [-0.5, -0.50, 0], color=COL_FLUID_H6_15, stroke_width=4.5, tip_length=0.18)
+        badge_high_p = _h6_15_badge("แรงดันสูงมหาศาล!", COL_FLUID_H6_15).move_to([-4.85, 0.0, 0.0])
+        arr_high_in = Arrow([-3.65, 0.0, 0], [-2.35, 0.0, 0], color=COL_FLUID_H6_15, stroke_width=4, tip_length=0.16)
+        high_p_grp = VGroup(fluid_rect_high, h_arr1, h_arr2, badge_high_p, arr_high_in)
+
+        # GENUINE SHAPE DEFORMATION: O-ring with a prominent extruded tongue poking into clearance gap!
+        # Hand-crafted polygon with extruded lobe reaching into the gap (x=1.8 to 2.5, y=0.62 to 0.95)
+        ext_pts = [
+            [0.72 - 1.05, 0.0, 0],       # left center (-0.33, 0.0)
+            [0.72 - 0.75, 0.75, 0],      # top left
+            [0.72 + 0.30, 0.97, 0],      # top wall contact
+            [1.80, 0.97, 0],             # entering clearance gap top
+            [2.45, 0.95, 0],             # EXTRUDED TIP TOP (deep in gap!)
+            [2.50, 0.78, 0],             # EXTRUDED TIP RIGHT END
+            [2.40, 0.62, 0],             # EXTRUDED TIP BOTTOM
+            [1.80, 0.62, 0],             # entering gap bottom edge
+            [1.80, 0.20, 0],             # right wall contact
+            [1.80, -0.50, 0],            # right wall bottom
+            [1.40, -0.97, 0],            # bottom right
+            [0.72, -0.97, 0],            # bottom floor contact
+            [0.72 - 0.75, -0.75, 0],     # bottom left
+        ]
+        oring_extruded = Polygon(
+            *ext_pts,
+            color=COL_WARN, stroke_width=3.5,
+            fill_color="#451A03", fill_opacity=0.95
+        )
+
+        arr_ext_warn = Arrow([4.3, 0.80, 0], [2.65, 0.80, 0], color=COL_WARN, stroke_width=3, tip_length=0.12)
+        lbl_ext_warn = _h6_15_badge("เนื้อยางทะลัก (Extrusion) เสี่ยงฉีกขาด!", COL_WARN).next_to(arr_ext_warn, RIGHT, buff=0.12)
+        ext_callout = VGroup(arr_ext_warn, lbl_ext_warn)
+
+        banner3 = _h6_15_banner("ช่องว่างระหว่างชิ้นส่วนเป็นจุดอ่อน — แรงดันสูงดันให้ยางทะลักและฉีกขาด", COL_WARN)
+
+        self.play(
+            FadeIn(gap_housing),
+            FadeIn(gap_callout),
+            FadeIn(high_p_grp),
+            FadeIn(oring_pre_ext),
+            FadeIn(banner3),
+            run_time=1.0
+        )
+        self.wait(0.8)
+        self.play(FadeOut(gap_callout), run_time=0.4)
+
+        # Real transform showing visible extrusion protrusion! Fade in extrusion alert
+        self.play(
+            Transform(oring_pre_ext, oring_extruded),
+            FadeIn(ext_callout),
+            run_time=1.0
+        )
+        self.wait(5.0)  # Checkpoint 30.0s falls here
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 34.6–44.0: State 4 (Solution: Back-Up Ring Blocks Gap)
+        # ----------------------------------------------------------------------
+        cap4 = _h6_15_caption_top("4. ทางแก้: ติดตั้ง Back-Up Ring บล็อกช่องว่าง ป้องกันการทะลัก")
+        self.play(FadeIn(cap4, shift=UP * 0.35), run_time=0.6)
+
+        # Same gap housing
+        gap_housing_copy = gap_housing.copy()
+        high_p_grp_copy = high_p_grp.copy()
+
+        # Rigid Back-Up Ring: firm rectangular block placed on downstream side (x=1.35 to 1.80)
+        # Blocking entrance to clearance gap!
+        backup_ring = Rectangle(
+            width=0.55, height=1.92,
+            color=COL_OK, stroke_width=3,
+            fill_color="#334155", fill_opacity=0.95
+        ).move_to([1.52, 0.0, 0.0])
+        lbl_bu = Text("Back-Up Ring\n(แหวนกันทะลัก)", font_size=10.5, color=COL_OK).next_to(backup_ring, UP, buff=0.35)
+        bu_grp = VGroup(backup_ring, lbl_bu)
+
+        # O-Ring contained: healthy round/oval shape pressed against back-up ring (NOT extruded!)
+        oring_contained = Ellipse(
+            width=1.90, height=1.94,
+            color="#38BDF8", stroke_width=3.5,
+            fill_color="#0F172A", fill_opacity=0.95
+        ).move_to([0.30, 0.0, 0.0])
+
+        banner4 = _h6_15_banner("แหวนแข็ง Back-Up Ring ปิดกั้นช่องว่างฝั่งท้ายน้ำ — แรงดันสูงแค่ไหนก็ไม่ทะลัก!", COL_OK)
+
+        self.play(
+            FadeIn(gap_housing_copy),
+            FadeIn(high_p_grp_copy),
+            FadeIn(oring_pre_ext),
+            run_time=0.8
+        )
+        self.wait(0.4)
+
+        # Back-up ring slides in and O-ring returns to healthy contained shape
+        self.play(
+            FadeIn(bu_grp, shift=DOWN * 0.2),
+            Transform(oring_pre_ext, oring_contained),
+            Indicate(backup_ring, color=YELLOW, scale_factor=1.15),
+            FadeIn(banner4),
+            run_time=1.2
+        )
+        self.wait(5.0)  # Checkpoint 40.0s falls here
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 44.6–50.0: Summary Card
+        # ----------------------------------------------------------------------
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: กลไก O-Ring และ Back-Up Ring (hydraulic06 น.18)", font_size=14, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. ติดตั้ง (Initial Squeeze): บีบอัด O-ring บน-ล่างในร่องเพื่อปิดผนึกขั้นต้นเมื่อยังไม่มีแรงดัน",
+            "2. Self-Energizing: เมื่อมีแรงดัน ของไหลจะผลัก O-ring อัดแน่นกับผิวที่ 3 ยิ่งแรงดันสูงยิ่งแน่น",
+            "3. การทะลัก (Extrusion): แรงดันสูงเกินไปจะบี้ O-ring ให้ไหลปลิ้นเข้า Clearance Gap จนฉีกขาด",
+            "4. Back-Up Ring: ใส่แหวนแข็งฝั่งแรงดันต่ำเพื่อปิดบล็อกช่องว่าง ป้องกัน O-ring ปลิ้นเสียหายได้อย่างสมบูรณ์"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(4.6)  # Checkpoint 47.0s falls here
+
+        # ----------------------------------------------------------------------
+        # BEAT 50.0–55.0: Review Question Card
+        # ----------------------------------------------------------------------
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ระบบไฮดรอลิกแรงดันสูงมากที่มีช่องว่าง Clearance Gap ระหว่างชิ้นส่วน\nควรเสริมอุปกรณ์ใดเข้าไปในร่องซีล เพื่อป้องกัน O-Ring เสียหาย?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: เสริม Back-Up Ring (แหวนกันทะลัก) ด้านท้ายน้ำ (Low-Pressure Side)\nเพื่อปิดบล็อกช่องว่าง ไม่ให้เนื้อยาง O-Ring ทะลัก (Extrude) เข้าไปจนฉีกขาด)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(4.4)  # Checkpoint 52.0s falls here
+
+        self.play(FadeOut(question_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+        self.wait(0.5)
+
+
