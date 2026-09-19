@@ -10071,3 +10071,514 @@ class H6_25_GasAccumulatorsBladder(SafeScene):
         self.wait(0.5)
 
 
+# ======================================================================
+# SCENE: H6_26_AccumulatorApps1
+# hydraulic06.pdf — Page 29: Accumulator Applications (1 & 2)
+# ======================================================================
+
+def _h6_26_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_26_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_26_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_26_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_26_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    fit_width(lbl, 11.4)
+    return VGroup(bg, lbl)
+
+
+# ----------------------------------------------------------------------
+# ISO Hydraulic Schematic Symbol Builders (page 29)
+# ----------------------------------------------------------------------
+
+def _build_reservoir(x, y):
+    """Open tank reservoir symbol."""
+    w, h = 0.32, 0.20
+    b = Line([x - w/2, y, 0], [x + w/2, y, 0], color=COL_METAL, stroke_width=2)
+    l = Line([x - w/2, y, 0], [x - w/2, y + h, 0], color=COL_METAL, stroke_width=2)
+    r = Line([x + w/2, y, 0], [x + w/2, y + h, 0], color=COL_METAL, stroke_width=2)
+    return VGroup(b, l, r)
+
+
+def _build_strainer(x, y):
+    """Filter / Strainer symbol: square diamond with dashed line."""
+    d = Square(side_length=0.28, color=COL_METAL, stroke_width=1.5).rotate(PI/4).move_to([x, y, 0])
+    dash = DashedLine([x, y - 0.18, 0], [x, y + 0.18, 0], color=COL_METAL, stroke_width=1.5, dash_length=0.05)
+    return VGroup(d, dash)
+
+
+def _build_pump(x, y):
+    """Hydraulic pump symbol: circle with upward pointing filled triangle."""
+    c = Circle(radius=0.25, color=COL_METAL, stroke_width=2.0).set_fill("#0F172A", 1.0).move_to([x, y, 0])
+    tri = Polygon(
+        [x, y + 0.23, 0],
+        [x - 0.13, y + 0.02, 0],
+        [x + 0.13, y + 0.02, 0],
+        color=WHITE, fill_color=WHITE, fill_opacity=1.0, stroke_width=1
+    )
+    return VGroup(c, tri)
+
+
+def _build_check_valve(x, y):
+    """Check valve symbol: ball sitting in V-seat (free flow right)."""
+    seat = Polygon([x - 0.12, y + 0.14, 0], [x - 0.02, y, 0], [x - 0.12, y - 0.14, 0], color=COL_METAL, stroke_width=1.8)
+    ball = Circle(radius=0.08, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([x + 0.06, y, 0])
+    return VGroup(seat, ball)
+
+
+def _build_accumulator_symbol(x, y, label="ACCUMULATOR"):
+    """ISO Accumulator symbol: capsule with downward gas-barrier triangle."""
+    shell = RoundedRectangle(width=0.48, height=0.75, corner_radius=0.24, color=COL_OK, stroke_width=2.0).set_fill(COL_BG_BOX, 1.0).move_to([x, y, 0])
+    div = Polygon(
+        [x - 0.16, y + 0.06, 0],
+        [x + 0.16, y + 0.06, 0],
+        [x, y - 0.08, 0],
+        color=COL_OK, fill_color=COL_GAS, fill_opacity=0.9, stroke_width=1.5
+    )
+    stem = Line([x, y - 0.75/2, 0], [x, y - 0.75/2 - 0.35, 0], color=COL_METAL, stroke_width=2.0)
+    lbl = Text(label, font_size=8, color=COL_OK, weight=BOLD).next_to(shell, UP, buff=0.08)
+    return VGroup(stem, shell, div, lbl)
+
+
+def _build_relief_valve(x, y):
+    """Relief valve: square envelope, arrow offset, spring, pilot line."""
+    sq = Square(side_length=0.46, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([x, y, 0])
+    arr = Arrow(start=[x, y - 0.16, 0], end=[x, y + 0.16, 0], color=COL_METAL, stroke_width=2.0, max_tip_length_to_length_ratio=0.35)
+    sp_pts = [[x - 0.23, y - 0.10, 0], [x - 0.31, y - 0.05, 0], [x - 0.23, y, 0], [x - 0.31, y + 0.05, 0], [x - 0.23, y + 0.10, 0]]
+    spring = VMobject(color=COL_SPRING, stroke_width=1.5).set_points_as_corners([np.array(p) for p in sp_pts])
+    tank = _build_reservoir(x, y - 0.46)
+    t_line = Line([x, y - 0.23, 0], [x, y - 0.36, 0], color=COL_METAL, stroke_width=2.0)
+    return VGroup(sq, arr, spring, t_line, tank)
+
+
+def _build_pressure_switch(x, y):
+    """
+    ISO Pressure Switch symbol (§34 CRITICAL REQUIREMENT):
+    Square envelope with spring on top, 2 contact terminals, and switch blade.
+    """
+    sq = Square(side_length=0.48, color=COL_WARN, stroke_width=2.0).set_fill(COL_BG_BOX, 1.0).move_to([x, y, 0])
+    sp_pts = [[x - 0.10, y + 0.24, 0], [x - 0.05, y + 0.32, 0], [x, y + 0.24, 0], [x + 0.05, y + 0.32, 0], [x + 0.10, y + 0.24, 0]]
+    spring = VMobject(color=COL_SPRING, stroke_width=1.8).set_points_as_corners([np.array(p) for p in sp_pts])
+    dot1 = Circle(radius=0.035, color=WHITE).set_fill(WHITE, 1.0).move_to([x - 0.12, y - 0.08, 0])
+    dot2 = Circle(radius=0.035, color=WHITE).set_fill(WHITE, 1.0).move_to([x + 0.12, y + 0.08, 0])
+    switch_arm = Line([x - 0.12, y - 0.08, 0], [x + 0.08, y + 0.05, 0], color=COL_WARN, stroke_width=2.2)
+    stem = Line([x, y - 0.24, 0], [x, y - 0.55, 0], color=COL_WARN, stroke_width=2.0)
+    lbl = Text("PRESSURE\nSWITCH", font_size=7.5, color=COL_WARN, weight=BOLD).next_to(sq, LEFT, buff=0.10)
+    return VGroup(stem, sq, spring, dot1, dot2, switch_arm, lbl)
+
+
+def _build_dcv(x, y):
+    """Directional Control Valve: 2 positions, lever on left, spring return on right."""
+    w, h = 0.84, 0.44
+    b1 = Square(side_length=h, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([x - h/2, y, 0])
+    b2 = Square(side_length=h, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([x + h/2, y, 0])
+    a1 = Arrow(start=[x - h/2 - 0.10, y - 0.14, 0], end=[x - h/2 - 0.10, y + 0.14, 0], color=COL_METAL, stroke_width=1.5, max_tip_length_to_length_ratio=0.35)
+    a2 = Arrow(start=[x - h/2 + 0.10, y + 0.14, 0], end=[x - h/2 + 0.10, y - 0.14, 0], color=COL_METAL, stroke_width=1.5, max_tip_length_to_length_ratio=0.35)
+    x1 = Line([x + h/2 - 0.10, y - 0.14, 0], [x + h/2 + 0.10, y + 0.14, 0], color=COL_METAL, stroke_width=1.5)
+    x2 = Line([x + h/2 - 0.10, y + 0.14, 0], [x + h/2 + 0.10, y - 0.14, 0], color=COL_METAL, stroke_width=1.5)
+    lever_stem = Line([x - h, y, 0], [x - h - 0.22, y + 0.15, 0], color=COL_METAL, stroke_width=2.0)
+    lever_knob = Circle(radius=0.06, color=COL_METAL).set_fill(COL_METAL, 1.0).move_to([x - h - 0.22, y + 0.15, 0])
+    lever = VGroup(lever_stem, lever_knob)
+    sp_pts = [[x + h, y - 0.10, 0], [x + h + 0.08, y - 0.05, 0], [x + h, y, 0], [x + h + 0.08, y + 0.05, 0], [x + h, y + 0.10, 0]]
+    spring = VMobject(color=COL_SPRING, stroke_width=1.5).set_points_as_corners([np.array(p) for p in sp_pts])
+    tank = _build_reservoir(x, y - 0.40)
+    t_line = Line([x, y - h/2, 0], [x, y - 0.30, 0], color=COL_METAL, stroke_width=1.8)
+    return VGroup(b1, b2, a1, a2, x1, x2, lever, spring, t_line, tank)
+
+
+def _build_cylinder(x, y):
+    """Double-acting hydraulic cylinder."""
+    bw, bh = 1.35, 0.40
+    barrel = Rectangle(width=bw, height=bh, color=COL_METAL, stroke_width=2.0).set_fill("#0F172A", 1.0).move_to([x, y, 0])
+    piston = Rectangle(width=0.12, height=bh - 0.06, color=COL_METAL, stroke_width=1.5).set_fill("#64748B", 1.0).move_to([x - 0.22, y, 0])
+    rod = Line([x - 0.22, y, 0], [x + bw/2 + 0.45, y, 0], color=COL_METAL, stroke_width=3.5)
+    return VGroup(barrel, piston, rod)
+
+
+class H6_26_AccumulatorApps1(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–1.5: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_26_title("Accumulator Applications: การใช้งานจริง")
+        self.ref_m = _h6_26_page_ref("hydraulic06 น.29")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 1.5–5.0: Hook Question
+        # ======================================================================
+        hook_q = _h6_26_caption_top(
+            "Accumulator ในวงจรจริงมีหน้าที่แค่สำรองพลังงานเฉยๆ เหมือนกันทุกที่ที่ติดตั้งจริงไหม?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 12.0)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.2)
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.3)
+
+        # ======================================================================
+        # BEAT 5.0–18.0: Application 1: Auxiliary Power Source
+        # ======================================================================
+        cap1 = _h6_26_caption_top("1. Auxiliary Power Source: เสริมกำลังตอนต้องการพีคชั่วขณะ")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Circuit 1 Assembly (Centered at x = -2.1, y = -0.40)
+        cx, cy = -2.1, -0.40
+
+        # Components
+        res1 = _build_reservoir(cx - 2.2, cy - 1.55)
+        pipe_suction1 = Line([cx - 2.2, cy - 1.55, 0], [cx - 2.2, cy - 1.25, 0], color=COL_METAL, stroke_width=2)
+        strainer1 = _build_strainer(cx - 2.2, cy - 1.15)
+        pipe_strainer_pump1 = Line([cx - 2.2, cy - 1.00, 0], [cx - 2.2, cy - 0.75, 0], color=COL_METAL, stroke_width=2)
+        pump1 = _build_pump(cx - 2.2, cy - 0.50)
+
+        # Pressure line from pump
+        p_line_up1 = Line([cx - 2.2, cy - 0.25, 0], [cx - 2.2, cy + 0.35, 0], color=COL_OIL_RED, stroke_width=2.5)
+        p_line_top1 = Line([cx - 2.2, cy + 0.35, 0], [cx + 1.6, cy + 0.35, 0], color=COL_OIL_RED, stroke_width=2.5)
+
+        # Relief valve branch
+        rv_tee1 = Dot([cx - 1.3, cy + 0.35, 0], radius=0.05, color=COL_OIL_RED)
+        rv_down1 = Line([cx - 1.3, cy + 0.35, 0], [cx - 1.3, cy + 0.05, 0], color=COL_OIL_RED, stroke_width=2.0)
+        relief1 = _build_relief_valve(cx - 1.3, cy - 0.18)
+
+        # Check valve
+        check1 = _build_check_valve(cx - 0.45, cy + 0.35)
+
+        # Accumulator branch
+        acc_tee1 = Dot([cx + 0.40, cy + 0.35, 0], radius=0.05, color=COL_OK)
+        acc_up1 = Line([cx + 0.40, cy + 0.35, 0], [cx + 0.40, cy + 0.90, 0], color=COL_OK, stroke_width=2.5)
+        accum1 = _build_accumulator_symbol(cx + 0.40, cy + 1.28, label="ACCUMULATOR")
+
+        # Pilot sensing line to relief valve (dashed line from downstream of check valve)
+        pilot_dot1 = Dot([cx + 0.05, cy + 0.35, 0], radius=0.04, color=COL_METAL)
+        pilot1_pts = [
+            [cx + 0.05, cy + 0.35, 0],
+            [cx + 0.05, cy - 0.18, 0],
+            [cx - 1.07, cy - 0.18, 0]
+        ]
+        pilot_line1 = VMobject(color=COL_METAL, stroke_width=1.5).set_points_as_corners([np.array(p) for p in pilot1_pts])
+
+        # DCV
+        dcv1 = _build_dcv(cx + 1.7, cy + 0.35)
+
+        # Lines from DCV to Cylinder
+        line_a1 = Line([cx + 1.55, cy + 0.57, 0], [cx + 1.55, cy + 1.45, 0], color=COL_METAL, stroke_width=2.0)
+        line_b1 = Line([cx + 1.85, cy + 0.57, 0], [cx + 1.85, cy + 1.45, 0], color=COL_METAL, stroke_width=2.0)
+        line_a1_top = Line([cx + 1.55, cy + 1.45, 0], [cx + 1.30, cy + 1.45, 0], color=COL_METAL, stroke_width=2.0)
+        line_b1_top = Line([cx + 1.85, cy + 1.45, 0], [cx + 2.15, cy + 1.45, 0], color=COL_METAL, stroke_width=2.0)
+        cyl_lines1 = VGroup(line_a1, line_b1, line_a1_top, line_b1_top)
+
+        # Cylinder
+        cyl1 = _build_cylinder(cx + 1.80, cy + 1.65)
+
+        # Subtitle under circuit
+        sub_c1 = Text("Accumulator as an auxiliary power source", font_size=11, color=WHITE, weight=BOLD).move_to([cx, cy - 1.95, 0])
+
+        circuit1_grp = VGroup(
+            res1, pipe_suction1, strainer1, pipe_strainer_pump1, pump1,
+            p_line_up1, p_line_top1, rv_tee1, rv_down1, relief1,
+            check1, acc_tee1, acc_up1, accum1,
+            pilot_dot1, pilot_line1,
+            dcv1, cyl_lines1, cyl1, sub_c1
+        )
+
+        # Right Side: Explanation Card
+        card1_box = RoundedRectangle(
+            width=5.2, height=3.8, corner_radius=0.14,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([3.4, -0.25, 0])
+
+        card1_head = _h6_26_badge("Auxiliary Power Source: แหล่งจ่ายเสริม", COL_OK).move_to([3.4, 1.30, 0])
+
+        card1_text = VGroup(
+            Text("• ขนาดปั๊ม: เลือกปั๊มขนาดเล็ก จ่ายพอดีอัตราไหลเฉลี่ย", font_size=10.5, color=WHITE),
+            Text("• ช่วงพักรอบ: ปั๊มชาร์จน้ำมันเก็บสะสมใน Accumulator", font_size=10.5, color=COL_OK),
+            Text("• ช่วงความต้องการสูงสุด (Peak Demand):", font_size=10.5, color=COL_WARN, weight=BOLD),
+            Text("  Accumulator ร่วมคายน้ำมันเสริมกำลังให้ปั๊มทันที", font_size=10.5, color=YELLOW),
+            Text("• ประโยชน์หลักทางวิศวกรรม:", font_size=10.5, color=WHITE, weight=BOLD),
+            Text("  ไม่ต้องซื้อปั๊มใหญ่และมอเตอร์แรงม้าสูงเกินจำเป็น", font_size=10.0, color=COL_GRAY),
+            Text("  ประหยัดต้นทุนเครื่องจักรและพลังงานไฟฟ้ามหาศาล", font_size=10.0, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.12, aligned_edge=LEFT).move_to([3.4, -0.35, 0])
+        fit_width(card1_text, 4.8)
+
+        card1_grp = VGroup(card1_box, card1_head, card1_text)
+
+        banner1 = _h6_26_banner(
+            "ปั๊มตัวเล็กพอสำหรับการไหลเฉลี่ยทั่วไป — accumulator ช่วยจ่ายการไหลเสริมตอนกระบอกสูบต้องการพีคชั่วขณะ ไม่ต้องซื้อปั๊มใหญ่ราคาแพง",
+            COL_OK
+        )
+
+        # Peak Flow Arrow (Animated assist during peak demand)
+        peak_flow_arrow = Arrow(
+            start=[cx + 0.40, cy + 0.70, 0],
+            end=[cx + 1.40, cy + 0.35, 0],
+            color=YELLOW, stroke_width=3.5, max_tip_length_to_length_ratio=0.25
+        )
+        lbl_peak = Text("เสริมพีค!", font_size=9, color=YELLOW, weight=BOLD).next_to(peak_flow_arrow, UP, buff=0.05)
+        peak_assist_grp = VGroup(peak_flow_arrow, lbl_peak)
+
+        self.play(FadeIn(circuit1_grp), FadeIn(card1_grp), FadeIn(banner1), run_time=1.0)
+        self.play(Indicate(accum1, color=COL_OK), run_time=0.8)
+        self.play(FadeIn(peak_assist_grp, shift=RIGHT * 0.3), run_time=0.6)
+        self.wait(8.1)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 18.0–33.0: Application 2: Leakage Compensator with Pressure Switch
+        # ======================================================================
+        cap2 = _h6_26_caption_top("2. Leakage Compensator: ทำงานคู่กับ Pressure Switch ประหยัดพลังงาน")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Circuit 2 Assembly (Identical to 1 + PRESSURE SWITCH at cx - 0.05)
+        cx2, cy2 = -2.1, -0.40
+
+        res2 = _build_reservoir(cx2 - 2.2, cy2 - 1.55)
+        pipe_suction2 = Line([cx2 - 2.2, cy2 - 1.55, 0], [cx2 - 2.2, cy2 - 1.25, 0], color=COL_METAL, stroke_width=2)
+        strainer2 = _build_strainer(cx2 - 2.2, cy2 - 1.15)
+        pipe_strainer_pump2 = Line([cx2 - 2.2, cy2 - 1.00, 0], [cx2 - 2.2, cy2 - 0.75, 0], color=COL_METAL, stroke_width=2)
+        pump2 = _build_pump(cx2 - 2.2, cy2 - 0.50)
+
+        p_line_up2 = Line([cx2 - 2.2, cy2 - 0.25, 0], [cx2 - 2.2, cy2 + 0.35, 0], color=COL_OIL_RED, stroke_width=2.5)
+        p_line_top2 = Line([cx2 - 2.2, cy2 + 0.35, 0], [cx2 + 1.6, cy2 + 0.35, 0], color=COL_OIL_RED, stroke_width=2.5)
+
+        rv_tee2 = Dot([cx2 - 1.3, cy2 + 0.35, 0], radius=0.05, color=COL_OIL_RED)
+        rv_down2 = Line([cx2 - 1.3, cy2 + 0.35, 0], [cx2 - 1.3, cy2 + 0.05, 0], color=COL_OIL_RED, stroke_width=2.0)
+        relief2 = _build_relief_valve(cx2 - 1.3, cy2 - 0.18)
+
+        check2 = _build_check_valve(cx2 - 0.65, cy2 + 0.35)
+
+        # PRESSURE SWITCH (§34 Structural Difference: ONLY in Circuit 2!)
+        ps_tee2 = Dot([cx2 - 0.05, cy2 + 0.35, 0], radius=0.05, color=COL_WARN)
+        press_switch2 = _build_pressure_switch(cx2 - 0.05, cy2 + 1.20)
+
+        # Accumulator branch
+        acc_tee2 = Dot([cx2 + 0.75, cy2 + 0.35, 0], radius=0.05, color=COL_OK)
+        acc_up2 = Line([cx2 + 0.75, cy2 + 0.35, 0], [cx2 + 0.75, cy2 + 0.90, 0], color=COL_OK, stroke_width=2.5)
+        accum2 = _build_accumulator_symbol(cx2 + 0.75, cy2 + 1.28, label="")
+
+        # Pilot sensing line to relief valve
+        pilot_dot2 = Dot([cx2 + 0.35, cy2 + 0.35, 0], radius=0.04, color=COL_METAL)
+        pilot2_pts = [
+            [cx2 + 0.35, cy2 + 0.35, 0],
+            [cx2 + 0.35, cy2 - 0.18, 0],
+            [cx2 - 1.07, cy2 - 0.18, 0]
+        ]
+        pilot_line2 = VMobject(color=COL_METAL, stroke_width=1.5).set_points_as_corners([np.array(p) for p in pilot2_pts])
+
+        dcv2 = _build_dcv(cx2 + 1.7, cy2 + 0.35)
+
+        line_a2 = Line([cx2 + 1.55, cy2 + 0.57, 0], [cx2 + 1.55, cy2 + 1.45, 0], color=COL_METAL, stroke_width=2.0)
+        line_b2 = Line([cx2 + 1.85, cy2 + 0.57, 0], [cx2 + 1.85, cy2 + 1.45, 0], color=COL_METAL, stroke_width=2.0)
+        line_a2_top = Line([cx2 + 1.55, cy2 + 1.45, 0], [cx2 + 1.30, cy2 + 1.45, 0], color=COL_METAL, stroke_width=2.0)
+        line_b2_top = Line([cx2 + 1.85, cy2 + 1.45, 0], [cx2 + 2.15, cy2 + 1.45, 0], color=COL_METAL, stroke_width=2.0)
+        cyl_lines2 = VGroup(line_a2, line_b2, line_a2_top, line_b2_top)
+
+        cyl2 = _build_cylinder(cx2 + 1.80, cy2 + 1.65)
+
+        sub_c2 = Text("Accumulator as a leakage compensator", font_size=11, color=WHITE, weight=BOLD).move_to([cx2, cy2 - 1.95, 0])
+
+        circuit2_grp = VGroup(
+            res2, pipe_suction2, strainer2, pipe_strainer_pump2, pump2,
+            p_line_up2, p_line_top2, rv_tee2, rv_down2, relief2,
+            check2, ps_tee2, press_switch2, acc_tee2, acc_up2, accum2,
+            pilot_dot2, pilot_line2,
+            dcv2, cyl_lines2, cyl2, sub_c2
+        )
+
+        # Right Side: 3-Phase Interactive Card
+        card2_box = RoundedRectangle(
+            width=5.2, height=3.8, corner_radius=0.14,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([3.4, -0.25, 0])
+
+        card2_head = _h6_26_badge("Leakage Compensator: ชดเชยการรั่วซึม", COL_OK).move_to([3.4, 1.30, 0])
+
+        # Status box & Pressure Gauge Bar
+        status_box = RoundedRectangle(width=4.6, height=0.45, corner_radius=0.08, color=COL_OK, fill_color="#0F766E").set_fill("#0F766E", 0.8).move_to([3.4, 0.95, 0])
+        status_txt = Text("จังหวะ 1: ปั๊มอัดแรงดันเต็ม → Pressure Switch ตัดปั๊ม", font_size=9.5, color=WHITE, weight=BOLD).move_to(status_box.get_center())
+        status_grp = VGroup(status_box, status_txt)
+
+        # Gauge bar showing pressure level
+        gauge_bg = Rectangle(width=4.4, height=0.22, color=COL_METAL, stroke_width=1.5).set_fill("#0F172A", 1.0).move_to([3.4, 0.30, 0])
+        gauge_fill = Rectangle(width=4.36, height=0.18, color=COL_OK, stroke_width=0).set_fill(COL_OK, 0.9).move_to([3.4, 0.30, 0])
+        gauge_lbl = Text("ระดับแรงดันในระบบไฮดรอลิก (System Pressure)", font_size=9, color=WHITE).move_to([3.4, 0.52, 0])
+        gauge_grp = VGroup(gauge_bg, gauge_fill, gauge_lbl)
+
+        card2_bullets = VGroup(
+            Text("• จุดต่างสำคัญ (§34): มี PRESSURE SWITCH ต่อเส้นหลัก", font_size=10.5, color=YELLOW, weight=BOLD),
+            Text("• เมื่อแรงดันถึงเป้า: Switch สั่งตัดปั๊มหยุดทำงาน (OFF)", font_size=10.5, color=WHITE),
+            Text("• ช่วงพัก: การรั่วซึมภายในทำให้ความดันตกช้าๆ", font_size=10.5, color=COL_WARN),
+            Text("  → Accumulator จ่ายน้ำมันชดเชยรักษาแรงดันค้างไว้", font_size=10.5, color=COL_OK),
+            Text("• เมื่อแรงดันลดถึงเกณฑ์: Switch สั่งปั๊มติดใหม่ (ON)", font_size=10.5, color=WHITE)
+        ).arrange(DOWN, buff=0.10, aligned_edge=LEFT).move_to([3.4, -0.68, 0])
+        fit_width(card2_bullets, 4.8)
+
+        card2_grp = VGroup(card2_box, card2_head, status_grp, gauge_grp, card2_bullets)
+
+        banner2 = _h6_26_banner(
+            "Pressure Switch สั่งปั๊มหยุดเมื่อแรงดันเต็ม — accumulator ชดเชยแรงดันที่ตกจากการรั่วซึมภายใน จนกว่าจะสั่งปั๊มทำงานใหม่ ประหยัดพลังงาน",
+            COL_OK
+        )
+
+        self.play(FadeIn(circuit2_grp), FadeIn(card2_grp), FadeIn(banner2), run_time=1.0)
+        self.play(Indicate(press_switch2, color=COL_WARN), run_time=0.8)
+        self.wait(1.5)
+
+        # --- Phase 2: Pump OFF & Pressure Decay with Accumulator Compensation (23.5–28.5s) ---
+        txt_p2 = Text("จังหวะ 2: ปั๊มหยุด (OFF) — Accumulator จ่ายชดเชยการรั่ว", font_size=9.5, color=YELLOW, weight=BOLD).move_to(status_box.get_center())
+        # Gauge bar drops from width 4.36 down to 2.40 (decay)
+        gauge_decay = Rectangle(width=2.40, height=0.18, color=COL_WARN, stroke_width=0).set_fill(COL_WARN, 0.9).move_to([3.4 - (4.36 - 2.40)/2, 0.30, 0])
+
+        self.play(
+            pump2.animate.set_opacity(0.35),
+            status_box.animate.set_fill(COL_WARN, 0.8),
+            Transform(status_txt, txt_p2),
+            Transform(gauge_fill, gauge_decay),
+            run_time=3.5
+        )
+        self.wait(1.5)
+
+        # --- Phase 3: Pressure Reaches Lower Limit -> Pump restarts (ON) (28.5–33.0s) ---
+        txt_p3 = Text("จังหวะ 3: แรงดันตกถึงเกณฑ์ → Switch สั่งปั๊มเริ่มใหม่ (ON)", font_size=9.5, color=WHITE, weight=BOLD).move_to(status_box.get_center())
+        gauge_full = Rectangle(width=4.36, height=0.18, color=COL_OK, stroke_width=0).set_fill(COL_OK, 0.9).move_to([3.4, 0.30, 0])
+
+        self.play(
+            pump2.animate.set_opacity(1.0),
+            status_box.animate.set_fill("#0F766E", 0.8),
+            Transform(status_txt, txt_p3),
+            Transform(gauge_fill, gauge_full),
+            run_time=1.0
+        )
+        self.wait(3.5)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 33.0–38.5: The 4 Major Applications Overview (Slide List)
+        # ======================================================================
+        cap3 = _h6_26_caption_top("3. ยังมีอีก 2 การใช้งาน (เรียนต่อหน้า 30)")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        card_list_box = RoundedRectangle(
+            width=11.2, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        list_head = Text("4 การใช้งานหลักของ Accumulator (hydraulic06 น.29)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+
+        rows_app = [
+            ("1. As an auxiliary power source (แหล่งพลังงานเสริม)", "[ ✓ เรียนแล้ว ]", COL_OK),
+            ("2. As a leakage compensator (ตัวชดเชยการรั่วซึม)", "[ ✓ เรียนแล้ว ]", COL_OK),
+            ("3. As an emergency power source (แหล่งพลังงานฉุกเฉิน)", "[ ต่อไป (น.30) ]", COL_GRAY),
+            ("4. As a hydraulic shock absorber (ตัวดูดซับแรงกระแทกไฮดรอลิก)", "[ ต่อไป (น.30) ]", COL_GRAY),
+        ]
+
+        app_items = []
+        for title_th, status_lbl, col in rows_app:
+            t = Text(title_th, font_size=11.5, color=WHITE)
+            s = _h6_26_badge(status_lbl, col)
+            item = VGroup(t, s).arrange(RIGHT, buff=0.4)
+            app_items.append(item)
+
+        list_rows = VGroup(*app_items).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.18, 0.0])
+        fit_width(list_rows, 10.4)
+        applist_grp = VGroup(card_list_box, list_head, list_rows)
+
+        banner3 = _h6_26_banner(
+            "4 การใช้งานหลักของ Accumulator: เรียนไปแล้ว 2 ข้อ อีก 2 ข้อรอต่อหน้า 30",
+            COL_OK
+        )
+
+        self.play(FadeIn(applist_grp, shift=UP * 0.3), FadeIn(banner3), run_time=0.8)
+        self.wait(3.7)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 38.5–42.0: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: Accumulator Applications (hydraulic06 น.29)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. Auxiliary Power: ปั๊มเล็กจ่ายพอดีค่าเฉลี่ย — Accumulator ช่วยคายน้ำมันเสริมตอนกระบอกสูบต้องการพีคชั่วขณะ",
+            "2. Leakage Compensator: ทำงานร่วมกับ Pressure Switch สั่งปั๊มตัด-ต่อเป็นช่วงๆ ประหยัดพลังงาน ลดความร้อน",
+            "3. หน้าที่ของ Accumulator: ปรับเปลี่ยนไปตามการออกแบบวงจรรอบตัวมัน (อีก 2 การใช้งานเรียนต่อในคลิปถัดไป)"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        fit_width(s_rows, 10.8)
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.7)
+        self.wait(2.2)
+
+        # ======================================================================
+        # BEAT 42.0–45.5: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ถ้าไม่มี Pressure Switch ในวงจรชดเชยการรั่วซึม ปั๊มจะต้องทำงานอย่างไรแตกต่างไป และเสียพลังงานเพิ่มขึ้นหรือไม่?",
+            font_size=12.0, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        fit_width(q_body, 10.6)
+        q_ans = Text(
+            "(คำตอบ: หากไม่มี Pressure Switch ปั๊มจะต้องเดินเครื่องตลอดเวลาและระบายน้ำมันส่วนเกินทิ้งผ่าน Relief Valve อย่างต่อเนื่อง\nทำให้สิ้นเปลืองพลังงานไฟฟ้าและเกิดความร้อนสะสมในน้ำมันไฮดรอลิกสูงมาก)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        fit_width(q_ans, 10.6)
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.9)
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
+
