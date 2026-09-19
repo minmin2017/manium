@@ -6030,3 +6030,405 @@ class H6_15_ORings(SafeScene):
         self.wait(0.5)
 
 
+# ==============================================================================
+# SCENE 16: H6_16_CompressionPackings1 (Compression Packing: ติดตั้งให้ถูกวิธี)
+# hydraulic06.pdf page 19
+# ==============================================================================
+
+def _h6_16_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_16_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_16_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_16_banner(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=min(12.6, max(lbl.width + 0.6, 9.5)),
+        height=0.50,
+        corner_radius=0.1,
+        color=color,
+        fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.62, 0.0])
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_16_badge(text, color):
+    lbl = Text(text, font_size=10.5, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.35,
+        height=0.34,
+        corner_radius=0.08,
+        color=color,
+        fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class H6_16_CompressionPackings1(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        """Fade out all scene mobjects except persistent header."""
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ----------------------------------------------------------------------
+        self.title_m = _h6_16_title("Compression Packing: ติดตั้งให้ถูกวิธี")
+        self.ref_m = _h6_16_page_ref("hydraulic06 น.19")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)  # Checkpoint 1.5s falls here
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–5.5: Hook Question
+        # ----------------------------------------------------------------------
+        hook_q = _h6_16_caption_top("ยัดแหวนซ้อนเข้าไปในร่อง หันทิศไหนก็ได้ใช่ไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.9)  # Checkpoint 3.6s falls here
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 5.5–14.0: Beat 1 (Lip Direction: Must Face Pressure)
+        # ----------------------------------------------------------------------
+        cap1 = _h6_16_caption_top("1. ปากซีล (Lips) ต้องหันเข้าหาแรงดันเสมอ")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Side-by-side comparison cards
+        card_w, card_h = 5.6, 3.8
+        x_left, x_right = -3.2, 3.2
+
+        # --- LEFT: WRONG (Lips face AWAY from pressure) ---
+        box_wrong = RoundedRectangle(
+            width=card_w, height=card_h, corner_radius=0.12,
+            color=COL_WARN
+        ).set_fill(COL_BG_BOX, 0.90).move_to([x_left, 0.0, 0.0])
+        badge_wrong = _h6_16_badge("ผิด: ปากหันหนีแรงดัน (Wrong)", COL_WARN).move_to([x_left, 1.45, 0.0])
+
+        # Housing walls top & bottom on left
+        wall_w_top = Rectangle(width=3.6, height=0.4, color=COL_METAL).set_fill("#334155", 0.95).move_to([x_left + 0.3, 0.95, 0.0])
+        wall_w_bot = Rectangle(width=3.6, height=0.4, color=COL_METAL).set_fill("#334155", 0.95).move_to([x_left + 0.3, -0.95, 0.0])
+
+        # Pressure arrows entering from left
+        p_arr_w1 = Arrow([x_left - 2.2, 0.40, 0], [x_left - 1.0, 0.40, 0], color=COL_FLUID_H6_15, stroke_width=3.5, tip_length=0.14)
+        p_arr_w2 = Arrow([x_left - 2.2, -0.40, 0], [x_left - 1.0, -0.40, 0], color=COL_FLUID_H6_15, stroke_width=3.5, tip_length=0.14)
+        p_lbl_w = Text("แรงดัน (P)", font_size=10, color=COL_FLUID_H6_15).move_to([x_left - 1.6, 0.0, 0.0])
+
+        # V-ring polygon: point of V faces LEFT, lips open towards RIGHT (away from pressure)
+        # Squeezed inward by pressure!
+        pts_v_wrong = [
+            [x_left - 0.7, 0.0, 0],      # Apex facing pressure
+            [x_left + 0.5, 0.65, 0],     # Top lip (collapsed inward, leaving gap to wall 0.95)
+            [x_left + 0.2, 0.65, 0],     # Inner top
+            [x_left - 0.4, 0.0, 0],      # Inner apex
+            [x_left + 0.2, -0.65, 0],    # Inner bot
+            [x_left + 0.5, -0.65, 0],    # Bot lip (collapsed inward)
+        ]
+        poly_v_wrong = Polygon(*pts_v_wrong, color=COL_WARN).set_fill("#451A03", 0.95).set_stroke(COL_WARN, 3.0)
+
+        # Red leak arrows slipping past collapsed lips!
+        leak_arr1 = Arrow([x_left + 0.2, 0.85, 0], [x_left + 1.8, 0.85, 0], color=COL_FLUID_H6_15, stroke_width=2.5, tip_length=0.10)
+        leak_arr2 = Arrow([x_left + 0.2, -0.85, 0], [x_left + 1.8, -0.85, 0], color=COL_FLUID_H6_15, stroke_width=2.5, tip_length=0.10)
+        lbl_leak_warn = Text("แรงดันบีบปากหุบเข้า → รั่ว!", font_size=10.5, color=COL_WARN).move_to([x_left + 0.4, -1.45, 0.0])
+
+        grp_wrong = VGroup(box_wrong, badge_wrong, wall_w_top, wall_w_bot, p_arr_w1, p_arr_w2, p_lbl_w,
+                           poly_v_wrong, leak_arr1, leak_arr2, lbl_leak_warn)
+
+        # --- RIGHT: CORRECT (Lips face TOWARD pressure) ---
+        box_right = RoundedRectangle(
+            width=card_w, height=card_h, corner_radius=0.12,
+            color=COL_OK
+        ).set_fill(COL_BG_BOX, 0.90).move_to([x_right, 0.0, 0.0])
+        badge_right = _h6_16_badge("ถูกต้อง: ปากหันสู้แรงดัน (Correct)", COL_OK).move_to([x_right, 1.45, 0.0])
+
+        wall_r_top = Rectangle(width=3.6, height=0.4, color=COL_METAL).set_fill("#334155", 0.95).move_to([x_right - 0.3, 0.95, 0.0])
+        wall_r_bot = Rectangle(width=3.6, height=0.4, color=COL_METAL).set_fill("#334155", 0.95).move_to([x_right - 0.3, -0.95, 0.0])
+
+        p_arr_r1 = Arrow([x_right - 2.2, 0.40, 0], [x_right - 1.0, 0.40, 0], color=COL_FLUID_H6_15, stroke_width=3.5, tip_length=0.14)
+        p_arr_r2 = Arrow([x_right - 2.2, -0.40, 0], [x_right - 1.0, -0.40, 0], color=COL_FLUID_H6_15, stroke_width=3.5, tip_length=0.14)
+        p_lbl_r = Text("แรงดัน (P)", font_size=10, color=COL_FLUID_H6_15).move_to([x_right - 1.6, 0.0, 0.0])
+
+        # V-ring polygon: lips open towards LEFT (facing pressure), apex points RIGHT!
+        # Lips flare tightly against walls at y=0.75 and -0.75!
+        pts_v_right = [
+            [x_right + 0.7, 0.0, 0],     # Apex facing downstream
+            [x_right - 0.5, 0.75, 0],    # Top lip flared firmly against top wall
+            [x_right - 0.2, 0.75, 0],    # Inner top
+            [x_right + 0.4, 0.0, 0],     # Inner apex
+            [x_right - 0.2, -0.75, 0],   # Inner bot
+            [x_right - 0.5, -0.75, 0],   # Bot lip flared firmly against bot wall
+        ]
+        poly_v_right = Polygon(*pts_v_right, color=COL_OK).set_fill("#064E3B", 0.95).set_stroke(COL_OK, 3.0)
+
+        # Sealing force contact arrows pressing outward into walls
+        f_press_top = Arrow([x_right - 0.1, 0.35, 0], [x_right - 0.3, 0.72, 0], color=COL_OK, stroke_width=2.5, tip_length=0.10)
+        f_press_bot = Arrow([x_right - 0.1, -0.35, 0], [x_right - 0.3, -0.72, 0], color=COL_OK, stroke_width=2.5, tip_length=0.10)
+        lbl_right_ok = Text("แรงดันดันปากบานออก → ซีลแน่น!", font_size=10.5, color=COL_OK).move_to([x_right + 0.3, -1.45, 0.0])
+
+        grp_right = VGroup(box_right, badge_right, wall_r_top, wall_r_bot, p_arr_r1, p_arr_r2, p_lbl_r,
+                            poly_v_right, f_press_top, f_press_bot, lbl_right_ok)
+
+        banner1 = _h6_16_banner("แรงดันดันปากให้บานออกกดผนังแน่นขึ้นเอง (Self-Energizing) เหมือน O-Ring จาก H6_15!", COL_OK)
+
+        self.play(
+            FadeIn(grp_wrong, shift=UP * 0.25),
+            FadeIn(grp_right, shift=UP * 0.25),
+            FadeIn(banner1),
+            run_time=1.0
+        )
+        # Sequential Indicate (never in same play as FadeIn per Lesson 5)
+        self.play(Indicate(poly_v_wrong, color=COL_WARN), run_time=0.6)
+        self.play(Indicate(poly_v_right, color=COL_OK), run_time=0.6)
+        self.wait(5.0)  # Checkpoint 10.0s falls inside this hold
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 14.6–23.0: Beat 2 (Stagger Joints: 180° then 90°)
+        # ----------------------------------------------------------------------
+        cap2 = _h6_16_caption_top("2. รอยต่อแต่ละวงต้องเยื้องกัน (Stagger All Joints)")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Stuffing box housing cavity: width 6.0, height 2.6
+        box_outer = RoundedRectangle(width=8.0, height=3.0, corner_radius=0.12, color=COL_METAL).set_fill("#334155", 0.95).move_to([0.0, 0.05, 0.0])
+        box_cavity = Rectangle(width=6.0, height=2.2, color=BLACK).set_fill("#0F172A", 1.0).move_to([0.0, 0.05, 0.0])
+
+        # 4 Horizontal Packing Rings stacked vertically
+        y_rings = [0.72, 0.27, -0.18, -0.63]
+        ring_h = 0.38
+
+        # --- WRONG STATE: All 4 cut joints aligned at x = 0.0 ---
+        rings_wrong_mobs = []
+        cut_markers_wrong = []
+        for y_r in y_rings:
+            r_left = Rectangle(width=2.85, height=ring_h, color=COL_WARN).set_fill("#1E293B", 0.95).set_stroke(COL_WARN, 1.5).move_to([-1.45, y_r, 0.0])
+            r_right = Rectangle(width=2.85, height=ring_h, color=COL_WARN).set_fill("#1E293B", 0.95).set_stroke(COL_WARN, 1.5).move_to([1.45, y_r, 0.0])
+            cut_dot = Dot([0.0, y_r, 0.0], radius=0.08, color=RED)
+            rings_wrong_mobs.extend([r_left, r_right])
+            cut_markers_wrong.append(cut_dot)
+
+        stack_wrong_grp = VGroup(*rings_wrong_mobs, *cut_markers_wrong)
+
+        # Red leak path line cutting straight down through all 4 aligned joints!
+        leak_path_line = Arrow([0.0, 1.50, 0.0], [0.0, -1.15, 0.0], color=RED, stroke_width=4.5, tip_length=0.16)
+        lbl_leak_col = _h6_16_badge("รอยต่อตรงกัน = ช่องรั่วทะลุตลอดแนว!", COL_WARN).move_to([0.0, 1.85, 0.0])
+        leak_alert_grp = VGroup(leak_path_line, lbl_leak_col)
+
+        banner2_wrong = _h6_16_banner("หากรอยต่อทุกวงอยู่แนวเดียวกัน ของไหลจะไหลทะลุช่องรอยต่อได้ทันที!", COL_WARN)
+
+        self.play(
+            FadeIn(box_outer),
+            FadeIn(box_cavity),
+            FadeIn(stack_wrong_grp),
+            FadeIn(banner2_wrong),
+            run_time=0.8
+        )
+        self.play(FadeIn(leak_alert_grp, shift=DOWN * 0.2), run_time=0.6)
+        self.wait(1.5)  # Checkpoint 18.0s first check (aligned state)
+
+        # --- RIGHT STATE: Staggered joints (alternating -1.5, +1.5, -0.6, +0.6) ---
+        x_staggers = [-1.6, 1.6, -0.7, 0.7]
+        rings_right_mobs = []
+        cut_markers_right = []
+        for i, y_r in enumerate(y_rings):
+            x_cut = x_staggers[i]
+            w_l = (x_cut - (-2.9))
+            w_r = (2.9 - x_cut)
+            pos_l = -2.9 + w_l / 2.0
+            pos_r = x_cut + w_r / 2.0
+            r_l = Rectangle(width=w_l, height=ring_h, color=COL_OK).set_fill("#1E293B", 0.95).set_stroke(COL_OK, 1.5).move_to([pos_l, y_r, 0.0])
+            r_r = Rectangle(width=w_r, height=ring_h, color=COL_OK).set_fill("#1E293B", 0.95).set_stroke(COL_OK, 1.5).move_to([pos_r, y_r, 0.0])
+            cut_dot = Dot([x_cut, y_r, 0.0], radius=0.08, color=YELLOW)
+            rings_right_mobs.extend([r_l, r_r])
+            cut_markers_right.append(cut_dot)
+
+        stack_right_grp = VGroup(*rings_right_mobs, *cut_markers_right)
+        badge_stagger = _h6_16_badge("เยื้องสลับ 180° แล้ว 90° ปิดกั้นทางรั่วสนิท", COL_OK).move_to([0.0, 1.85, 0.0])
+        banner2_right = _h6_16_banner("รอยต่อต้องเยื้องสลับกัน 180° แล้ว 90° — ปลายรอยต่อเกยกันเล็กน้อย ห้ามตัดแหวนขาด", COL_OK)
+
+        self.play(
+            FadeOut(leak_alert_grp),
+            FadeOut(banner2_wrong),
+            run_time=0.4
+        )
+        self.play(
+            Transform(stack_wrong_grp, stack_right_grp),
+            FadeIn(badge_stagger),
+            FadeIn(banner2_right),
+            run_time=1.0
+        )
+        self.wait(4.0)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 23.6–31.0: Beat 3 (Surface Finish: 32 RMS Static vs 16 RMS Dynamic)
+        # ----------------------------------------------------------------------
+        cap3 = _h6_16_caption_top("3. ผิวสัมผัส: ฝั่งเคลื่อนที่ต้องเรียบกว่าฝั่งนิ่ง (Surface Finish)")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        card3_w, card3_h = 5.6, 3.8
+
+        # --- LEFT: STATIC SURFACE (32 RMS) ---
+        box_static = RoundedRectangle(width=card3_w, height=card3_h, corner_radius=0.12, color=COL_GRAY).set_fill(COL_BG_BOX, 0.90).move_to([x_left, 0.0, 0.0])
+        badge_static = _h6_16_badge("Static Surface Finish — 32 RMS", COL_GRAY).move_to([x_left, 1.45, 0.0])
+        lbl_static_desc = Text("ผนังเรือนสูบ (อยู่นิ่ง ไม่ขยับ)\nยอมให้มีความหยาบได้มากกว่า", font_size=11, color=WHITE).move_to([x_left, 0.85, 0.0])
+
+        # Coarse zigzag profile (large amplitude 0.28, low frequency: 14 vertices across width 4.2)
+        n_coarse = 14
+        xs_c = np.linspace(x_left - 2.1, x_left + 2.1, n_coarse)
+        pts_coarse = []
+        for idx, x in enumerate(xs_c):
+            y = 0.0 + (0.28 if idx % 2 == 0 else -0.28)
+            pts_coarse.append([x, y, 0.0])
+        line_static = VMobject(color=COL_GRAY, stroke_width=3.5).set_points_as_corners([np.array(p) for p in pts_coarse])
+        lbl_rms32 = _h6_16_badge("32 RMS (ผิวหยาบกว่า)", COL_GRAY).move_to([x_left, -0.85, 0.0])
+
+        grp_static = VGroup(box_static, badge_static, lbl_static_desc, line_static, lbl_rms32)
+
+        # --- RIGHT: DYNAMIC SURFACE (16 RMS) ---
+        box_dynamic = RoundedRectangle(width=card3_w, height=card3_h, corner_radius=0.12, color=COL_OK).set_fill(COL_BG_BOX, 0.90).move_to([x_right, 0.0, 0.0])
+        badge_dynamic = _h6_16_badge("Dynamic Surface Finish — 16 RMS", COL_OK).move_to([x_right, 1.45, 0.0])
+        lbl_dynamic_desc = Text("ผิวแกนก้านสูบ (เคลื่อนที่ตลอดเวลา)\nต้องเรียบเนียนเป็นพิเศษ ลดสึกหรอ", font_size=11, color=WHITE).move_to([x_right, 0.85, 0.0])
+
+        # Fine zigzag profile (tiny amplitude 0.09, high frequency: 50 vertices across width 4.2)
+        n_fine = 50
+        xs_f = np.linspace(x_right - 2.1, x_right + 2.1, n_fine)
+        pts_fine = []
+        for idx, x in enumerate(xs_f):
+            y = 0.0 + (0.09 if idx % 2 == 0 else -0.09)
+            pts_fine.append([x, y, 0.0])
+        line_dynamic = VMobject(color=COL_OK, stroke_width=3.0).set_points_as_corners([np.array(p) for p in pts_fine])
+        lbl_rms16 = _h6_16_badge("16 RMS (เรียบเนียนกว่า 2 เท่า)", COL_OK).move_to([x_right, -0.85, 0.0])
+
+        grp_dynamic = VGroup(box_dynamic, badge_dynamic, lbl_dynamic_desc, line_dynamic, lbl_rms16)
+
+        banner3 = _h6_16_banner("ผิว Dynamic (16 RMS) ต้องเรียบกว่า Static (32 RMS) เพื่อลดการเสียดสีและการสึกหรอของซีล", COL_OK)
+
+        self.play(
+            FadeIn(grp_static, shift=UP * 0.25),
+            FadeIn(grp_dynamic, shift=UP * 0.25),
+            FadeIn(banner3),
+            run_time=1.0
+        )
+        self.wait(5.8)  # Checkpoint 27.0s falls inside this hold
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 31.6–40.0: Beat 4 (Assembly Order & Shim Protection)
+        # ----------------------------------------------------------------------
+        cap4 = _h6_16_caption_top("4. ลำดับติดตั้ง + เสริม Shim กันปากซีลบี้แตก")
+        self.play(FadeIn(cap4, shift=UP * 0.35), run_time=0.5)
+
+        # Housing box cavity on left (x=-1.5)
+        cavity_bg = Rectangle(width=3.2, height=3.6, color=COL_METAL).set_fill("#1E293B", 0.95).move_to([-1.5, 0.0, 0.0])
+
+        # 1. Male / Bottom Adapter Ring (first!)
+        adapter_bot = Rectangle(width=2.8, height=0.50, color=COL_OK).set_fill("#064E3B", 0.95).set_stroke(COL_OK, 2.5).move_to([-1.5, -1.35, 0.0])
+        lbl_step1 = _h6_16_badge("① ใส่ Male Adapter ก่อน (ล่างสุด)", COL_OK).move_to([2.4, -1.35, 0.0])
+        arr_s1 = Arrow([1.0, -1.35, 0], [-0.05, -1.35, 0], color=COL_OK, stroke_width=2.5, tip_length=0.10)
+        grp_s1 = VGroup(adapter_bot, lbl_step1, arr_s1)
+
+        # 2. Packing Rings Stack (middle)
+        r1 = Rectangle(width=2.8, height=0.38, color=COL_CURR).set_fill("#334155", 0.95).set_stroke(COL_CURR, 2.0).move_to([-1.5, -0.80, 0.0])
+        r2 = Rectangle(width=2.8, height=0.38, color=COL_CURR).set_fill("#334155", 0.95).set_stroke(COL_CURR, 2.0).move_to([-1.5, -0.35, 0.0])
+        r3 = Rectangle(width=2.8, height=0.38, color=COL_CURR).set_fill("#334155", 0.95).set_stroke(COL_CURR, 2.0).move_to([-1.5, 0.10, 0.0])
+        lbl_step2 = _h6_16_badge("② ใส่แหวน Packing ซ้อนตามลำดับ", COL_CURR).move_to([2.4, -0.35, 0.0])
+        arr_s2 = Arrow([1.0, -0.35, 0], [-0.05, -0.35, 0], color=COL_CURR, stroke_width=2.5, tip_length=0.10)
+        grp_s2 = VGroup(r1, r2, r3, lbl_step2, arr_s2)
+
+        # 3. Female / Top Adapter Ring (last!)
+        adapter_top = Rectangle(width=2.8, height=0.50, color=COL_OK).set_fill("#064E3B", 0.95).set_stroke(COL_OK, 2.5).move_to([-1.5, 0.65, 0.0])
+        lbl_step3 = _h6_16_badge("③ ใส่ Female Adapter ปิดท้าย", COL_OK).move_to([2.4, 0.65, 0.0])
+        arr_s3 = Arrow([1.0, 0.65, 0], [-0.05, 0.65, 0], color=COL_OK, stroke_width=2.5, tip_length=0.10)
+        grp_s3 = VGroup(adapter_top, lbl_step3, arr_s3)
+
+        # 4. Gland Follower & Yellow Shim (protective strip)
+        # Shim: distinct visible yellow strip between gland and top adapter!
+        shim_strip = Rectangle(width=2.8, height=0.18, color=YELLOW).set_fill(YELLOW, 0.95).set_stroke(YELLOW, 2.0).move_to([-1.5, 1.05, 0.0])
+        gland_block = Rectangle(width=3.2, height=0.50, color=COL_METAL).set_fill("#475569", 0.95).set_stroke(COL_METAL, 2.5).move_to([-1.5, 1.45, 0.0])
+        lbl_shim = _h6_16_badge("④ เสริม Shim กันปากซีลถูกบี้แตก", YELLOW).move_to([2.4, 1.35, 0.0])
+        arr_s4 = Arrow([1.0, 1.35, 0], [-0.05, 1.25, 0], color=YELLOW, stroke_width=2.5, tip_length=0.10)
+        grp_s4 = VGroup(shim_strip, gland_block, lbl_shim, arr_s4)
+
+        banner4 = _h6_16_banner("Gland ต้องแนบพอดี — หากแน่นเกินไปให้เสริม Shim เพื่อป้องกันปากซีลถูกบี้แตกเสียหาย", COL_OK)
+
+        self.play(FadeIn(cavity_bg), FadeIn(grp_s1), run_time=0.8)
+        self.wait(0.8)
+        self.play(FadeIn(grp_s2), run_time=0.8)
+        self.wait(0.8)
+        self.play(FadeIn(grp_s3), run_time=0.8)
+        self.wait(0.8)
+        self.play(FadeIn(grp_s4), FadeIn(banner4), run_time=1.0)
+        self.wait(2.8)  # Checkpoint 36.0s falls inside this hold
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 40.6–45.0: Summary Card
+        # ----------------------------------------------------------------------
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: กฎ 4 ข้อในการติดตั้ง Compression Packing (hydraulic06 น.19)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. ปากซีล (Lips): ต้องหันเข้าหาแรงดันเสมอ เพื่อให้แรงดันช่วยดันปากบานออก (Self-Energizing)",
+            "2. รอยต่อ (Joints): จัดเยื้องสลับ 180° แล้ว 90° ปลายเกยกันเล็กน้อย ห้ามรอยต่อตรงกันเด็ดขาด",
+            "3. ผิวสัมผัส (RMS): ผิวฝั่งเคลื่อนที่ (Dynamic, 16 RMS) ต้องเรียบกว่าฝั่งอยู่นิ่ง (Static, 32 RMS)",
+            "4. ลำดับ + Shim: ใส่ Male ก่อน Female ปิดท้าย และเสริม Shim ป้องกัน Gland บี้ปากซีลแตกเสียหาย"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(3.6)  # Checkpoint 42.0s falls here
+
+        # ----------------------------------------------------------------------
+        # BEAT 45.0–49.5: Review Question Card
+        # ----------------------------------------------------------------------
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "หากช่างติดตั้งแหวน Compression Packing โดยหันปากซีล (Lips)\nออกจากทิศทางแรงดันของไหล จะเกิดผลเสียอย่างไรต่อระบบ?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: แรงดันของไหลจะดันให้ปากซีลหุบเข้า เกิดช่องว่างและของไหลจะรั่วไหลทันที\nตรงข้ามกับการหันปากสู้แรงดัน ที่แรงดันจะช่วยถ่างปากซีลให้แนบสนิทขึ้น)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.5)  # Checkpoint 47.0s falls here
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
+
+
+
