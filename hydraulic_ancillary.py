@@ -2039,4 +2039,350 @@ class H6_04_SteelPipes(SafeScene):
         self.fade_out_all(run_time=0.8)
 
 
+# ==============================================================================
+# SCENE 5: H6_05_PipeThreads (hydraulic06.pdf page 8)
+# Duration: ~45.5 seconds | 2D SafeScene
+# Pedagogical Focus: Tapered Pipe Threads (NPT vs NPTF) = Self-Sealing Mechanism
+# AHA Moment: Metal-to-metal interference provides the actual seal, not PTFE tape;
+# Dry-Seal (NPTF) eliminates spiral clearance by root-and-crest engagement
+# ==============================================================================
+class H6_05_PipeThreads(SafeScene):
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–4.8: Title, Page Reference & Hook Question
+        # ----------------------------------------------------------------------
+        title_m = title("เกลียวท่อ — ซีลในตัว")
+        ref_m = page_ref("hydraulic06 น.8")
+        self.play(FadeIn(title_m, shift=UP * 0.4), FadeIn(ref_m), run_time=1.5)
+        self.wait(0.5)
+
+        hook_q = caption_top("เกลียวแค่ยึดไว้ ต้องมีปะเก็นถึงจะกันรั่วได้ไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=1.0)
+        self.wait(1.2)
+        self.play(FadeOut(hook_q), run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 4.8–9.8: Tapered Pipe & Fitting (Male vs Female Taper)
+        # ----------------------------------------------------------------------
+        cap1 = caption_top("เกลียวท่อเป็นเกลียว 'เรียว' (Tapered) — ไม่ใช่เกลียวขนาน")
+        self.play(FadeIn(cap1, shift=UP * 0.4), run_time=0.8)
+
+        # Helper to build male pipe
+        def create_male_pipe():
+            top_pts = [
+                [-5.0, 0.85, 0], [-2.4, 0.85, 0],
+                [-2.4, 1.35, 0],
+                [-2.25, 1.10, 0], [-2.05, 1.32, 0],
+                [-1.90, 1.07, 0], [-1.70, 1.29, 0],
+                [-1.55, 1.04, 0], [-1.35, 1.26, 0],
+                [-1.20, 1.01, 0], [-1.00, 1.23, 0],
+                [-0.85, 0.98, 0], [-0.65, 1.20, 0],
+                [-0.65, 0.85, 0]
+            ]
+            top_wall = Polygon(*top_pts, color=COL_METAL).set_fill(COL_METAL, 0.85).set_stroke(COL_METAL, width=2)
+
+            bot_pts = [[p[0], -p[1], 0] for p in top_pts]
+            bot_wall = Polygon(*bot_pts, color=COL_METAL).set_fill(COL_METAL, 0.85).set_stroke(COL_METAL, width=2)
+            return VGroup(top_wall, bot_wall)
+
+        # Helper to build female fitting
+        def create_female_fitting():
+            top_pts = [
+                [0.5, 1.6, 0], [4.5, 1.6, 0],
+                [4.5, 0.85, 0], [2.3, 0.85, 0],
+                [2.3, 1.03, 0], [2.1, 1.22, 0],
+                [1.9, 1.06, 0], [1.7, 1.25, 0],
+                [1.5, 1.09, 0], [1.3, 1.28, 0],
+                [1.1, 1.12, 0], [0.9, 1.31, 0],
+                [0.7, 1.15, 0], [0.5, 1.37, 0]
+            ]
+            top_block = Polygon(*top_pts, color=COL_GRAY).set_fill("#334155", 0.95).set_stroke(COL_GRAY, width=2)
+
+            bot_pts = [[p[0], -p[1], 0] for p in top_pts]
+            bot_block = Polygon(*bot_pts, color=COL_GRAY).set_fill("#334155", 0.95).set_stroke(COL_GRAY, width=2)
+            return VGroup(top_block, bot_block)
+
+        male_pipe = create_male_pipe()
+        female_fitting = create_female_fitting()
+
+        taper_male_top = DashedLine(start=[-2.5, 1.37, 0], end=[-0.5, 1.18, 0], color=COL_WARN, stroke_width=2.5)
+        taper_fem_top  = DashedLine(start=[0.4, 1.38, 0], end=[2.4, 1.21, 0], color=COL_WARN, stroke_width=2.5)
+        lbl_taper = Text("มุมเรียว 1° 47' (Tapered)", font_size=15, color=COL_WARN).move_to([-1.5, 1.85, 0])
+
+        lbl_male = Text("เกลียวตัวผู้ (ท่อเหล็ก)", font_size=16, color=COL_METAL).move_to([-3.0, -1.8, 0])
+        lbl_fem  = Text("เกลียวตัวเมีย (ข้อต่อ/วาล์ว)", font_size=16, color=COL_GRAY).move_to([2.5, -1.8, 0])
+
+        self.play(
+            FadeIn(male_pipe, shift=RIGHT * 0.3),
+            FadeIn(female_fitting, shift=LEFT * 0.3),
+            FadeIn(lbl_male),
+            FadeIn(lbl_fem),
+            Create(taper_male_top),
+            Create(taper_fem_top),
+            FadeIn(lbl_taper, shift=UP * 0.1),
+            run_time=1.8
+        )
+        self.wait(1.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 9.8–15.0: Threading In (Male moves into Female, Metal-to-Metal)
+        # ----------------------------------------------------------------------
+        cap2 = caption_top("ขันเข้าไป — เนื้อโลหะเบียดอัดกันแน่นขึ้นเรื่อยๆ")
+        self.play(
+            ReplacementTransform(cap1, cap2),
+            FadeOut(taper_male_top),
+            FadeOut(taper_fem_top),
+            FadeOut(lbl_taper),
+            FadeOut(lbl_male),
+            FadeOut(lbl_fem),
+            run_time=0.8
+        )
+
+        # Threading in: male_pipe shifts into female_fitting
+        # Check a: 10.8s vs 12.5s distance visibly changes
+        self.play(
+            male_pipe.animate.shift(RIGHT * 1.5),
+            run_time=3.4,
+            rate_func=linear
+        )
+        self.wait(0.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 15.0–19.8: Zoom into Contact Zone (Interference Sealing)
+        # ----------------------------------------------------------------------
+        cap_zoom = caption_top("เนื้อโลหะถูกบีบอัด (Interference) — ซีลเกิดขึ้นเองโดยไม่ต้องพึ่งปะเก็น")
+        top_assembly = VGroup(male_pipe[0], female_fitting[0])
+        bot_assembly = VGroup(male_pipe[1], female_fitting[1])
+        contact_pt = np.array([0.7, 1.2, 0])
+
+        contact_ellipse = Ellipse(width=1.6, height=0.9, color=COL_WARN).move_to([0.7, 0.4, 0])
+        interf_txt = Text("เนื้อโลหะเบียดอัดกันแน่น (Metal-to-Metal Interference)\nป้องกันน้ำมันไฮดรอลิกรั่วซึมโดยอัตโนมัติ", font_size=16, color=COL_OK).move_to([0.0, -1.8, 0])
+
+        self.play(
+            ReplacementTransform(cap2, cap_zoom),
+            FadeOut(bot_assembly),
+            top_assembly.animate.scale(2.2, about_point=contact_pt).shift(DOWN * 0.8),
+            run_time=1.4
+        )
+        self.play(
+            Create(contact_ellipse),
+            FadeIn(interf_txt, shift=UP * 0.15),
+            run_time=0.8
+        )
+        self.play(Indicate(contact_ellipse, color=COL_WARN), run_time=0.8)
+        self.wait(1.0)
+
+        # Zoom out
+        self.play(
+            FadeOut(contact_ellipse),
+            FadeOut(interf_txt),
+            top_assembly.animate.shift(UP * 0.8).scale(1 / 2.2, about_point=contact_pt),
+            FadeIn(bot_assembly),
+            run_time=0.8
+        )
+        self.play(FadeOut(male_pipe), FadeOut(female_fitting), FadeOut(cap_zoom), run_time=0.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 20.6–25.8: PTFE Tape Role (Helper, Not Primary Seal)
+        # ----------------------------------------------------------------------
+        cap3 = caption_top("เทปพันเกลียว / น้ำยาซีล = ตัวช่วยเสริม ไม่ใช่ตัวซีลหลัก")
+        self.play(FadeIn(cap3, shift=UP * 0.4), run_time=0.8)
+
+        pipe_body_tape = Polygon(
+            [-5.0, 0.75, 0], [-2.0, 0.75, 0], [-2.0, 1.25, 0], [-5.0, 1.25, 0],
+            color=COL_METAL
+        ).set_fill(COL_METAL, 0.85).set_stroke(COL_METAL, width=2)
+        pipe_bot_tape = Polygon(
+            [-5.0, -1.25, 0], [-2.0, -1.25, 0], [-2.0, -0.75, 0], [-5.0, -0.75, 0],
+            color=COL_METAL
+        ).set_fill(COL_METAL, 0.85).set_stroke(COL_METAL, width=2)
+
+        tape_box_top = RoundedRectangle(corner_radius=0.08, width=1.5, height=0.7, color="#FFF59D", fill_color="#FFF9C4").set_fill("#FFF9C4", 0.9).move_to([-2.8, 1.0, 0])
+        tape_box_bot = RoundedRectangle(corner_radius=0.08, width=1.5, height=0.7, color="#FFF59D", fill_color="#FFF9C4").set_fill("#FFF9C4", 0.9).move_to([-2.8, -1.0, 0])
+        tape_lbl = Text("เทป PTFE (เทปพันเกลียว)", font_size=14, color=WHITE).move_to([-2.8, -1.8, 0])
+        tape_demo_grp = VGroup(pipe_body_tape, pipe_bot_tape, tape_box_top, tape_box_bot, tape_lbl)
+
+        tape_card_box = RoundedRectangle(corner_radius=0.15, width=6.6, height=3.4, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([2.6, 0.0, 0])
+        tc_head = Text("หน้าที่จริงของเทปพันเกลียว", font_size=17, color=COL_OK).move_to([2.6, 1.25, 0])
+        tc_l1 = Text("• หน้าที่หลัก: หล่อลื่นเกลียว (Lubricant)\n  ช่วยให้ขันได้ลึกขึ้น ป้องกันเกลียวติดตาย (Galling)", font_size=14, color=WHITE).move_to([2.6, 0.60, 0])
+        tc_l2 = Text("• หน้าที่รอง: ช่วยอุดรอยขูดขีดตามผิวโลหะ", font_size=14, color=COL_FIELD).move_to([2.6, -0.10, 0])
+        tc_l3 = Text("⚠️ ไม่ใช่ตัวรับแรงดันหลัก!\n  ตัวซีลจริงคือเนื้อโลหะที่เบียดอัดกันแน่น", font_size=14, color=COL_WARN).move_to([2.6, -0.85, 0])
+        tape_info_grp = VGroup(tape_card_box, tc_head, tc_l1, tc_l2, tc_l3)
+
+        self.play(
+            FadeIn(tape_demo_grp, shift=RIGHT * 0.2),
+            FadeIn(tape_info_grp, shift=LEFT * 0.2),
+            run_time=0.8
+        )
+        self.wait(2.8)
+
+        self.play(FadeOut(tape_demo_grp), FadeOut(tape_info_grp), FadeOut(cap3), run_time=0.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 25.8–31.8: Standard Pipe Thread (NPT) Cutaway — Flank Contact
+        # ----------------------------------------------------------------------
+        cap4 = caption_top("1. Standard Pipe Thread (NPT) — ด้านข้าง Flank ชนกันก่อน")
+        self.play(FadeIn(cap4, shift=UP * 0.4), run_time=0.8)
+
+        p = 1.3
+        h_tooth = 1.0
+        g_gap = 0.20
+
+        m_pts = [[-2.5, -1.0, 0]]
+        for i in range(3):
+            x_b = -1.95 + i * p
+            m_pts.extend([
+                [x_b, -0.2 + g_gap, 0],
+                [x_b + p * 0.4, -0.2 + h_tooth - g_gap, 0],
+                [x_b + p * 0.6, -0.2 + h_tooth - g_gap, 0],
+                [x_b + p, -0.2 + g_gap, 0]
+            ])
+        m_pts.append([2.5, -1.0, 0])
+        std_male = Polygon(*m_pts, color=COL_METAL).set_fill(COL_METAL, 0.85).set_stroke(COL_METAL, width=2)
+
+        f_pts = [[-2.5, 1.2, 0]]
+        for i in range(3):
+            x_b = -1.95 + i * p
+            f_pts.extend([
+                [x_b, 0.8 - g_gap, 0],
+                [x_b + p * 0.4, 0.8 - h_tooth + g_gap, 0],
+                [x_b + p * 0.6, 0.8 - h_tooth + g_gap, 0],
+                [x_b + p, 0.8 - g_gap, 0]
+            ])
+        f_pts.append([2.5, 1.2, 0])
+        std_female = Polygon(*f_pts, color=COL_GRAY).set_fill("#334155", 0.9).set_stroke(COL_GRAY, width=2)
+
+        gap_polys = []
+        for i in range(3):
+            x_b = -1.95 + i * p
+            g_top = Polygon(
+                [x_b + p * 0.38, -0.2 + h_tooth - g_gap, 0],
+                [x_b + p * 0.62, -0.2 + h_tooth - g_gap, 0],
+                [x_b + p * 0.65, 0.8 - g_gap, 0],
+                [x_b + p * 0.35, 0.8 - g_gap, 0],
+                color=COL_WARN
+            ).set_fill(COL_WARN, 0.95).set_stroke(COL_WARN, width=1)
+            g_bot = Polygon(
+                [x_b - 0.05, -0.2 + g_gap, 0],
+                [x_b + 0.05, -0.2 + g_gap, 0],
+                [x_b + p * 0.42, 0.8 - h_tooth + g_gap, 0],
+                [x_b - p * 0.42, 0.8 - h_tooth + g_gap, 0],
+                color=COL_WARN
+            ).set_fill(COL_WARN, 0.95).set_stroke(COL_WARN, width=1)
+            gap_polys.extend([g_top, g_bot])
+
+        std_gaps = VGroup(*gap_polys)
+
+        flank_lines = []
+        for i in range(3):
+            x_b = -1.95 + i * p
+            flank_lines.append(Line([x_b + p * 0.1, 0.0, 0], [x_b + p * 0.35, 0.5, 0], color=COL_OK, stroke_width=4))
+        flanks_grp = VGroup(*flank_lines)
+
+        lbl_flank = Text("หน้าข้าง (Flank) สัมผัสกันก่อน", font_size=15, color=COL_OK).move_to([-3.4, 1.8, 0])
+        arr_flank = Arrow(start=[-2.2, 1.8, 0], end=[-1.5, 0.35, 0], color=COL_OK, buff=0.1, stroke_width=2)
+
+        lbl_gap = Text("มีช่องว่างเกลียว (Spiral Clearance)\nของไหลอาจรั่ววนออกตามร่องได้", font_size=14, color=COL_WARN).move_to([3.4, 1.8, 0])
+        arr_gap = Arrow(start=[2.2, 1.8, 0], end=[0.8, 0.7, 0], color=COL_WARN, buff=0.1, stroke_width=2)
+
+        std_note = Text("→ เกลียว NPT ทั่วไปจึงต้องพึ่งเทป PTFE หรือน้ำยาซีลช่วยอุดร่องวนนี้", font_size=15, color=WHITE).move_to([0.0, -1.8, 0])
+
+        std_scene_grp = VGroup(std_male, std_female, std_gaps, flanks_grp, lbl_flank, arr_flank, lbl_gap, arr_gap, std_note)
+
+        self.play(FadeIn(std_scene_grp, shift=UP * 0.3), run_time=1.8)
+        self.play(Indicate(flanks_grp, color=COL_OK), run_time=0.6)
+        self.play(Indicate(std_gaps, color=COL_WARN), run_time=0.8)
+        self.wait(1.4)
+
+        self.play(FadeOut(std_scene_grp), FadeOut(cap4), run_time=0.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 31.8–37.8: Dry-Seal Thread (NPTF) Cutaway — Root & Crest Contact
+        # ----------------------------------------------------------------------
+        cap5 = caption_top("2. Dry-Seal Thread (NPTF) — ยอดและโคนฟันชนกันก่อน ปิดช่องว่างหมด")
+        self.play(FadeIn(cap5, shift=UP * 0.4), run_time=0.8)
+
+        m_pts_ds = [[-2.5, -1.0, 0]]
+        for i in range(3):
+            x_b = -1.95 + i * p
+            m_pts_ds.extend([
+                [x_b, 0.0, 0],
+                [x_b + p * 0.42, 0.8, 0],
+                [x_b + p * 0.58, 0.8, 0],
+                [x_b + p, 0.0, 0]
+            ])
+        m_pts_ds.append([2.5, -1.0, 0])
+        ds_male = Polygon(*m_pts_ds, color=COL_METAL).set_fill(COL_METAL, 0.85).set_stroke(COL_METAL, width=2)
+
+        f_pts_ds = [[-2.5, 1.2, 0]]
+        for i in range(3):
+            x_b = -1.95 + i * p
+            f_pts_ds.extend([
+                [x_b, 0.8, 0],
+                [x_b + p * 0.42, 0.0, 0],
+                [x_b + p * 0.58, 0.0, 0],
+                [x_b + p, 0.8, 0]
+            ])
+        f_pts_ds.append([2.5, 1.2, 0])
+        ds_female = Polygon(*f_pts_ds, color=COL_GRAY).set_fill("#334155", 0.9).set_stroke(COL_GRAY, width=2)
+
+        crush_lines = []
+        for i in range(3):
+            x_b = -1.95 + i * p
+            crush_lines.append(Line([x_b + p * 0.42, 0.8, 0], [x_b + p * 0.58, 0.8, 0], color=COL_OK, stroke_width=6))
+            crush_lines.append(Line([x_b + p * 0.92, 0.0, 0], [x_b + p * 1.08, 0.0, 0], color=COL_OK, stroke_width=6))
+        crush_grp = VGroup(*crush_lines)
+
+        lbl_crush = Text("ยอดและโคนฟัน (Roots & Crests) บดอัดชนกันสนิท\nกำจัด Spiral Clearance จนหมดสิ้น!", font_size=15, color=COL_OK).move_to([0.0, 1.85, 0])
+
+        ds_note = Text("→ เนื้อโลหะซีลกันสนิทโดยตรง (Metal-to-Metal Crush)\nไม่ต้องใช้เทปพันเกลียวเลย! เหมาะกับงานที่ไม่ต้องการให้มีเศษเทปหลุดปนเปื้อน", font_size=14, color=COL_WARN).move_to([0.0, -1.8, 0])
+
+        ds_scene_grp = VGroup(ds_male, ds_female, crush_grp, lbl_crush, ds_note)
+
+        self.play(FadeIn(ds_scene_grp, shift=UP * 0.3), run_time=1.8)
+        self.play(Indicate(crush_grp, color=COL_OK), run_time=0.8)
+        self.wait(1.8)
+
+        self.play(FadeOut(ds_scene_grp), FadeOut(cap5), run_time=0.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 37.8–40.5: Summary Card
+        # ----------------------------------------------------------------------
+        sum_box = RoundedRectangle(corner_radius=0.15, width=11.4, height=3.6,
+                                   color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.25, 0.0])
+        sum_title = Text("สรุปเกลียวท่อไฮดรอลิก (hydraulic06 น.8)", font_size=19, color=COL_OK).move_to([0.0, 1.15, 0.0])
+        s1 = Text("1. เกลียวท่อ (NPT) เป็น 'เกลียวเรียว' (Tapered) มุม 1° 47' ขันแน่นแล้วเกิด Interference", font_size=15, color=WHITE).move_to([0.0, 0.60, 0.0])
+        s2 = Text("2. ซีลด้วยเนื้อโลหะเบียดอัดกันเอง ไม่ต้องพึ่งปะเก็น (เทปพันเกลียวเป็นเพียงตัวช่วยเสริม)", font_size=15, color=WHITE).move_to([0.0, 0.10, 0.0])
+        s3 = Text("3. เกลียวธรรมดา (NPT): ด้านข้าง (Flanks) ชนก่อน → เกิดช่องว่างวน (Spiral Clearance) ที่โคน/ยอด", font_size=15, color=COL_WARN).move_to([0.0, -0.40, 0.0])
+        s4 = Text("4. เกลียว Dry-Seal (NPTF): ยอดและโคนฟันชนกันก่อน → บดอัดแนบสนิท ไม่ต้องใช้เทปเลย", font_size=15, color=COL_OK).move_to([0.0, -0.90, 0.0])
+        s5 = Text("(* อ้างอิงสไลด์หน้า 8: Standard vs Dry-Seal Tapered Pipe Threads)", font_size=13, color=COL_GRAY).move_to([0.0, -1.35, 0.0])
+
+        sum_grp = VGroup(sum_box, sum_title, s1, s2, s3, s4, s5)
+
+        self.play(FadeIn(sum_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(1.9)
+        self.play(FadeOut(sum_grp), run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 40.5–45.5: Review Question Card & Outro
+        # ----------------------------------------------------------------------
+        q_box = RoundedRectangle(corner_radius=0.15, width=11.0, height=2.6,
+                                 color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.35, 0.0])
+        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0.0, 0.50, 0.0])
+        q_body = Text("ทำไม Dry-Seal Thread (NPTF) จึงไม่ต้องพันเทป PTFE เลย\nในขณะที่ Standard Pipe Thread (NPT) ยังจำเป็นต้องพันเทปอยู่เสมอ?",
+                      font_size=15, color=WHITE).move_to([0.0, -0.05, 0.0])
+        q_ans = Text("(คำตอบ: เพราะ Dry-Seal มียอดและโคนฟันบดอัดชนกันสนิท กำจัด Spiral Clearance จนหมด\nส่วน Standard จะเหลือช่องว่างวนที่ยอดและโคนฟัน จึงต้องใช้เทปช่วยอุด)",
+                     font_size=13, color=COL_GRAY).move_to([0.0, -0.75, 0.0])
+
+        q_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.8)
+
+        self.play(FadeOut(q_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+
+
+
 
