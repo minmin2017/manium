@@ -4636,6 +4636,403 @@ class H6_11_HoseSizeFittings(SafeScene):
         self.wait(0.5)
 
 
+# ==============================================================================
+# SCENE 12: H6_12_HoseInstallation (hydraulic06.pdf page 15)
+# Duration: ~62.2 seconds | 2D SafeScene
+# Pedagogical Focus: 6 Core Hose Installation Rules (Right vs Wrong)
+# AHA Moment:
+#   1. Routing: Use 90° elbow to eliminate meandering long runs & 4 kinks.
+#   2. Heat: Avoid heat source (>100°C); use standoff clamps and thermal insulation sleeve.
+#   3. Bend Radius: Keep R >= R_min; tight bends cause outer wire rupture and flow pinch.
+#   4. Twisted Hose: 7" twist on large hose reduces pressure capability by up to 90%!
+#   5. Movement Plane: Flexing must occur in same plane as bend to prevent neck twist.
+#   6. Slack: Operating pressure changes length by +2% to -6%; adequate slack (5-10%) mandatory.
+# ==============================================================================
+
+def _h6_12_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_12_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_12_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_12_badge(text, color):
+    lbl = Text(text, font_size=11.5, color=color)
+    bg = RoundedRectangle(width=lbl.width + 0.45, height=0.38, corner_radius=0.08, color=color, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_12_banner(text, color):
+    bg = RoundedRectangle(width=11.8, height=0.55, corner_radius=0.1, color=color, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -1.85, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class H6_12_HoseInstallation(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        """Fade out all scene mobjects except persistent header."""
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–2.0: Persistent Title & Page Reference
+        # ----------------------------------------------------------------------
+        self.title_m = _h6_12_title("ติดตั้งสายไฮดรอลิก: ถูก vs ผิด")
+        self.ref_m = _h6_12_page_ref("hydraulic06 น.15")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)  # Checkpoint 1.5s
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–5.0: Hook Question
+        # ----------------------------------------------------------------------
+        hook_q = _h6_12_caption_top("เลือกสายถูกสเปคแล้ว ติดตั้งยังไงก็ได้เหมือนกันจริงไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.5)  # Checkpoint 3.6s
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 5.0–12.5: 1. Routing & Interference (เดินสายให้พอดี ไม่อ้อมเกะกะ)
+        # ----------------------------------------------------------------------
+        cap1 = _h6_12_caption_top("1. เดินสายให้พอดี ไม่อ้อมเกะกะ (Correct Routing)")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Obstacle
+        obs_box = RoundedRectangle(width=1.6, height=2.2, corner_radius=0.1, color=COL_GRAY, fill_color="#334155", fill_opacity=0.9).move_to([0.0, 0.1, 0.0])
+        obs_txt = Text("โครงเครื่องจักร\n(Obstacle)", font_size=11, color=COL_GRAY).move_to(obs_box.get_center())
+        obstacle = VGroup(obs_box, obs_txt)
+
+        port_a = Dot([-3.2, -0.8, 0.0], color=COL_METAL, radius=0.12)
+        lbl_a = Text("Port A", font_size=10, color=COL_METAL).next_to(port_a, DOWN, buff=0.08)
+        port_b = Dot([3.2, 0.9, 0.0], color=COL_METAL, radius=0.12)
+        lbl_b = Text("Port B", font_size=10, color=COL_METAL).next_to(port_b, UP, buff=0.08)
+        ports_grp = VGroup(obstacle, port_a, lbl_a, port_b, lbl_b)
+
+        # Wrong 1: Meandering hose with 4 sharp kinks
+        pts_w1 = [
+            [-3.2, -0.8, 0], [-1.8, -0.8, 0], [-1.8, -1.25, 0],
+            [1.8, -1.25, 0], [1.8, 0.9, 0], [3.2, 0.9, 0]
+        ]
+        hose_w1_out = VMobject(stroke_color="#334155", stroke_width=10).set_points_as_corners(pts_w1)
+        hose_w1_in  = VMobject(stroke_color=COL_WARN, stroke_width=6).set_points_as_corners(pts_w1)
+        badge_w1 = _h6_12_badge("✗ ผิด (อ้อมยาว 4 หักมุม)", COL_WARN).move_to([-1.8, 1.25, 0.0])
+        call_w1 = Text("สายยาวเกะกะ + หักมุม 4 จุด → สั่นสะบัด/เสี่ยงถูกเกี่ยวขาด", font_size=11.5, color=COL_WARN).move_to([0.0, -1.45, 0.0])
+        wrong1_grp = VGroup(ports_grp, hose_w1_out, hose_w1_in, badge_w1, call_w1)
+
+        # Right 1: 90° elbow fitting, short direct clean L-run
+        ports_grp_r = ports_grp.copy()
+        pts_r1 = [
+            [-3.2, -0.8, 0], [-3.2, 0.9, 0], [3.2, 0.9, 0]
+        ]
+        hose_r1_out = VMobject(stroke_color="#334155", stroke_width=10).set_points_as_corners(pts_r1)
+        hose_r1_in  = VMobject(stroke_color=COL_OK, stroke_width=6).set_points_as_corners(pts_r1)
+        elbow_fit = Square(side_length=0.32, color=COL_METAL, fill_color="#475569", fill_opacity=1.0).move_to([-3.2, 0.9, 0.0])
+        badge_r1 = _h6_12_badge("✓ ถูก (ใช้ข้อต่องอ 90°)", COL_OK).move_to([-1.8, 1.25, 0.0])
+        call_r1 = Text("ใช้ข้อต่องอ 90° → สายสั้นกะทัดรัด ไม่เกะกะ ปลอดภัย", font_size=11.5, color=COL_OK).move_to([0.0, -1.45, 0.0])
+        right1_grp = VGroup(ports_grp_r, hose_r1_out, hose_r1_in, elbow_fit, badge_r1, call_r1)
+
+        banner1 = _h6_12_banner("ใช้ข้อต่องอลดความยาวส่วนเกิน ลดเสียดสี/กีดขวาง ซ่อมง่ายขึ้น", COL_OK)
+
+        self.play(FadeIn(wrong1_grp, shift=RIGHT * 0.2), FadeIn(banner1), run_time=0.8)
+        self.wait(1.2)  # Checkpoint 9.0s falls right here!
+        self.play(FadeOut(wrong1_grp), run_time=0.4)
+        self.play(FadeIn(right1_grp), run_time=0.6)
+        self.wait(2.5)
+
+        self.clear_stage(run_time=0.5)
+        self.wait(0.1)
+
+        # ----------------------------------------------------------------------
+        # BEAT 13.1–20.0: 2. Heat Proximity (หลีกเลี่ยงผิวร้อน)
+        # ----------------------------------------------------------------------
+        cap2 = _h6_12_caption_top("2. หลีกเลี่ยงผิวร้อน (Avoid Heat Sources)")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Hot exhaust pipe on left side (x = -2.4)
+        hot_pipe_body = RoundedRectangle(width=1.6, height=2.4, corner_radius=0.15, color="#F97316", fill_color="#EA580C", fill_opacity=0.85).move_to([-2.4, -0.15, 0.0])
+        hot_pipe_txt  = Text("ท่อไอเสีย / ผิวร้อน\n(Heat Source > 100°C)", font_size=10.5, color="#FEF08A").next_to(hot_pipe_body, UP, buff=0.15)
+        hot_pipe_inner = Text("120°C", font_size=13, color="#FEF08A").move_to([-2.4, -0.15, 0.0])
+        hot_pipe_grp = VGroup(hot_pipe_body, hot_pipe_txt, hot_pipe_inner)
+
+        # Wrong 2: Hose directly touching the hot pipe (contact gap = 0)
+        hose_w2_out = Line([-1.55, -1.3, 0], [-1.55, 1.3, 0], stroke_color="#334155", stroke_width=10)
+        hose_w2_in  = Line([-1.55, -1.3, 0], [-1.55, 1.3, 0], stroke_color=COL_WARN, stroke_width=6)
+        contact_pt = Ellipse(width=0.25, height=1.2, color=RED, fill_color=RED, fill_opacity=0.45).move_to([-1.60, -0.15, 0.0])
+        badge_w2 = _h6_12_badge("✗ ผิด (สัมผัสผิวร้อน)", COL_WARN).move_to([1.8, 1.15, 0.0])
+        call_w2 = Text("⚠️ ระยะห่าง = 0 mm (แนบผิวร้อน) → ยางไหม้กรอบแตกลายงา ไส้แตก!", font_size=11.5, color=COL_WARN).move_to([1.8, 0.45, 0.0])
+        wrong2_grp = VGroup(hot_pipe_grp, hose_w2_out, hose_w2_in, contact_pt, badge_w2, call_w2)
+
+        # Right 2: Clamped away (wide air gap) + Thermal insulation sleeve
+        hot_pipe_grp_r = hot_pipe_grp.copy()
+        hose_r2_out = Line([0.8, -1.3, 0], [0.8, 1.3, 0], stroke_color="#334155", stroke_width=10)
+        hose_r2_in  = Line([0.8, -1.3, 0], [0.8, 1.3, 0], stroke_color=COL_OK, stroke_width=6)
+        clamp_bracket = Rectangle(width=0.45, height=0.25, color=COL_GRAY, fill_color="#475569", fill_opacity=1.0).move_to([0.8, -0.8, 0.0])
+        sleeve = RoundedRectangle(width=0.45, height=1.7, corner_radius=0.08, color="#E2E8F0", fill_color="#94A3B8", fill_opacity=0.75).move_to([0.8, 0.1, 0.0])
+        sleeve_lbl = Text("ปลอกฉนวนกันความร้อน\n(Insulation Sleeve)", font_size=10, color=WHITE).move_to([2.7, 0.1, 0.0])
+        gap_dim = DoubleArrow([-1.60, -0.2, 0], [0.55, -0.2, 0], color=COL_OK, stroke_width=2)
+        gap_lbl = Text("ระยะปลอดภัย > 50 mm", font_size=10, color=COL_OK).move_to([-0.5, 0.05, 0.0])
+        badge_r2 = _h6_12_badge("✓ ถูก (เว้นระยะ + หุ้มฉนวน)", COL_OK).move_to([2.2, 1.15, 0.0])
+        call_r2 = Text("✓ ดันสายห่างด้วยแคลมป์ + สวมปลอกฉนวนกันความร้อน", font_size=11.5, color=COL_OK).move_to([1.8, -1.35, 0.0])
+        right2_grp = VGroup(hot_pipe_grp_r, hose_r2_out, hose_r2_in, clamp_bracket, sleeve, sleeve_lbl, gap_dim, gap_lbl, badge_r2, call_r2)
+
+        banner2 = _h6_12_banner("ห้ามให้สายชิดผิวร้อน — ใช้แคลมป์ดันออกหรือหุ้มฉนวนกันความร้อนคั่นกลาง", COL_OK)
+
+        self.play(FadeIn(wrong2_grp, shift=UP * 0.2), FadeIn(banner2), run_time=0.8)
+        self.wait(1.2)  # Checkpoint 17.0s falls right here!
+        self.play(FadeOut(wrong2_grp), run_time=0.4)
+        self.play(FadeIn(right2_grp), run_time=0.6)
+        self.wait(2.2)
+
+        self.clear_stage(run_time=0.5)
+        self.wait(0.1)
+
+        # ----------------------------------------------------------------------
+        # BEAT 20.6–29.0: 3. Bend Radius U-Loop (เผื่อรัศมีดัดโค้งให้พอ - เชื่อม H6_11)
+        # ----------------------------------------------------------------------
+        cap3 = _h6_12_caption_top("3. เผื่อรัศมีดัดโค้งให้พอ (ต่อจาก H6_11) — รัศมีแคบ vs กว้าง")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        # Left Wrong U-Loop
+        lw_arc_out = Arc(radius=0.40, start_angle=0, angle=PI, arc_center=[-3.2, 0.0, 0], stroke_color="#334155", stroke_width=10)
+        lw_arc_in  = Arc(radius=0.40, start_angle=0, angle=PI, arc_center=[-3.2, 0.0, 0], stroke_color=COL_WARN, stroke_width=6)
+        lw_stem_l = Line([-3.60, 0.0, 0], [-3.60, -1.15, 0], stroke_color="#334155", stroke_width=10)
+        lw_stem_l_in = Line([-3.60, 0.0, 0], [-3.60, -1.15, 0], stroke_color=COL_WARN, stroke_width=6)
+        lw_stem_r = Line([-2.80, 0.0, 0], [-2.80, -1.15, 0], stroke_color="#334155", stroke_width=10)
+        lw_stem_r_in = Line([-2.80, 0.0, 0], [-2.80, -1.15, 0], stroke_color=COL_WARN, stroke_width=6)
+        crimp_w1 = Rectangle(width=0.36, height=0.22, color=COL_GRAY, fill_color="#475569", fill_opacity=1.0).move_to([-3.60, -1.15, 0])
+        crimp_w2 = Rectangle(width=0.36, height=0.22, color=COL_GRAY, fill_color="#475569", fill_opacity=1.0).move_to([-2.80, -1.15, 0])
+        kink_mark = Text("⚡ จุดพับหักมุม", font_size=10, color=COL_WARN).next_to(lw_arc_out, UP, buff=0.08)
+        r_dim_w = Text("R < R_min (แคบเกิน!)", font_size=10.5, color=COL_WARN).next_to(kink_mark, UP, buff=0.08)
+        badge_w3 = _h6_12_badge("✗ ผิด (รัศมีแคบ)", COL_WARN).next_to(r_dim_w, UP, buff=0.10)
+        call_w3 = Text("ลวดล้าหัก + รูในตีบแคบ", font_size=11, color=COL_WARN).move_to([-3.2, -1.35, 0.0])
+        loop_wrong = VGroup(
+            lw_arc_out, lw_arc_in, lw_stem_l, lw_stem_l_in, lw_stem_r, lw_stem_r_in,
+            crimp_w1, crimp_w2, kink_mark, r_dim_w, badge_w3, call_w3
+        )
+
+        # Right Correct U-Loop
+        lr_arc_out = Arc(radius=1.35, start_angle=0, angle=PI, arc_center=[3.2, -0.20, 0], stroke_color="#334155", stroke_width=10)
+        lr_arc_in  = Arc(radius=1.35, start_angle=0, angle=PI, arc_center=[3.2, -0.20, 0], stroke_color=COL_OK, stroke_width=6)
+        lr_stem_l = Line([1.85, -0.20, 0], [1.85, -1.15, 0], stroke_color="#334155", stroke_width=10)
+        lr_stem_l_in = Line([1.85, -0.20, 0], [1.85, -1.15, 0], stroke_color=COL_OK, stroke_width=6)
+        lr_stem_r = Line([4.55, -0.20, 0], [4.55, -1.15, 0], stroke_color="#334155", stroke_width=10)
+        lr_stem_r_in = Line([4.55, -0.20, 0], [4.55, -1.15, 0], stroke_color=COL_OK, stroke_width=6)
+        crimp_r1 = Rectangle(width=0.36, height=0.22, color=COL_GRAY, fill_color="#475569", fill_opacity=1.0).move_to([1.85, -1.15, 0])
+        crimp_r2 = Rectangle(width=0.36, height=0.22, color=COL_GRAY, fill_color="#475569", fill_opacity=1.0).move_to([4.55, -1.15, 0])
+        r_dim_r = Text("R ≥ R_min (กว้าง ปลอดภัย)", font_size=11, color=COL_OK).move_to([3.2, 0.20, 0])
+        badge_r3 = _h6_12_badge("✓ ถูก (รัศมีกว้างพอ)", COL_OK).move_to([3.2, 1.40, 0.0])
+        call_r3 = Text("ของไหลสะดวก ลวดไม่ล้า", font_size=11, color=COL_OK).move_to([3.2, -1.35, 0.0])
+        loop_right = VGroup(
+            lr_arc_out, lr_arc_in, lr_stem_l, lr_stem_l_in, lr_stem_r, lr_stem_r_in,
+            crimp_r1, crimp_r2, r_dim_r, badge_r3, call_r3
+        )
+
+        banner3 = _h6_12_banner("รัศมีแคบเกินไป = เสียดทานของไหลเพิ่ม + เสี่ยงชั้นเสริมแรงล้า (ตัวเลขขั้นต่ำดูได้ที่ H6_11)", COL_WARN)
+
+        self.play(FadeIn(VGroup(loop_wrong, loop_right), shift=UP * 0.25), FadeIn(banner3), run_time=1.0)
+        self.play(Indicate(loop_wrong, color=COL_WARN, scale_factor=1.04), run_time=0.8)
+        self.wait(5.0)  # Checkpoint 25.0s falls right here!
+
+        self.clear_stage(run_time=0.5)
+        self.wait(0.1)
+
+        # ----------------------------------------------------------------------
+        # BEAT 29.6–38.5: 4. Twisted Hose (ห้ามติดตั้งแบบสายบิด) — HIGHEST RISK BEAT
+        # ----------------------------------------------------------------------
+        cap4 = _h6_12_caption_top("4. ห้ามติดตั้งแบบสายบิด (Do Not Install in Twisted Position)")
+        self.play(FadeIn(cap4, shift=UP * 0.35), run_time=0.5)
+
+        # Common hose body & fittings
+        hose_body_bg = Rectangle(width=7.2, height=0.62, color="#334155", fill_color="#1E293B", fill_opacity=0.98).move_to([0.0, 0.15, 0.0])
+        crimp_nut_l = Rectangle(width=0.45, height=0.75, color=COL_METAL, fill_color="#475569", fill_opacity=1.0).move_to([-3.8, 0.15, 0.0])
+        crimp_nut_r = Rectangle(width=0.45, height=0.75, color=COL_METAL, fill_color="#475569", fill_opacity=1.0).move_to([3.8, 0.15, 0.0])
+        nut_label_l = Text("ฟิตติ้ง A", font_size=10, color=COL_METAL).next_to(crimp_nut_l, DOWN, buff=0.1)
+        nut_label_r = Text("ฟิตติ้ง B", font_size=10, color=COL_METAL).next_to(crimp_nut_r, DOWN, buff=0.1)
+        hose_base_grp = VGroup(hose_body_bg, crimp_nut_l, crimp_nut_r, nut_label_l, nut_label_r)
+
+        # Right: Straight longitudinal layline perfectly parallel
+        layline_straight = Line([-3.5, 0.05, 0], [3.5, 0.05, 0], color=COL_OK, stroke_width=4)
+        layline_text = Text("━ ━ ━ SAE 100R2AT 3/4\" WP 3100 PSI (Layline ขนานตรง) ━ ━ ━", font_size=10.5, color=COL_OK).move_to([0.0, 0.25, 0.0])
+        badge_r4 = _h6_12_badge("✓ ถูก (สายตรง ลายขนาน)", COL_OK).move_to([0.0, 1.15, 0.0])
+        call_r4 = Text("เส้นพิมพ์บอกสเปก (Layline) ตรงขนานแนวแกน → ชั้นลวดรับแรงดันได้ 100%", font_size=12, color=COL_OK).move_to([0.0, -0.65, 0.0])
+        straight_hose_grp = VGroup(hose_base_grp, layline_straight, layline_text, badge_r4, call_r4)
+
+        # Wrong: Helical spiral stripes wrapping around the hose (≥2 full turns visible!)
+        hose_base_grp_w = hose_base_grp.copy()
+        sp_f1 = Line([-3.5, 0.44, 0], [-1.8, -0.14, 0], color=COL_WARN, stroke_width=5)
+        sp_b1 = DashedLine([-1.8, -0.14, 0], [-1.4, 0.44, 0], color="#F87171", stroke_width=3)
+        sp_f2 = Line([-1.4, 0.44, 0], [0.3, -0.14, 0], color=COL_WARN, stroke_width=5)
+        sp_b2 = DashedLine([0.3, -0.14, 0], [0.7, 0.44, 0], color="#F87171", stroke_width=3)
+        sp_f3 = Line([0.7, 0.44, 0], [2.4, -0.14, 0], color=COL_WARN, stroke_width=5)
+        sp_b3 = DashedLine([2.4, -0.14, 0], [2.8, 0.44, 0], color="#F87171", stroke_width=3)
+        sp_f4 = Line([2.8, 0.44, 0], [3.5, 0.15, 0], color=COL_WARN, stroke_width=5)
+        spiral_stripes = VGroup(sp_f1, sp_b1, sp_f2, sp_b2, sp_f3, sp_b3, sp_f4)
+
+        torque_arr = CurvedArrow([3.8, -0.3, 0], [3.8, 0.6, 0], radius=0.45, color=RED, stroke_width=3)
+        torque_lbl = Text("แรงบิดจากการขัน!", font_size=10, color=RED).next_to(torque_arr, RIGHT, buff=0.1)
+        badge_w4 = _h6_12_badge("✗ ผิด (สายบิดเป็นเกลียว)", COL_WARN).move_to([0.0, 1.15, 0.0])
+        call_w4 = Text("⚠️ บิดสายแค่ 7 นิ้ว (7″) บนสายใหญ่ → ความสามารถทนแรงดันลดลงถึง 90%!", font_size=12.5, color=COL_WARN).move_to([0.0, -0.65, 0.0])
+        call_w4_sub = Text("(โครงสร้างลวดถักคลายตัว + ข้อต่อพร้อมคลายหลุดเมื่อเจอแรงดันกระชาก)", font_size=11, color=COL_GRAY).move_to([0.0, -1.05, 0.0])
+        twisted_hose_grp = VGroup(hose_base_grp_w, spiral_stripes, torque_arr, torque_lbl, badge_w4, call_w4, call_w4_sub)
+
+        banner4 = _h6_12_banner("บิดสายแค่ 7 นิ้ว บนสายไซส์ใหญ่ ก็ลดแรงดันที่ทนได้ถึง 90%! ข้อต่อยังคลายง่ายขึ้นตอนแรงดันกระชากด้วย", COL_WARN)
+
+        self.play(FadeIn(straight_hose_grp, shift=UP * 0.2), FadeIn(banner4), run_time=0.8)
+        self.wait(1.0)
+        self.play(FadeOut(straight_hose_grp), run_time=0.4)
+        self.play(FadeIn(twisted_hose_grp), run_time=0.6)
+        self.play(Indicate(spiral_stripes, color=RED, scale_factor=1.04), run_time=0.8)
+        self.wait(4.0)  # Checkpoint 34.0s falls right here!
+
+        self.clear_stage(run_time=0.5)
+        self.wait(0.1)
+
+        # ----------------------------------------------------------------------
+        # BEAT 39.1–46.5: 5. Movement Plane (ถ้าสายต้องขยับ ให้ขยับในระนาบเดียว)
+        # ----------------------------------------------------------------------
+        cap5 = _h6_12_caption_top("5. ถ้าสายต้องขยับ ให้ขยับในระนาบเดียว (Flexing in One Plane)")
+        self.play(FadeIn(cap5, shift=UP * 0.35), run_time=0.5)
+
+        base_manifold = Rectangle(width=0.9, height=0.4, color=COL_METAL, fill_color="#475569", fill_opacity=1.0).move_to([-0.5, -1.05, 0.0])
+        base_lbl = Text("จุดยึดฐาน", font_size=10, color=COL_METAL).next_to(base_manifold, LEFT, buff=0.10)
+        actuator_block = Rectangle(width=0.9, height=0.4, color=COL_METAL, fill_color="#475569", fill_opacity=1.0).move_to([-0.5, 0.85, 0.0])
+        act_lbl = Text("ชิ้นส่วนเคลื่อนที่", font_size=10, color=COL_METAL).next_to(actuator_block, LEFT, buff=0.10)
+        flex_mech = VGroup(base_manifold, base_lbl, actuator_block, act_lbl)
+
+        # Right: Flex in single 2D plane with curve
+        hose_r5_out = Arc(radius=0.95, start_angle=-PI/2, angle=PI, arc_center=[-0.5, -0.10, 0], stroke_color="#334155", stroke_width=10)
+        hose_r5_in  = Arc(radius=0.95, start_angle=-PI/2, angle=PI, arc_center=[-0.5, -0.10, 0], stroke_color=COL_OK, stroke_width=6)
+        arrow_r5 = DoubleArrow([0.8, 0.85, 0], [0.8, -0.10, 0], color=COL_OK, stroke_width=3.5, tip_length=0.16)
+        arrow_r5_lbl = Text("ขยับขึ้น-ลงในระนาบเดียวกับโค้ง", font_size=11, color=COL_OK).next_to(arrow_r5, RIGHT, buff=0.15)
+        badge_r5 = _h6_12_badge("✓ ถูก (ระนาบเดียวกับความโค้ง)", COL_OK).move_to([0.0, 1.35, 0.0])
+        call_r5 = Text("การเคลื่อนที่อยู่ในระนาบเดียวกับส่วนโค้ง → สายไม่งัด ไม่เกิดแรงบิดลวด", font_size=11.5, color=COL_OK).move_to([0.0, -1.38, 0.0])
+        right5_grp = VGroup(flex_mech, hose_r5_out, hose_r5_in, arrow_r5, arrow_r5_lbl, badge_r5, call_r5)
+
+        # Wrong: Out-of-plane twist motion
+        flex_mech_w = flex_mech.copy()
+        pts_w5 = [[-0.5, -1.05, 0], [0.6, -0.65, 0], [0.9, 0.15, 0], [-0.5, 0.85, 0]]
+        hose_w5_out = VMobject(stroke_color="#334155", stroke_width=10).set_points_as_corners(pts_w5)
+        hose_w5_in  = VMobject(stroke_color=COL_WARN, stroke_width=6).set_points_as_corners(pts_w5)
+        arrow_w5 = Arrow([0.5, 0.2, 0], [1.9, 0.85, 0], color=COL_WARN, stroke_width=3.5, tip_length=0.16)
+        arrow_w5_lbl = Text("ขยับเฉียงตัดขวางระนาบโค้ง!", font_size=11, color=COL_WARN).next_to(arrow_w5, UP, buff=0.1)
+        badge_w5 = _h6_12_badge("✗ ผิด (ขยับเฉียงตัดระนาบ)", COL_WARN).move_to([0.0, 1.35, 0.0])
+        call_w5 = Text("⚠️ ขยับตัดระนาบ → ปลายสายถูกบิดและงัดที่คอข้อต่อ เสี่ยงฉีกขาดรวดเร็ว", font_size=11.5, color=COL_WARN).move_to([0.0, -1.38, 0.0])
+        wrong5_grp = VGroup(flex_mech_w, hose_w5_out, hose_w5_in, arrow_w5, arrow_w5_lbl, badge_w5, call_w5)
+
+        banner5 = _h6_12_banner("ให้การขยับอยู่ระนาบเดียวกับส่วนโค้งของสาย และไม่ให้รัศมีแคบกว่าขั้นต่ำระหว่างขยับ", COL_OK)
+
+        self.play(FadeIn(right5_grp, shift=UP * 0.2), FadeIn(banner5), run_time=0.8)
+        self.wait(1.2)  # Checkpoint 43.0s falls right here!
+        self.play(FadeOut(right5_grp), run_time=0.4)
+        self.play(FadeIn(wrong5_grp), run_time=0.6)
+        self.wait(3.5)
+
+        self.clear_stage(run_time=0.5)
+        self.wait(0.1)
+
+        # ----------------------------------------------------------------------
+        # BEAT 47.1–55.5: 6. Slack & Length Change (เผื่อความยาว/สแลคให้พอ)
+        # ----------------------------------------------------------------------
+        cap6 = _h6_12_caption_top("6. เผื่อความยาว/สแลคให้พอ (Provide Adequate Slack)")
+        self.play(FadeIn(cap6, shift=UP * 0.35), run_time=0.5)
+
+        mount_l = Rectangle(width=0.45, height=0.75, color=COL_METAL, fill_color="#475569", fill_opacity=1.0).move_to([-3.2, 0.0, 0.0])
+        lbl_m_l = Text("จุดยึด 1", font_size=10, color=COL_METAL).next_to(mount_l, DOWN, buff=0.1)
+        mount_r = Rectangle(width=0.45, height=0.75, color=COL_METAL, fill_color="#475569", fill_opacity=1.0).move_to([3.2, 0.0, 0.0])
+        lbl_m_r = Text("จุดยึด 2", font_size=10, color=COL_METAL).next_to(mount_r, DOWN, buff=0.1)
+        mounts_grp = VGroup(mount_l, lbl_m_l, mount_r, lbl_m_r)
+
+        # Wrong 6: Dead-straight taut line (zero slack)
+        hose_w6_out = Line([-2.95, 0.0, 0], [2.95, 0.0, 0], stroke_color="#334155", stroke_width=10)
+        hose_w6_in  = Line([-2.95, 0.0, 0], [2.95, 0.0, 0], stroke_color=COL_WARN, stroke_width=6)
+        tension_l = Arrow([-1.8, 0.0, 0], [-2.7, 0.0, 0], color=RED, stroke_width=3, tip_length=0.15)
+        tension_r = Arrow([1.8, 0.0, 0], [2.7, 0.0, 0], color=RED, stroke_width=3, tip_length=0.15)
+        dim_w6 = Text("ความยาวตึงเป๊ะ 100% (ไร้สแลค)", font_size=11, color=COL_WARN).move_to([0.0, 0.35, 0.0])
+        badge_w6 = _h6_12_badge("✗ ผิด (สายตึงเกินไป)", COL_WARN).move_to([0.0, 1.15, 0.0])
+        call_w6 = Text("⚠️ เมื่อจ่ายแรงดัน สายหดตัวสั้นลงได้ถึง −6% → ดึงกระชากข้อต่อหลุดกระเด็น!", font_size=12, color=COL_WARN).move_to([0.0, -0.65, 0.0])
+        call_w6_sub = Text("(แถมตอนติดตั้ง สายสั้นจะถูกบิดตัวขันน็อตลำบาก)", font_size=11, color=COL_GRAY).move_to([0.0, -1.05, 0.0])
+        wrong6_grp = VGroup(mounts_grp, hose_w6_out, hose_w6_in, tension_l, tension_r, dim_w6, badge_w6, call_w6, call_w6_sub)
+
+        # Right 6: Gentle catenary droop (adequate slack)
+        mounts_grp_r = mounts_grp.copy()
+        catenary_pts = [
+            [-2.95, 0.0, 0], [-2.0, -0.42, 0], [-1.0, -0.65, 0],
+            [0.0, -0.72, 0], [1.0, -0.65, 0], [2.0, -0.42, 0], [2.95, 0.0, 0]
+        ]
+        hose_r6_out = VMobject(stroke_color="#334155", stroke_width=10).set_points_smoothly(catenary_pts)
+        hose_r6_in  = VMobject(stroke_color=COL_OK, stroke_width=6).set_points_smoothly(catenary_pts)
+        dim_r6 = Text("เผื่อความยาวสแลค (Slack) +5% ถึง +10%", font_size=11, color=COL_OK).move_to([0.0, 0.35, 0.0])
+        badge_r6 = _h6_12_badge("✓ ถูก (เผื่อสแลคให้พอ)", COL_OK).move_to([0.0, 1.15, 0.0])
+        call_r6 = Text("✓ เผื่อสแลครองรับการเปลี่ยนความยาว (+2% ถึง −6%) ได้อย่างอิสระ ไม่ดึงรั้งข้อต่อ", font_size=12, color=COL_OK).move_to([0.0, -1.25, 0.0])
+        right6_grp = VGroup(mounts_grp_r, hose_r6_out, hose_r6_in, dim_r6, badge_r6, call_r6)
+
+        banner6 = _h6_12_banner("แรงดันเปลี่ยนความยาวสายได้ถึง +2% ถึง −6% — สายสั้น/ตึงเกินไปจะถูกดึงบิดตอนติดตั้ง ต้องเผื่อสแลค", COL_OK)
+
+        self.play(FadeIn(wrong6_grp, shift=UP * 0.2), FadeIn(banner6), run_time=0.8)
+        self.wait(1.2)  # Checkpoint 51.0s falls right here!
+        self.play(FadeOut(wrong6_grp), run_time=0.4)
+        self.play(FadeIn(right6_grp), run_time=0.6)
+        self.wait(4.0)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 56.3–61.0: Summary Card
+        # ----------------------------------------------------------------------
+        card_box = RoundedRectangle(width=11.6, height=3.6, corner_radius=0.15, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, 0.0, 0.0])
+        s_head = Text("สรุป: 6 กฎทองการติดตั้งสายไฮดรอลิก (hydraulic06 น.15)", font_size=13.5, color=COL_OK).move_to([0.0, 1.45, 0.0])
+        rows = [
+            "1. เดินสายพอดี: ใช้ข้อต่องอลดความยาวส่วนเกินและจุดหักมุม (ลดเสียดสี)",
+            "2. เลี่ยงผิวร้อน: ห่างผิวร้อนเสมอ หรือใช้แคลมป์ดัน + ปลอกฉนวนกันความร้อน",
+            "3. รัศมีดัดโค้ง: ต้องกว้างกว่า R_min (ดูตัวเลขสเปกขั้นต่ำจาก H6_11)",
+            "4. ห้ามบิดสาย: บิดแค่ 7 นิ้ว (7″) ทนแรงดันลดลงถึง 90%! (สังเกตแนว Layline)",
+            "5. ขยับในระนาบเดียว: ทิศทางการเคลื่อนที่ต้องระนาบเดียวกับความโค้งสาย ไม่งัด",
+            "6. เผื่อสแลค (Slack): แรงดันทำให้สายยาว +2% ถึง −6% อย่าขึงตึงเด็ดขาด"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.16, aligned_edge=LEFT).move_to([0.0, 0.0, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(3.9)  # Checkpoint 58.5s falls right here!
+
+        # ----------------------------------------------------------------------
+        # BEAT 61.0–65.5: Review Question Card
+        # ----------------------------------------------------------------------
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(width=11.2, height=3.2, corner_radius=0.15, color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, 0.0, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.15, 0.0])
+        q_body = Text(
+            "หากช่างตัดสายไฮดรอลิกสั้นเกินไปนิดเดียวตอนติดตั้ง\nจะเกิดความเสี่ยงร้ายแรงอะไรตามมาบ้าง (เชื่อมโยง 2 กฎในคลิปนี้)?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: 1. สายจะถูกดึงกระชากหลุดเมื่อแรงดันทำให้สายหดสั้นลงถึง −6%\n2. ตอนขันเกลียวติดตั้ง สายที่สั้นจะถูกบังคับบิดตัว (Twist) ซึ่งบิดแค่ 7″ ทนแรงดันลดฮวบ 90%)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.65, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.9)  # Checkpoint 63.0s falls right here!
+
+        self.play(FadeOut(question_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+        self.wait(0.5)
+
+
 
 
 
