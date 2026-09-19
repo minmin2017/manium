@@ -7434,3 +7434,344 @@ class H6_18_PistonCupPackings(SafeScene):
         self.wait(0.2)
         self.fade_out_all(run_time=0.6)
         self.wait(0.5)
+
+
+# ==============================================================================
+# Scene: H6_19_PistonRings (แหวนลูกสูบ Piston Rings)
+# Lecture slides: hydraulic06.pdf page 22
+# Pedagogical Objective:
+# - Piston Ring is a metallic ring with a visible end gap, not an elastomer O-ring
+# - End gap enables installation into piston grooves and intentionally allows slight leakage
+# - Cross-section comparison: Piston ring at OD (pressure side) vs O-ring at rod shoulder
+# - Metallic rings withstand extreme temperatures far better than rubber/elastomers
+# ==============================================================================
+
+def _h6_19_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _h6_19_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _h6_19_caption_top(text, color=WHITE):
+    return Text(text, font_size=14, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _h6_19_badge(text, color):
+    lbl = Text(text, font_size=11, color=color)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.48, height=0.38, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_19_banner(text, color):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=12, color=color).move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _h6_19_flame_icon(color=WARN, scale=0.25):
+    pts_outer = [
+        [0.0, 0.9, 0], [0.25, 0.35, 0], [0.45, 0.45, 0], [0.5, 0.0, 0],
+        [0.4, -0.5, 0], [0.0, -0.7, 0], [-0.4, -0.5, 0], [-0.5, 0.0, 0],
+        [-0.45, 0.45, 0], [-0.25, 0.35, 0]
+    ]
+    f_out = Polygon(*pts_outer, color=color, fill_color=color, fill_opacity=0.9).scale(scale)
+    f_in = Polygon(*pts_outer, color=YELLOW, fill_color=YELLOW, fill_opacity=0.95).scale(scale * 0.5).shift(DOWN * 0.05 * scale)
+    return VGroup(f_out, f_in)
+
+
+class H6_19_PistonRings(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–2.0: Title & Page Reference
+        # ======================================================================
+        self.title_m = _h6_19_title("Piston Rings: แหวนลูกสูบ")
+        self.ref_m = _h6_19_page_ref("hydraulic06 น.22")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 2.0–5.5: Hook Question
+        # ======================================================================
+        hook_q = _h6_19_caption_top("ซีลในกระบอกสูบต้องเป็นยางเสมอ และห้ามรั่วซึมเลยจริงไหม?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.5)
+
+        # ======================================================================
+        # BEAT 5.5–15.0: Closed Ring (O-ring) vs Split Ring (Piston Ring)
+        # ======================================================================
+        cap1 = _h6_19_caption_top("1. Piston Ring คือแหวนโลหะที่มีรอยผ่า ไม่ใช่ยางแบบ O-ring")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Left Ring: Closed Ring (O-ring elastomer style) at x = -3.2
+        xl = -3.2
+        closed_ring = Annulus(
+            inner_radius=1.00, outer_radius=1.38,
+            color=COL_BAD, fill_color="#DC2626", fill_opacity=0.35,
+            stroke_width=2.8, stroke_color=COL_BAD
+        ).move_to([xl, -0.05, 0.0])
+        closed_badge = _h6_19_badge("วงปิดสนิท (แบบ O-ring)", COL_BAD).move_to([xl, 1.85, 0.0])
+        closed_sub = Text("เนื้อยางต่อเนื่อง ไม่มีรอยผ่า ซีลสนิท 100%", font_size=10, color=WHITE).move_to([xl, -1.85, 0.0])
+        closed_grp = VGroup(closed_ring, closed_badge, closed_sub)
+
+        # Right Ring: Split Ring (Piston Ring with visible end gap) at x = +3.2
+        xr = 3.2
+        # Visible gap at top (30° opening centered at 90°)
+        split_ring = AnnularSector(
+            inner_radius=1.00, outer_radius=1.38,
+            start_angle=105 * DEGREES, angle=330 * DEGREES,
+            color=COL_METAL, fill_color="#475569", fill_opacity=0.55,
+            stroke_width=2.8, stroke_color=COL_METAL
+        ).move_to([xr, -0.05, 0.0])
+
+        # Gap Callout Arrow pointing directly into the opening
+        gap_arr = Arrow([xr, 1.62, 0.0], [xr, 1.18, 0.0], color=COL_OK, stroke_width=3.0, tip_length=0.14)
+        gap_lbl = _h6_19_badge("รอยผ่า (End Gap) ถ่างสวมเข้าร่องได้", COL_OK).move_to([xr, 1.85, 0.0])
+        gap_callout = VGroup(gap_arr, gap_lbl)
+
+        split_sub = Text("แหวนโลหะมีรอยผ่า ยอมให้รั่วซึมเล็กน้อยได้โดยตั้งใจ", font_size=10, color=WHITE).move_to([xr, -1.85, 0.0])
+        split_grp = VGroup(split_ring, split_sub)
+
+        banner1 = _h6_19_banner(
+            "วงปิดสนิทแบบ O-ring vs แหวนโลหะที่มีรอยผ่า — รอยผ่านี้เองที่ทำให้สวมเข้าร่องลูกสูบได้",
+            COL_OK
+        )
+
+        self.play(
+            FadeIn(closed_grp, shift=UP * 0.25),
+            FadeIn(split_grp, shift=UP * 0.25),
+            FadeIn(banner1),
+            run_time=1.0
+        )
+        # Lesson 5: Sequence Indicate after FadeIn
+        self.play(Indicate(split_ring, color=COL_OK, scale_factor=1.08), run_time=0.8)
+        self.play(FadeIn(gap_callout, shift=DOWN * 0.15), run_time=0.6)
+        self.wait(5.0)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 15.6–26.0: Cross-Section: Piston Ring vs O-ring (hydraulic06 p.22)
+        # ======================================================================
+        cap2 = _h6_19_caption_top("2. ภาพเดียวกัน คนละตำแหน่ง คนละหน้าที่: Piston Ring vs O-ring")
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Full cross-section matching slide 22 (scaled vertically to prevent collision)
+        # Cylinder barrel: top and bottom walls
+        cyl_t = Rectangle(width=9.2, height=0.28, color=COL_METAL).set_fill("#334155", 0.95).move_to([0.0, 1.25, 0.0])
+        cyl_b = Rectangle(width=9.2, height=0.28, color=COL_METAL).set_fill("#334155", 0.95).move_to([0.0, -1.25, 0.0])
+        cyl_bg = Rectangle(width=9.2, height=2.22, color=BLACK).set_fill("#0F172A", 1.0).move_to([0.0, 0.0, 0.0])
+        lbl_barrel = Text("CYLINDER BARREL (ผนังกระบอกสูบ)", font_size=9.0, color=COL_METAL).move_to([-2.6, 1.52, 0.0])
+
+        # Red High-Pressure Chamber on RIGHT side of piston (x = 0.9 to 4.6)
+        press_chamber = Rectangle(width=3.7, height=2.22, color=RED).set_fill(RED, 0.65).move_to([2.75, 0.0, 0.0])
+        lbl_pressure = Text("PRESSURE\n(ห้องน้ำมันแรงดันสูง)", font_size=10.5, color=YELLOW).move_to([2.75, 0.0, 0.0])
+        chamber_grp = VGroup(press_chamber, lbl_pressure)
+
+        # Piston Rod: entering from left to piston step
+        rod_main = Rectangle(width=3.2, height=0.65, color=COL_METAL).set_fill("#475569", 0.95).move_to([-3.0, 0.0, 0.0])
+        rod_neck = Rectangle(width=1.7, height=0.42, color=WHITE).set_fill("#94A3B8", 1.0).move_to([-0.55, 0.0, 0.0])
+        rod_nut = Rectangle(width=0.40, height=0.55, color=WHITE).set_fill("#CBD5E1", 1.0).move_to([0.50, 0.0, 0.0])
+        rod_grp = VGroup(rod_main, rod_neck, rod_nut)
+
+        # Piston Body: mounted around rod neck from x = -1.4 to 0.9
+        piston_t = Rectangle(width=2.3, height=0.82, color=COL_METAL).set_fill("#64748B", 0.95).move_to([-0.25, 0.70, 0.0])
+        piston_b = Rectangle(width=2.3, height=0.82, color=COL_METAL).set_fill("#64748B", 0.95).move_to([-0.25, -0.70, 0.0])
+        lbl_piston = Text("PISTON (ลูกสูบ)", font_size=9.5, color=WHITE).move_to([-0.35, 0.68, 0.0])
+
+        # 4 Ring Grooves on top OD and bottom OD (groove width = 0.16, depth = 0.16)
+        grooves = []
+        for gx in [-0.55, -0.30, -0.05, 0.20]:
+            grooves.append(Rectangle(width=0.15, height=0.16, color=BLACK).set_fill("#0F172A", 1.0).move_to([gx, 1.03, 0.0]))
+            grooves.append(Rectangle(width=0.15, height=0.16, color=BLACK).set_fill("#0F172A", 1.0).move_to([gx, -1.03, 0.0]))
+        grooves_grp = VGroup(*grooves)
+
+        # 1. PISTON RING MOB (OD corner, rightmost groove x = 0.20, facing pressure side)
+        pr_block_t = Rectangle(width=0.15, height=0.16, color=COL_OK).set_fill(COL_OK, 1.0).move_to([0.20, 1.03, 0.0])
+        pr_block_b = Rectangle(width=0.15, height=0.16, color=COL_OK).set_fill(COL_OK, 1.0).move_to([0.20, -1.03, 0.0])
+        # §34 Geometry icon: distinct split ring with visible end gap
+        pr_icon_ring = AnnularSector(
+            inner_radius=0.18, outer_radius=0.28,
+            start_angle=60 * DEGREES, angle=320 * DEGREES,
+            color=COL_OK, fill_color="#0284C7", fill_opacity=0.9,
+            stroke_width=1.8, stroke_color=COL_OK
+        ).move_to([0.05, 1.78, 0.0])
+        pr_badge = _h6_19_badge("PISTON RING: มีรอยผ่า (ฝั่งแรงดัน)", COL_OK).move_to([1.6, 1.78, 0.0])
+        pr_arrow = Arrow([0.45, 1.62, 0.0], [0.22, 1.15, 0.0], color=COL_OK, stroke_width=2.2, tip_length=0.11)
+        piston_ring_mob = VGroup(pr_block_t, pr_block_b, pr_icon_ring, pr_badge, pr_arrow)
+
+        # 2. O-RING MOB (Inside piston-to-rod shoulder, left side at x = -1.25)
+        or_dot_t = Circle(radius=0.09, color=COL_BAD, fill_color="#DC2626", fill_opacity=1.0).move_to([-1.25, 0.28, 0.0])
+        or_dot_b = Circle(radius=0.09, color=COL_BAD, fill_color="#DC2626", fill_opacity=1.0).move_to([-1.25, -0.28, 0.0])
+        or_icon_ring = Annulus(
+            inner_radius=0.16, outer_radius=0.26,
+            color=COL_BAD, fill_color="#DC2626", fill_opacity=0.9,
+            stroke_width=1.8, stroke_color=COL_BAD
+        ).move_to([-3.0, -1.78, 0.0])
+        or_badge = _h6_19_badge("O-RING: วงปิดสนิท (ฝั่งก้านสูบ)", COL_BAD).move_to([-1.2, -1.78, 0.0])
+        or_arrow = Arrow([-1.75, -1.62, 0.0], [-1.28, -0.40, 0.0], color=COL_BAD, stroke_width=2.2, tip_length=0.11)
+        oring_mob = VGroup(or_dot_t, or_dot_b, or_icon_ring, or_badge, or_arrow)
+
+        cross_section = VGroup(
+            cyl_bg, cyl_t, cyl_b, lbl_barrel, chamber_grp,
+            rod_grp, piston_t, piston_b, lbl_piston, grooves_grp
+        )
+
+        banner2 = _h6_19_banner(
+            "Piston Ring: ฝั่งแรงดัน ซีลลูกสูบกับผนังกระบอกสูบ (ยอมรั่วซึมนิดหน่อยได้) — O-ring: ฝั่งก้านสูบ ซีลนิ่งสนิท 100%",
+            COL_OK
+        )
+
+        self.play(FadeIn(cross_section, shift=UP * 0.25), FadeIn(banner2), run_time=1.0)
+        # Sequentially Indicate piston ring (Lesson 5: after FadeIn)
+        self.play(
+            FadeIn(piston_ring_mob),
+            run_time=0.6
+        )
+        self.play(
+            Indicate(piston_ring_mob, color=COL_OK, scale_factor=1.06),
+            run_time=0.8
+        )
+        self.wait(1.0)
+
+        # Sequentially Indicate O-ring
+        self.play(
+            FadeIn(oring_mob),
+            run_time=0.6
+        )
+        self.play(
+            Indicate(oring_mob, color=COL_BAD, scale_factor=1.06),
+            run_time=0.8
+        )
+        self.wait(3.5)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 26.6–33.5: Heat Resistance Comparison (Metal vs Elastomer)
+        # ======================================================================
+        cap3 = _h6_19_caption_top("3. โลหะทนความร้อนได้ดีกว่ายาง")
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        # Left Card: Elastomer / Rubber O-ring (Fails at high temp)
+        c_el_box = RoundedRectangle(
+            width=5.6, height=3.3, corner_radius=0.14,
+            color=COL_BAD, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([-3.1, -0.05, 0.0])
+        c_el_head = _h6_19_badge("ยางสังเคราะห์ (Elastomer / O-ring)", COL_BAD).move_to([-3.1, 1.25, 0.0])
+
+        icon_cross = Text("✕", font_size=38, color=COL_BAD).move_to([-4.8, 0.45, 0.0])
+        flame_el = _h6_19_flame_icon(color=COL_WARN, scale=0.28).move_to([-3.4, 0.45, 0.0])
+        lbl_flame_el = Text("ความร้อนสูง", font_size=12, color=COL_WARN).next_to(flame_el, RIGHT, buff=0.15)
+        icon_flame_el = VGroup(flame_el, lbl_flame_el)
+        status_el = _h6_19_badge("เสื่อมสภาพที่อุณหภูมิสูง", COL_BAD).move_to([-3.1, -0.15, 0.0])
+        points_el = VGroup(
+            Text("• เนื้อยางจะแข็งกรอบ ละลาย หรือสูญเสียความยืดหยุ่น", font_size=10.5, color=WHITE),
+            Text("• ไม่สามารถใช้งานในจุดที่มีความร้อนสะสมสูงจัดได้", font_size=10.5, color=COL_GRAY),
+        ).arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to([-3.1, -0.90, 0.0])
+        card_elastomer = VGroup(c_el_box, c_el_head, icon_cross, icon_flame_el, status_el, points_el)
+
+        # Right Card: Metallic Piston Ring (Survives high temp)
+        c_me_box = RoundedRectangle(
+            width=5.6, height=3.3, corner_radius=0.14,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([3.1, -0.05, 0.0])
+        c_me_head = _h6_19_badge("แหวนโลหะ (Metallic Piston Ring)", COL_METAL).move_to([3.1, 1.25, 0.0])
+
+        icon_check = Text("✓", font_size=38, color=COL_OK).move_to([1.4, 0.45, 0.0])
+        flame_me = _h6_19_flame_icon(color=COL_OK, scale=0.28).move_to([2.8, 0.45, 0.0])
+        lbl_flame_me = Text("ความร้อนสูง", font_size=12, color=COL_OK).next_to(flame_me, RIGHT, buff=0.15)
+        icon_flame_me = VGroup(flame_me, lbl_flame_me)
+        status_me = _h6_19_badge("ทนความร้อนสูงได้ดีเยี่ยม", COL_OK).move_to([3.1, -0.15, 0.0])
+        points_me = VGroup(
+            Text("• ทนทานต่ออุณหภูมิสูงจัดได้ดี ไม่เสียรูปหรือละลาย", font_size=10.5, color=WHITE),
+            Text("• จึงใช้ piston ring แทน O-ring ตรงจุดที่ร้อนจัด", font_size=10.5, color=COL_OK),
+        ).arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to([3.1, -0.90, 0.0])
+        card_metal = VGroup(c_me_box, c_me_head, icon_check, icon_flame_me, status_me, points_me)
+
+        banner3 = _h6_19_banner(
+            "อุณหภูมิสูงเกินไป: ยางเสื่อมสภาพ แต่โลหะยังทนอยู่ได้ — จึงใช้ piston ring แทน O-ring ตรงจุดที่ร้อนจัด",
+            COL_OK
+        )
+
+        self.play(FadeIn(VGroup(card_elastomer, card_metal), shift=UP * 0.25), FadeIn(banner3), run_time=1.0)
+        self.play(
+            Indicate(icon_cross, color=COL_BAD, scale_factor=1.15),
+            Indicate(icon_check, color=COL_OK, scale_factor=1.15),
+            run_time=0.9
+        )
+        self.wait(4.5)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 34.1–37.5: Summary Card
+        # ======================================================================
+        card_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        s_head = Text("สรุป: แหวนลูกสูบ (Piston Rings - hydraulic06 น.22)", font_size=13.5, color=COL_OK).move_to([0.0, 1.35, 0.0])
+        rows = [
+            "1. วัสดุเป็นโลหะ: ไม่ใช่ยางสังเคราะห์ (Elastomer) จึงทนทานต่อสภาวะแวดล้อมที่รุนแรงได้ดีกว่า",
+            "2. มีรอยผ่า (End Gap): ทำหน้าที่ถ่างสวมเข้าร่องลูกสูบได้ และยอมให้มีการรั่วซึมเล็กน้อยได้โดยตั้งใจ",
+            "3. ทนความร้อนสูงกว่ายาง: จึงถูกเลือกใช้แทน O-ring ในจุดของกระบอกสูบที่มีอุณหภูมิสูงจัด"
+        ]
+        s_rows = VGroup(*[Text(r, font_size=11, color=WHITE) for r in rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.15, 0.0])
+        summary_grp = VGroup(card_box, s_head, s_rows)
+
+        self.play(FadeIn(summary_grp, shift=UP * 0.4), run_time=0.7)
+        self.wait(2.7)
+
+        # ======================================================================
+        # BEAT 37.5–41.0: Review Question Card
+        # ======================================================================
+        self.play(FadeOut(summary_grp), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.2, height=3.0, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=14, color=COL_WARN).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ทำไม piston ring ถึงยอมให้มีรอยรั่วเล็กน้อยได้ ทั้งที่ O-ring ในภาพเดียวกันต้องซีลสนิท 100%?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        q_ans = Text(
+            "(คำตอบ: เพราะ piston ring เป็นโลหะที่เน้นทนความร้อนสูง และจำเป็นต้องมีรอยผ่าเพื่อถ่างสวมเข้าร่อง\nขณะที่ O-ring เป็นยางที่ซีลสนิท 100% ตรงรอยต่อก้านสูบที่ไม่สัมผัสความร้อนสูงโดยตรง)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.60, 0.0])
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.9)
+
+        self.play(FadeOut(question_grp), run_time=0.5)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
