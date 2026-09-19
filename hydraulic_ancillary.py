@@ -1713,3 +1713,330 @@ class H6_03_PressureRating(SafeThreeDScene):
         self.fade_out_all(run_time=0.8)
 
 
+# ==============================================================================
+# SCENE 4: H6_04_SteelPipes (hydraulic06.pdf page 7)
+# Duration: ~42 seconds | 2D SafeScene
+# Pedagogical Focus: Pipe Schedule Number = Wall Thickness Rating
+# AHA Moment: Same OD across schedules, but ID shrinks as wall thickness increases
+# Connection: BP = 2tS / Di (from H6_03) yields ~1.51x higher BP for Sch 80 vs Sch 40
+# ==============================================================================
+class H6_04_SteelPipes(SafeScene):
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # BEAT 0.0–4.6: Title, Page Reference & Hook Question
+        # ----------------------------------------------------------------------
+        title_m = title("ท่อเหล็ก — Schedule Number")
+        ref_m = page_ref("hydraulic06 น.7")
+        self.play(FadeIn(title_m, shift=UP * 0.4), FadeIn(ref_m), run_time=1.5)
+        self.wait(0.5)
+
+        hook_q = caption_top("ท่อ 2 นิ้วเหมือนกัน ทำไมน้ำหนัก/ราคาต่างกันได้ 4 แบบ?", color=COL_WARN)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=1.0)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 4.6–13.8: 4 Cross-Section Rings (Nominal 2" Pipe: Same OD, Shrinking ID)
+        # ----------------------------------------------------------------------
+        cap1 = caption_top("4 วงแหวนหน้าตัด — OD เท่ากันเป๊ะ (Nominal Size เดียวกัน)")
+        self.play(FadeIn(cap1, shift=UP * 0.4), run_time=0.6)
+
+        # Ring geometry parameters: Nominal 2" pipe (OD = 2.375")
+        R_OD = 1.05
+        # Inner radii proportional to real ID/OD from table:
+        # Sch 40: ID = 2.067" -> R_ID = 1.05 * 2.067 / 2.375 = 0.9138
+        # Sch 80: ID = 1.939" -> R_ID = 1.05 * 1.939 / 2.375 = 0.8572
+        # Sch 160: ID = 1.689" -> R_ID = 1.05 * 1.689 / 2.375 = 0.7467
+        # XXH: ID = 1.503" -> R_ID = 1.05 * 1.503 / 2.375 = 0.6645
+        r_in_40  = R_OD * (2.067 / 2.375)
+        r_in_80  = R_OD * (1.939 / 2.375)
+        r_in_160 = R_OD * (1.689 / 2.375)
+        r_in_xxh = R_OD * (1.503 / 2.375)
+
+        x_coords = [-4.5, -1.5, 1.5, 4.5]
+        y_ring = 0.35
+
+        ring_40 = Annulus(inner_radius=r_in_40, outer_radius=R_OD).set_fill(COL_METAL, 0.85).set_stroke(COL_METAL, width=2).move_to([x_coords[0], y_ring, 0])
+        ring_80 = Annulus(inner_radius=r_in_80, outer_radius=R_OD).set_fill(COL_FIELD, 0.85).set_stroke(COL_FIELD, width=2).move_to([x_coords[1], y_ring, 0])
+        ring_160 = Annulus(inner_radius=r_in_160, outer_radius=R_OD).set_fill(COL_CURR, 0.85).set_stroke(COL_CURR, width=2).move_to([x_coords[2], y_ring, 0])
+        ring_xxh = Annulus(inner_radius=r_in_xxh, outer_radius=R_OD).set_fill(COL_WARN, 0.85).set_stroke(COL_WARN, width=2).move_to([x_coords[3], y_ring, 0])
+
+        lbl_40 = VGroup(
+            Text("Schedule 40", font_size=18, color=COL_METAL),
+            Text("(Standard / STD)", font_size=13, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.1).move_to([x_coords[0], -1.35, 0])
+
+        lbl_80 = VGroup(
+            Text("Schedule 80", font_size=18, color=COL_FIELD),
+            Text("(Extra Heavy / XH)", font_size=13, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.1).move_to([x_coords[1], -1.35, 0])
+
+        lbl_160 = VGroup(
+            Text("Schedule 160", font_size=18, color=COL_CURR),
+            Text("(High Pressure)", font_size=13, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.1).move_to([x_coords[2], -1.35, 0])
+
+        lbl_xxh = VGroup(
+            Text("Double Extra Heavy", font_size=16, color=COL_WARN),
+            Text("(XXH / XXS)", font_size=13, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.1).move_to([x_coords[3], -1.35, 0])
+
+        ring_items = [
+            VGroup(ring_40, lbl_40),
+            VGroup(ring_80, lbl_80),
+            VGroup(ring_160, lbl_160),
+            VGroup(ring_xxh, lbl_xxh)
+        ]
+
+        self.play(
+            LaggedStart(*[FadeIn(item, shift=UP * 0.2) for item in ring_items], lag_ratio=0.4),
+            run_time=2.6
+        )
+        self.wait(0.8)
+
+        # Highlight identical OD (9.0–10.4s)
+        od_line_top = DashedLine(start=[-5.8, y_ring + R_OD, 0], end=[5.8, y_ring + R_OD, 0], color=COL_OK, stroke_width=2)
+        od_line_bot = DashedLine(start=[-5.8, y_ring - R_OD, 0], end=[5.8, y_ring - R_OD, 0], color=COL_OK, stroke_width=2)
+        lbl_od_same = Text("OD = 2.375 นิ้ว เท่ากันทุกวง (ขนาดระบุ 2 นิ้ว)", font_size=17, color=COL_OK).move_to([0.0, 1.90, 0])
+
+        self.play(
+            Create(od_line_top),
+            Create(od_line_bot),
+            FadeIn(lbl_od_same, shift=UP * 0.15),
+            run_time=0.8
+        )
+        self.wait(0.6)
+
+        # Highlight shrinking ID (10.4–13.0s)
+        cap_id = caption_top("ID เล็กลงเรื่อยๆ — ยิ่ง Schedule สูง ผนังยิ่งหนา")
+
+        id_items = []
+        id_values_str = ['ID=2.067"', 'ID=1.939"', 'ID=1.689"', 'ID=1.503"']
+        id_radii = [r_in_40, r_in_80, r_in_160, r_in_xxh]
+        for i in range(4):
+            val_txt = Text(id_values_str[i], font_size=14, color=WHITE).move_to([x_coords[i], y_ring, 0])
+            w_half = val_txt.width / 2 + 0.05
+            arr_l = Arrow(start=[x_coords[i] - w_half, y_ring, 0], end=[x_coords[i] - id_radii[i], y_ring, 0],
+                          buff=0, color=COL_WARN, stroke_width=2, max_tip_length_to_length_ratio=0.35)
+            arr_r = Arrow(start=[x_coords[i] + w_half, y_ring, 0], end=[x_coords[i] + id_radii[i], y_ring, 0],
+                          buff=0, color=COL_WARN, stroke_width=2, max_tip_length_to_length_ratio=0.35)
+            id_items.append(VGroup(val_txt, arr_l, arr_r))
+        id_grp = VGroup(*id_items)
+
+        self.play(
+            ReplacementTransform(cap1, cap_id),
+            FadeOut(od_line_top),
+            FadeOut(od_line_bot),
+            FadeOut(lbl_od_same),
+            FadeIn(id_grp, shift=UP * 0.1),
+            run_time=1.4
+        )
+        self.wait(1.2)
+
+        # Clear beat 2
+        self.play(
+            FadeOut(VGroup(ring_40, ring_80, ring_160, ring_xxh, lbl_40, lbl_80, lbl_160, lbl_xxh, id_grp, cap_id)),
+            run_time=0.8
+        )
+
+        # ----------------------------------------------------------------------
+        # BEAT 13.8–24.8: Connection to H6_03 (BP = 2tS/Di) & Relative BP Ratio
+        # ----------------------------------------------------------------------
+        cap2 = caption_top("ย้อนกลับไปสูตร BP = 2tS/Di จากคลิปก่อน")
+        self.play(FadeIn(cap2, shift=UP * 0.4), run_time=0.8)
+
+        formula_bp = Text("BP = 2 · t · S / Di", font_size=24, color=COL_OK).move_to([0.0, 1.20, 0.0])
+        formula_sub = Text("(ยิ่งความหนาผนัง t มาก ยิ่งรับความดันแตก BP ได้สูงขึ้น)", font_size=16, color=COL_GRAY).move_to([0.0, 0.65, 0.0])
+
+        self.play(FadeIn(formula_bp, shift=UP * 0.2), FadeIn(formula_sub, shift=UP * 0.15), run_time=0.6)
+        self.wait(1.8)
+
+        # Wall thickness calculation (17.0–20.0s)
+        t_head = Text("คำนวณความหนาผนัง t = (OD − ID) / 2  (สำหรับท่อ 2 นิ้ว, OD = 2.375 นิ้ว):", font_size=16, color=WHITE).move_to([0.0, 1.35, 0.0])
+        t_40 = Text("• Sch 40:  t = (2.375 − 2.067) / 2 = 0.154 นิ้ว", font_size=17, color=COL_METAL).move_to([-3.2, 0.70, 0.0])
+        t_80 = Text("• Sch 80:  t = (2.375 − 1.939) / 2 = 0.218 นิ้ว  (+41.6% หนาขึ้น)", font_size=17, color=COL_FIELD).move_to([-3.2, 0.15, 0.0])
+
+        self.play(FadeOut(formula_sub), run_time=0.3)
+        self.play(
+            ReplacementTransform(formula_bp, t_head),
+            FadeIn(t_40, shift=UP * 0.15),
+            FadeIn(t_80, shift=UP * 0.15),
+            run_time=2.5
+        )
+        self.wait(0.2)
+
+        # BP ratio calculation & Bar Chart (20.0–24.0s)
+        cap_ratio = caption_top("Sch 80 รับความดันได้มากกว่า Sch 40 ถึง ~1.51 เท่า (ที่ไซส์เดียวกัน)")
+
+        calc_head = Text("อัตราส่วนความดันแตก (BP) วัสดุเดียวกัน (S เท่ากัน):", font_size=15, color=WHITE).move_to([-3.4, 1.35, 0.0])
+        calc_r1 = Text("BP_80 / BP_40 = (t_80 / Di_80) / (t_40 / Di_40)", font_size=16, color=COL_OK).move_to([-3.4, 0.85, 0.0])
+        calc_r2 = Text("= (0.218 / 1.939) / (0.154 / 2.067)", font_size=16, color=WHITE).move_to([-3.4, 0.35, 0.0])
+        calc_r3 = Text("= 0.1124 / 0.0745", font_size=16, color=WHITE).move_to([-3.4, -0.15, 0.0])
+        calc_res = Text("≈ 1.51 เท่า (+51%)", font_size=22, color=COL_OK).move_to([-3.4, -0.75, 0.0])
+        box_res = SurroundingRectangle(calc_res, color=COL_OK, buff=0.12, corner_radius=0.1)
+        calc_note = Text("*คำนวณต่อยอดจากสูตร H6_03 + ตารางสไลด์หน้า 7", font_size=12, color=COL_GRAY).move_to([-3.4, -1.35, 0.0])
+
+        calc_grp = VGroup(calc_head, calc_r1, calc_r2, calc_r3, calc_res, box_res, calc_note)
+
+        # Right Bar Chart (High-Risk Check b: EXACT ratio 1.0 : 1.509 = 1.51)
+        y_base = -1.50
+        chart_base = Line(start=[0.6, y_base, 0], end=[6.2, y_base, 0], color=COL_GRAY, stroke_width=2)
+        chart_title = Text("ความดันแตกสัมพัทธ์ (Relative BP)", font_size=15, color=WHITE).move_to([3.4, 2.05, 0])
+
+        h_bar40 = 2.000
+        # Exact mathematical ratio from slide table data:
+        # (t80/Di80) / (t40/Di40) = (0.218/1.939) / (0.154/2.067) = 1.50925
+        h_bar80 = 2.000 * ((0.218 / 1.939) / (0.154 / 2.067))
+        w_bar = 1.30
+
+        x_bar40 = 2.00
+        x_bar80 = 4.60
+
+        bar40 = Rectangle(width=w_bar, height=h_bar40).set_fill(COL_METAL, 0.85).set_stroke(COL_METAL, width=2).move_to([x_bar40, y_base + h_bar40 / 2, 0])
+        bar80 = Rectangle(width=w_bar, height=h_bar80).set_fill(COL_FIELD, 0.85).set_stroke(COL_FIELD, width=2).move_to([x_bar80, y_base + h_bar80 / 2, 0])
+
+        lbl_bar40_top = Text("1.00x", font_size=18, color=COL_METAL).move_to([x_bar40, y_base + h_bar40 + 0.25, 0])
+        lbl_bar80_top = Text("1.51x", font_size=20, color=COL_OK).move_to([x_bar80, y_base + h_bar80 + 0.25, 0])
+
+        lbl_bar40_bot = VGroup(
+            Text("Sch 40", font_size=15, color=COL_METAL),
+            Text("(มาตรฐาน)", font_size=12, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.08).move_to([x_bar40, y_base - 0.40, 0])
+
+        lbl_bar80_bot = VGroup(
+            Text("Sch 80", font_size=15, color=COL_FIELD),
+            Text("(หนาพิเศษ)", font_size=12, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.08).move_to([x_bar80, y_base - 0.40, 0])
+
+        chart_grp = VGroup(chart_base, chart_title, bar40, bar80, lbl_bar40_top, lbl_bar80_top, lbl_bar40_bot, lbl_bar80_bot)
+
+        self.play(FadeOut(VGroup(t_head, t_40, t_80)), run_time=0.4)
+        self.play(
+            ReplacementTransform(cap2, cap_ratio),
+            FadeIn(calc_grp, shift=UP * 0.2),
+            Create(chart_base),
+            FadeIn(chart_title),
+            GrowFromEdge(bar40, DOWN),
+            GrowFromEdge(bar80, DOWN),
+            FadeIn(lbl_bar40_top, shift=UP * 0.1),
+            FadeIn(lbl_bar80_top, shift=UP * 0.1),
+            FadeIn(lbl_bar40_bot),
+            FadeIn(lbl_bar80_bot),
+            run_time=3.0
+        )
+        self.wait(0.6)
+
+        # Clear beat 3
+        self.play(
+            FadeOut(calc_grp),
+            FadeOut(chart_grp),
+            FadeOut(cap_ratio),
+            run_time=0.8
+        )
+
+        # ----------------------------------------------------------------------
+        # BEAT 24.8–29.8: Double Extra Heavy vs Sch 40 Comparison
+        # ----------------------------------------------------------------------
+        cap3 = caption_top("Double Extra Heavy — ผนังหนาสุด รับความดันสูงสุด")
+        self.play(FadeIn(cap3, shift=UP * 0.4), run_time=0.8)
+
+        r_od_big = 1.35
+        r_in_40_big  = r_od_big * (2.067 / 2.375)
+        r_in_xxh_big = r_od_big * (1.503 / 2.375)
+
+        ring_comp_40 = Annulus(inner_radius=r_in_40_big, outer_radius=r_od_big).set_fill(COL_METAL, 0.85).set_stroke(COL_METAL, width=2).move_to([-3.0, 0.20, 0])
+        ring_comp_xxh = Annulus(inner_radius=r_in_xxh_big, outer_radius=r_od_big).set_fill(COL_WARN, 0.85).set_stroke(COL_WARN, width=2).move_to([3.0, 0.20, 0])
+
+        lbl_comp_40 = VGroup(
+            Text("Schedule 40 (STD)", font_size=18, color=COL_METAL),
+            Text("ความหนา t = 0.154 นิ้ว", font_size=15, color=WHITE),
+            Text("ID = 2.067 นิ้ว (รูในกว้าง ไหลสะดวก)", font_size=14, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.10).move_to([-3.0, -1.80, 0])
+
+        lbl_comp_xxh = VGroup(
+            Text("Double Extra Heavy (XXH)", font_size=18, color=COL_WARN),
+            Text("ความหนา t = 0.436 นิ้ว (หนาเกือบ 3 เท่า!)", font_size=15, color=COL_WARN),
+            Text("ID = 1.503 นิ้ว (รูในแคบมาก รับแรงดันมหาศาล)", font_size=14, color=COL_GRAY)
+        ).arrange(DOWN, buff=0.10).move_to([3.0, -1.80, 0])
+
+        comp_top_note = Text("OD = 2.375 นิ้ว เท่ากันเป๊ะ แต่พื้นที่เนื้อเหล็กต่างกันอย่างสิ้นเชิง", font_size=16, color=COL_OK).move_to([0.0, 1.95, 0])
+
+        self.play(
+            FadeIn(ring_comp_40, shift=UP * 0.2),
+            FadeIn(ring_comp_xxh, shift=UP * 0.2),
+            FadeIn(lbl_comp_40, shift=UP * 0.15),
+            FadeIn(lbl_comp_xxh, shift=UP * 0.15),
+            FadeIn(comp_top_note),
+            run_time=1.6
+        )
+        self.play(Indicate(ring_comp_xxh, color=COL_WARN), run_time=0.8)
+        self.wait(1.0)
+
+        # Clear beat 4
+        self.play(
+            FadeOut(VGroup(ring_comp_40, ring_comp_xxh, lbl_comp_40, lbl_comp_xxh, comp_top_note, cap3)),
+            run_time=0.8
+        )
+
+        # ----------------------------------------------------------------------
+        # BEAT 29.8–34.8: Schedule Number Misconception Card
+        # ----------------------------------------------------------------------
+        cap4 = caption_top("Schedule Number ไม่ใช่สูตรคำนวณ — เป็นรหัสมาตรฐาน")
+        self.play(FadeIn(cap4, shift=UP * 0.4), run_time=0.8)
+
+        card_box = RoundedRectangle(corner_radius=0.15, width=11.4, height=3.6,
+                                    color=COL_GRAY, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.25, 0.0])
+        card_head = Text("⚠️ ทำความเข้าใจ Schedule Number (ANSI / ASME B36.10M)", font_size=18, color=COL_WARN).move_to([0.0, 1.15, 0.0])
+        card_l1 = Text("1. Schedule Number เป็นเพียง 'รหัสมาตรฐาน' ไม่ใช่ค่าที่นำไปคำนวณทางฟิสิกส์ตรงๆ", font_size=15, color=WHITE).move_to([0.0, 0.60, 0.0])
+        card_l2 = Text("2. หลักจำง่ายๆ:  Schedule ยิ่งสูง = ผนังยิ่งหนา (t เพิ่ม) = รูในยิ่งแคบ (ID ลด)", font_size=15, color=COL_OK).move_to([0.0, 0.10, 0.0])
+        card_l3 = Text("3. ท่อไซส์ระบุ (Nominal Size) เดียวกัน → จะมี 'OD เท่ากันเสมอ' ทุก Schedule", font_size=15, color=COL_FIELD).move_to([0.0, -0.40, 0.0])
+        card_l4 = Text("4. ระวัง Head Loss: รูในแคบลงทำให้ความเร็วของไหล v สูงขึ้น เกิดความเสียดทานเพิ่ม", font_size=15, color=COL_WARN).move_to([0.0, -0.90, 0.0])
+        card_l5 = Text("   (งานไฮดรอลิกจึงต้องเปิดตารางเช็คทั้งความทนแรงดันและอัตราการไหลควบคู่กัน)", font_size=13, color=COL_GRAY).move_to([0.0, -1.35, 0.0])
+
+        card_grp = VGroup(card_box, card_head, card_l1, card_l2, card_l3, card_l4, card_l5)
+
+        self.play(FadeIn(card_grp, shift=UP * 0.3), run_time=0.8)
+        self.wait(2.6)
+
+        self.play(FadeOut(card_grp), FadeOut(cap4), run_time=0.8)
+
+        # ----------------------------------------------------------------------
+        # BEAT 34.8–37.0: Summary Card
+        # ----------------------------------------------------------------------
+        sum_box = RoundedRectangle(corner_radius=0.15, width=11.4, height=3.6,
+                                   color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.25, 0.0])
+        sum_title = Text("สรุปท่อเหล็กและ Schedule Number (hydraulic06 น.7)", font_size=19, color=COL_OK).move_to([0.0, 1.15, 0.0])
+        s1 = Text("1. ท่อขนาดระบุ (Nominal Size) เดียวกัน → เส้นผ่านศูนย์กลางภายนอก (OD) เท่ากันทุกวง", font_size=15, color=WHITE).move_to([0.0, 0.60, 0.0])
+        s2 = Text("2. Schedule สูงขึ้น (40 → 80 → 160 → XXH) → ผนังหนาขึ้น (t เพิ่ม) แต่รูในแคบลง (ID ลด)", font_size=15, color=WHITE).move_to([0.0, 0.10, 0.0])
+        s3 = Text("3. เชื่อมสูตร H6_03: ท่อ 2 นิ้ว Sch 80 รับ Burst Pressure ได้ ~1.51 เท่าของ Sch 40", font_size=15, color=COL_OK).move_to([0.0, -0.40, 0.0])
+        s4 = Text("4. ผนังหนาขึ้นรับความดันได้สูงขึ้น แต่ท่อหนักขึ้น แพงขึ้น และเกิด Head Loss เพิ่มขึ้น", font_size=15, color=COL_WARN).move_to([0.0, -0.90, 0.0])
+        s5 = Text("(* อัตราส่วน 1.51 เท่าเป็นค่าคำนวณต่อยอดจากสูตร BP = 2tS/Di และตารางหน้า 7)", font_size=13, color=COL_GRAY).move_to([0.0, -1.35, 0.0])
+
+        sum_grp = VGroup(sum_box, sum_title, s1, s2, s3, s4, s5)
+
+        self.play(FadeIn(sum_grp, shift=UP * 0.4), run_time=0.8)
+        self.wait(1.4)
+        self.play(FadeOut(sum_grp), run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 37.0–42.0: Review Question Card & Outro
+        # ----------------------------------------------------------------------
+        q_box = RoundedRectangle(corner_radius=0.15, width=11.0, height=2.6,
+                                 color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.35, 0.0])
+        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0.0, 0.50, 0.0])
+        q_body = Text("ท่อ Sch 160 มีความหนาผนังมากกว่า Sch 80 อีก (t เพิ่มขึ้น, ID ลดลง)\nคาดว่าความดันแตก (Burst Pressure) จะเปลี่ยนแปลงอย่างไรเทียบกับ Sch 80?",
+                      font_size=15, color=WHITE).move_to([0.0, -0.05, 0.0])
+        q_ans = Text("(คำตอบ: BP สูงขึ้นอีก เพราะตามสูตร BP = 2tS / Di ยิ่ง t มากขึ้น และ Di เล็กลง BP ก็ยิ่งสูง)",
+                     font_size=14, color=COL_GRAY).move_to([0.0, -0.75, 0.0])
+
+        q_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.4)
+
+        self.play(FadeOut(q_grp), run_time=0.6)
+        self.wait(0.2)
+        self.fade_out_all(run_time=0.8)
+
+
+
