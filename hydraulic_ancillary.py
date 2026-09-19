@@ -2384,5 +2384,416 @@ class H6_05_PipeThreads(SafeScene):
         self.fade_out_all(run_time=0.8)
 
 
+# ==============================================================================
+# H6_06_PipeFittings — คำศัพท์ข้อต่อท่อไฮดรอลิก 11 ชนิด (hydraulic06.pdf น.9)
+# ==============================================================================
+
+class H6_06_PipeFittings(SafeScene):
+    """
+    Fluid Power Control — W06 Hydraulic Ancillary Devices (hydraulic06.pdf)
+    Scene: H6_06_PipeFittings (ข้อต่อท่อ — คำศัพท์พื้นฐาน 11 ชนิด)
+    Lecture slide: hydraulic06.pdf page 9 ("Pipe Fittings")
+    Duration target: ~38 seconds (thin richness: pure vocabulary flashcard)
+    
+    Verified facts from source slide:
+    - 11 pipe fittings: Pipe Plug, Nipple, Tee, 90° Elbow, Union,
+      Reducing Bushing, Reducing Coupling, Straight Coupling, Cap,
+      Street Elbow, Globe Valve.
+    - Pedagogical purpose: distinguish fittings by their recognizable shape
+      and single-line engineering purpose.
+    """
+    def clear_stage(self, keep=(), run_time=0.6):
+        """Fade out active stage objects while preserving persistent title badges."""
+        targets = [m for m in self.mobjects if m not in keep and m not in getattr(self, "keep_mobs", ())]
+        if targets:
+            self.play(FadeOut(Group(*targets)), run_time=run_time)
+
+    # --------------------------------------------------------------------------
+    # Fitting Icon Generators (2D Distinct Graphical Shapes)
+    # --------------------------------------------------------------------------
+    def make_plug_icon(self):
+        head = Rectangle(width=0.68, height=0.20, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.95).move_to([0, 0.15, 0])
+        plug = Polygon([-0.24, 0.05, 0], [0.24, 0.05, 0], [0.16, -0.34, 0], [-0.16, -0.34, 0],
+                       color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.5)
+        socket = Square(side_length=0.10, color=COL_BG_BOX, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 1.0).move_to([0, 0.15, 0])
+        t1 = Line([-0.21, -0.06, 0], [0.21, -0.06, 0], color=COL_GRAY, stroke_width=1.5)
+        t2 = Line([-0.19, -0.16, 0], [0.19, -0.16, 0], color=COL_GRAY, stroke_width=1.5)
+        t3 = Line([-0.17, -0.26, 0], [0.17, -0.26, 0], color=COL_GRAY, stroke_width=1.5)
+        return VGroup(head, plug, socket, t1, t2, t3)
+
+    def make_nipple_icon(self):
+        th_l = Rectangle(width=0.34, height=0.38, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.45).move_to([-0.29, 0, 0])
+        th_r = Rectangle(width=0.34, height=0.38, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.45).move_to([0.29, 0, 0])
+        hex_nut = Rectangle(width=0.22, height=0.54, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.95).move_to([0, 0, 0])
+        l_ribs = VGroup(*[Line([-0.39 + i * 0.08, -0.19, 0], [-0.39 + i * 0.08, 0.19, 0], color=COL_GRAY, stroke_width=1.5) for i in range(3)])
+        r_ribs = VGroup(*[Line([0.21 + i * 0.08, -0.19, 0], [0.21 + i * 0.08, 0.19, 0], color=COL_GRAY, stroke_width=1.5) for i in range(3)])
+        return VGroup(th_l, th_r, hex_nut, l_ribs, r_ribs)
+
+    def make_tee_icon(self):
+        h_body = Rectangle(width=0.92, height=0.36, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.5).move_to([0, -0.08, 0])
+        v_body = Rectangle(width=0.36, height=0.40, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.5).move_to([0, 0.16, 0])
+        c_l = Rectangle(width=0.08, height=0.46, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.9).move_to([-0.46, -0.08, 0])
+        c_r = Rectangle(width=0.08, height=0.46, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.9).move_to([0.46, -0.08, 0])
+        c_t = Rectangle(width=0.46, height=0.08, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.9).move_to([0, 0.36, 0])
+        t_flow = VGroup(
+            Line([-0.36, -0.08, 0], [0.36, -0.08, 0], color=COL_OK, stroke_width=2),
+            Line([0, -0.08, 0], [0, 0.30, 0], color=COL_OK, stroke_width=2)
+        )
+        return VGroup(h_body, v_body, c_l, c_r, c_t, t_flow)
+
+    def make_elbow_icon(self):
+        h_part = Rectangle(width=0.48, height=0.36, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.5).move_to([-0.11, -0.11, 0])
+        v_part = Rectangle(width=0.36, height=0.48, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.5).move_to([0.11, 0.11, 0])
+        corner = Square(side_length=0.36, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.5).move_to([0.11, -0.11, 0])
+        c_in = Rectangle(width=0.08, height=0.46, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.9).move_to([-0.35, -0.11, 0])
+        c_out = Rectangle(width=0.46, height=0.08, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.9).move_to([0.11, 0.35, 0])
+        flow_arc = Arc(radius=0.20, start_angle=-PI, angle=PI/2, color=COL_OK, stroke_width=2).move_to([0.02, -0.02, 0])
+        return VGroup(h_part, v_part, corner, c_in, c_out, flow_arc)
+
+    def make_union_icon(self):
+        p_l = Rectangle(width=0.30, height=0.38, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.45).move_to([-0.26, 0, 0])
+        p_r = Rectangle(width=0.30, height=0.38, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.45).move_to([0.26, 0, 0])
+        u_nut = Rectangle(width=0.28, height=0.58, color=COL_WARN, fill_color=COL_WARN).set_fill(COL_WARN, 0.85).move_to([0, 0, 0])
+        div_l = Line([-0.05, -0.29, 0], [-0.05, 0.29, 0], color=COL_BG_BOX, stroke_width=2)
+        div_r = Line([0.05, -0.29, 0], [0.05, 0.29, 0], color=COL_BG_BOX, stroke_width=2)
+        return VGroup(p_l, p_r, u_nut, div_l, div_r)
+
+    def make_cap_icon(self):
+        dome = RoundedRectangle(corner_radius=0.12, width=0.58, height=0.46, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.65).move_to([0.05, 0, 0])
+        collar = Rectangle(width=0.09, height=0.54, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.95).move_to([-0.24, 0, 0])
+        cavity = Rectangle(width=0.22, height=0.32, color=COL_BG_BOX, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 1.0).move_to([-0.13, 0, 0])
+        stop_line = Line([0.06, -0.18, 0], [0.06, 0.18, 0], color=COL_WARN, stroke_width=3)
+        return VGroup(dome, collar, cavity, stop_line)
+
+    def make_bushing_icon(self):
+        hex_shoulder = Rectangle(width=0.20, height=0.68, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.95).move_to([-0.26, 0, 0])
+        male_body = Rectangle(width=0.44, height=0.52, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.5).move_to([0.06, 0, 0])
+        inner_bore = Rectangle(width=0.58, height=0.28, color=COL_BG_BOX, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 1.0).move_to([0, 0, 0])
+        ribs = VGroup(*[Line([-0.08 + i * 0.08, -0.26, 0], [-0.08 + i * 0.08, 0.26, 0], color=COL_GRAY, stroke_width=1.5) for i in range(3)])
+        return VGroup(hex_shoulder, male_body, inner_bore, ribs)
+
+    def make_red_coupling_icon(self):
+        l_sleeve = Rectangle(width=0.30, height=0.60, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.6).move_to([-0.28, 0, 0])
+        taper = Polygon([-0.13, 0.30, 0], [0.13, 0.19, 0], [0.13, -0.19, 0], [-0.13, -0.30, 0],
+                        color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.6)
+        r_sleeve = Rectangle(width=0.30, height=0.38, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.6).move_to([0.28, 0, 0])
+        c_l = Rectangle(width=0.08, height=0.68, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.95).move_to([-0.43, 0, 0])
+        c_r = Rectangle(width=0.08, height=0.46, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.95).move_to([0.43, 0, 0])
+        return VGroup(l_sleeve, taper, r_sleeve, c_l, c_r)
+
+    def make_str_coupling_icon(self):
+        sleeve = Rectangle(width=0.82, height=0.48, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.55).move_to([0, 0, 0])
+        c_l = Rectangle(width=0.08, height=0.58, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.95).move_to([-0.41, 0, 0])
+        c_r = Rectangle(width=0.08, height=0.58, color=COL_FIELD, fill_color=COL_FIELD).set_fill(COL_FIELD, 0.95).move_to([0.41, 0, 0])
+        center_stop = Line([0, -0.24, 0], [0, 0.24, 0], color=COL_OK, stroke_width=3)
+        return VGroup(sleeve, c_l, c_r, center_stop)
+
+    def make_street_elbow_icon(self):
+        h_part = Rectangle(width=0.42, height=0.36, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.5).move_to([-0.09, -0.11, 0])
+        v_part = Rectangle(width=0.36, height=0.42, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.5).move_to([0.11, 0.09, 0])
+        corner = Square(side_length=0.36, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.5).move_to([0.11, -0.11, 0])
+        f_collar = Rectangle(width=0.46, height=0.09, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.95).move_to([0.11, 0.35, 0])
+        m_spigot = Rectangle(width=0.28, height=0.30, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.4).move_to([-0.41, -0.11, 0])
+        m_ribs = VGroup(*[Line([-0.48 + i * 0.07, -0.26, 0], [-0.48 + i * 0.07, 0.04, 0], color=COL_WARN, stroke_width=1.5) for i in range(3)])
+        return VGroup(h_part, v_part, corner, f_collar, m_spigot, m_ribs)
+
+    def make_globe_valve_icon(self):
+        body = Circle(radius=0.26, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.35).move_to([0, -0.09, 0])
+        fl_l = Rectangle(width=0.16, height=0.32, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.85).move_to([-0.35, -0.09, 0])
+        fl_r = Rectangle(width=0.16, height=0.32, color=COL_CURR, fill_color=COL_CURR).set_fill(COL_CURR, 0.85).move_to([0.35, -0.09, 0])
+        stem = Line([0, 0.17, 0], [0, 0.45, 0], color=COL_METAL, stroke_width=3.5)
+        wheel = Ellipse(width=0.48, height=0.13, color=COL_WARN, fill_color=COL_WARN).set_fill(COL_WARN, 0.85).move_to([0, 0.45, 0])
+        baffle = Arc(radius=0.16, start_angle=-PI/3, angle=2*PI/3, color=COL_WARN, stroke_width=2.5).move_to([0, -0.09, 0])
+        return VGroup(body, fl_l, fl_r, stem, wheel, baffle)
+
+    def construct(self):
+        # ----------------------------------------------------------------------
+        # SETUP PERSISTENT BADGES (0.0–1.5s)
+        # ----------------------------------------------------------------------
+        title_mob = title("ข้อต่อท่อ — คำศัพท์พื้นฐาน")
+        ref_mob = page_ref("hydraulic06 น.9")
+        self.keep_mobs = (title_mob, ref_mob)
+
+        self.play(
+            FadeIn(title_mob, shift=UP * 0.4),
+            FadeIn(ref_mob),
+            run_time=1.5
+        )
+        self.wait(0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 2.0–6.5: 6 Most Common Pipe Fittings (6 ไอคอนเจอบ่อย)
+        # ----------------------------------------------------------------------
+        cap1 = caption_top("6 ชนิดที่เจอบ่อยที่สุด")
+        self.play(FadeIn(cap1, shift=UP * 0.3), run_time=0.8)
+
+        # 6 Cards: Top row (3) and Bottom row (3)
+        # Coordinates: x in [-4.4, 0.0, 4.4], y in [1.05, -1.15]
+        box_w, box_h = 3.8, 1.95
+        xs = [-4.4, 0.0, 4.4]
+        y_top, y_bot = 1.05, -1.15
+
+        # Item 1: Pipe Plug
+        icon_plug = self.make_plug_icon().move_to([xs[0], y_top + 0.35, 0])
+        box1 = RoundedRectangle(corner_radius=0.12, width=box_w, height=box_h,
+                                color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[0], y_top, 0])
+        t1_en = Text("Pipe Plug", font_size=15, color=WHITE).move_to([xs[0], y_top - 0.30, 0])
+        t1_th = Text("ปลั๊กอุดท่อ (อุดรูเกลียวใน)", font_size=12, color=COL_CURR).move_to([xs[0], y_top - 0.60, 0])
+        card1 = VGroup(box1, icon_plug, t1_en, t1_th)
+
+        # Item 2: Nipple
+        icon_nipple = self.make_nipple_icon().move_to([xs[1], y_top + 0.35, 0])
+        box2 = RoundedRectangle(corner_radius=0.12, width=box_w, height=box_h,
+                                color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[1], y_top, 0])
+        t2_en = Text("Nipple", font_size=15, color=WHITE).move_to([xs[1], y_top - 0.30, 0])
+        t2_th = Text("นิปเปิ้ล (เกลียวนอก 2 ด้าน)", font_size=12, color=COL_CURR).move_to([xs[1], y_top - 0.60, 0])
+        card2 = VGroup(box2, icon_nipple, t2_en, t2_th)
+
+        # Item 3: Tee
+        icon_tee = self.make_tee_icon().move_to([xs[2], y_top + 0.35, 0])
+        box3 = RoundedRectangle(corner_radius=0.12, width=box_w, height=box_h,
+                                color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[2], y_top, 0])
+        t3_en = Text("Tee", font_size=15, color=WHITE).move_to([xs[2], y_top - 0.30, 0])
+        t3_th = Text("สามทาง (แยกการไหล)", font_size=12, color=COL_CURR).move_to([xs[2], y_top - 0.60, 0])
+        card3 = VGroup(box3, icon_tee, t3_en, t3_th)
+
+        # Item 4: 90° Elbow
+        icon_elbow = self.make_elbow_icon().move_to([xs[0], y_bot + 0.35, 0])
+        box4 = RoundedRectangle(corner_radius=0.12, width=box_w, height=box_h,
+                                color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[0], y_bot, 0])
+        t4_en = Text("90° Elbow", font_size=15, color=WHITE).move_to([xs[0], y_bot - 0.30, 0])
+        t4_th = Text("ข้องอ 90° (เปลี่ยนทิศ)", font_size=12, color=COL_CURR).move_to([xs[0], y_bot - 0.60, 0])
+        card4 = VGroup(box4, icon_elbow, t4_en, t4_th)
+
+        # Item 5: Union
+        icon_union = self.make_union_icon().move_to([xs[1], y_bot + 0.35, 0])
+        box5 = RoundedRectangle(corner_radius=0.12, width=box_w, height=box_h,
+                                color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[1], y_bot, 0])
+        t5_en = Text("Union", font_size=15, color=WHITE).move_to([xs[1], y_bot - 0.30, 0])
+        t5_th = Text("ยูเนียน (ถอดแยกได้อิสระ)", font_size=12, color=COL_CURR).move_to([xs[1], y_bot - 0.60, 0])
+        card5 = VGroup(box5, icon_union, t5_en, t5_th)
+
+        # Item 6: Cap
+        icon_cap = self.make_cap_icon().move_to([xs[2], y_bot + 0.35, 0])
+        box6 = RoundedRectangle(corner_radius=0.12, width=box_w, height=box_h,
+                                color=COL_METAL, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[2], y_bot, 0])
+        t6_en = Text("Cap", font_size=15, color=WHITE).move_to([xs[2], y_bot - 0.30, 0])
+        t6_th = Text("ฝาครอบ (ปิดปลายเกลียวนอก)", font_size=12, color=COL_CURR).move_to([xs[2], y_bot - 0.60, 0])
+        card6 = VGroup(box6, icon_cap, t6_en, t6_th)
+
+        cards6 = [card1, card2, card3, card4, card5, card6]
+
+        self.play(
+            LaggedStart(*[FadeIn(card, shift=UP * 0.2) for card in cards6], lag_ratio=0.25),
+            run_time=3.2
+        )
+        self.wait(0.5)
+
+        # ----------------------------------------------------------------------
+        # BEAT 6.5–15.5: Sequential Highlight & Single-Line Function (6 รายการ)
+        # ----------------------------------------------------------------------
+        desc_box = RoundedRectangle(corner_radius=0.08, width=11.6, height=0.52,
+                                    color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -2.65, 0])
+
+        d1 = Text("Pipe Plug: อุดรูเกลียวหรือช่องต่อที่ไม่ใช้งาน เพื่อป้องกันน้ำมันรั่วไหล", font_size=14, color=COL_WARN).move_to([0, -2.65, 0])
+        self.play(Indicate(icon_plug, color=COL_WARN), FadeIn(desc_box), FadeIn(d1), run_time=0.7)
+        self.wait(0.8)
+
+        d2 = Text("Nipple: ข้อต่อเกลียวนอกสองข้าง สำหรับเชื่อมต่อระยะสั้นระหว่างอุปกรณ์", font_size=14, color=COL_WARN).move_to([0, -2.65, 0])
+        self.play(Indicate(icon_nipple, color=COL_WARN), ReplacementTransform(d1, d2), run_time=0.6)
+        self.wait(0.9)
+
+        d3 = Text("Tee: ข้อต่อ 3 ทาง ใช้แยกเส้นทางน้ำมันจากท่อหลักออกเป็น 2 ทิศทาง", font_size=14, color=COL_WARN).move_to([0, -2.65, 0])
+        self.play(Indicate(icon_tee, color=COL_WARN), ReplacementTransform(d2, d3), run_time=0.6)
+        self.wait(0.9)
+
+        d4 = Text("90° Elbow: ข้อศอกเปลี่ยนทิศทางการไหล 90° (มีมุม 45° และ 60° ด้วย)", font_size=14, color=COL_WARN).move_to([0, -2.65, 0])
+        self.play(Indicate(icon_elbow, color=COL_WARN), ReplacementTransform(d3, d4), run_time=0.6)
+        self.wait(0.9)
+
+        d5 = Text("Union: ข้อต่อยูเนียน ถอดประกอบซ่อมบำรุงได้สะดวก โดยไม่ต้องหมุนท่อทั้งเส้น", font_size=14, color=COL_WARN).move_to([0, -2.65, 0])
+        self.play(Indicate(icon_union, color=COL_WARN), ReplacementTransform(d4, d5), run_time=0.6)
+        self.wait(0.9)
+
+        d6 = Text("Cap: ฝาครอบเกลียวใน ใช้ปิดผนึกปลายท่อด้านนอกให้สนิท", font_size=14, color=COL_WARN).move_to([0, -2.65, 0])
+        self.play(Indicate(icon_cap, color=COL_WARN), ReplacementTransform(d5, d6), run_time=0.6)
+        self.wait(0.9)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 16.3–24.8: Reducing & Coupling Group (กลุ่มเปลี่ยนขนาดและต่อตรง)
+        # ----------------------------------------------------------------------
+        cap2 = caption_top("กลุ่มเปลี่ยนขนาด/ต่อท่อตรง")
+        self.play(FadeIn(cap2, shift=UP * 0.3), run_time=0.8)
+
+        card_w2, card_h2 = 3.8, 2.4
+        y_c2 = 0.15
+
+        # Card 7: Reducing Bushing
+        icon_bushing = self.make_bushing_icon().move_to([xs[0], y_c2 + 0.45, 0])
+        box7 = RoundedRectangle(corner_radius=0.12, width=card_w2, height=card_h2,
+                                color=COL_FIELD, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[0], y_c2, 0])
+        t7_en = Text("Reducing Bushing", font_size=15, color=WHITE).move_to([xs[0], y_c2 - 0.25, 0])
+        t7_th = Text("ปลอกลด (เกลียวนอก-ใน)", font_size=13, color=COL_FIELD).move_to([xs[0], y_c2 - 0.55, 0])
+        t7_tag = Text("เกลียวนอกใหญ่ — เกลียวในเล็ก", font_size=11, color=COL_GRAY).move_to([xs[0], y_c2 - 0.85, 0])
+        card7 = VGroup(box7, icon_bushing, t7_en, t7_th, t7_tag)
+
+        # Card 8: Reducing Coupling
+        icon_red_coup = self.make_red_coupling_icon().move_to([xs[1], y_c2 + 0.45, 0])
+        box8 = RoundedRectangle(corner_radius=0.12, width=card_w2, height=card_h2,
+                                color=COL_FIELD, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[1], y_c2, 0])
+        t8_en = Text("Reducing Coupling", font_size=15, color=WHITE).move_to([xs[1], y_c2 - 0.25, 0])
+        t8_th = Text("ข้อต่อลด (เกลียวใน 2 ด้าน)", font_size=13, color=COL_FIELD).move_to([xs[1], y_c2 - 0.55, 0])
+        t8_tag = Text("เชื่อมท่อ 2 เส้นขนาดต่างกัน", font_size=11, color=COL_GRAY).move_to([xs[1], y_c2 - 0.85, 0])
+        card8 = VGroup(box8, icon_red_coup, t8_en, t8_th, t8_tag)
+
+        # Card 9: Straight Coupling
+        icon_str_coup = self.make_str_coupling_icon().move_to([xs[2], y_c2 + 0.45, 0])
+        box9 = RoundedRectangle(corner_radius=0.12, width=card_w2, height=card_h2,
+                                color=COL_FIELD, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs[2], y_c2, 0])
+        t9_en = Text("Straight Coupling", font_size=15, color=WHITE).move_to([xs[2], y_c2 - 0.25, 0])
+        t9_th = Text("ข้อต่อตรง (เกลียวใน 2 ด้าน)", font_size=13, color=COL_FIELD).move_to([xs[2], y_c2 - 0.55, 0])
+        t9_tag = Text("เชื่อมท่อไซส์เดียวกันเป็นเส้นยาว", font_size=11, color=COL_GRAY).move_to([xs[2], y_c2 - 0.85, 0])
+        card9 = VGroup(box9, icon_str_coup, t9_en, t9_th, t9_tag)
+
+        cards3 = [card7, card8, card9]
+
+        self.play(
+            LaggedStart(*[FadeIn(card, shift=UP * 0.2) for card in cards3], lag_ratio=0.3),
+            run_time=1.8
+        )
+        self.wait(1.5)
+
+        # Highlight 3 items
+        desc_box2 = RoundedRectangle(corner_radius=0.08, width=11.6, height=0.52,
+                                     color=COL_FIELD, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -2.2, 0])
+
+        d7 = Text("Bushing: ปลอกลด เกลียวนอกใหญ่-เกลียวในเล็ก ประหยัดพื้นที่ติดตั้ง", font_size=14, color=COL_FIELD).move_to([0, -2.2, 0])
+        self.play(Indicate(icon_bushing, color=COL_FIELD), FadeIn(desc_box2), FadeIn(d7), run_time=0.5)
+        self.wait(0.7)
+
+        d8 = Text("Reducing Coupling: ข้อต่อลดเกลียวใน ใช้เชื่อมท่อ 2 เส้นที่มีขนาดต่างกัน", font_size=14, color=COL_FIELD).move_to([0, -2.2, 0])
+        self.play(Indicate(icon_red_coup, color=COL_FIELD), ReplacementTransform(d7, d8), run_time=0.5)
+        self.wait(0.7)
+
+        d9 = Text("Straight Coupling: ข้อต่อตรงเกลียวใน ใช้ต่อท่อขนาดเดียวกันเป็นเส้นยาว", font_size=14, color=COL_FIELD).move_to([0, -2.2, 0])
+        self.play(Indicate(icon_str_coup, color=COL_FIELD), ReplacementTransform(d8, d9), run_time=0.5)
+        self.wait(0.7)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 24.8–29.8: Street Elbow & Globe Valve (ข้องอนอก-ใน และโกลบวาล์ว)
+        # ----------------------------------------------------------------------
+        cap3 = caption_top("Street Elbow และ Globe Valve")
+        self.play(FadeIn(cap3, shift=UP * 0.3), run_time=0.8)
+
+        card_w3, card_h3 = 5.2, 2.5
+        xs3 = [-3.2, 3.2]
+        y_c3 = 0.15
+
+        # Card 10: Street Elbow
+        icon_street = self.make_street_elbow_icon().move_to([xs3[0], y_c3 + 0.45, 0])
+        box10 = RoundedRectangle(corner_radius=0.12, width=card_w3, height=card_h3,
+                                 color=COL_CURR, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs3[0], y_c3, 0])
+        t10_en = Text("Street Elbow", font_size=16, color=WHITE).move_to([xs3[0], y_c3 - 0.25, 0])
+        t10_th = Text("ข้องอนอก-ใน (เกลียวนอก 1 ข้าง, เกลียวใน 1 ข้าง)", font_size=12, color=COL_CURR).move_to([xs3[0], y_c3 - 0.55, 0])
+        t10_tag = Text("ขันตรงเข้าอุปกรณ์ได้ทันที — ประหยัดนิปเปิ้ล", font_size=11, color=COL_GRAY).move_to([xs3[0], y_c3 - 0.85, 0])
+        card10 = VGroup(box10, icon_street, t10_en, t10_th, t10_tag)
+
+        # Card 11: Globe Valve
+        icon_globe = self.make_globe_valve_icon().move_to([xs3[1], y_c3 + 0.45, 0])
+        box11 = RoundedRectangle(corner_radius=0.12, width=card_w3, height=card_h3,
+                                 color=COL_CURR, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.90).move_to([xs3[1], y_c3, 0])
+        t11_en = Text("Globe Valve", font_size=16, color=WHITE).move_to([xs3[1], y_c3 - 0.25, 0])
+        t11_th = Text("โกลบวาล์ว (วาล์วควบคุมการไหล)", font_size=12, color=COL_CURR).move_to([xs3[1], y_c3 - 0.55, 0])
+        t11_tag = Text("ทางเดินคดเคี้ยว — เหมาะสำหรับปรับหรี่ (Throttling)", font_size=11, color=COL_GRAY).move_to([xs3[1], y_c3 - 0.85, 0])
+        card11 = VGroup(box11, icon_globe, t11_en, t11_th, t11_tag)
+
+        self.play(FadeIn(card10, shift=UP * 0.2), FadeIn(card11, shift=UP * 0.2), run_time=1.0)
+        self.wait(0.8)
+
+        desc_box3 = RoundedRectangle(corner_radius=0.08, width=11.6, height=0.52,
+                                     color=COL_CURR, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -2.2, 0])
+
+        d10 = Text("Street Elbow: มีเกลียวนอก 1 ข้าง เกลียวใน 1 ข้าง ขันตรงเข้าอุปกรณ์ได้โดยไม่ต้องใช้ Nipple", font_size=14, color=COL_CURR).move_to([0, -2.2, 0])
+        self.play(Indicate(icon_street, color=COL_CURR), FadeIn(desc_box3), FadeIn(d10), run_time=0.6)
+        self.wait(0.9)
+
+        d11 = Text("Globe Valve: วาล์วแบบโกลบ ออกแบบช่องไหลคดเคี้ยว เหมาะสำหรับปรับหรี่อัตราไหล (Throttling)", font_size=14, color=COL_CURR).move_to([0, -2.2, 0])
+        self.play(Indicate(icon_globe, color=COL_CURR), ReplacementTransform(d10, d11), run_time=0.6)
+        self.wait(0.9)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ----------------------------------------------------------------------
+        # BEAT 29.8–33.0: Summary Table (ตารางสรุป 11 ชนิด)
+        # ----------------------------------------------------------------------
+        table_box = RoundedRectangle(corner_radius=0.15, width=12.2, height=4.7,
+                                     color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0, -0.15, 0])
+
+        head_col1 = Text("ชนิดข้อต่อ (Pipe Fitting)", font_size=13, color=COL_OK).move_to([-3.6, 1.88, 0])
+        head_col2 = Text("หน้าที่หลัก / ลักษณะการใช้งาน (Function)", font_size=13, color=COL_OK).move_to([1.8, 1.88, 0])
+        h_sep = Line([-5.8, 1.68, 0], [5.8, 1.68, 0], color=COL_OK, stroke_width=1.5)
+
+        items_summary = [
+            ("Pipe Plug (ปลั๊กอุด)", "อุดรูเกลียวใน หรือพอร์ตอุปกรณ์ที่ไม่ใช้งาน"),
+            ("Nipple (นิปเปิ้ล)", "ต่อเชื่อมระยะสั้นระหว่างอุปกรณ์ (เกลียวนอก 2 ด้าน)"),
+            ("Tee (สามทาง)", "แยกเส้นทางการไหลจาก 1 ทางออกเป็น 2 ทิศทาง"),
+            ("90° Elbow (ข้องอ 90°)", "เปลี่ยนทิศทางการเดินท่อ 90° (มี 45° และ 60° ด้วย)"),
+            ("Union (ยูเนียน)", "ถอดประกอบซ่อมบำรุงได้สะดวก โดยไม่ต้องหมุนท่อทั้งเส้น"),
+            ("Cap (ฝาครอบ)", "ปิดผนึกปลายท่อด้านนอกให้สนิท"),
+            ("Reducing Bushing (ปลอกลด)", "ลดขนาดเกลียว (เกลียวนอกใหญ่ - เกลียวในเล็ก ประหยัดที่)"),
+            ("Reducing Coupling (ข้อต่อลด)", "เชื่อมต่อท่อ 2 เส้นที่มีขนาดต่างกัน (เกลียวใน 2 ด้าน)"),
+            ("Straight Coupling (ข้อต่อตรง)", "เชื่อมต่อท่อขนาดเดียวกันเป็นเส้นยาว (เกลียวใน 2 ด้าน)"),
+            ("Street Elbow (ข้องอนอก-ใน)", "ข้องอที่มีเกลียวนอก 1 ข้าง เกลียวใน 1 ข้าง (ประหยัดนิปเปิ้ล)"),
+            ("Globe Valve (โกลบวาล์ว)", "ควบคุมเปิด-ปิด และปรับหรี่อัตราการไหล (Throttling)")
+        ]
+
+        row_mobs = []
+        y_start = 1.48
+        dy = 0.36
+        for i, (name_txt, func_txt) in enumerate(items_summary):
+            y_r = y_start - i * dy
+            t_name = Text(f"{i+1}. {name_txt}", font_size=12, color=WHITE).move_to([-3.6, y_r, 0])
+            t_func = Text(func_txt, font_size=12, color=COL_GRAY).move_to([1.8, y_r, 0])
+            row_mobs.extend([t_name, t_func])
+
+        summary_table = VGroup(table_box, head_col1, head_col2, h_sep, *row_mobs)
+
+        self.play(FadeIn(summary_table, shift=UP * 0.4), run_time=0.8)
+        self.wait(2.4)
+
+        self.clear_stage(run_time=0.6)
+
+        # ----------------------------------------------------------------------
+        # BEAT 33.0–37.0: Review Question Card
+        # ----------------------------------------------------------------------
+        q_box = RoundedRectangle(corner_radius=0.15, width=11.2, height=2.6,
+                                 color=COL_WARN, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.35, 0.0])
+        q_head = Text("คำถามทบทวนความเข้าใจ", font_size=18, color=COL_WARN).move_to([0.0, 0.50, 0.0])
+        q_body = Text("ต้องการถอดข้อต่อออกบ่อยๆ เพื่อซ่อมบำรุง โดยไม่หมุนท่อทั้งเส้น\nควรเลือกใช้ข้อต่อชนิดใด?",
+                      font_size=15, color=WHITE).move_to([0.0, 0.0, 0.0])
+        q_ans = Text("(คำตอบ: Union — มีปลอกเกลียวหมุนขันแยกอิสระได้ โดยท่อทั้งสองข้างอยู่นิ่ง)",
+                     font_size=13, color=COL_GRAY).move_to([0.0, -0.65, 0.0])
+
+        q_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(q_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(3.4)
+
+        # ----------------------------------------------------------------------
+        # BEAT 37.0–38.0: Outro & Fade Out
+        # ----------------------------------------------------------------------
+        self.play(FadeOut(q_grp), run_time=0.6)
+        self.wait(0.4)
+        self.fade_out_all(run_time=0.8)
+
+
+
 
 
