@@ -5943,10 +5943,8 @@ class H6_15_ORings(SafeScene):
         # Rigid Back-Up Ring: firm rectangular block placed on downstream side (x=1.35 to 1.80)
         # Blocking entrance to clearance gap!
         backup_ring = Rectangle(
-            width=0.55, height=1.92,
-            color=COL_OK, stroke_width=3,
-            fill_color="#334155", fill_opacity=0.95
-        ).move_to([1.52, 0.0, 0.0])
+            width=0.55, height=1.92, color=COL_OK
+        ).set_fill("#334155", 0.95).set_stroke(COL_OK, 3.0).move_to([1.52, 0.0, 0.0])
         lbl_bu = Text("Back-Up Ring\n(แหวนกันทะลัก)", font_size=10.5, color=COL_OK).next_to(backup_ring, UP, buff=0.35)
         bu_grp = VGroup(backup_ring, lbl_bu)
 
@@ -5971,11 +5969,14 @@ class H6_15_ORings(SafeScene):
         self.play(
             FadeIn(bu_grp, shift=DOWN * 0.2),
             Transform(oring_pre_ext, oring_contained),
-            Indicate(backup_ring, color=YELLOW, scale_factor=1.15),
             FadeIn(banner4),
-            run_time=1.2
+            run_time=1.0
         )
-        self.wait(5.0)  # Checkpoint 40.0s falls here
+        self.play(
+            Indicate(backup_ring, color=YELLOW, scale_factor=1.15),
+            run_time=0.6
+        )
+        self.wait(4.6)  # Checkpoint t≈36.0s falls inside this hold period
 
         self.clear_stage(run_time=0.6)
         self.wait(0.2)
