@@ -1858,7 +1858,7 @@ class IC06_KennedysTheorem(SafeScene):
         stepA1 = _ic06_step_badge("ขั้นที่ 1: วัตถุ 1 (เฟรม) + วัตถุ 2 ต่อกันที่หมุด", COL_OK).move_to(stepA_pos)
         self.play(FadeIn(stepA1, shift=UP * 0.2), run_time=0.4)
 
-        I12_pt = np.array([-2.6, -0.3, 0.0])
+        I12_pt = np.array([-2.6, -1.1, 0.0])
         body1_line = Line(I12_pt + [-1.6, -0.9, 0], I12_pt + [1.6, -0.9, 0], color=COL_METAL, stroke_width=6)
         hatch1 = VGroup(*[
             Line([x, I12_pt[1] - 0.9, 0], [x - 0.14, I12_pt[1] - 1.08, 0], color="#64748B", stroke_width=1.3)
@@ -1893,7 +1893,7 @@ class IC06_KennedysTheorem(SafeScene):
         self.play(ReplacementTransform(stepA2, stepA3), run_time=0.4)
 
         dir_v = (I23_pt - I12_pt) / np.linalg.norm(I23_pt - I12_pt)
-        line_ext = DashedLine(I12_pt - 1.6 * dir_v, I23_pt + 3.2 * dir_v, color=COL_WARN, stroke_width=2.5)
+        line_ext = DashedLine(I12_pt - 1.6 * dir_v, I23_pt + 1.6 * dir_v, color=COL_WARN, stroke_width=2.5)
         self.play(Create(line_ext), run_time=1.0)
         self.wait(0.5)
 
@@ -1901,10 +1901,10 @@ class IC06_KennedysTheorem(SafeScene):
         stepA4 = _ic06_step_badge("ขั้นที่ 4: I_13 ต้องอยู่บนเส้นนี้เท่านั้น", COL_WARN).move_to(stepA_pos)
         self.play(ReplacementTransform(stepA3, stepA4), run_time=0.4)
 
-        I13_guess = I23_pt + 2.0 * dir_v
+        I13_guess = I23_pt + 1.1 * dir_v
         dot_I13 = Dot(I13_guess, radius=0.09, color=COL_WARN)
         ring_I13 = Circle(radius=0.22, color=COL_WARN, stroke_width=2.2).move_to(I13_guess)
-        lbl_I13 = Text("I_13 (อยู่บนเส้นนี้แน่ๆ)", font_size=10.5, color=COL_WARN, weight=BOLD).next_to(dot_I13, RIGHT, buff=0.15)
+        lbl_I13 = Text("I_13 (อยู่บนเส้นนี้แน่ๆ)", font_size=10.5, color=COL_WARN, weight=BOLD).next_to(dot_I13, DOWN + RIGHT, buff=0.15)
         self.play(FadeIn(dot_I13), FadeIn(ring_I13), FadeIn(lbl_I13), run_time=0.6)
 
         theorem_text = Text(
