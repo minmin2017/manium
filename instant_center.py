@@ -1462,3 +1462,312 @@ class IC04_NotationI12(SafeScene):
         # ==================================================================
         self.fade_out_all(run_time=0.5)
         self.wait(0.5)
+
+
+# ======================================================================
+# Helper functions for IC05_JointTypes
+# ======================================================================
+
+def _ic05_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _ic05_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _ic05_caption_top(text, color=WHITE):
+    return Text(text, font_size=13, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _ic05_badge(text, color):
+    lbl = Text(text, font_size=9.5, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.36, height=0.30, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _ic05_type_label(text, color=COL_OK):
+    lbl = Text(text, font_size=13, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.5, height=0.44, corner_radius=0.10,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl).move_to([-4.2, 1.9, 0.0])
+
+
+def _ic05_reason(text, color=WHITE):
+    t = Text(text, font_size=12, color=color).move_to([0.0, -2.55, 0.0])
+    fit_width(t, 11.6)
+    return t
+
+
+class IC05_JointTypes(SafeScene):
+    """
+    W03 น.10-12 — ตำแหน่ง IC ของข้อต่อ (joint) 5 แบบ
+    Plan: Main_note/Claude_Specs/Manim — IC05_JointTypes Plan.md
+    """
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ==================================================================
+        # BEAT 0.0-1.8: Title & Page Reference
+        # ==================================================================
+        title_m = _ic05_title("IC ของข้อต่อ (Joint) 5 แบบ")
+        page_ref_m = _ic05_page_ref("W03 น.10-12")
+        self.play(FadeIn(title_m, shift=UP * 0.4), FadeIn(page_ref_m), run_time=1.2)
+        self.wait(0.4)
+
+        # ==================================================================
+        # BEAT 1.8-4.8: Hook Question
+        # ==================================================================
+        hook_q = _ic05_caption_top(
+            "วิธีลากเส้นตั้งฉากที่เรียนไป ใช้ได้เหมือนกันหมดทุกชนิดข้อต่อไหม?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 11.8)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.5)
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT 4.8-5.5: Answer caption
+        # ==================================================================
+        cap1 = _ic05_caption_top(
+            "จริงๆ ตำแหน่ง IC ขึ้นกับชนิดข้อต่อ — 4 ใน 5 แบบ หาได้ทันทีจากรูปทรง ไม่ต้องรู้ทิศทางความเร็วเลย"
+        )
+        fit_width(cap1, 11.8)
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # ==================================================================
+        # CASE 1/5: Revolute joint (หมุด) — n.12 top-left
+        # ==================================================================
+        type1 = _ic05_type_label("1. Revolute joint (ข้อต่อหมุด)", COL_OK)
+        self.play(FadeIn(type1, shift=UP * 0.2), run_time=0.4)
+
+        pin1 = np.array([0.0, -0.6, 0.0])
+        ang_B1 = np.radians(200)
+        ang_C1 = np.radians(-20)
+        body_B1 = Line(pin1, pin1 + 2.1 * np.array([np.cos(ang_B1), np.sin(ang_B1), 0]), stroke_width=7, color=COL_METAL)
+        body_C1 = Line(pin1, pin1 + 2.3 * np.array([np.cos(ang_C1), np.sin(ang_C1), 0]), stroke_width=7, color=COL_FIELD)
+        lbl_B1 = Text("Body B", font_size=11, color=COL_METAL).next_to(body_B1.get_end(), DOWN + LEFT, buff=0.1)
+        lbl_C1 = Text("Body C", font_size=11, color=COL_FIELD).next_to(body_C1.get_end(), RIGHT, buff=0.1)
+
+        self.play(Create(body_B1), FadeIn(lbl_B1), run_time=0.6)
+        self.play(Create(body_C1), FadeIn(lbl_C1), run_time=0.6)
+
+        pin1_dot = Dot(pin1, radius=0.09, color=WHITE)
+        pin1_cross = VGroup(
+            Line(pin1 + [-0.09, 0, 0], pin1 + [0.09, 0, 0], color=COL_BG_BOX, stroke_width=1.5),
+            Line(pin1 + [0, -0.09, 0], pin1 + [0, 0.09, 0], color=COL_BG_BOX, stroke_width=1.5),
+        )
+        self.play(FadeIn(pin1_dot), FadeIn(pin1_cross), run_time=0.5)
+        self.wait(0.3)
+
+        self.play(Indicate(pin1_dot, color=COL_OK), run_time=0.6)
+        label_IC1 = Text("I_BC, I_CB", font_size=13, color=COL_OK, weight=BOLD).next_to(pin1_dot, UP, buff=0.25)
+        self.play(FadeIn(label_IC1), run_time=0.5)
+        self.wait(0.3)
+
+        reason1 = _ic05_reason("จุดหมุดมีความเร็วเท่ากัน ไม่ว่าจะมองจากชิ้นไหน → IC อยู่ตรงจุดหมุดเลย", COL_OK)
+        self.play(FadeIn(reason1, shift=UP * 0.3), run_time=0.5)
+        self.wait(3.5)
+
+        self.play(*[FadeOut(m) for m in list(self.mobjects) if m not in (title_m, page_ref_m, cap1)], run_time=0.5)
+        self.wait(0.1)
+
+        # ==================================================================
+        # CASE 2/5: Prismatic joint (สไลด์เดอร์ตรง)
+        # ==================================================================
+        type2 = _ic05_type_label("2. Prismatic joint (สไลด์เดอร์ตรง)", COL_OK)
+        self.play(FadeIn(type2), run_time=0.4)
+
+        rail_y = -1.1
+        rail_C2 = Line([-3.4, rail_y, 0], [3.4, rail_y, 0], stroke_width=7, color=COL_FIELD)
+        lbl_rail = Text("Body C (ราง)", font_size=10.5, color=COL_FIELD).next_to(rail_C2, DOWN, buff=0.2)
+        self.play(Create(rail_C2), FadeIn(lbl_rail), run_time=0.5)
+
+        block_B2 = RoundedRectangle(width=1.1, height=0.5, corner_radius=0.06, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.6).move_to([-0.3, rail_y + 0.45, 0])
+        lbl_block = Text("Body B", font_size=10.5, color=COL_METAL).next_to(block_B2, UP, buff=0.12)
+        self.play(FadeIn(block_B2), FadeIn(lbl_block), run_time=0.5)
+
+        slide_arrow = Arrow(block_B2.get_center() + [1.0, 0, 0], block_B2.get_center() + [2.0, 0, 0], buff=0, color=COL_WARN, stroke_width=3.5, max_tip_length_to_length_ratio=0.3)
+        slide_lbl = Text("ไถลตรง", font_size=9.5, color=COL_WARN).next_to(slide_arrow, UP, buff=0.08)
+        self.play(GrowArrow(slide_arrow), FadeIn(slide_lbl), run_time=0.5)
+        self.wait(0.3)
+
+        px = block_B2.get_center()[0]
+        perp_up = Arrow([px, rail_y + 0.45, 0], [px, rail_y + 2.2, 0], buff=0.25, color=COL_OK, stroke_width=3.0, max_tip_length_to_length_ratio=0.12)
+        perp_down = Arrow([px, rail_y + 0.45, 0], [px, rail_y - 1.55, 0], buff=0.25, color=COL_OK, stroke_width=3.0, max_tip_length_to_length_ratio=0.12)
+        self.play(GrowArrow(perp_up), GrowArrow(perp_down), run_time=0.7)
+        label_inf = Text("I_BC, I_CB at ∞", font_size=12.5, color=COL_OK, weight=BOLD).next_to(perp_up, UP, buff=0.12)
+        self.play(FadeIn(label_inf), run_time=0.5)
+
+        reason2 = _ic05_reason("เส้นตรง = รัศมีความโค้ง ∞ → ω = v/r = v/∞ = 0 จริง แต่ตำแหน่งศูนย์กลางอยู่ที่ ∞ ⊥ ทิศไถล", COL_OK)
+        self.play(FadeIn(reason2, shift=UP * 0.3), run_time=0.5)
+        self.wait(3.0)
+
+        self.play(*[FadeOut(m) for m in list(self.mobjects) if m not in (title_m, page_ref_m, cap1)], run_time=0.5)
+        self.wait(0.1)
+
+        # ==================================================================
+        # CASE 3/5: Rolling contact (กลิ้งไม่ลื่นไถล) — callback IC02
+        # ==================================================================
+        type3 = _ic05_type_label("3. Rolling contact (กลิ้งไม่ลื่นไถล)", COL_OK)
+        self.play(FadeIn(type3), run_time=0.4)
+
+        P3 = np.array([0.0, -0.6, 0.0])
+        blob_B3 = Circle(radius=1.3, color=COL_METAL, stroke_width=3.0).move_to(P3 + [-1.3, 0, 0])
+        blob_B3.set_fill(COL_METAL, 0.15)
+        blob_C3 = Circle(radius=1.0, color=COL_FIELD, stroke_width=3.0).move_to(P3 + [1.0, 0, 0])
+        blob_C3.set_fill(COL_FIELD, 0.15)
+        lbl_B3 = Text("Body B", font_size=10.5, color=COL_METAL).move_to(P3 + [-1.3, -1.6, 0])
+        lbl_C3 = Text("Body C", font_size=10.5, color=COL_FIELD).move_to(P3 + [1.0, -1.35, 0])
+
+        self.play(Create(blob_B3), FadeIn(lbl_B3), run_time=0.6)
+        self.play(Create(blob_C3), FadeIn(lbl_C3), run_time=0.6)
+        self.wait(0.3)
+
+        dot_P3 = Dot(P3, radius=0.09, color=COL_OK)
+        self.play(FadeIn(dot_P3), run_time=0.4)
+        self.play(Indicate(dot_P3, color=COL_OK), run_time=0.6)
+        label_IC3 = Text("P = I_BC, I_CB", font_size=12.5, color=COL_OK, weight=BOLD).next_to(dot_P3, UP, buff=0.22)
+        self.play(FadeIn(label_IC3), run_time=0.5)
+
+        recap3 = Text("(callback: เหมือนล้อกลิ้งใน IC02!)", font_size=10, color=COL_GRAY).move_to([4.4, -2.3, 0.0])
+        self.play(FadeIn(recap3, scale=0.8), run_time=0.5)
+
+        reason3 = _ic05_reason("จุดสัมผัสไม่ลื่นไถล = จุดที่ v เท่ากันทั้งสองฝั่ง → IC อยู่ที่จุดสัมผัสเลย", COL_OK)
+        self.play(FadeIn(reason3, shift=UP * 0.3), run_time=0.5)
+        self.wait(3.0)
+
+        self.play(*[FadeOut(m) for m in list(self.mobjects) if m not in (title_m, page_ref_m, cap1)], run_time=0.5)
+        self.wait(0.1)
+
+        # ==================================================================
+        # CASE 4/5: Cam-pair contact — ⚠️ EXCEPTION, uses COL_WARN
+        # ==================================================================
+        type4 = _ic05_type_label("4. Cam-pair contact — ⚠️ ข้อยกเว้น!", COL_WARN)
+        self.play(FadeIn(type4), run_time=0.4)
+
+        P4 = np.array([0.0, -0.5, 0.0])
+        OB4 = P4 + np.array([-1.5, -0.3, 0.0])
+        OC4 = P4 + np.array([1.6, -0.2, 0.0])
+        cam_B4 = Ellipse(width=2.6, height=1.7, color=COL_METAL, stroke_width=3.0).set_fill(COL_METAL, 0.15).move_to(OB4).rotate(np.radians(15))
+        cam_C4 = Ellipse(width=2.2, height=1.5, color=COL_FIELD, stroke_width=3.0).set_fill(COL_FIELD, 0.15).move_to(OC4).rotate(np.radians(-20))
+        lbl_B4 = Text("Body B", font_size=10.5, color=COL_METAL).move_to(OB4 + [0, -1.15, 0])
+        lbl_C4 = Text("Body C", font_size=10.5, color=COL_FIELD).move_to(OC4 + [0, -1.05, 0])
+
+        self.play(Create(cam_B4), FadeIn(lbl_B4), run_time=0.6)
+        self.play(Create(cam_C4), FadeIn(lbl_C4), run_time=0.6)
+
+        dot_OB4 = Dot(OB4, radius=0.06, color=COL_METAL)
+        dot_OC4 = Dot(OC4, radius=0.06, color=COL_FIELD)
+        dot_P4 = Dot(P4, radius=0.08, color=WHITE)
+        self.play(FadeIn(dot_OB4), FadeIn(dot_OC4), FadeIn(dot_P4), run_time=0.4)
+        self.wait(0.2)
+
+        perp_line4 = DashedLine(P4 + [0, 2.0, 0], P4 + [0, -2.0, 0], color=COL_WARN, stroke_width=2.5)
+        self.play(Create(perp_line4), run_time=1.0)
+        self.wait(0.5)
+        label_IC4 = Text("I_BC, I_CB อยู่บนเส้นนี้ (ยังไม่รู้จุดแน่ๆ)", font_size=11.5, color=COL_WARN, weight=BOLD).next_to(perp_line4, RIGHT, buff=0.2)
+        fit_width(label_IC4, 4.0)
+        self.play(FadeIn(label_IC4), run_time=0.5)
+
+        reason4 = _ic05_reason("ต่างจาก 3 แบบแรก! รู้แค่ 'แนวเส้น' — ต้องรู้ทิศทางความเร็วเพิ่ม ถึงจะบอกตำแหน่งแน่นอนได้", COL_WARN)
+        self.play(FadeIn(reason4, shift=UP * 0.3), run_time=0.5)
+        self.wait(3.5)
+
+        self.play(*[FadeOut(m) for m in list(self.mobjects) if m not in (title_m, page_ref_m, cap1)], run_time=0.5)
+        self.wait(0.1)
+
+        # ==================================================================
+        # CASE 5/5: Curved slider
+        # ==================================================================
+        type5 = _ic05_type_label("5. Curved slider", COL_OK)
+        self.play(FadeIn(type5), run_time=0.4)
+
+        center_curv = np.array([0.0, -2.1, 0.0])
+        rho_len = 2.3
+        curve_C5 = Arc(radius=rho_len, start_angle=np.radians(55), angle=np.radians(70), arc_center=center_curv, color=COL_FIELD, stroke_width=4.0)
+        lbl_C5 = Text("Body C", font_size=10.5, color=COL_FIELD).move_to(center_curv + [1.9, 1.7, 0])
+        self.play(Create(curve_C5), FadeIn(lbl_C5), run_time=0.6)
+
+        ang_P5 = np.radians(90)
+        P5 = center_curv + rho_len * np.array([np.cos(ang_P5), np.sin(ang_P5), 0])
+        block_B5 = RoundedRectangle(width=0.7, height=0.35, corner_radius=0.05, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.7)
+        block_B5.move_to(P5 + [0, 0.22, 0])
+        lbl_B5 = Text("Body B", font_size=10, color=COL_METAL).next_to(block_B5, UP, buff=0.1)
+        self.play(FadeIn(block_B5), FadeIn(lbl_B5), run_time=0.5)
+
+        rho_arrow = Arrow(P5, center_curv, buff=0.08, color=COL_OK, stroke_width=2.8, max_tip_length_to_length_ratio=0.08)
+        rho_lbl = Text("ρ", font_size=13, color=COL_OK).move_to((P5 + center_curv) / 2 + [0.3, 0, 0])
+        self.play(GrowArrow(rho_arrow), FadeIn(rho_lbl), run_time=0.6)
+
+        dot_center5 = Dot(center_curv, radius=0.09, color=COL_OK)
+        self.play(FadeIn(dot_center5), run_time=0.4)
+        label_IC5 = Text("I_BC, I_CB (จุดศูนย์กลางความโค้ง)", font_size=11.5, color=COL_OK, weight=BOLD).next_to(dot_center5, DOWN, buff=0.18)
+        fit_width(label_IC5, 6.0)
+        self.play(FadeIn(label_IC5), run_time=0.5)
+        self.wait(2.9)
+
+        self.fade_out_all(run_time=0.5)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT: Summary Card (5 types comparison)
+        # ==================================================================
+        sum_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        sum_head = _ic05_badge("สรุป: ตำแหน่ง IC ของข้อต่อ 5 แบบ", COL_OK).move_to([0.0, 1.45, 0.0])
+        rows = [
+            "Revolute = ตรงจุดหมุด",
+            "Prismatic = ∞ ⊥ ทิศไถล",
+            "Rolling contact = จุดสัมผัส",
+            "Curved slider = จุดศูนย์กลางความโค้ง",
+        ]
+        s_rows = VGroup(*[Text(r, font_size=12, color=WHITE) for r in rows]).arrange(DOWN, buff=0.18, aligned_edge=LEFT).move_to([0.0, 0.35, 0.0])
+        fit_width(s_rows, 10.8)
+        s_warn = Text("Cam-pair = บนเส้น ⊥ ผิวสัมผัส (ต้องรู้ทิศ v เพิ่ม) ⚠️", font_size=12, color=COL_WARN, weight=BOLD).move_to([0.0, -1.15, 0.0])
+        fit_width(s_warn, 10.8)
+        summary_card = VGroup(sum_box, sum_head, s_rows, s_warn)
+
+        self.play(FadeIn(summary_card, shift=UP * 0.4), run_time=0.6)
+        self.wait(1.3)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT: Review Question (bridge to IC06)
+        # ==================================================================
+        q_box = RoundedRectangle(
+            width=11.4, height=2.6, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_body = Text(
+            "ถ้ากลไกมีมากกว่า 2 ชิ้น จะหา IC ระหว่างชิ้นที่ไม่ได้ต่อกันโดยตรงได้ยังไง?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.25, 0.0])
+        fit_width(q_body, 10.6)
+        q_ans = Text(
+            "(คลิปต่อไป: Kennedy's Theorem)",
+            font_size=11, color=COL_GRAY
+        ).move_to([0.0, -0.5, 0.0])
+        question_card = VGroup(q_box, q_body, q_ans)
+
+        self.play(FadeIn(question_card, shift=UP * 0.3), run_time=0.5)
+        self.wait(2.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(1.0)
