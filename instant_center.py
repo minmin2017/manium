@@ -2054,3 +2054,231 @@ class IC06_KennedysTheorem(SafeScene):
 
         self.fade_out_all(run_time=0.6)
         self.wait(0.7)
+
+
+# ======================================================================
+# Helper functions for IC07_FourBarExamples
+# ======================================================================
+
+def _ic07_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _ic07_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _ic07_caption_top(text, color=WHITE):
+    return Text(text, font_size=13, color=color).move_to([0.0, 2.55, 0.0])
+
+
+def _ic07_step_badge(text, color=COL_OK):
+    lbl = Text(text, font_size=12, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.4, height=0.38, corner_radius=0.10,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _ic07_line_intersect(p1, p2, p3, p4):
+    """Intersection point of infinite lines through p1-p2 and p3-p4 (2D, z=0)."""
+    x1, y1 = p1[0], p1[1]
+    x2, y2 = p2[0], p2[1]
+    x3, y3 = p3[0], p3[1]
+    x4, y4 = p4[0], p4[1]
+    denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+    t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom
+    return np.array([x1 + t * (x2 - x1), y1 + t * (y2 - y1), 0.0])
+
+
+class IC07_FourBarExamples(SafeScene):
+    """
+    W03 น.14-15 — ประยุกต์ Circle Diagram กับกลไก 4-bar จริง (2 ตัวอย่าง)
+    Plan: Main_note/Claude_Specs/Manim — IC07_FourBarExamples Plan.md
+    """
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ==================================================================
+        # BEAT 0.0-1.8: Title & Page Reference
+        # ==================================================================
+        title_m = _ic07_title("ตัวอย่างจริง: 4-bar linkage")
+        page_ref_m = _ic07_page_ref("W03 น.14-15")
+        self.play(FadeIn(title_m, shift=UP * 0.4), FadeIn(page_ref_m), run_time=1.2)
+        self.wait(0.4)
+
+        # ==================================================================
+        # BEAT 1.8-4.5: Hook Question
+        # ==================================================================
+        hook_q = _ic07_caption_top(
+            "เทคนิค circle diagram ใช้กับกลไกจริงได้จริงไหม?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 11.5)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.4)
+
+        # ==================================================================
+        # BEAT 4.5-5.2: Answer
+        # ==================================================================
+        cap1 = _ic07_caption_top("ได้จริง ลองดู 2 ตัวอย่าง")
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # ==================================================================
+        # EXAMPLE 1: ordinary four-bar (5.2-20.0), step-by-step per §48
+        # ==================================================================
+        ex1_badge = _ic07_step_badge("Example 1: four-bar ธรรมดา", COL_OK).move_to([-4.6, 1.9, 0.0])
+        self.play(FadeIn(ex1_badge, shift=UP * 0.2), run_time=0.4)
+
+        O2 = np.array([-3.4, -1.7, 0.0])
+        O4 = np.array([1.3, -1.7, 0.0])
+        A = np.array([-2.1, 0.1, 0.0])
+        B = np.array([0.5, 0.7, 0.0])
+
+        ground = Line(O2 + [-0.6, 0, 0], O4 + [0.6, 0, 0], color=COL_GRAY, stroke_width=2.0)
+        hatches1 = VGroup(*[
+            Line([x, O2[1], 0], [x - 0.13, O2[1] - 0.17, 0], color="#64748B", stroke_width=1.2)
+            for x in np.linspace(O2[0] - 0.5, O2[0] + 0.5, 6)
+        ])
+        hatches4 = VGroup(*[
+            Line([x, O4[1], 0], [x - 0.13, O4[1] - 0.17, 0], color="#64748B", stroke_width=1.2)
+            for x in np.linspace(O4[0] - 0.5, O4[0] + 0.5, 6)
+        ])
+        link2 = Line(O2, A, color=COL_FIELD, stroke_width=5)
+        link3 = Line(A, B, color="#BA68C8", stroke_width=5)
+        link4 = Line(B, O4, color=COL_WARN, stroke_width=5)
+
+        self.play(Create(ground), FadeIn(hatches1), FadeIn(hatches4), run_time=0.5)
+        self.play(Create(link2), run_time=0.5)
+        dot_I12 = Dot(O2, radius=0.08, color=COL_OK)
+        lbl_I12 = Text("I_12", font_size=10, color=COL_OK).next_to(dot_I12, DOWN, buff=0.12)
+        self.play(FadeIn(dot_I12), FadeIn(lbl_I12), run_time=0.35)
+
+        self.play(Create(link3), run_time=0.5)
+        dot_I23 = Dot(A, radius=0.08, color=COL_OK)
+        lbl_I23 = Text("I_23", font_size=10, color=COL_OK).next_to(dot_I23, UP + LEFT, buff=0.1)
+        self.play(FadeIn(dot_I23), FadeIn(lbl_I23), run_time=0.35)
+
+        self.play(Create(link4), run_time=0.5)
+        dot_I34 = Dot(B, radius=0.08, color=COL_OK)
+        lbl_I34 = Text("I_34", font_size=10, color=COL_OK).next_to(dot_I34, UP, buff=0.1)
+        self.play(FadeIn(dot_I34), FadeIn(lbl_I34), run_time=0.35)
+
+        dot_I14 = Dot(O4, radius=0.08, color=COL_OK)
+        lbl_I14 = Text("I_14", font_size=10, color=COL_OK).next_to(dot_I14, DOWN, buff=0.12)
+        self.play(FadeIn(dot_I14), FadeIn(lbl_I14), run_time=0.35)
+        self.wait(0.5)
+
+        ex1_badge2 = _ic07_step_badge("หา I_13: ต่อเส้น I_12–I_23 กับ I_34–I_14", COL_WARN).move_to([-4.6, 1.9, 0.0])
+        self.play(ReplacementTransform(ex1_badge, ex1_badge2), run_time=0.4)
+
+        I13 = _ic07_line_intersect(O2, A, B, O4)
+        d1 = (A - O2) / np.linalg.norm(A - O2)
+        d2 = (O4 - B) / np.linalg.norm(O4 - B)
+        ln1 = DashedLine(O2 - 0.2 * d1, I13 + 0.15 * d1, color=COL_WARN, stroke_width=1.8)
+        ln2 = DashedLine(B - 0.2 * d2, I13 + 0.15 * d2, color=COL_WARN, stroke_width=1.8)
+        self.play(Create(ln1), Create(ln2), run_time=0.8)
+        dot_I13 = Dot(I13, radius=0.08, color=COL_WARN)
+        lbl_I13 = Text("I_13", font_size=11, color=COL_WARN, weight=BOLD).next_to(dot_I13, UP, buff=0.1)
+        self.play(FadeIn(dot_I13), FadeIn(lbl_I13), run_time=0.4)
+        self.wait(0.6)
+
+        ex1_badge3 = _ic07_step_badge("หา I_24: ต่อเส้น I_23–I_34 กับ I_12–I_14", COL_WARN).move_to([-4.6, 1.9, 0.0])
+        self.play(ReplacementTransform(ex1_badge2, ex1_badge3), run_time=0.4)
+
+        I24 = _ic07_line_intersect(A, B, O2, O4)
+        d3 = (B - A) / np.linalg.norm(B - A)
+        ln3 = DashedLine(A - 1.3 * d3, I24 + 0.15 * d3, color=COL_WARN, stroke_width=1.8)
+        ln4 = DashedLine(O4 + 0.2 * (O4 - O2) / np.linalg.norm(O4 - O2), I24, color=COL_WARN, stroke_width=1.8)
+        self.play(Create(ln3), Create(ln4), run_time=0.8)
+        dot_I24 = Dot(I24, radius=0.08, color=COL_WARN)
+        lbl_I24 = Text("I_24", font_size=11, color=COL_WARN, weight=BOLD).next_to(dot_I24, DOWN, buff=0.1)
+        self.play(FadeIn(dot_I24), FadeIn(lbl_I24), run_time=0.4)
+        self.wait(2.0)
+
+        self.play(*[FadeOut(m) for m in list(self.mobjects) if m not in (title_m, page_ref_m)], run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # EXAMPLE 2: four-bar with a slider (20.6-36.0), §48 stepwise
+        # ==================================================================
+        cap2 = _ic07_caption_top("Example 2: เหมือนเดิม แต่ลิงก์ 4 เป็นสไลด์เดอร์ (prismatic กับเฟรม)")
+        fit_width(cap2, 11.6)
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        ex2_badge = _ic07_step_badge("โครงสร้างเดิม: link1(เฟรม)-2-3, หมุดที่ O2, A, B", COL_OK).move_to([-4.4, 1.9, 0.0])
+        self.play(FadeIn(ex2_badge, shift=UP * 0.2), run_time=0.4)
+
+        O2b = np.array([-3.2, -1.5, 0.0])
+        Ab = np.array([-1.9, 0.1, 0.0])
+        Bb = np.array([0.9, 0.5, 0.0])
+
+        hatches1b = VGroup(*[
+            Line([x, O2b[1], 0], [x - 0.13, O2b[1] - 0.17, 0], color="#64748B", stroke_width=1.2)
+            for x in np.linspace(O2b[0] - 0.5, O2b[0] + 0.5, 6)
+        ])
+        link2b = Line(O2b, Ab, color=COL_FIELD, stroke_width=5)
+        link3b = Line(Ab, Bb, color="#BA68C8", stroke_width=5)
+        self.play(FadeIn(hatches1b), Create(link2b), Create(link3b), run_time=0.7)
+        dot_I12b = Dot(O2b, radius=0.08, color=COL_OK)
+        dot_I23b = Dot(Ab, radius=0.08, color=COL_OK)
+        dot_I34b = Dot(Bb, radius=0.08, color=COL_OK)
+        lbls_b = VGroup(
+            Text("I_12", font_size=10, color=COL_OK).next_to(dot_I12b, DOWN, buff=0.12),
+            Text("I_23", font_size=10, color=COL_OK).next_to(dot_I23b, UP + LEFT, buff=0.1),
+            Text("I_34", font_size=10, color=COL_OK).next_to(dot_I34b, UP, buff=0.1),
+        )
+        self.play(FadeIn(dot_I12b), FadeIn(dot_I23b), FadeIn(dot_I34b), FadeIn(lbls_b), run_time=0.5)
+        self.wait(0.5)
+
+        ex2_badge2 = _ic07_step_badge("Link 4 เป็นสไลด์เดอร์ → I_14 ที่ ∞ ⊥ ทิศไถล", COL_WARN).move_to([-4.4, 1.9, 0.0])
+        self.play(ReplacementTransform(ex2_badge, ex2_badge2), run_time=0.4)
+
+        slide_dir = np.array([1.0, 0.15, 0.0])
+        slide_dir = slide_dir / np.linalg.norm(slide_dir)
+        rail = Line(Bb - 1.4 * slide_dir, Bb + 1.4 * slide_dir, color=COL_GRAY, stroke_width=2.0)
+        block4 = RoundedRectangle(width=0.7, height=0.35, corner_radius=0.05, color=COL_WARN, fill_color=COL_WARN).set_fill(COL_WARN, 0.6).move_to(Bb)
+        self.play(Create(rail), run_time=0.4)
+        self.play(FadeIn(block4), run_time=0.4)
+
+        perp = np.array([-slide_dir[1], slide_dir[0], 0.0])
+        arr_up = Arrow(Bb + 0.35 * perp, Bb + 1.6 * perp, buff=0, color=COL_WARN, stroke_width=2.6, max_tip_length_to_length_ratio=0.15)
+        arr_dn = Arrow(Bb - 0.35 * perp, Bb - 1.6 * perp, buff=0, color=COL_WARN, stroke_width=2.6, max_tip_length_to_length_ratio=0.15)
+        self.play(GrowArrow(arr_up), GrowArrow(arr_dn), run_time=0.6)
+        lbl_inf = Text("I_14 at ∞", font_size=11, color=COL_WARN, weight=BOLD).next_to(arr_up, RIGHT, buff=0.15)
+        self.play(FadeIn(lbl_inf), run_time=0.4)
+        self.wait(0.6)
+
+        ex2_badge3 = _ic07_step_badge("Kennedy ยังใช้ได้ปกติ — แค่เส้นหนึ่งไปบรรจบทิศ ∞ แทนจุดจริง", COL_OK).move_to([-4.4, 1.9, 0.0])
+        self.play(ReplacementTransform(ex2_badge2, ex2_badge3), run_time=0.4)
+        self.wait(2.2)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT: Review Question (bridge to IC08)
+        # ==================================================================
+        q_box = RoundedRectangle(
+            width=11.4, height=2.4, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_body = Text(
+            "ถ้ากลไกมี 6 ชิ้น (15 จุด IC) จะยังใช้เทคนิคเดิมไหวไหม?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.2, 0.0])
+        fit_width(q_body, 10.6)
+        q_ans = Text("(คลิปต่อไป: ตัวอย่างกลไก 6 ชิ้น)", font_size=11, color=COL_GRAY).move_to([0.0, -0.4, 0.0])
+        question_card = VGroup(q_box, q_body, q_ans)
+
+        self.play(FadeIn(question_card, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.7)
