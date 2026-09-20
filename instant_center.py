@@ -1852,7 +1852,7 @@ class IC06_KennedysTheorem(SafeScene):
         # ==================================================================
         # PART A: The theorem (5.6-20.0), step-by-step per §48
         # ==================================================================
-        stepA_pos = np.array([-4.6, 1.85, 0.0])
+        stepA_pos = np.array([3.6, 1.85, 0.0])
 
         # Step A1: Body 1 (frame) + Body 2, pinned at I12
         stepA1 = _ic06_step_badge("ขั้นที่ 1: วัตถุ 1 (เฟรม) + วัตถุ 2 ต่อกันที่หมุด", COL_OK).move_to(stepA_pos)
@@ -1893,7 +1893,7 @@ class IC06_KennedysTheorem(SafeScene):
         self.play(ReplacementTransform(stepA2, stepA3), run_time=0.4)
 
         dir_v = (I23_pt - I12_pt) / np.linalg.norm(I23_pt - I12_pt)
-        line_ext = DashedLine(I12_pt - 1.6 * dir_v, I23_pt + 1.6 * dir_v, color=COL_WARN, stroke_width=2.5)
+        line_ext = DashedLine(I12_pt - 0.6 * dir_v, I23_pt + 1.3 * dir_v, color=COL_WARN, stroke_width=2.5)
         self.play(Create(line_ext), run_time=1.0)
         self.wait(0.5)
 
