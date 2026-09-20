@@ -2133,13 +2133,14 @@ class IC07_FourBarExamples(SafeScene):
         # ==================================================================
         # EXAMPLE 1: ordinary four-bar (5.2-20.0), step-by-step per §48
         # ==================================================================
-        ex1_badge = _ic07_step_badge("Example 1: four-bar ธรรมดา", COL_OK).move_to([-4.6, 1.9, 0.0])
+        ex1_pos = np.array([3.6, 1.9, 0.0])
+        ex1_badge = _ic07_step_badge("Example 1: four-bar ธรรมดา", COL_OK).move_to(ex1_pos)
         self.play(FadeIn(ex1_badge, shift=UP * 0.2), run_time=0.4)
 
-        O2 = np.array([-3.4, -1.7, 0.0])
-        O4 = np.array([1.3, -1.7, 0.0])
-        A = np.array([-2.1, 0.1, 0.0])
-        B = np.array([0.5, 0.7, 0.0])
+        O2 = np.array([-3.4, -2.6, 0.0])
+        O4 = np.array([1.3, -2.6, 0.0])
+        A = np.array([-2.1, -0.8, 0.0])
+        B = np.array([0.5, -0.2, 0.0])
 
         ground = Line(O2 + [-0.6, 0, 0], O4 + [0.6, 0, 0], color=COL_GRAY, stroke_width=2.0)
         hatches1 = VGroup(*[
@@ -2167,7 +2168,7 @@ class IC07_FourBarExamples(SafeScene):
 
         self.play(Create(link4), run_time=0.5)
         dot_I34 = Dot(B, radius=0.08, color=COL_OK)
-        lbl_I34 = Text("I_34", font_size=10, color=COL_OK).next_to(dot_I34, UP, buff=0.1)
+        lbl_I34 = Text("I_34", font_size=10, color=COL_OK).next_to(dot_I34, RIGHT, buff=0.12)
         self.play(FadeIn(dot_I34), FadeIn(lbl_I34), run_time=0.35)
 
         dot_I14 = Dot(O4, radius=0.08, color=COL_OK)
@@ -2175,7 +2176,7 @@ class IC07_FourBarExamples(SafeScene):
         self.play(FadeIn(dot_I14), FadeIn(lbl_I14), run_time=0.35)
         self.wait(0.5)
 
-        ex1_badge2 = _ic07_step_badge("หา I_13: ต่อเส้น I_12–I_23 กับ I_34–I_14", COL_WARN).move_to([-4.6, 1.9, 0.0])
+        ex1_badge2 = _ic07_step_badge("หา I_13: ต่อเส้น I_12–I_23 กับ I_34–I_14", COL_WARN).move_to(ex1_pos)
         self.play(ReplacementTransform(ex1_badge, ex1_badge2), run_time=0.4)
 
         I13 = _ic07_line_intersect(O2, A, B, O4)
@@ -2189,17 +2190,15 @@ class IC07_FourBarExamples(SafeScene):
         self.play(FadeIn(dot_I13), FadeIn(lbl_I13), run_time=0.4)
         self.wait(0.6)
 
-        ex1_badge3 = _ic07_step_badge("หา I_24: ต่อเส้น I_23–I_34 กับ I_12–I_14", COL_WARN).move_to([-4.6, 1.9, 0.0])
+        ex1_badge3 = _ic07_step_badge("I_24: หาแบบเดียวกัน (ต่อเส้น I_23–I_34 กับ I_12–I_14)", COL_WARN).move_to(ex1_pos)
         self.play(ReplacementTransform(ex1_badge2, ex1_badge3), run_time=0.4)
 
-        I24 = _ic07_line_intersect(A, B, O2, O4)
-        d3 = (B - A) / np.linalg.norm(B - A)
-        ln3 = DashedLine(A - 1.3 * d3, I24 + 0.15 * d3, color=COL_WARN, stroke_width=1.8)
-        ln4 = DashedLine(O4 + 0.2 * (O4 - O2) / np.linalg.norm(O4 - O2), I24, color=COL_WARN, stroke_width=1.8)
-        self.play(Create(ln3), Create(ln4), run_time=0.8)
-        dot_I24 = Dot(I24, radius=0.08, color=COL_WARN)
-        lbl_I24 = Text("I_24", font_size=11, color=COL_WARN, weight=BOLD).next_to(dot_I24, DOWN, buff=0.1)
-        self.play(FadeIn(dot_I24), FadeIn(lbl_I24), run_time=0.4)
+        note_I24 = Text(
+            "I_24 หาได้แบบเดียวกัน แต่มักตกอยู่ไกลนอกกรอบรูปที่วาด (เส้นเกือบขนานกัน)",
+            font_size=11.5, color=COL_WARN
+        ).move_to([0.0, -3.3, 0.0])
+        fit_width(note_I24, 11.6)
+        self.play(FadeIn(note_I24, shift=UP * 0.2), run_time=0.5)
         self.wait(2.0)
 
         self.play(*[FadeOut(m) for m in list(self.mobjects) if m not in (title_m, page_ref_m)], run_time=0.6)
@@ -2212,7 +2211,7 @@ class IC07_FourBarExamples(SafeScene):
         fit_width(cap2, 11.6)
         self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
 
-        ex2_badge = _ic07_step_badge("โครงสร้างเดิม: link1(เฟรม)-2-3, หมุดที่ O2, A, B", COL_OK).move_to([-4.4, 1.9, 0.0])
+        ex2_badge = _ic07_step_badge("โครงสร้างเดิม: link1(เฟรม)-2-3, หมุดที่ O2, A, B", COL_OK).move_to([3.6, 1.9, 0.0])
         self.play(FadeIn(ex2_badge, shift=UP * 0.2), run_time=0.4)
 
         O2b = np.array([-3.2, -1.5, 0.0])
@@ -2237,7 +2236,7 @@ class IC07_FourBarExamples(SafeScene):
         self.play(FadeIn(dot_I12b), FadeIn(dot_I23b), FadeIn(dot_I34b), FadeIn(lbls_b), run_time=0.5)
         self.wait(0.5)
 
-        ex2_badge2 = _ic07_step_badge("Link 4 เป็นสไลด์เดอร์ → I_14 ที่ ∞ ⊥ ทิศไถล", COL_WARN).move_to([-4.4, 1.9, 0.0])
+        ex2_badge2 = _ic07_step_badge("Link 4 เป็นสไลด์เดอร์ → I_14 ที่ ∞ ⊥ ทิศไถล", COL_WARN).move_to([3.6, 1.9, 0.0])
         self.play(ReplacementTransform(ex2_badge, ex2_badge2), run_time=0.4)
 
         slide_dir = np.array([1.0, 0.15, 0.0])
@@ -2255,7 +2254,7 @@ class IC07_FourBarExamples(SafeScene):
         self.play(FadeIn(lbl_inf), run_time=0.4)
         self.wait(0.6)
 
-        ex2_badge3 = _ic07_step_badge("Kennedy ยังใช้ได้ปกติ — แค่เส้นหนึ่งไปบรรจบทิศ ∞ แทนจุดจริง", COL_OK).move_to([-4.4, 1.9, 0.0])
+        ex2_badge3 = _ic07_step_badge("Kennedy ยังใช้ได้ปกติ — แค่เส้นหนึ่งไปบรรจบทิศ ∞ แทนจุดจริง", COL_OK).move_to([3.6, 1.9, 0.0])
         self.play(ReplacementTransform(ex2_badge2, ex2_badge3), run_time=0.4)
         self.wait(2.2)
 
