@@ -39,9 +39,19 @@ class DCMotor_ArmatureCommutator(SafeThreeDScene):
     def construct(self):
         self.set_camera_orientation(phi=75 * DEGREES, theta=-50 * DEGREES)
 
-        SHAFT_LEN, SHAFT_R = 6.0, 0.09
-        ARM_X, ARM_ROUT, ARM_RHUB = -1.0, 1.0, 0.15
-        COM_X, COM_ROUT, COM_RIN = 0.55, 0.42, 0.16
+        # frames at scale=1 came back with the whole assembly reading tiny
+        # (~15-20% of frame width) once actually viewed -- scaled 2.5x so the
+        # wiring/segment detail Min needs for the physical build is legible
+        SCALE = 2.5
+        SHAFT_LEN, SHAFT_R = 8.5, 0.09 * SCALE
+        ARM_X, ARM_ROUT, ARM_RHUB = -1.0 * SCALE, 1.0 * SCALE, 0.15 * SCALE
+        COM_X, COM_ROUT, COM_RIN = 0.55 * SCALE, 0.42 * SCALE, 0.16 * SCALE
+        STACK_HALF = 0.22 * SCALE
+        COIL_R = 0.16 * SCALE
+        JOINT_DX = 0.22 * SCALE
+        BRUSH_GAP = 0.12 * SCALE
+        BRUSH_W, BRUSH_H = 0.30 * SCALE, 0.12 * SCALE
+        LEAD_LEN = 0.9 * SCALE
         POLE_ANGLES = [0, 120, 240]
         SEG_ANGLES = [60, 180, 300]
 
@@ -73,7 +83,7 @@ class DCMotor_ArmatureCommutator(SafeThreeDScene):
 
         # ------------------------------------------------ step 2: armature
         set_step("2) แกน armature 3 ขา (เหล็กลามิเนตอัดซ้อน) อัดแน่นเข้ากับเพลา")
-        stack_xs = np.linspace(ARM_X - 0.22, ARM_X + 0.22, 5)
+        stack_xs = np.linspace(ARM_X - STACK_HALF, ARM_X + STACK_HALF, 5)
         arm_pieces = VGroup(*[
             armature_cross_section(ARM_ROUT, ARM_RHUB, 3, 0.55, METAL)
             .rotate(PI / 2, axis=UP, about_point=ORIGIN).shift(RIGHT * x)
@@ -88,14 +98,14 @@ class DCMotor_ArmatureCommutator(SafeThreeDScene):
         coil_r = ARM_ROUT * 0.62
         names = ["A", "B", "C"]
         coils = VGroup(*[
-            Circle(radius=0.16, color=CURRENT, fill_opacity=0.85, stroke_width=2)
+            Circle(radius=COIL_R, color=CURRENT, fill_opacity=0.85, stroke_width=2)
             .move_to(pt(ARM_X, coil_r, ang))
             for ang in POLE_ANGLES
         ])
         self.play(*[FadeIn(c, scale=0.4) for c in coils], run_time=0.8)
         coil_labels = VGroup()
         for name, ang in zip(names, POLE_ANGLES):
-            lbl = Text(name, font_size=16, color=WHITE).move_to(pt(ARM_X, coil_r, ang))
+            lbl = Text(name, font_size=24, color=WHITE).move_to(pt(ARM_X, coil_r, ang))
             self.world_text(lbl)
             coil_labels.add(lbl)
         self.play(FadeIn(coil_labels), run_time=0.4)
@@ -119,9 +129,9 @@ class DCMotor_ArmatureCommutator(SafeThreeDScene):
         set_step("5) จุดต่อขดลวดคู่ติดกัน (ตรงช่องว่างระหว่างขา) บัดกรีเข้า commutator ชิ้นมุมเดียวกัน")
         wires, junction_dots = VGroup(), VGroup()
         for ang in SEG_ANGLES:
-            j_pt = pt(ARM_X + 0.22, ARM_ROUT * 0.98, ang)
+            j_pt = pt(ARM_X + JOINT_DX, ARM_ROUT * 0.98, ang)
             s_pt = pt(COM_X, COM_ROUT * 0.98, ang)
-            junction_dots.add(Dot(j_pt, radius=0.05, color=CURRENT))
+            junction_dots.add(Dot(j_pt, radius=0.05 * SCALE, color=CURRENT))
             wires.add(Line(j_pt, s_pt, color=CURRENT, stroke_width=3))
         self.play(FadeIn(junction_dots), run_time=0.4)
         self.play(LaggedStart(*[Create(w) for w in wires], lag_ratio=0.25),
@@ -130,13 +140,13 @@ class DCMotor_ArmatureCommutator(SafeThreeDScene):
 
         # -------------------------------------------------- step 6: brushes
         set_step("6) แปรงถ่าน 2 อัน กดสัมผัสผิว commutator จากภายนอก (อยู่นิ่ง ไม่หมุนตามเพลา)")
-        b_top = Rectangle(width=0.30, height=0.12, color=GRAYTXT,
+        b_top = Rectangle(width=BRUSH_W, height=BRUSH_H, color=GRAYTXT,
                           fill_opacity=1, stroke_width=1)
-        b_top.move_to(pt(COM_X, COM_ROUT + 0.12, 90))
-        b_bot = b_top.copy().move_to(pt(COM_X, COM_ROUT + 0.12, 270))
-        lead_p = Line(b_top.get_center(), b_top.get_center() + UP * 0.9,
+        b_top.move_to(pt(COM_X, COM_ROUT + BRUSH_GAP, 90))
+        b_bot = b_top.copy().move_to(pt(COM_X, COM_ROUT + BRUSH_GAP, 270))
+        lead_p = Line(b_top.get_center(), b_top.get_center() + UP * LEAD_LEN,
                       color=EMF, stroke_width=3)
-        lead_m = Line(b_bot.get_center(), b_bot.get_center() + DOWN * 0.9,
+        lead_m = Line(b_bot.get_center(), b_bot.get_center() + DOWN * LEAD_LEN,
                       color=EMF, stroke_width=3)
         self.play(FadeIn(b_top, b_bot), Create(lead_p), Create(lead_m), run_time=1.0)
         legend = self.hud(Text("แปรงถ่าน 2 อัน = ขั้ว + และ − จากไฟภายนอก",
