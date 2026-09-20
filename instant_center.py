@@ -828,3 +828,411 @@ class IC02_RelativeMotionReview(SafeScene):
 
         self.fade_out_all(run_time=0.6)
         self.wait(0.5)
+
+
+
+def _ic03_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _ic03_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _ic03_caption_top(text, color=WHITE):
+    return Text(text, font_size=13.5, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _ic03_badge(text, color):
+    lbl = Text(text, font_size=9.5, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.36, height=0.30, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _ic03_banner(text, color=COL_OK):
+    bg = RoundedRectangle(
+        width=11.8, height=0.52, corner_radius=0.1,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -2.90, 0.0])
+    lbl = Text(text, font_size=11.5, color=color).move_to(bg.get_center())
+    fit_width(lbl, 11.4)
+    return VGroup(bg, lbl)
+
+
+def _ic03_step_badge(text, color):
+    lbl = Text(text, font_size=10.5, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.40, height=0.36, corner_radius=0.08,
+        color=color, stroke_width=2.0, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class IC03_DefinitionOfIC(SafeScene):
+    def clear_stage(self, run_time=0.5):
+        mobs = [
+            m for m in self.mobjects
+            if m not in (getattr(self, "title_m", None), getattr(self, "ref_m", None))
+        ]
+        if mobs:
+            self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ======================================================================
+        # BEAT 0.0–1.8: Title & Page Reference
+        # ======================================================================
+        self.title_m = _ic03_title("นิยาม Instant Center (IC)")
+        self.ref_m = _ic03_page_ref("W03 น.7")
+        self.play(FadeIn(self.title_m, shift=UP * 0.4), FadeIn(self.ref_m), run_time=1.2)
+        self.wait(0.4)
+
+        # ======================================================================
+        # BEAT 1.8–4.8: Hook Question Card
+        # ======================================================================
+        hook_box = RoundedRectangle(
+            width=10.4, height=2.3, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        hook_badge = _ic03_badge("คำถามชวนคิดก่อนเริ่ม (Misconception)", COL_WARN).move_to([0.0, 0.70, 0.0])
+        hook_text = Text(
+            "จุด 'ศูนย์กลางชั่วขณะของความเร็ว' (IC) นี้ อยู่ตำแหน่งเดิมตลอดไปไหม?",
+            font_size=13.5, color=WHITE, weight=BOLD
+        ).move_to([0.0, 0.12, 0.0])
+        fit_width(hook_text, 9.8)
+        hook_sub = Text(
+            "(หลายคนคิดว่า IC เป็นจุดตรึงถาวรบนกลไกเหมือนจุดหมุนของบานพับ — จริงหรือไม่?)",
+            font_size=10.5, color=COL_GRAY
+        ).move_to([0.0, -0.42, 0.0])
+        fit_width(hook_sub, 9.8)
+        hook_card = VGroup(hook_box, hook_badge, hook_text, hook_sub)
+
+        self.play(FadeIn(hook_card, shift=UP * 0.3), run_time=0.6)
+        self.wait(1.8)
+        self.play(FadeOut(hook_card), run_time=0.4)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 4.8–10.6: Definition & Geometric Reason (Connecting with IC02)
+        # ======================================================================
+        cap1 = _ic03_caption_top("นิยาม: ทุกขณะที่วัตถุแกร่งเคลื่อนที่บนระนาบ จะมีจุดหนึ่งที่ความเร็วเป็นศูนย์ชั่วขณะ (v = 0)")
+        fit_width(cap1, 11.8)
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # Schematic connecting with IC02:
+        # If C is IC, then v_X = omega x r_(X/C) is perpendicular to r_(X/C)
+        pt_C_schem = np.array([-3.2, -0.4, 0.0])
+        pt_X_schem = np.array([0.2, 0.5, 0.0])
+        r_CX = pt_X_schem - pt_C_schem
+        L_CX = np.linalg.norm(r_CX)
+        u_CX = r_CX / L_CX
+        n_CX = np.array([-u_CX[1], u_CX[0], 0.0])  # Perpendicular CCW (+90 deg)
+
+        dot_C_schem = Dot(pt_C_schem, radius=0.10, color=COL_OK)
+        lbl_C_schem = Text("C (IC: v_C = 0)", font_size=10.5, color=COL_OK, weight=BOLD).next_to(dot_C_schem, DOWN, buff=0.12)
+        dot_X_schem = Dot(pt_X_schem, radius=0.08, color=WHITE)
+        lbl_X_schem = Text("X (จุดใดๆ บนวัตถุ)", font_size=10.5, color=WHITE).next_to(dot_X_schem, UP + RIGHT, buff=0.10)
+
+        r_line = Arrow(start=pt_C_schem, end=pt_X_schem, buff=0, color=COL_GRAY, stroke_width=3.0, max_tip_length_to_length_ratio=0.20)
+        lbl_r = Text("r_(X/C)", font_size=10, color=COL_GRAY).next_to(r_line.get_center(), UP + LEFT, buff=0.08)
+
+        vX_vec = 1.6 * n_CX
+        vX_arrow = Arrow(start=pt_X_schem, end=pt_X_schem + vX_vec, buff=0, color=COL_FORCE, stroke_width=4.0, max_tip_length_to_length_ratio=0.25)
+        lbl_vX = Text("v_X = ω × r_(X/C) (⊥ r)", font_size=10, color=COL_FORCE, weight=BOLD).next_to(vX_arrow.get_end(), UP + LEFT, buff=0.08)
+
+        # Right angle mark at X between r_line and vX_arrow
+        sq_schem = Square(side_length=0.22, stroke_width=1.8, color=WHITE)
+        sq_schem.rotate(np.arctan2(u_CX[1], u_CX[0]))
+        sq_schem.move_to(pt_X_schem + 0.11 * u_CX + 0.11 * n_CX)
+
+        schem_left = VGroup(dot_C_schem, lbl_C_schem, dot_X_schem, lbl_X_schem, r_line, lbl_r, vX_arrow, lbl_vX, sq_schem)
+
+        # Right side: explanation card
+        card_why_box = RoundedRectangle(
+            width=5.4, height=3.0, corner_radius=0.12,
+            color=COL_FIELD, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([3.4, -0.4, 0.0])
+        card_why_head = _ic03_badge("เหตุผลเชิงเรขาคณิต (จาก IC02)", COL_FIELD).move_to([3.4, 0.80, 0.0])
+        why_t1 = Text("• ความเร็วของทุกจุดเกิดจากการหมุนรอบ IC (C):", font_size=9.5, color=WHITE).move_to([3.4, 0.35, 0.0])
+        fit_width(why_t1, 5.0)
+        why_t2 = Text("  v = ω × r  →  ทิศทางตั้งฉากกับ r เสมอ", font_size=10.5, color=YELLOW, weight=BOLD).move_to([3.4, -0.05, 0.0])
+        fit_width(why_t2, 5.0)
+        why_t3 = Text("• สรุปกลับได้ว่า: จุด C (IC) ย่อมต้องอยู่บนแนวเส้น", font_size=9.5, color=WHITE).move_to([3.4, -0.50, 0.0])
+        fit_width(why_t3, 5.0)
+        why_t4 = Text("  'ที่ตั้งฉากกับเวกเตอร์ความเร็ว' เสมอ!", font_size=10.5, color=COL_OK, weight=BOLD).move_to([3.4, -0.85, 0.0])
+        fit_width(why_t4, 5.0)
+        card_why_grp = VGroup(card_why_box, card_why_head, why_t1, why_t2, why_t3, why_t4)
+
+        banner1 = _ic03_banner("ถ้า v ตั้งฉากกับ r เสมอ → จุด IC ย่อมต้องอยู่บนเส้นตั้งฉากกับเวกเตอร์ความเร็ว!", COL_OK)
+
+        self.play(FadeIn(schem_left), FadeIn(card_why_grp), FadeIn(banner1), run_time=1.0)
+        self.wait(3.8)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.2)
+
+        # ======================================================================
+        # BEAT 10.6–24.9: 3-Step Construction Procedure (page-07.jpg panel a)
+        # ======================================================================
+        cap2 = _ic03_caption_top("วิธีหาตำแหน่ง IC จากภาพ: ปฏิบัติตาม 3 ขั้นตอนหลัก")
+        fit_width(cap2, 11.8)
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        # Rigid Body Blob (smooth potato shape matching page-07.jpg)
+        blob_center = np.array([-0.3, -0.55, 0.0])
+        angles = np.linspace(0, 2 * np.pi, 24, endpoint=False)
+        radii = 1.7 + 0.5 * np.cos(angles) - 0.3 * np.sin(2 * angles) + 0.2 * np.cos(3 * angles)
+        blob_pts = [blob_center + np.array([r * np.cos(a), 0.72 * r * np.sin(a), 0.0]) for a, r in zip(angles, radii)]
+        body_blob = Polygon(*blob_pts, color="#B08968", stroke_width=3.0, fill_color="#8D6E63").set_fill("#8D6E63", 0.45)
+
+        # Instant Center C in panel (a)
+        pt_C = np.array([0.3, 1.4, 0.0])
+
+        # Point A and velocity v_A
+        pt_A = np.array([-2.0, -0.8, 0.0])
+        r_A = pt_A - pt_C
+        vA_dir = np.array([0.6912, -0.7226, 0.0])  # Perpendicular to CA pointing down-right
+        dot_A = Dot(pt_A, radius=0.08, color="#2E7D32")
+        lbl_A = Text("A", font_size=11, color=WHITE, weight=BOLD).next_to(dot_A, LEFT, buff=0.10)
+        vA_arrow = Arrow(start=pt_A, end=pt_A + 1.5 * vA_dir, buff=0, color=COL_FORCE, stroke_width=4.0, max_tip_length_to_length_ratio=0.25)
+        lbl_vA = Text("v_A", font_size=11, color=COL_FORCE, weight=BOLD).next_to(vA_arrow.get_end(), DOWN, buff=0.08)
+
+        # Point B and velocity v_B
+        pt_B = np.array([0.8, -0.3, 0.0])
+        r_B = pt_B - pt_C
+        vB_dir = np.array([0.9594, 0.2822, 0.0])   # Perpendicular to CB pointing right/up
+        dot_B = Dot(pt_B, radius=0.08, color="#2E7D32")
+        lbl_B = Text("B", font_size=11, color=WHITE, weight=BOLD).next_to(dot_B, DOWN + LEFT, buff=0.08)
+        vB_arrow = Arrow(start=pt_B, end=pt_B + 1.4 * vB_dir, buff=0, color=COL_FORCE, stroke_width=4.0, max_tip_length_to_length_ratio=0.25)
+        lbl_vB = Text("v_B", font_size=11, color=COL_FORCE, weight=BOLD).next_to(vB_arrow.get_end(), RIGHT, buff=0.08)
+
+        lbl_panel_a = Text("(a)", font_size=11, color=COL_GRAY).next_to(body_blob, DOWN, buff=0.20)
+
+        banner2 = _ic03_banner("เมื่อรู้ทิศทางความเร็ว 2 จุดที่ไม่ขนานกัน (v_A และ v_B) สามารถหาจุด IC ได้ทันที", COL_OK)
+
+        self.play(
+            Create(body_blob), FadeIn(dot_A), FadeIn(lbl_A), FadeIn(dot_B), FadeIn(lbl_B),
+            GrowArrow(vA_arrow), FadeIn(lbl_vA), GrowArrow(vB_arrow), FadeIn(lbl_vB),
+            FadeIn(lbl_panel_a), FadeIn(banner2),
+            run_time=1.2
+        )
+        self.wait(0.5)
+
+        # ----------------------------------------------------------------------
+        # STEP 1 (§48): Perpendicular line at Point A
+        # ----------------------------------------------------------------------
+        step_pos = np.array([-3.2, 1.95, 0.0])
+        step1_badge = _ic03_step_badge("ขั้นที่ 1: ลากเส้นตั้งฉากกับ v_A ที่จุด A", COL_WARN).move_to(step_pos)
+
+        # Red dashed line extending through C
+        perp_dir_A = (pt_C - pt_A) / np.linalg.norm(pt_C - pt_A)
+        perp_A = DashedLine(start=pt_A, end=pt_C + 0.10 * perp_dir_A, color=COL_BAD, stroke_width=2.5, dash_length=0.12)
+
+        # Right angle mark at A
+        sq_A = Square(side_length=0.20, stroke_width=1.8, color=WHITE)
+        sq_A.rotate(np.arctan2(perp_dir_A[1], perp_dir_A[0]))
+        sq_A.move_to(pt_A + 0.10 * perp_dir_A + 0.10 * vA_dir)
+
+        self.play(FadeIn(step1_badge, shift=UP * 0.2), run_time=0.4)
+        self.play(Create(perp_A), FadeIn(sq_A), run_time=1.0)
+        self.wait(1.5)
+
+        # ----------------------------------------------------------------------
+        # STEP 2 (§48): Perpendicular line at Point B
+        # ----------------------------------------------------------------------
+        step2_badge = _ic03_step_badge("ขั้นที่ 2: ลากเส้นตั้งฉากกับ v_B ที่จุด B", COL_WARN).move_to(step_pos)
+
+        perp_dir_B = (pt_C - pt_B) / np.linalg.norm(pt_C - pt_B)
+        perp_B = DashedLine(start=pt_B, end=pt_C + 0.10 * perp_dir_B, color=COL_BAD, stroke_width=2.5, dash_length=0.12)
+
+        # Right angle mark at B
+        sq_B = Square(side_length=0.20, stroke_width=1.8, color=WHITE)
+        sq_B.rotate(np.arctan2(perp_dir_B[1], perp_dir_B[0]))
+        sq_B.move_to(pt_B + 0.10 * perp_dir_B + 0.10 * vB_dir)
+
+        self.play(ReplacementTransform(step1_badge, step2_badge), run_time=0.4)
+        self.play(Create(perp_B), FadeIn(sq_B), run_time=1.0)
+        self.wait(1.5)
+
+        # ----------------------------------------------------------------------
+        # STEP 3 (§48): Mark intersection Point C = IC
+        # ----------------------------------------------------------------------
+        step3_badge = _ic03_step_badge("ขั้นที่ 3: จุดตัดของเส้นทั้งสอง = Instant Center (IC)", COL_OK).move_to(step_pos)
+
+        dot_C = Dot(pt_C, radius=0.11, color=COL_OK)
+        ring_C = Circle(radius=0.25, color=COL_OK, stroke_width=2.0).move_to(pt_C)
+        lbl_C = Text("C (Instant Center: v = 0)", font_size=10.5, color=COL_OK, weight=BOLD).next_to(ring_C, UP, buff=0.12)
+
+        self.play(ReplacementTransform(step2_badge, step3_badge), run_time=0.4)
+        self.play(FadeIn(dot_C), FadeIn(ring_C), FadeIn(lbl_C), run_time=0.6)
+        self.play(Indicate(dot_C, color=YELLOW, scale_factor=1.6), Indicate(ring_C, color=YELLOW), run_time=0.8)
+        self.wait(1.8)
+
+        self.clear_stage(run_time=0.6)
+        self.wait(0.1)
+
+        # ======================================================================
+        # BEAT 24.9–32.1: Panel (b) — IC Moves as Body Moves!
+        # ======================================================================
+        cap3 = _ic03_caption_top("แต่เมื่อวัตถุเคลื่อนที่ต่อไปอีกนิด... (ทำ 3 ขั้นตอนเดิมซ้ำ)")
+        fit_width(cap3, 11.8)
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        # Ghost / Dim of old IC (C1)
+        dot_C1_ghost = Dot(pt_C, radius=0.08, color=COL_GRAY)
+        ring_C1_ghost = Circle(radius=0.20, color=COL_GRAY, stroke_width=1.5, stroke_opacity=0.6).move_to(pt_C)
+        lbl_C1_ghost = Text("C (ขณะแรก)", font_size=9.5, color=COL_GRAY).next_to(ring_C1_ghost, UP + LEFT, buff=0.10)
+        ghost_grp = VGroup(dot_C1_ghost, ring_C1_ghost, lbl_C1_ghost)
+
+        # Panel (b) transformed body
+        blob_center2 = np.array([0.2, -0.65, 0.0])
+        angles2 = angles - np.radians(12)  # Rotated clockwise
+        blob_pts2 = [blob_center2 + np.array([r * np.cos(a), 0.72 * r * np.sin(a), 0.0]) for a, r in zip(angles2, radii)]
+        body_blob2 = Polygon(*blob_pts2, color="#B08968", stroke_width=3.0, fill_color="#8D6E63").set_fill("#8D6E63", 0.45)
+
+        # New points in panel (b)
+        pt_C2 = np.array([1.6, 1.3, 0.0])
+        pt_A2 = np.array([-1.5, -1.0, 0.0])
+        vA2_dir = np.array([0.5959, -0.8031, 0.0])
+        dot_A2 = Dot(pt_A2, radius=0.08, color="#2E7D32")
+        lbl_A2 = Text("A", font_size=11, color=WHITE, weight=BOLD).next_to(dot_A2, LEFT, buff=0.10)
+        vA2_arrow = Arrow(start=pt_A2, end=pt_A2 + 1.4 * vA2_dir, buff=0, color=COL_FORCE, stroke_width=4.0, max_tip_length_to_length_ratio=0.25)
+        lbl_vA2 = Text("v_A", font_size=11, color=COL_FORCE, weight=BOLD).next_to(vA2_arrow.get_end(), DOWN, buff=0.08)
+
+        pt_B2 = np.array([1.3, -0.5, 0.0])
+        vB2_dir = np.array([0.9864, -0.1644, 0.0])
+        dot_B2 = Dot(pt_B2, radius=0.08, color="#2E7D32")
+        lbl_B2 = Text("B", font_size=11, color=WHITE, weight=BOLD).next_to(dot_B2, DOWN + LEFT, buff=0.08)
+        vB2_arrow = Arrow(start=pt_B2, end=pt_B2 + 1.4 * vB2_dir, buff=0, color=COL_FORCE, stroke_width=4.0, max_tip_length_to_length_ratio=0.25)
+        lbl_vB2 = Text("v_B", font_size=11, color=COL_FORCE, weight=BOLD).next_to(vB2_arrow.get_end(), RIGHT, buff=0.08)
+
+        lbl_panel_b = Text("(b)", font_size=11, color=COL_GRAY).next_to(body_blob2, DOWN, buff=0.20)
+
+        # New perpendicular lines
+        perp_dir_A2 = (pt_C2 - pt_A2) / np.linalg.norm(pt_C2 - pt_A2)
+        perp_A2 = DashedLine(start=pt_A2, end=pt_C2 + 0.10 * perp_dir_A2, color=COL_BAD, stroke_width=2.5, dash_length=0.12)
+        sq_A2 = Square(side_length=0.20, stroke_width=1.8, color=WHITE)
+        sq_A2.rotate(np.arctan2(perp_dir_A2[1], perp_dir_A2[0]))
+        sq_A2.move_to(pt_A2 + 0.10 * perp_dir_A2 + 0.10 * vA2_dir)
+
+        perp_dir_B2 = (pt_C2 - pt_B2) / np.linalg.norm(pt_C2 - pt_B2)
+        perp_B2 = DashedLine(start=pt_B2, end=pt_C2 + 0.10 * perp_dir_B2, color=COL_BAD, stroke_width=2.5, dash_length=0.12)
+        sq_B2 = Square(side_length=0.20, stroke_width=1.8, color=WHITE)
+        sq_B2.rotate(np.arctan2(perp_dir_B2[1], perp_dir_B2[0]))
+        sq_B2.move_to(pt_B2 + 0.10 * perp_dir_B2 + 0.10 * vB2_dir)
+
+        # New IC point C2
+        dot_C2 = Dot(pt_C2, radius=0.11, color=COL_WARN)
+        ring_C2 = Circle(radius=0.25, color=COL_WARN, stroke_width=2.0).move_to(pt_C2)
+        lbl_C2 = Text("C' (IC ขณะใหม่)", font_size=10.5, color=COL_WARN, weight=BOLD).next_to(ring_C2, UP + RIGHT, buff=0.10)
+
+        # Curved arrow showing movement from C1 to C2
+        move_arr = CurvedArrow(start_point=pt_C + np.array([0.25, 0.1, 0]), end_point=pt_C2 + np.array([-0.25, 0.1, 0]), color=YELLOW)
+        lbl_move = Text("ตำแหน่ง IC เปลี่ยนไป!", font_size=10, color=YELLOW, weight=BOLD).next_to(move_arr, UP, buff=0.10)
+
+        panel_b_grp = VGroup(
+            body_blob2, dot_A2, lbl_A2, dot_B2, lbl_B2,
+            vA2_arrow, lbl_vA2, vB2_arrow, lbl_vB2, lbl_panel_b,
+            perp_A2, sq_A2, perp_B2, sq_B2,
+            dot_C2, ring_C2, lbl_C2, move_arr, lbl_move
+        )
+
+        banner3 = _ic03_banner("ตำแหน่งของ IC เปลี่ยนไปตามเวลาเรื่อยๆ จึงเรียกว่า 'Instant' (ชั่วขณะ) ไม่ใช่จุดคงที่", COL_WARN)
+
+        self.play(FadeIn(ghost_grp), FadeIn(panel_b_grp), FadeIn(banner3), run_time=1.2)
+        self.play(Indicate(dot_C2, color=YELLOW, scale_factor=1.6), Indicate(ring_C2, color=YELLOW), run_time=0.8)
+        self.wait(3.5)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ======================================================================
+        # BEAT 32.1–35.8: History Card (Johann Bernoulli, 1742)
+        # ======================================================================
+        cap4 = _ic03_caption_top("เพราะตำแหน่งเปลี่ยนได้ทุกขณะ จึงเรียกว่า Instant Center — ไม่ใช่จุดคงที่")
+        self.play(FadeIn(cap4, shift=UP * 0.35), run_time=0.5)
+
+        hist_box = RoundedRectangle(
+            width=10.4, height=2.4, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.20, 0.0])
+        hist_badge = _ic03_badge("ประวัติความเป็นมา (History)", COL_OK).move_to([0.0, 0.65, 0.0])
+        hist_title = Text(
+            "แนวคิด 'จุดศูนย์กลางชั่วขณะของความเร็ว' ค้นพบโดย Johann Bernoulli ในปี ค.ศ. 1742",
+            font_size=12, color=WHITE, weight=BOLD
+        ).move_to([0.0, 0.08, 0.0])
+        fit_width(hist_title, 9.8)
+        hist_sub = Text(
+            "(Johann Bernoulli: นักคณิตศาสตร์ชาวสวิส ผู้บุกเบิกกลศาสตร์ระนาบและแคลคูลัส)",
+            font_size=10.5, color=COL_GRAY
+        ).move_to([0.0, -0.45, 0.0])
+        fit_width(hist_sub, 9.8)
+        hist_card = VGroup(hist_box, hist_badge, hist_title, hist_sub)
+
+        self.play(FadeIn(hist_card, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.2)
+
+        self.fade_out_all(run_time=0.5)
+        self.wait(0.1)
+
+        # ======================================================================
+        # BEAT 35.8–38.0: Summary Card
+        # ======================================================================
+        sum_box = RoundedRectangle(
+            width=11.4, height=3.3, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        sum_head = Text(
+            "สรุป: นิยามและการหา Instant Center (IC)",
+            font_size=13.5, color=COL_OK, weight=BOLD
+        ).move_to([0.0, 1.10, 0.0])
+
+        s_rows = [
+            "1. นิยาม: จุดที่มีความเร็วสัมบูรณ์เป็นศูนย์ชั่วขณะ (v = 0) ในขณะใดขณะหนึ่งบนระนาบ",
+            "2. การหา 3 ขั้นตอน: ลากเส้น ⊥ v_A ที่จุด A, ลากเส้น ⊥ v_B ที่จุด B, จุดตัดของเส้นทั้งสองคือ IC",
+            "3. ธรรมชาติของ IC: ตำแหน่งเปลี่ยนไปเรื่อยๆ ตามการเคลื่อนที่ (เป็น Instant ไม่ใช่จุดคงที่ถาวร)"
+        ]
+        sum_lines = VGroup(*[Text(r, font_size=11, color=WHITE) for r in s_rows]).arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([0.0, -0.20, 0.0])
+        fit_width(sum_lines, 10.6)
+
+        summary_card = VGroup(sum_box, sum_head, sum_lines)
+
+        self.play(FadeIn(summary_card, shift=UP * 0.4), run_time=0.6)
+        self.wait(1.5)
+
+        self.fade_out_all(run_time=0.5)
+        self.wait(0.1)
+
+        # ======================================================================
+        # BEAT 38.0–40.8: Review Question (Teaser for IC04)
+        # ======================================================================
+        q_box = RoundedRectangle(
+            width=11.4, height=3.2, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text("คำถามทบทวนประจำคลิป (Check Your Understanding)", font_size=13.5, color=COL_WARN, weight=BOLD).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ถ้ามีวัตถุ 2 ชิ้นเคลื่อนที่พร้อมกันในกลไก จะมี IC ร่วมระหว่างวัตถุทั้งสองได้ไหม?",
+            font_size=12.0, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        fit_width(q_body, 10.6)
+        q_ans = Text(
+            "(คลิปถัดไป IC04: เราจะเรียนรู้สัญลักษณ์ I₁₂ และนิยาม Relative Instant Center\nซึ่งเป็นหัวใจสำคัญในการวิเคราะห์ความเร็วของกลไกหลายชิ้นส่วน!)",
+            font_size=11.0, color=COL_GRAY
+        ).move_to([0.0, -0.55, 0.0])
+        fit_width(q_ans, 10.6)
+        question_grp = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.2)
