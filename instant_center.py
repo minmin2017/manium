@@ -1771,3 +1771,286 @@ class IC05_JointTypes(SafeScene):
 
         self.fade_out_all(run_time=0.6)
         self.wait(1.0)
+
+
+# ======================================================================
+# Helper functions for IC06_KennedysTheorem
+# ======================================================================
+
+def _ic06_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _ic06_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _ic06_caption_top(text, color=WHITE):
+    return Text(text, font_size=13, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _ic06_badge(text, color):
+    lbl = Text(text, font_size=9.5, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.36, height=0.30, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+def _ic06_step_badge(text, color=COL_WARN):
+    lbl = Text(text, font_size=12.5, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.4, height=0.40, corner_radius=0.10,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class IC06_KennedysTheorem(SafeScene):
+    """
+    W03 น.13 — Kennedy's Theorem + Circle Diagram technique
+    Plan: Main_note/Claude_Specs/Manim — IC06_KennedysTheorem Plan.md
+    """
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ==================================================================
+        # BEAT 0.0-1.8: Title & Page Reference
+        # ==================================================================
+        title_m = _ic06_title("Kennedy's Theorem + Circle Diagram")
+        page_ref_m = _ic06_page_ref("W03 น.13")
+        self.play(FadeIn(title_m, shift=UP * 0.4), FadeIn(page_ref_m), run_time=1.2)
+        self.wait(0.4)
+
+        # ==================================================================
+        # BEAT 1.8-4.8: Hook Question
+        # ==================================================================
+        hook_q = _ic06_caption_top(
+            "ถ้าวัตถุ 2 ชิ้นไม่ได้ต่อกันโดยตรง จะหา IC ระหว่างมันไม่ได้เลยใช่ไหม?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 11.8)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.4)
+
+        # ==================================================================
+        # BEAT 4.8-5.6: Answer caption
+        # ==================================================================
+        cap1 = _ic06_caption_top(
+            "จริงๆ ใช้ทฤษฎีบทเคนเนดี้หาได้ — ไม่ต้องรู้ทิศทางความเร็วเลย"
+        )
+        fit_width(cap1, 11.8)
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # ==================================================================
+        # PART A: The theorem (5.6-20.0), step-by-step per §48
+        # ==================================================================
+        stepA_pos = np.array([-4.6, 1.85, 0.0])
+
+        # Step A1: Body 1 (frame) + Body 2, pinned at I12
+        stepA1 = _ic06_step_badge("ขั้นที่ 1: วัตถุ 1 (เฟรม) + วัตถุ 2 ต่อกันที่หมุด", COL_OK).move_to(stepA_pos)
+        self.play(FadeIn(stepA1, shift=UP * 0.2), run_time=0.4)
+
+        I12_pt = np.array([-2.6, -0.3, 0.0])
+        body1_line = Line(I12_pt + [-1.6, -0.9, 0], I12_pt + [1.6, -0.9, 0], color=COL_METAL, stroke_width=6)
+        hatch1 = VGroup(*[
+            Line([x, I12_pt[1] - 0.9, 0], [x - 0.14, I12_pt[1] - 1.08, 0], color="#64748B", stroke_width=1.3)
+            for x in np.linspace(I12_pt[0] - 1.4, I12_pt[0] + 1.4, 9)
+        ])
+        lbl_1 = Text("1 (Frame)", font_size=9.5, color=COL_METAL).next_to(body1_line, DOWN, buff=0.15)
+        body2_link = Line(I12_pt, I12_pt + [-0.4, 1.9, 0], color=COL_FIELD, stroke_width=6)
+        lbl_2 = Text("2", font_size=11, color=COL_FIELD, weight=BOLD).next_to(body2_link.get_end(), UP, buff=0.1)
+
+        self.play(Create(body1_line), FadeIn(hatch1), FadeIn(lbl_1), run_time=0.6)
+        self.play(Create(body2_link), FadeIn(lbl_2), run_time=0.6)
+        dot_I12 = Dot(I12_pt, radius=0.08, color=COL_OK)
+        lbl_I12 = Text("I_12", font_size=11, color=COL_OK, weight=BOLD).next_to(dot_I12, DOWN + LEFT, buff=0.12)
+        self.play(FadeIn(dot_I12), FadeIn(lbl_I12), run_time=0.4)
+        self.wait(0.6)
+
+        # Step A2: Body 2 + Body 3, pinned at I23
+        stepA2 = _ic06_step_badge("ขั้นที่ 2: วัตถุ 2 + วัตถุ 3 ต่อกันที่หมุด", COL_OK).move_to(stepA_pos)
+        self.play(ReplacementTransform(stepA1, stepA2), run_time=0.4)
+
+        I23_pt = I12_pt + [-0.4, 1.9, 0]
+        body3_link = Line(I23_pt, I23_pt + [2.3, 1.1, 0], color="#BA68C8", stroke_width=6)
+        lbl_3 = Text("3", font_size=11, color="#BA68C8", weight=BOLD).next_to(body3_link.get_end(), UP, buff=0.1)
+        self.play(Create(body3_link), FadeIn(lbl_3), run_time=0.6)
+        dot_I23 = Dot(I23_pt, radius=0.08, color=COL_OK)
+        lbl_I23 = Text("I_23", font_size=11, color=COL_OK, weight=BOLD).next_to(dot_I23, UP + LEFT, buff=0.12)
+        self.play(FadeIn(dot_I23), FadeIn(lbl_I23), run_time=0.4)
+        self.wait(0.6)
+
+        # Step A3: extend the dashed line through I12-I23
+        stepA3 = _ic06_step_badge("ขั้นที่ 3: ลากเส้นผ่าน I_12–I_23 ยาวออกไป", COL_OK).move_to(stepA_pos)
+        self.play(ReplacementTransform(stepA2, stepA3), run_time=0.4)
+
+        dir_v = (I23_pt - I12_pt) / np.linalg.norm(I23_pt - I12_pt)
+        line_ext = DashedLine(I12_pt - 1.6 * dir_v, I23_pt + 3.2 * dir_v, color=COL_WARN, stroke_width=2.5)
+        self.play(Create(line_ext), run_time=1.0)
+        self.wait(0.5)
+
+        # Step A4: I13 must lie on this line (unknown exact spot)
+        stepA4 = _ic06_step_badge("ขั้นที่ 4: I_13 ต้องอยู่บนเส้นนี้เท่านั้น", COL_WARN).move_to(stepA_pos)
+        self.play(ReplacementTransform(stepA3, stepA4), run_time=0.4)
+
+        I13_guess = I23_pt + 2.0 * dir_v
+        dot_I13 = Dot(I13_guess, radius=0.09, color=COL_WARN)
+        ring_I13 = Circle(radius=0.22, color=COL_WARN, stroke_width=2.2).move_to(I13_guess)
+        lbl_I13 = Text("I_13 (อยู่บนเส้นนี้แน่ๆ)", font_size=10.5, color=COL_WARN, weight=BOLD).next_to(dot_I13, RIGHT, buff=0.15)
+        self.play(FadeIn(dot_I13), FadeIn(ring_I13), FadeIn(lbl_I13), run_time=0.6)
+
+        theorem_text = Text(
+            "IC สัมพัทธ์ 3 จุดของวัตถุ 3 ชิ้นใดๆ อยู่ในแนวเส้นตรงเดียวกันเสมอ (Kennedy, ปลาย ค.ศ.19)",
+            font_size=12, color=WHITE
+        ).move_to([0.0, -2.6, 0.0])
+        fit_width(theorem_text, 11.8)
+        self.play(FadeIn(theorem_text, shift=UP * 0.2), run_time=0.5)
+        self.wait(3.5)
+
+        self.play(*[FadeOut(m) for m in list(self.mobjects) if m not in (title_m, page_ref_m)], run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT 20.6-22.0: Formula
+        # ==================================================================
+        formula_box = RoundedRectangle(
+            width=6.0, height=1.6, corner_radius=0.12,
+            color=COL_OK, stroke_width=2.4, fill_color="#0F766E"
+        ).set_fill("#0F766E", 0.3).move_to([0.0, 0.3, 0.0])
+        formula_tex = Text("N_IC = n(n-1) / 2", font_size=22, color=YELLOW, weight=BOLD).move_to([0.0, 0.55, 0.0])
+        formula_ex = Text("ตัวอย่าง n=4 → N_IC = 4×3/2 = 6 จุด", font_size=13, color=WHITE).move_to([0.0, 0.05, 0.0])
+        formula_grp = VGroup(formula_box, formula_tex, formula_ex)
+        self.play(FadeIn(formula_grp, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.4)
+        self.play(FadeOut(formula_grp), run_time=0.4)
+
+        # ==================================================================
+        # PART B: Circle Diagram technique (22.0-43.0), 4-body example, §48 stepwise
+        # ==================================================================
+        cap2 = _ic06_caption_top("เทคนิค Circle Diagram: หา IC ทั้งหมดของกลไก 4 ชิ้นอย่างเป็นระบบ")
+        fit_width(cap2, 11.8)
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        stepB_pos = np.array([-4.6, 1.85, 0.0])
+        cx, cy, r = 0.0, -0.6, 2.0
+        node_ang = {1: 135, 2: 45, 3: -45, 4: -135}
+        node_pos = {k: np.array([cx + r * np.cos(np.radians(a)), cy + r * np.sin(np.radians(a)), 0]) for k, a in node_ang.items()}
+
+        # Step B1: draw circle + 4 labeled points
+        stepB1 = _ic06_step_badge("ขั้นที่ 1: วาดวงกลม แบ่ง 4 จุด (จุด 1 = เฟรม)", COL_OK).move_to(stepB_pos)
+        self.play(FadeIn(stepB1, shift=UP * 0.2), run_time=0.4)
+        circle_b = Circle(radius=r, color=COL_GRAY, stroke_width=2.0).move_to([cx, cy, 0])
+        node_dots = VGroup(*[Dot(node_pos[k], radius=0.09, color=WHITE) for k in [1, 2, 3, 4]])
+        node_lbls = VGroup(*[
+            Text(str(k), font_size=13, color=WHITE, weight=BOLD).next_to(node_pos[k], node_pos[k] - [cx, cy, 0], buff=0.18)
+            for k in [1, 2, 3, 4]
+        ])
+        self.play(Create(circle_b), FadeIn(node_dots), FadeIn(node_lbls), run_time=0.8)
+        self.wait(0.4)
+
+        # Step B2: solid edges from real joints (square: 12,23,34,14)
+        stepB2 = _ic06_step_badge("ขั้นที่ 2: ลากเส้นทึบจากข้อต่อจริง (12, 23, 34, 14)", COL_OK).move_to(stepB_pos)
+        self.play(ReplacementTransform(stepB1, stepB2), run_time=0.4)
+        e12 = Line(node_pos[1], node_pos[2], color=COL_OK, stroke_width=3.0)
+        e23 = Line(node_pos[2], node_pos[3], color=COL_OK, stroke_width=3.0)
+        e34 = Line(node_pos[3], node_pos[4], color=COL_OK, stroke_width=3.0)
+        e14 = Line(node_pos[4], node_pos[1], color=COL_OK, stroke_width=3.0)
+        self.play(Create(e12), run_time=0.35)
+        self.play(Create(e23), run_time=0.35)
+        self.play(Create(e34), run_time=0.35)
+        self.play(Create(e14), run_time=0.35)
+        self.wait(0.5)
+
+        # Step B3: missing diagonals highlighted
+        stepB3 = _ic06_step_badge("ขั้นที่ 3: เส้นทแยงที่ยังขาด (13, 24) — ต้องใช้ Kennedy", COL_WARN).move_to(stepB_pos)
+        self.play(ReplacementTransform(stepB2, stepB3), run_time=0.4)
+        missing13 = DashedLine(node_pos[1], node_pos[3], color=COL_WARN, stroke_width=1.5)
+        missing24 = DashedLine(node_pos[2], node_pos[4], color=COL_WARN, stroke_width=1.5)
+        self.play(FadeIn(missing13, scale=0.9), FadeIn(missing24, scale=0.9), run_time=0.6)
+        self.wait(0.8)
+        self.play(FadeOut(missing13), FadeOut(missing24), run_time=0.4)
+
+        # Step B4a: triangle 1-2-3 has 12,23 -> find 13
+        stepB4a = _ic06_step_badge("ขั้นที่ 4ก: สามเหลี่ยม 1-2-3 มี 12,23 ครบ → หา 13 ได้", COL_OK).move_to(stepB_pos)
+        self.play(ReplacementTransform(stepB3, stepB4a), run_time=0.4)
+        tri123 = Polygon(node_pos[1], node_pos[2], node_pos[3], color=COL_OK, stroke_width=0, fill_color=COL_OK).set_fill(COL_OK, 0.15)
+        self.play(FadeIn(tri123), run_time=0.5)
+        self.wait(1.0)
+        self.play(FadeOut(tri123), run_time=0.3)
+
+        # Step B4b: triangle 1-3-4 has 34,14 -> confirms 13
+        stepB4b = _ic06_step_badge("ขั้นที่ 4ข: สามเหลี่ยม 1-3-4 มี 34,14 ครบ → ยืนยัน 13", COL_OK).move_to(stepB_pos)
+        self.play(ReplacementTransform(stepB4a, stepB4b), run_time=0.4)
+        tri134 = Polygon(node_pos[1], node_pos[3], node_pos[4], color=COL_OK, stroke_width=0, fill_color=COL_OK).set_fill(COL_OK, 0.15)
+        self.play(FadeIn(tri134), run_time=0.5)
+        self.wait(1.0)
+        self.play(FadeOut(tri134), run_time=0.3)
+
+        e13 = DashedLine(node_pos[1], node_pos[3], color=COL_OK, stroke_width=3.0)
+        self.play(Create(e13), run_time=0.7)
+        self.wait(0.4)
+
+        # Step B5: repeat the same logic for 24
+        stepB5 = _ic06_step_badge("ขั้นที่ 5: ทำนองเดียวกัน หา 24 จากสามเหลี่ยม 1-2-4 และ 2-3-4", COL_OK).move_to(stepB_pos)
+        self.play(ReplacementTransform(stepB4b, stepB5), run_time=0.4)
+        e24 = DashedLine(node_pos[2], node_pos[4], color=COL_OK, stroke_width=3.0)
+        self.play(Create(e24), run_time=0.7)
+        done_lbl = Text("ครบ N_IC = 6 เส้นแล้ว!", font_size=13, color=COL_OK, weight=BOLD).move_to([0.0, -2.75, 0.0])
+        self.play(FadeIn(done_lbl, shift=UP * 0.2), run_time=0.5)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT: Summary Card
+        # ==================================================================
+        sum_box = RoundedRectangle(
+            width=11.6, height=3.6, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        sum_head = _ic06_badge("สรุป: ขั้นตอน Circle Diagram", COL_OK).move_to([0.0, 1.45, 0.0])
+        rows = [
+            "1. วาดวงกลม แบ่ง n จุด (จุดที่ 1 = เฟรม)",
+            "2. ลากเส้นทึบเชื่อมคู่ที่หา IC ได้ตรงจากข้อต่อจริง",
+            "3. คู่ที่ยังไม่มีเส้น → หาสามเหลี่ยมที่มีเส้นทึบครบ 2 ใน 3 ด้าน → เส้นที่ 3 คือคำตอบ (เส้นประ)",
+            "4. ทำซ้ำจนครบ N_IC = n(n-1)/2 เส้น",
+        ]
+        s_rows = VGroup(*[Text(r, font_size=12, color=WHITE) for r in rows]).arrange(DOWN, buff=0.2, aligned_edge=LEFT).move_to([0.0, -0.1, 0.0])
+        fit_width(s_rows, 10.8)
+        summary_card = VGroup(sum_box, sum_head, s_rows)
+
+        self.play(FadeIn(summary_card, shift=UP * 0.4), run_time=0.6)
+        self.wait(1.3)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT: Review Question (bridge to IC07)
+        # ==================================================================
+        q_box = RoundedRectangle(
+            width=11.4, height=2.4, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_body = Text(
+            "ลองเอาเทคนิคนี้ไปใช้กับกลไก 4-bar จริงดูไหม?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.2, 0.0])
+        fit_width(q_body, 10.6)
+        q_ans = Text("(คลิปต่อไป: ตัวอย่างจริง)", font_size=11, color=COL_GRAY).move_to([0.0, -0.4, 0.0])
+        question_card = VGroup(q_box, q_body, q_ans)
+
+        self.play(FadeIn(question_card, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.7)
