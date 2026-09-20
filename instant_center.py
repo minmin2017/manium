@@ -2813,15 +2813,21 @@ class IC10_TransferPointExample(SafeScene):
         self.play(FadeIn(dot_I15), FadeIn(lbl_I15), FadeIn(dot_B), FadeIn(lbl_B), run_time=0.4)
         self.wait(0.4)
 
-        step5 = _ic10_step_badge("ขั้น 5: หา I_25 = transfer point (Kennedy) — ไม่ต้องอยู่บนข้อต่อจริง", COL_WARN).move_to(pos_badge)
+        step5 = _ic10_step_badge("ขั้น 5: หา I_25 = transfer point (Kennedy)", COL_WARN).move_to(pos_badge)
         self.play(ReplacementTransform(step4, step5), run_time=0.4)
         ln_d = DashedLine(A, I25, color=COL_CURR, stroke_width=1.6)
         ln_e = DashedLine(I15, I25, color=COL_CURR, stroke_width=1.6)
         self.play(Create(ln_d), Create(ln_e), run_time=0.6)
         dot_I25 = Dot(I25, radius=0.09, color=COL_CURR)
         diamond_I25 = Square(side_length=0.22, color=COL_CURR, stroke_width=2.2).rotate(np.radians(45)).move_to(I25)
-        lbl_I25 = Text("I_25 (transfer point)", font_size=10.5, color=COL_CURR, weight=BOLD).next_to(dot_I25, UP, buff=0.15)
-        self.play(FadeIn(dot_I25), FadeIn(diamond_I25), FadeIn(lbl_I25), run_time=0.5)
+        # label placed in open space below-right of the dot (away from the
+        # top-right badge zone, the up-left transfer arrow, and the two
+        # construction lines converging on the dot from the left) with a
+        # short leader line back to the dot (§29/§30 pattern)
+        lbl_I25_pos = I25 + np.array([1.15, -0.55, 0.0])
+        lbl_I25 = Text("I_25 (transfer point)", font_size=10.5, color=COL_CURR, weight=BOLD).move_to(lbl_I25_pos)
+        leader_I25 = DashedLine(lbl_I25.get_top(), dot_I25.get_center(), color=COL_CURR, stroke_width=1.2, dash_length=0.08)
+        self.play(FadeIn(dot_I25), FadeIn(diamond_I25), FadeIn(lbl_I25), Create(leader_I25), run_time=0.5)
         self.wait(1.0)
 
         step6 = _ic10_step_badge("ขั้น 6: สร้างรูปสามเหลี่ยมความเร็ว (ดูขั้นต่อไป)", COL_OK).move_to(pos_badge)
@@ -2841,7 +2847,7 @@ class IC10_TransferPointExample(SafeScene):
         self.play(Create(link2), Create(link5), run_time=0.5)
         self.play(FadeIn(dot_I12), FadeIn(lbl_I12), FadeIn(dot_A), FadeIn(lbl_A), run_time=0.3)
         self.play(FadeIn(dot_I15), FadeIn(lbl_I15), FadeIn(dot_B), FadeIn(lbl_B), run_time=0.3)
-        self.play(FadeIn(dot_I25), FadeIn(diamond_I25), FadeIn(lbl_I25), run_time=0.3)
+        self.play(FadeIn(dot_I25), FadeIn(diamond_I25), FadeIn(lbl_I25), Create(leader_I25), run_time=0.3)
         link_transfer = DashedLine(A, I25, color=COL_CURR, stroke_width=1.4)
         link_transfer2 = DashedLine(I15, I25, color=COL_CURR, stroke_width=1.4)
         self.play(Create(link_transfer), Create(link_transfer2), run_time=0.5)
@@ -2860,7 +2866,7 @@ class IC10_TransferPointExample(SafeScene):
         ratio1 = np.linalg.norm(I25 - I12) / np.linalg.norm(A - I12)
         rI25_dir = (I25 - I12) / np.linalg.norm(I25 - I12)
         vI25_dir = np.array([-rI25_dir[1], rI25_dir[0], 0.0])
-        vI25_len = min(1.0 * ratio1, 1.6)
+        vI25_len = min(1.0 * ratio1, 0.55)
         vI25_arrow = Arrow(I25, I25 + vI25_len * vI25_dir, buff=0, color=COL_CURR, stroke_width=3.6, max_tip_length_to_length_ratio=0.2)
         lbl_vI25 = Text("v_I25", font_size=10.5, color=COL_CURR).next_to(vI25_arrow.get_end(), vI25_dir, buff=0.12)
         self.play(GrowArrow(vI25_arrow), FadeIn(lbl_vI25), run_time=0.6)
