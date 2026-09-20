@@ -2996,7 +2996,7 @@ class IC11_SliderMultiPath(SafeScene):
         A = np.array([-1.6, 1.2, 0.0])
         I35 = np.array([1.0, 1.5, 0.0])
         I15 = np.array([-0.8, -1.8, 0.0])
-        C = np.array([3.2, -1.8, 0.0])
+        C = np.array([3.2, -1.55, 0.0])  # slider block rides just above the rail line (avoid label/line overlap)
 
         link3 = Line(I13, A, color=COL_FIELD, stroke_width=5)
         link5 = Line(I15, C, color=COL_FORCE, stroke_width=5)
@@ -3007,7 +3007,7 @@ class IC11_SliderMultiPath(SafeScene):
         dot_A = Dot(A, radius=0.07, color=WHITE)
         lbl_A = Text("A", font_size=11, color=WHITE).next_to(A, UP, buff=0.1)
         dot_C = Dot(C, radius=0.07, color=WHITE)
-        lbl_C = Text("C", font_size=11, color=WHITE).next_to(C, DOWN, buff=0.12)
+        lbl_C = Text("C", font_size=11, color=WHITE).next_to(C, UP, buff=0.12)
         self.play(FadeIn(dot_A), FadeIn(lbl_A), FadeIn(dot_C), FadeIn(lbl_C), run_time=0.4)
 
         setup_cap = _ic11_caption_top("รู้ v_A = 3 m/s (บนลิงก์ 3) → หา v_C (สไลด์เดอร์บนราง)")
