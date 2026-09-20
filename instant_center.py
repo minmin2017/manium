@@ -1413,3 +1413,230 @@ class IC04_NotationI12(SafeScene):
 
         self.fade_out_all(run_time=0.6)
         self.wait(1.0)
+
+
+# ======================================================================
+# Helper functions for IC04_NotationI12
+# ======================================================================
+
+def _ic04_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _ic04_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _ic04_caption_top(text, color=WHITE):
+    return Text(text, font_size=13.5, color=color).move_to([0.0, 2.45, 0.0])
+
+
+def _ic04_badge(text, color):
+    lbl = Text(text, font_size=9.5, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.36, height=0.30, corner_radius=0.08,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class IC04_NotationI12(SafeScene):
+    """
+    IC04: สัญกรณ์ IC สัมพัทธ์ระหว่าง 2 วัตถุ (I12)
+    ความยาว ~20.3 วินาที -- thin richness, fully static camera
+    W03 Instant Center series, clip 4/11
+    """
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ==================================================================
+        # BEAT 0.0-1.8: Title & Page Reference
+        # ==================================================================
+        title_m = _ic04_title("สัญกรณ์ IC สัมพัทธ์: I12")
+        page_ref_m = _ic04_page_ref("W03 น.9")
+        self.play(FadeIn(title_m, shift=UP * 0.4), FadeIn(page_ref_m), run_time=1.2)
+        self.wait(0.4)
+
+        # ==================================================================
+        # BEAT 1.8-4.0: Hook Question
+        # ==================================================================
+        hook_q = _ic04_caption_top(
+            "กลไกหนึ่งชุด มี IC แค่ตัวเดียวเท่านั้นใช่ไหม?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 11.8)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.5)
+
+        # ==================================================================
+        # BEAT 4.0-4.6: Clear & Brief Pause
+        # ==================================================================
+        self.play(FadeOut(hook_q), run_time=0.4)
+        self.wait(0.2)
+
+        # ==================================================================
+        # BEAT 4.6-5.3: Caption 1 -- Answer
+        # ==================================================================
+        cap1 = _ic04_caption_top(
+            "จริงๆ มี IC สัมพัทธ์ระหว่างวัตถุทุกคู่ในกลไก "
+            "สัญกรณ์ I12 (หรือ I21 -- สลับเลขได้ ความหมายเดียวกัน)"
+        )
+        fit_width(cap1, 11.8)
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+        self.wait(0.2)
+
+        # ==================================================================
+        # BEAT 5.3-15.0: Revolute-joint diagram
+        #   Link 1 (fixed ground): gray rectangle + hatching below
+        #   Link 2 (moving): light-blue polygon body
+        #   Pin A0 kept SEPARATE from link2_body so Rotate() does NOT spin the pin label
+        # ==================================================================
+        A0_pt = np.array([-1.0, -0.8, 0.0])
+
+        # --- Link 1: fixed ground (gray rectangle + hatching) ---
+        gnd_rect = Rectangle(
+            width=2.2, height=0.45, color=COL_METAL,
+            fill_color=COL_METAL, stroke_width=2.0
+        ).set_fill(COL_METAL, 0.55).move_to(A0_pt + np.array([0.0, -0.35, 0.0]))
+
+        hatch_y = A0_pt[1] - 0.58
+        hatches = VGroup(*[
+            Line(
+                start=[x, hatch_y, 0],
+                end=[x - 0.14, hatch_y - 0.18, 0],
+                color="#64748B", stroke_width=1.4
+            )
+            for x in np.linspace(A0_pt[0] - 0.9, A0_pt[0] + 0.9, 9)
+        ])
+        lbl_link1 = Text("1 (Fixed)", font_size=9.5, color=COL_METAL).next_to(
+            gnd_rect, LEFT, buff=0.18)
+        link1_fixed = VGroup(gnd_rect, hatches, lbl_link1)
+
+        # --- Link 2: moving body (COL_FIELD blue, irregular polygon matching ref image) ---
+        body_verts_rel = np.array([
+            [0.0,   0.0,  0.0],
+            [0.55, -0.25, 0.0],
+            [1.15, -0.10, 0.0],
+            [1.35,  0.55, 0.0],
+            [1.10,  1.35, 0.0],
+            [0.45,  1.80, 0.0],
+            [-0.25, 1.75, 0.0],
+            [-0.55, 1.10, 0.0],
+            [-0.35,  0.30, 0.0],
+        ])
+        body_verts = body_verts_rel + A0_pt
+
+        link2_body = Polygon(
+            *body_verts,
+            color=COL_FIELD, stroke_width=2.5,
+            fill_color=COL_FIELD
+        ).set_fill(COL_FIELD, 0.20)
+
+        lbl_link2 = Text("2 (เคลื่อนที่)", font_size=9.5, color=COL_FIELD).next_to(
+            link2_body, RIGHT, buff=0.15)
+
+        # --- Pin A0 at pivot (SEPARATE VGroup -- NOT inside link2_body) ---
+        pin_dot = Dot(A0_pt, radius=0.11, color=COL_OK)
+        pin_ring = Circle(radius=0.22, color=COL_OK, stroke_width=2.2).move_to(A0_pt)
+        label_A0 = Text("A0", font_size=11, color=COL_OK, weight=BOLD).next_to(
+            pin_dot, DOWN + LEFT, buff=0.14)
+        pin_A0 = VGroup(pin_dot, pin_ring, label_A0)
+
+        self.play(FadeIn(link1_fixed), run_time=0.5)
+        self.play(FadeIn(pin_A0), run_time=0.3)
+        self.play(FadeIn(link2_body), FadeIn(lbl_link2), run_time=0.5)
+        self.wait(0.5)
+
+        # Rotate link2 body + its label around pin A0 -- pin_A0 stays fixed
+        self.play(
+            Rotate(link2_body, angle=0.28, about_point=A0_pt),
+            Rotate(lbl_link2, angle=0.28, about_point=A0_pt),
+            run_time=1.5
+        )
+        self.wait(0.5)
+
+        # Caption below diagram
+        cap_diag = Text(
+            "จุด A0 (หมุดยึด) มีความเร็วเป็นศูนย์เท่ากันทั้ง 2 ชิ้น เพราะชิ้น 1 หยุดนิ่ง -> I12 = A0",
+            font_size=11.5, color=WHITE
+        ).move_to([0.0, -2.65, 0.0])
+        fit_width(cap_diag, 12.0)
+        self.play(FadeIn(cap_diag), run_time=0.5)
+
+        # Indicate pin, then TransformFromCopy label_A0 -> label_I12
+        self.play(Indicate(pin_A0, color=COL_OK, scale_factor=1.5), run_time=0.7)
+
+        label_I12 = Text("I12 = A0", font_size=13, color=COL_OK, weight=BOLD).next_to(
+            pin_dot, UP + RIGHT, buff=0.22)
+        self.play(TransformFromCopy(label_A0, label_I12), run_time=0.6)
+
+        self.wait(4.5)
+
+        # ==================================================================
+        # BEAT 15.0-15.6: Fade out all
+        # ==================================================================
+        self.fade_out_all(run_time=0.5)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT 15.6-17.0: Summary Card
+        # ==================================================================
+        sum_box = RoundedRectangle(
+            width=11.4, height=2.8, corner_radius=0.15,
+            color=COL_OK, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.20, 0.0])
+        sum_head = _ic04_badge("สรุป: สัญกรณ์ I12 / I21", COL_OK).move_to([0.0, 0.80, 0.0])
+        sum_text = Text(
+            "I12 = I21 = จุดที่ความเร็วสัมพัทธ์ระหว่างวัตถุ 2 ชิ้นเป็นศูนย์\n"
+            "(สลับเลขได้ ความหมายเดียวกัน)",
+            font_size=12.5, color=WHITE
+        ).move_to([0.0, -0.05, 0.0])
+        fit_width(sum_text, 10.8)
+        sum_sub = Text(
+            "ตัวอย่าง: ชิ้น 1 หยุดนิ่ง, ชิ้น 2 หมุนรอบหมุด A0 -> I12 = A0",
+            font_size=11, color=COL_GRAY
+        ).move_to([0.0, -0.72, 0.0])
+        fit_width(sum_sub, 10.8)
+        summary_card = VGroup(sum_box, sum_head, sum_text, sum_sub)
+
+        self.play(FadeIn(summary_card, shift=UP * 0.4), run_time=0.5)
+        self.wait(0.9)
+
+        # ==================================================================
+        # BEAT 17.0-19.3: Review Question Card (bridge to IC05)
+        # ==================================================================
+        self.play(FadeOut(summary_card), run_time=0.4)
+
+        q_box = RoundedRectangle(
+            width=11.4, height=3.2, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_head = Text(
+            "คำถามทบทวนประจำคลิป (Check Your Understanding)",
+            font_size=13.5, color=COL_WARN, weight=BOLD
+        ).move_to([0.0, 1.05, 0.0])
+        q_body = Text(
+            "ถ้าวัตถุ 2 ชิ้นไม่ได้ต่อกันด้วยหมุดตรงๆ\n"
+            "(เช่น เลื่อนกัน หรือเป็นเฟือง) จะหา I12 ยังไง?",
+            font_size=12.0, color=WHITE
+        ).move_to([0.0, 0.20, 0.0])
+        fit_width(q_body, 10.6)
+        q_ans = Text(
+            "(คลิปต่อไป IC05: จะเฉลยทีละกรณีตามชนิดข้อต่อ: revolute, prismatic, rolling contact และอื่นๆ)",
+            font_size=10.5, color=COL_GRAY
+        ).move_to([0.0, -0.70, 0.0])
+        fit_width(q_ans, 10.6)
+        question_card = VGroup(q_box, q_head, q_body, q_ans)
+
+        self.play(FadeIn(question_card, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.8)
+
+        # ==================================================================
+        # BEAT 19.3-20.3: Hold & Fade
+        # ==================================================================
+        self.fade_out_all(run_time=0.5)
+        self.wait(0.5)
