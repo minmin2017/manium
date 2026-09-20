@@ -2504,3 +2504,189 @@ class IC08_SixLinkExample(SafeScene):
 
         self.fade_out_all(run_time=0.6)
         self.wait(0.7)
+
+
+# ======================================================================
+# Helper functions for IC09_VelocityRatioFormula
+# ======================================================================
+
+def _ic09_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _ic09_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _ic09_caption_top(text, color=WHITE):
+    return Text(text, font_size=13, color=color).move_to([0.0, 2.55, 0.0])
+
+
+def _ic09_step_badge(text, color=COL_OK):
+    lbl = Text(text, font_size=12, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.4, height=0.38, corner_radius=0.10,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class IC09_VelocityRatioFormula(SafeScene):
+    """
+    W03 น.21 — สูตรความเร็วจาก IC (ไม่ต้องรู้ ω)
+    Plan: Main_note/Claude_Specs/Manim — IC09_VelocityRatioFormula Plan.md
+    """
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ==================================================================
+        # BEAT 0.0-1.8: Title & Page Reference
+        # ==================================================================
+        title_m = _ic09_title("สูตรความเร็วจาก IC (ไม่ต้องรู้ ω)")
+        page_ref_m = _ic09_page_ref("W03 น.21")
+        self.play(FadeIn(title_m, shift=UP * 0.4), FadeIn(page_ref_m), run_time=1.2)
+        self.wait(0.4)
+
+        # ==================================================================
+        # BEAT 1.8-4.5: Hook Question
+        # ==================================================================
+        hook_q = _ic09_caption_top(
+            "ต้องรู้ ω ก่อนเสมอไหม ถึงจะหาความเร็วจุดอื่นบนลิงก์เดียวกันได้?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 11.5)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.4)
+
+        # ==================================================================
+        # BEAT 4.5-5.2: Answer
+        # ==================================================================
+        cap1 = _ic09_caption_top("ไม่จำเป็น ถ้ารู้ความเร็วจุดหนึ่งบนลิงก์เดียวกันอยู่แล้ว")
+        fit_width(cap1, 11.6)
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+
+        # ==================================================================
+        # BEAT 5.2-20.0: Build the diagram step by step (§48)
+        # ==================================================================
+        pos_badge = np.array([3.6, 1.9, 0.0])
+        step1 = _ic09_step_badge("วัตถุ 3 เกร็ง เคลื่อนที่ เทียบชิ้น 1 (หยุดนิ่ง)", COL_OK).move_to(pos_badge)
+        self.play(FadeIn(step1, shift=UP * 0.2), run_time=0.4)
+
+        blob_center = np.array([-1.6, -0.4, 0.0])
+        angles = np.linspace(0, 2 * np.pi, 24, endpoint=False)
+        radii = 1.3 + 0.35 * np.cos(angles) - 0.2 * np.sin(2 * angles) + 0.15 * np.cos(3 * angles)
+        blob_pts = [blob_center + np.array([r * np.cos(a), 0.68 * r * np.sin(a), 0.0]) for a, r in zip(angles, radii)]
+        body_blob = Polygon(*blob_pts, color="#B08968", stroke_width=3.0, fill_color="#8D6E63").set_fill("#8D6E63", 0.4)
+        lbl_body = Text("ชิ้น 3", font_size=11, color="#D7B899").move_to(blob_center)
+        self.play(Create(body_blob), FadeIn(lbl_body), run_time=0.6)
+        self.wait(0.3)
+
+        IC13 = np.array([2.2, -0.4, 0.0])
+        dot_IC13 = Dot(IC13, radius=0.09, color=COL_OK)
+        lbl_IC13 = Text("I_13", font_size=12, color=COL_OK, weight=BOLD).next_to(dot_IC13, RIGHT, buff=0.12)
+        self.play(FadeIn(dot_IC13), FadeIn(lbl_IC13), run_time=0.4)
+        self.wait(0.3)
+
+        step2 = _ic09_step_badge("จุด P บนวัตถุ: v_P ⊥ r_(P/I13)", COL_OK).move_to(pos_badge)
+        self.play(ReplacementTransform(step1, step2), run_time=0.4)
+        P = blob_center + np.array([-0.75, 0.55, 0.0])
+        r_P = P - IC13
+        rP_dir = r_P / np.linalg.norm(r_P)
+        vP_dir = np.array([-rP_dir[1], rP_dir[0], 0.0])
+        line_rP = Line(IC13, P, color=COL_GRAY, stroke_width=1.6)
+        dot_P = Dot(P, radius=0.07, color=WHITE)
+        lbl_P = Text("P", font_size=11, color=WHITE).next_to(dot_P, UP, buff=0.1)
+        self.play(Create(line_rP), FadeIn(dot_P), FadeIn(lbl_P), run_time=0.5)
+        vP_arrow = Arrow(P, P + 1.1 * vP_dir, buff=0, color=COL_FORCE, stroke_width=3.6, max_tip_length_to_length_ratio=0.22)
+        lbl_vP = Text("v_P", font_size=11, color=COL_FORCE).next_to(vP_arrow.get_end(), UP, buff=0.08)
+        self.play(GrowArrow(vP_arrow), FadeIn(lbl_vP), run_time=0.5)
+        self.wait(0.4)
+
+        step3 = _ic09_step_badge("จุด S บนวัตถุ: v_S ⊥ r_(S/I13)", COL_OK).move_to(pos_badge)
+        self.play(ReplacementTransform(step2, step3), run_time=0.4)
+        S = blob_center + np.array([0.15, -0.7, 0.0])
+        r_S = S - IC13
+        rS_dir = r_S / np.linalg.norm(r_S)
+        vS_dir = np.array([-rS_dir[1], rS_dir[0], 0.0])
+        line_rS = Line(IC13, S, color=COL_GRAY, stroke_width=1.6)
+        dot_S = Dot(S, radius=0.07, color=WHITE)
+        lbl_S = Text("S", font_size=11, color=WHITE).next_to(dot_S, DOWN, buff=0.1)
+        self.play(Create(line_rS), FadeIn(dot_S), FadeIn(lbl_S), run_time=0.5)
+        vS_arrow = Arrow(S, S + 0.75 * vS_dir, buff=0, color=COL_CURR, stroke_width=3.6, max_tip_length_to_length_ratio=0.22)
+        lbl_vS = Text("v_S", font_size=11, color=COL_CURR).next_to(vS_arrow.get_end(), DOWN, buff=0.08)
+        self.play(GrowArrow(vS_arrow), FadeIn(lbl_vS), run_time=0.5)
+        self.wait(0.5)
+
+        step4 = _ic09_step_badge("(a) |V_P|=r_(P/I13)·ω₃   (b) |V_S|=r_(S/I13)·ω₃", COL_WARN).move_to(pos_badge)
+        self.play(ReplacementTransform(step3, step4), run_time=0.4)
+        self.wait(2.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT 20.6-24.0: Summary formula card
+        # ==================================================================
+        f_box = RoundedRectangle(
+            width=8.5, height=1.8, corner_radius=0.12,
+            color=COL_OK, stroke_width=2.4, fill_color="#0F766E"
+        ).set_fill("#0F766E", 0.3).move_to([0.0, 0.1, 0.0])
+        f_text = Text("|V_S| = |V_P| × (r_(S/IC) / r_(P/IC))", font_size=17, color=YELLOW, weight=BOLD).move_to([0.0, 0.4, 0.0])
+        f_sub = Text("ω หายไปจากสมการพอดี — ไม่ต้องรู้ ω เลย ถ้ารู้ v ที่จุดหนึ่งบนลิงก์เดียวกัน", font_size=11.5, color=WHITE).move_to([0.0, -0.15, 0.0])
+        fit_width(f_sub, 8.2)
+        f_grp = VGroup(f_box, f_text, f_sub)
+        self.play(FadeIn(f_grp, shift=UP * 0.3), run_time=0.6)
+        self.wait(2.3)
+
+        self.play(FadeOut(f_grp), run_time=0.4)
+
+        # ==================================================================
+        # BEAT 24.0-30.0: Direction rule (exam-critical)
+        # ==================================================================
+        rule_box = RoundedRectangle(
+            width=11.4, height=3.0, corner_radius=0.15,
+            color=COL_BAD, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        rule_head = Text("จุดออกสอบ ⭐⭐⭐ — หัวใจของการใช้ IC หาความเร็ว", font_size=14, color=COL_BAD, weight=BOLD).move_to([0.0, 1.0, 0.0])
+        rule_body = Text(
+            "ทิศทางของ V_S ตั้งฉากกับเส้น S–IC เสมอ (เหมือนหมุนรอบจุดหมุน)",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.35, 0.0])
+        fit_width(rule_body, 10.6)
+        rule_sub = Text(
+            "ขนาดใช้สัดส่วนระยะทางจาก IC ได้เลย ไม่ต้องรู้ ω จริง ถ้ารู้ v จุดหนึ่งบนลิงก์เดียวกันอยู่แล้ว",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -0.35, 0.0])
+        fit_width(rule_sub, 10.6)
+        rule_grp = VGroup(rule_box, rule_head, rule_body, rule_sub)
+        self.play(FadeIn(rule_grp, shift=UP * 0.4), run_time=0.6)
+        self.wait(2.5)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT: Review Question (bridge to IC10)
+        # ==================================================================
+        q_box3 = RoundedRectangle(
+            width=11.4, height=2.4, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_body3 = Text(
+            "ลองใช้สูตรนี้กับโจทย์จริง (กลไก 6 ชิ้น) ดูไหม?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.2, 0.0])
+        fit_width(q_body3, 10.6)
+        q_ans3 = Text("(คลิปต่อไป: โจทย์ transfer point)", font_size=11, color=COL_GRAY).move_to([0.0, -0.4, 0.0])
+        question_card3 = VGroup(q_box3, q_body3, q_ans3)
+
+        self.play(FadeIn(question_card3, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.7)
