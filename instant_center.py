@@ -2910,3 +2910,280 @@ class IC10_TransferPointExample(SafeScene):
 
         self.fade_out_all(run_time=0.6)
         self.wait(0.7)
+
+
+# ======================================================================
+# Helper functions for IC11_SliderMultiPath
+# ======================================================================
+
+def _ic11_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _ic11_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _ic11_caption_top(text, color=WHITE):
+    return Text(text, font_size=13, color=color).move_to([0.0, 2.55, 0.0])
+
+
+def _ic11_step_badge(text, color=COL_OK):
+    lbl = Text(text, font_size=12, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.4, height=0.38, corner_radius=0.10,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class IC11_SliderMultiPath(SafeScene):
+    """
+    W03 น.25-27 — Example 2: สไลด์เดอร์คร่อม 2 ก้าน, แก้ได้หลายเส้นทาง (คำตอบเดียวกัน)
+    Plan: Main_note/Claude_Specs/Manim — IC11_SliderMultiPath Plan.md
+    Last clip in the 11-clip W03 Instant Center series.
+    """
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        pos_badge = np.array([3.6, 1.9, 0.0])
+
+        # ==================================================================
+        # BEAT 0.0-1.8: Title & Page Reference
+        # ==================================================================
+        title_m = _ic11_title("โจทย์: สไลด์เดอร์คร่อม 2 ก้าน — แก้ได้หลายทาง")
+        page_ref_m = _ic11_page_ref("W03 น.25-27")
+        self.play(FadeIn(title_m, shift=UP * 0.4), FadeIn(page_ref_m), run_time=1.2)
+        self.wait(0.4)
+
+        # ==================================================================
+        # BEAT 1.8-4.8: Hook question + answer
+        # ==================================================================
+        hook_q = _ic11_caption_top(
+            "รู้ v_A=3 m/s หา v_C — มีตัวเลือกมองจุด/transfer point หลายแบบ วิธีไหน 'ถูก'?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 11.6)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.6)
+        self.play(FadeOut(hook_q), run_time=0.4)
+
+        cap0 = _ic11_caption_top("ทุกทางถูกหมด — IC เป็นสมบัติของกลไกทั้งระบบ", color=COL_OK)
+        fit_width(cap0, 11.6)
+        self.play(FadeIn(cap0, shift=UP * 0.35), run_time=0.5)
+        self.wait(0.8)
+        self.play(FadeOut(cap0), run_time=0.4)
+
+        # ==================================================================
+        # BEAT 4.8-9.6: Mechanism setup (schematic, abbreviated like IC10)
+        # ==================================================================
+        wall = Line([-4.3, -2.2, 0], [-4.3, 1.3, 0], color=COL_GRAY, stroke_width=2.0)
+        wall_hatch = VGroup(*[
+            Line([-4.3, y, 0], [-4.5, y - 0.16, 0], color="#64748B", stroke_width=1.2)
+            for y in np.linspace(-2.0, 1.1, 7)
+        ])
+        rail = Line([1.8, -1.8, 0], [4.3, -1.8, 0], color=COL_GRAY, stroke_width=3.0)
+        rail_hatch = VGroup(*[
+            Line([x, -1.8, 0], [x - 0.16, -2.0, 0], color="#64748B", stroke_width=1.2)
+            for x in np.linspace(2.0, 4.2, 6)
+        ])
+
+        I13 = np.array([-4.0, 0.3, 0.0])
+        A = np.array([-1.6, 1.2, 0.0])
+        I35 = np.array([1.0, 1.5, 0.0])
+        I15 = np.array([-0.8, -1.8, 0.0])
+        C = np.array([3.2, -1.8, 0.0])
+
+        link3 = Line(I13, A, color=COL_FIELD, stroke_width=5)
+        link5 = Line(I15, C, color=COL_FORCE, stroke_width=5)
+
+        self.play(Create(wall), FadeIn(wall_hatch), Create(rail), FadeIn(rail_hatch), run_time=0.6)
+        self.play(Create(link3), Create(link5), run_time=0.6)
+
+        dot_A = Dot(A, radius=0.07, color=WHITE)
+        lbl_A = Text("A", font_size=11, color=WHITE).next_to(A, UP, buff=0.1)
+        dot_C = Dot(C, radius=0.07, color=WHITE)
+        lbl_C = Text("C", font_size=11, color=WHITE).next_to(C, DOWN, buff=0.12)
+        self.play(FadeIn(dot_A), FadeIn(lbl_A), FadeIn(dot_C), FadeIn(lbl_C), run_time=0.4)
+
+        setup_cap = _ic11_caption_top("รู้ v_A = 3 m/s (บนลิงก์ 3) → หา v_C (สไลด์เดอร์บนราง)")
+        fit_width(setup_cap, 11.6)
+        self.play(FadeIn(setup_cap, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.0)
+        self.play(FadeOut(setup_cap), run_time=0.4)
+
+        # ==================================================================
+        # BEAT 9.6-19.1: Method 1 — links 1, 3, 5
+        # ==================================================================
+        m1_cap = _ic11_caption_top("วิธี 1: พิจารณาลิงก์ 1, 3, 5", color=COL_FIELD)
+        fit_width(m1_cap, 11.6)
+        self.play(FadeIn(m1_cap, shift=UP * 0.3), run_time=0.5)
+
+        step1 = _ic11_step_badge("ขั้น 1: หา I_13 (pivot)", COL_OK).move_to(pos_badge)
+        self.play(FadeIn(step1, shift=UP * 0.2), run_time=0.4)
+        ln_a = DashedLine([-4.3, 0.9, 0], I13, color=COL_OK, stroke_width=1.6)
+        ln_b = DashedLine(A + np.array([0.0, -0.9, 0.0]), I13, color=COL_OK, stroke_width=1.6)
+        self.play(Create(ln_a), Create(ln_b), run_time=0.6)
+        dot_I13 = Dot(I13, radius=0.08, color=COL_OK)
+        lbl_I13 = Text("I_13", font_size=10, color=COL_OK).next_to(dot_I13, DOWN, buff=0.1)
+        self.play(FadeIn(dot_I13), FadeIn(lbl_I13), run_time=0.4)
+        self.wait(0.5)
+
+        step2 = _ic11_step_badge("ขั้น 2: หา I_15 (pivot อีกฝั่ง, จาก I_13)", COL_OK).move_to(pos_badge)
+        self.play(ReplacementTransform(step1, step2), run_time=0.4)
+        ln_c = DashedLine(I13, I15, color=COL_OK, stroke_width=1.6)
+        ln_d = DashedLine([-4.3, -1.6, 0], I15, color=COL_OK, stroke_width=1.6)
+        self.play(Create(ln_c), Create(ln_d), run_time=0.6)
+        dot_I15 = Dot(I15, radius=0.08, color=COL_OK)
+        lbl_I15 = Text("I_15", font_size=10, color=COL_OK).next_to(dot_I15, DOWN, buff=0.1)
+        self.play(FadeIn(dot_I15), FadeIn(lbl_I15), run_time=0.4)
+        self.wait(0.5)
+
+        step3 = _ic11_step_badge("ขั้น 3: หา I_35 = transfer point (Kennedy)", COL_WARN).move_to(pos_badge)
+        self.play(ReplacementTransform(step2, step3), run_time=0.4)
+        ln_e = DashedLine(I13, I35, color=COL_CURR, stroke_width=1.6)
+        ln_f = DashedLine(I15, I35, color=COL_CURR, stroke_width=1.6)
+        self.play(Create(ln_e), Create(ln_f), run_time=0.6)
+        dot_I35 = Dot(I35, radius=0.09, color=COL_CURR)
+        diamond_I35 = Square(side_length=0.22, color=COL_CURR, stroke_width=2.2).rotate(np.radians(45)).move_to(I35)
+        # open space below-right of the dot, away from the top-right badge
+        # and the up-left-going velocity arrow that will appear next beat
+        # (same leader-line fix pattern as IC10's I_25 label, §29/§30)
+        lbl_I35_pos = I35 + np.array([1.1, -0.55, 0.0])
+        lbl_I35 = Text("I_35 (transfer point)", font_size=10.5, color=COL_CURR, weight=BOLD).move_to(lbl_I35_pos)
+        leader_I35 = DashedLine(lbl_I35.get_top(), dot_I35.get_center(), color=COL_CURR, stroke_width=1.2, dash_length=0.08)
+        self.play(FadeIn(dot_I35), FadeIn(diamond_I35), FadeIn(lbl_I35), Create(leader_I35), run_time=0.5)
+        self.wait(1.0)
+
+        step4 = _ic11_step_badge("ขั้น 4: สร้างรูปสามเหลี่ยมความเร็ว (ดูขั้นต่อไป)", COL_OK).move_to(pos_badge)
+        self.play(ReplacementTransform(step3, step4), run_time=0.4)
+        self.wait(1.2)
+
+        self.play(FadeOut(m1_cap), run_time=0.4)
+        self.play(*[FadeOut(m) for m in [ln_a, ln_b, ln_c, ln_d, ln_e, ln_f, step4]], run_time=0.5)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT 19.1-30.0: Step 4 in detail — velocity triangle chain
+        # ==================================================================
+        cap2 = _ic11_caption_top("ขั้นที่ 4: v_A → v_I35 (ผ่าน I_13) → v_C (ผ่าน I_15)")
+        fit_width(cap2, 11.6)
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+        self.wait(0.3)
+
+        rA_dir = (A - I13) / np.linalg.norm(A - I13)
+        vA_dir = np.array([-rA_dir[1], rA_dir[0], 0.0])
+        vA_arrow = Arrow(A, A + 1.0 * vA_dir, buff=0, color=COL_FORCE, stroke_width=3.6, max_tip_length_to_length_ratio=0.22)
+        lbl_vA = Text("v_A (รู้ค่า)", font_size=10.5, color=COL_FORCE).next_to(vA_arrow.get_end(), vA_dir, buff=0.12)
+        self.play(GrowArrow(vA_arrow), FadeIn(lbl_vA), run_time=0.6)
+        self.wait(0.5)
+
+        step_a = _ic11_step_badge("v_I35 = v_A × (r_(I35/I13) / r_(A/I13))", COL_WARN).move_to(pos_badge)
+        self.play(FadeIn(step_a, shift=UP * 0.2), run_time=0.4)
+        ratio1 = np.linalg.norm(I35 - I13) / np.linalg.norm(A - I13)
+        rI35_dir = (I35 - I13) / np.linalg.norm(I35 - I13)
+        vI35_dir = np.array([-rI35_dir[1], rI35_dir[0], 0.0])
+        vI35_len = min(1.0 * ratio1, 0.55)
+        vI35_arrow = Arrow(I35, I35 + vI35_len * vI35_dir, buff=0, color=COL_CURR, stroke_width=3.6, max_tip_length_to_length_ratio=0.2)
+        lbl_vI35 = Text("v_I35", font_size=10.5, color=COL_CURR).next_to(vI35_arrow.get_end(), vI35_dir, buff=0.12)
+        self.play(GrowArrow(vI35_arrow), FadeIn(lbl_vI35), run_time=0.6)
+        self.wait(0.6)
+
+        step_b = _ic11_step_badge("I_35 อยู่บนลิงก์ 5 ด้วย → v ถ่ายโอนข้ามลิงก์", COL_CURR).move_to(pos_badge)
+        self.play(ReplacementTransform(step_a, step_b), run_time=0.4)
+        self.wait(1.2)
+
+        step_c = _ic11_step_badge("v_C = v_I35 × (r_(C/I15) / r_(I35/I15))", COL_OK).move_to(pos_badge)
+        self.play(ReplacementTransform(step_b, step_c), run_time=0.4)
+        ratio2 = np.linalg.norm(C - I15) / np.linalg.norm(I35 - I15)
+        vC_len = min(vI35_len * ratio2, 1.3)
+        # C rides a slider on a horizontal rail (prismatic joint, §IC05) —
+        # its velocity must lie along the rail even though the general IC
+        # rule (perpendicular to the line to the IC) is what derives its
+        # magnitude here; state both explicitly so they don't look like a
+        # contradiction.
+        vC_arrow = Arrow(C, C + np.array([vC_len, 0.0, 0.0]), buff=0, color=COL_OK, stroke_width=4.0, max_tip_length_to_length_ratio=0.2)
+        lbl_vC = Text("v_C", font_size=12, color=COL_OK, weight=BOLD).next_to(vC_arrow.get_end(), RIGHT, buff=0.12)
+        self.play(GrowArrow(vC_arrow), FadeIn(lbl_vC), run_time=0.6)
+        self.wait(0.6)
+
+        rail_note = Text(
+            "v_C ต้องอยู่ในแนวราง (prismatic joint) — สอดคล้องกับทิศตั้งฉากกับเส้น C–I_15 พอดี",
+            font_size=10.5, color=COL_GRAY
+        ).move_to([0.0, -2.55, 0.0])
+        fit_width(rail_note, 11.4)
+        self.play(FadeIn(rail_note, shift=UP * 0.2), run_time=0.5)
+        self.wait(2.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT 30.6-38.0: Method 2 summary (abbreviated, per plan scope)
+        # ==================================================================
+        m2_cap = _ic11_caption_top("วิธี 2: พิจารณาลิงก์ 1, 2, 6 (สรุปเร็ว — คำตอบเดียวกัน)", color=COL_FIELD)
+        fit_width(m2_cap, 11.6)
+        self.play(FadeIn(m2_cap, shift=UP * 0.3), run_time=0.5)
+        self.wait(0.3)
+
+        chain_items = [
+            ("I_12 (pivot, revolute ตรงๆ)", COL_OK),
+            ("I_26 (transfer point)", COL_CURR),
+            ("I_16 ที่ ∞ (ลิงก์ 6 เคลื่อนที่เชิงเส้นล้วน → v เท่ากันทุกจุด)", COL_WARN),
+        ]
+        chain_mobs = VGroup()
+        y0 = 0.9
+        for i, (txt, col) in enumerate(chain_items):
+            box = RoundedRectangle(width=8.6, height=0.5, corner_radius=0.1, color=col, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95)
+            lbl = Text(txt, font_size=12, color=col)
+            fit_width(lbl, 8.2)
+            lbl.move_to(box.get_center())
+            row = VGroup(box, lbl).move_to([0.0, y0 - i * 0.75, 0.0])
+            chain_mobs.add(row)
+        arrows_chain = VGroup(*[
+            Arrow(chain_mobs[i].get_bottom(), chain_mobs[i + 1].get_top(), buff=0.05, color=COL_GRAY, stroke_width=2.2, max_tip_length_to_length_ratio=0.3)
+            for i in range(len(chain_mobs) - 1)
+        ])
+        self.play(LaggedStart(*[FadeIn(row, shift=UP * 0.2) for row in chain_mobs], lag_ratio=0.4), run_time=1.4)
+        self.play(Create(arrows_chain), run_time=0.6)
+        self.wait(1.0)
+
+        result_note = Text("v_C = ค่าเดียวกับวิธี 1 — เพราะ C อยู่บนลิงก์ 6 เดียวกับ I_26 ทั้งหมด", font_size=11, color=COL_OK).move_to([0.0, -1.9, 0.0])
+        fit_width(result_note, 11.2)
+        self.play(FadeIn(result_note, shift=UP * 0.2), run_time=0.5)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT 38.0-42.5: Exam-point card + callback to HW4
+        # ==================================================================
+        tip_box = RoundedRectangle(width=11.6, height=2.6, corner_radius=0.15, color=COL_OK, fill_color=COL_BG_BOX).set_fill(COL_BG_BOX, 0.95).move_to([0.0, 0.1, 0.0])
+        tip_l1 = Text("จุดออกสอบ: IC เป็นสมบัติของกลไกทั้งระบบ ไม่ขึ้นกับว่ามองผ่านลิงก์ไหน", font_size=13, color=WHITE).move_to([0.0, 0.55, 0.0])
+        fit_width(tip_l1, 11.0)
+        tip_l2 = Text("ทุกเส้นทางที่ถูกต้องให้คำตอบตรงกันเสมอ — ใช้ตรวจคำตอบวิธีเวกเตอร์ได้ด้วย", font_size=12, color=COL_GRAY).move_to([0.0, 0.05, 0.0])
+        fit_width(tip_l2, 11.0)
+        tip_l3 = Text("(โจทย์นี้ตรงกับการบ้าน 4 ที่แก้ด้วยวิธีเวกเตอร์ — ลองเทียบคำตอบดู)", font_size=11, color=COL_FIELD).move_to([0.0, -0.45, 0.0])
+        fit_width(tip_l3, 11.0)
+        tip_card = VGroup(tip_box, tip_l1, tip_l2, tip_l3)
+        self.play(FadeIn(tip_card, shift=UP * 0.3), run_time=0.5)
+        self.wait(3.2)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT 42.5-45.0: Series closing card
+        # ==================================================================
+        end_txt = Text("จบซีรีส์ Instant Center — W03", font_size=22, color=WHITE, weight=BOLD).move_to([0.0, 0.2, 0.0])
+        end_sub = Text("Mechanics of Machinery — 11 คลิป", font_size=13, color=COL_GRAY).move_to([0.0, -0.35, 0.0])
+        self.play(FadeIn(end_txt, shift=UP * 0.3), FadeIn(end_sub, shift=UP * 0.2), run_time=0.7)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.5)
