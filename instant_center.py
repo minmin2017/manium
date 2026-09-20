@@ -2281,3 +2281,226 @@ class IC07_FourBarExamples(SafeScene):
 
         self.fade_out_all(run_time=0.6)
         self.wait(0.7)
+
+
+# ======================================================================
+# Helper functions for IC08_SixLinkExample
+# ======================================================================
+
+def _ic08_title(text):
+    return Text(text, font_size=20, color=WHITE).to_edge(UP, buff=0.35)
+
+
+def _ic08_page_ref(text):
+    return Text(text, font_size=12, color=COL_GRAY).to_corner(UR, buff=0.35)
+
+
+def _ic08_caption_top(text, color=WHITE):
+    return Text(text, font_size=13, color=color).move_to([0.0, 2.55, 0.0])
+
+
+def _ic08_step_badge(text, color=COL_OK):
+    lbl = Text(text, font_size=12, color=color, weight=BOLD)
+    bg = RoundedRectangle(
+        width=lbl.width + 0.4, height=0.38, corner_radius=0.10,
+        color=color, fill_color=COL_BG_BOX
+    ).set_fill(COL_BG_BOX, 0.95)
+    lbl.move_to(bg.get_center())
+    return VGroup(bg, lbl)
+
+
+class IC08_SixLinkExample(SafeScene):
+    """
+    W03 น.16-20 — กลไก 6 ชิ้น สไลด์เดอร์ 2 ตัว (N_IC=15, 2 จุดที่ ∞)
+    Plan: Main_note/Claude_Specs/Manim — IC08_SixLinkExample Plan.md
+    """
+
+    def fade_out_all(self, run_time=0.5):
+        if self.mobjects:
+            self.play(*[FadeOut(m) for m in list(self.mobjects)], run_time=run_time)
+
+    def construct(self):
+        # ==================================================================
+        # BEAT 0.0-1.8: Title & Page Reference
+        # ==================================================================
+        title_m = _ic08_title("กลไก 6 ชิ้น: สไลด์เดอร์ 2 ตัว")
+        page_ref_m = _ic08_page_ref("W03 น.16-20")
+        self.play(FadeIn(title_m, shift=UP * 0.4), FadeIn(page_ref_m), run_time=1.2)
+        self.wait(0.4)
+
+        # ==================================================================
+        # BEAT 1.8-4.5: Hook Question
+        # ==================================================================
+        hook_q = _ic08_caption_top(
+            "เทคนิคเดิมใช้กับกลไกที่ซับซ้อนกว่านี้ได้ไหม?",
+            color=COL_WARN
+        )
+        fit_width(hook_q, 11.5)
+        self.play(FadeIn(hook_q, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.5)
+        self.play(FadeOut(hook_q), run_time=0.4)
+
+        # ==================================================================
+        # BEAT 4.5-7.0: Answer + Formula
+        # ==================================================================
+        cap1 = _ic08_caption_top("ได้ — หลักการเดียวกัน แค่ N มากขึ้น: n=6 → N_IC = 6×5/2 = 15 จุด")
+        fit_width(cap1, 11.6)
+        self.play(FadeIn(cap1, shift=UP * 0.35), run_time=0.5)
+        self.wait(1.3)
+
+        # ==================================================================
+        # BEAT 7.0-22.0: Build mechanism step by step (§48)
+        # ==================================================================
+        pos_badge = np.array([3.6, 1.9, 0.0])
+        step1 = _ic08_step_badge("สร้างกลไกทีละขั้น: เฟรม (ผนัง+พื้น)", COL_OK).move_to(pos_badge)
+        self.play(FadeIn(step1, shift=UP * 0.2), run_time=0.4)
+
+        wall = Line([-4.3, -2.2, 0], [-4.3, 1.3, 0], color=COL_GRAY, stroke_width=2.0)
+        wall_hatch = VGroup(*[
+            Line([-4.3, y, 0], [-4.5, y - 0.16, 0], color="#64748B", stroke_width=1.2)
+            for y in np.linspace(-2.0, 1.1, 8)
+        ])
+        ground = Line([-4.3, -2.2, 0], [3.0, -2.2, 0], color=COL_GRAY, stroke_width=2.0)
+        ground_hatch = VGroup(*[
+            Line([x, -2.2, 0], [x - 0.16, -2.38, 0], color="#64748B", stroke_width=1.2)
+            for x in np.linspace(-4.1, 2.8, 12)
+        ])
+        self.play(Create(wall), FadeIn(wall_hatch), Create(ground), FadeIn(ground_hatch), run_time=0.6)
+
+        I12 = np.array([-4.3, 0.2, 0.0])
+        A = np.array([-2.5, 0.9, 0.0])
+        u3 = np.array([1.0, -0.28, 0.0]) / np.linalg.norm([1.0, -0.28, 0.0])
+        A2 = A + 1.7 * u3
+        B = np.array([0.3, -0.5, 0.0])
+        C = np.array([2.2, -2.2, 0.0])
+
+        step2 = _ic08_step_badge("Link 2: หมุดที่ I_12 (ผนัง)", COL_OK).move_to(pos_badge)
+        self.play(ReplacementTransform(step1, step2), run_time=0.4)
+        link2 = Line(I12, A, color=COL_FIELD, stroke_width=5)
+        self.play(Create(link2), run_time=0.5)
+        dot_I12 = Dot(I12, radius=0.08, color=COL_OK)
+        lbl_I12 = Text("I_12", font_size=10, color=COL_OK).next_to(dot_I12, LEFT, buff=0.12)
+        self.play(FadeIn(dot_I12), FadeIn(lbl_I12), run_time=0.35)
+
+        step3 = _ic08_step_badge("Link 3: หมุดที่ I_23", COL_OK).move_to(pos_badge)
+        self.play(ReplacementTransform(step2, step3), run_time=0.4)
+        link3 = Line(A, A2 + 0.5 * u3, color="#BA68C8", stroke_width=5)
+        self.play(Create(link3), run_time=0.5)
+        dot_I23 = Dot(A, radius=0.08, color=COL_OK)
+        lbl_I23 = Text("I_23", font_size=10, color=COL_OK).next_to(dot_I23, UP, buff=0.1)
+        self.play(FadeIn(dot_I23), FadeIn(lbl_I23), run_time=0.35)
+
+        step4 = _ic08_step_badge("Link 4: สไลเดอร์บน Link 3 → หมุดที่ I_45", COL_OK).move_to(pos_badge)
+        self.play(ReplacementTransform(step3, step4), run_time=0.4)
+        perp3 = np.array([-u3[1], u3[0], 0.0])
+        block34 = RoundedRectangle(width=0.55, height=0.32, corner_radius=0.05, color=COL_WARN, fill_color=COL_WARN).set_fill(COL_WARN, 0.6)
+        block34.rotate(np.arctan2(u3[1], u3[0])).move_to(A2)
+        self.play(FadeIn(block34), run_time=0.4)
+        link4 = Line(A2, B, color=COL_CURR, stroke_width=5)
+        self.play(Create(link4), run_time=0.5)
+        dot_I45 = Dot(B, radius=0.08, color=COL_OK)
+        lbl_I45 = Text("I_45", font_size=10, color=COL_OK).next_to(dot_I45, DOWN, buff=0.12)
+        self.play(FadeIn(dot_I45), FadeIn(lbl_I45), run_time=0.35)
+
+        step5 = _ic08_step_badge("Link 5-6: หมุดที่ I_56 → บล็อกสไลด์บนพื้น", COL_OK).move_to(pos_badge)
+        self.play(ReplacementTransform(step4, step5), run_time=0.4)
+        link5 = Line(B, C, color=COL_FORCE, stroke_width=5)
+        self.play(Create(link5), run_time=0.5)
+        block56 = RoundedRectangle(width=0.6, height=0.3, corner_radius=0.05, color=COL_WARN, fill_color=COL_WARN).set_fill(COL_WARN, 0.6).move_to(C)
+        self.play(FadeIn(block56), run_time=0.4)
+        dot_I56 = Dot(C, radius=0.08, color=COL_OK)
+        lbl_I56 = Text("I_56", font_size=10, color=COL_OK).next_to(dot_I56, UP, buff=0.16)
+        self.play(FadeIn(dot_I56), FadeIn(lbl_I56), run_time=0.35)
+        self.wait(0.8)
+
+        self.play(*[FadeOut(m) for m in list(self.mobjects) if m not in (title_m, page_ref_m)], run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT 22.6-33.0: Two points at infinity
+        # ==================================================================
+        cap2 = _ic08_caption_top("จุดที่ ∞ (novel): สไลด์เดอร์ 2 ตัว → จุด ∞ 2 จุด คนละทิศกัน")
+        fit_width(cap2, 11.6)
+        self.play(FadeIn(cap2, shift=UP * 0.35), run_time=0.5)
+
+        self.play(Create(wall), FadeIn(wall_hatch), Create(ground), FadeIn(ground_hatch), run_time=0.5)
+        self.play(Create(link2), Create(link3), Create(link4), Create(link5), run_time=0.6)
+        self.play(FadeIn(block34), FadeIn(block56), FadeIn(dot_I12), FadeIn(dot_I45), FadeIn(dot_I56), run_time=0.5)
+
+        step6 = _ic08_step_badge("ข้อต่อ 3-4 เป็นสไลด์เดอร์ → I_34 at ∞ ⊥ ทิศไถลของ link3", COL_WARN).move_to(pos_badge)
+        self.play(FadeIn(step6, shift=UP * 0.2), run_time=0.4)
+        arr34a = Arrow(A2 + 0.3 * perp3, A2 + 1.3 * perp3, buff=0, color=COL_WARN, stroke_width=2.6, max_tip_length_to_length_ratio=0.18)
+        arr34b = Arrow(A2 - 0.3 * perp3, A2 - 1.3 * perp3, buff=0, color=COL_WARN, stroke_width=2.6, max_tip_length_to_length_ratio=0.18)
+        self.play(GrowArrow(arr34a), GrowArrow(arr34b), run_time=0.6)
+        lbl_I34 = Text("I_34 at ∞", font_size=10.5, color=COL_WARN, weight=BOLD).next_to(arr34a, RIGHT, buff=0.12)
+        self.play(FadeIn(lbl_I34), run_time=0.4)
+        self.wait(1.0)
+
+        step7 = _ic08_step_badge("Link 6 สไลด์บนพื้น (แนวนอน) → I_16 at ∞ (แนวตั้ง)", COL_WARN).move_to(pos_badge)
+        self.play(ReplacementTransform(step6, step7), run_time=0.4)
+        arr16 = Arrow(C + [0, 0.3, 0], C + [0, 1.5, 0], buff=0, color=COL_WARN, stroke_width=2.6, max_tip_length_to_length_ratio=0.18)
+        self.play(GrowArrow(arr16), run_time=0.5)
+        lbl_I16 = Text("I_16 at ∞", font_size=10.5, color=COL_WARN, weight=BOLD).next_to(arr16, RIGHT, buff=0.12)
+        self.play(FadeIn(lbl_I16), run_time=0.4)
+
+        note_diff = Text(
+            "I_34 กับ I_16 อยู่ที่ ∞ คนละทิศกัน — เป็นเส้นขนานคนละแนว ไม่ใช่จุดเดียวกัน",
+            font_size=11.5, color=COL_WARN
+        ).move_to([0.0, -2.9, 0.0])
+        fit_width(note_diff, 11.6)
+        self.play(FadeIn(note_diff, shift=UP * 0.2), run_time=0.5)
+        self.wait(2.0)
+
+        self.play(*[FadeOut(m) for m in list(self.mobjects) if m not in (title_m, page_ref_m)], run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT 33.6-38.0: One Kennedy-derived example (I13)
+        # ==================================================================
+        cap3 = _ic08_caption_top("ตัวอย่าง Kennedy-derived 1 จุด: หา I_13 จากสามเหลี่ยม 1-2-3")
+        fit_width(cap3, 11.6)
+        self.play(FadeIn(cap3, shift=UP * 0.35), run_time=0.5)
+
+        self.play(Create(wall), FadeIn(wall_hatch), Create(ground), FadeIn(ground_hatch), run_time=0.4)
+        self.play(Create(link2), run_time=0.4)
+        self.play(FadeIn(dot_I12), FadeIn(lbl_I12), FadeIn(dot_I23), FadeIn(lbl_I23), run_time=0.4)
+
+        d1 = (A - I12) / np.linalg.norm(A - I12)
+        I13 = I12 + 3.6 * d1
+        ln13 = DashedLine(I12 - 0.3 * d1, I13, color=COL_WARN, stroke_width=1.8)
+        self.play(Create(ln13), run_time=0.7)
+        dot_I13 = Dot(I13, radius=0.08, color=COL_WARN)
+        lbl_I13 = Text("I_13", font_size=11, color=COL_WARN, weight=BOLD).next_to(dot_I13, RIGHT, buff=0.1)
+        self.play(FadeIn(dot_I13), FadeIn(lbl_I13), run_time=0.4)
+
+        note_rest = Text(
+            "อีก 11 จุดที่เหลือ ใช้หลักการเดียวกันนี้ทั้งหมด (ไม่ไล่ครบในคลิปนี้)",
+            font_size=11.5, color=COL_GRAY
+        ).move_to([0.0, -2.9, 0.0])
+        fit_width(note_rest, 11.6)
+        self.play(FadeIn(note_rest, shift=UP * 0.2), run_time=0.5)
+        self.wait(2.0)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.1)
+
+        # ==================================================================
+        # BEAT: Review Question (bridge to IC09)
+        # ==================================================================
+        q_box2 = RoundedRectangle(
+            width=11.4, height=2.4, corner_radius=0.15,
+            color=COL_WARN, fill_color=COL_BG_BOX
+        ).set_fill(COL_BG_BOX, 0.95).move_to([0.0, -0.15, 0.0])
+        q_body2 = Text(
+            "รู้ตำแหน่ง IC ครบแล้ว จะหาความเร็วจริงโดยไม่ต้องรู้ ω ได้ไหม?",
+            font_size=13, color=WHITE
+        ).move_to([0.0, 0.2, 0.0])
+        fit_width(q_body2, 10.6)
+        q_ans2 = Text("(คลิปต่อไป: สูตรอัตราส่วนความเร็วจาก IC)", font_size=11, color=COL_GRAY).move_to([0.0, -0.4, 0.0])
+        question_card2 = VGroup(q_box2, q_body2, q_ans2)
+
+        self.play(FadeIn(question_card2, shift=UP * 0.3), run_time=0.5)
+        self.wait(1.8)
+
+        self.fade_out_all(run_time=0.6)
+        self.wait(0.7)
