@@ -57,11 +57,10 @@ class DCMotor_ArmatureCommutator(SafeThreeDScene):
         step_cap = [None]
 
         def set_step(txt):
-            new = self.hud(caption_top(txt, size=21, max_w=12.5))
-            anims = [FadeIn(new, shift=UP * 0.2)]
             if step_cap[0] is not None:
-                anims.append(FadeOut(step_cap[0]))
-            self.play(*anims, run_time=0.5)
+                self.play(FadeOut(step_cap[0]), run_time=0.3)
+            new = self.hud(caption_top(txt, size=21, max_w=12.5))
+            self.play(FadeIn(new, shift=UP * 0.2), run_time=0.4)
             step_cap[0] = new
 
         # ---------------------------------------------------- step 1: shaft
