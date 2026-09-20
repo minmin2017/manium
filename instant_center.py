@@ -1592,11 +1592,11 @@ class IC05_JointTypes(SafeScene):
 
         rail_y = -1.1
         rail_C2 = Line([-3.4, rail_y, 0], [3.4, rail_y, 0], stroke_width=7, color=COL_FIELD)
-        lbl_rail = Text("Body C (ราง)", font_size=10.5, color=COL_FIELD).next_to(rail_C2, DOWN, buff=0.2)
+        lbl_rail = Text("Body C (ราง)", font_size=10.5, color=COL_FIELD).next_to(rail_C2.get_start(), DOWN, buff=0.2)
         self.play(Create(rail_C2), FadeIn(lbl_rail), run_time=0.5)
 
         block_B2 = RoundedRectangle(width=1.1, height=0.5, corner_radius=0.06, color=COL_METAL, fill_color=COL_METAL).set_fill(COL_METAL, 0.6).move_to([-0.3, rail_y + 0.45, 0])
-        lbl_block = Text("Body B", font_size=10.5, color=COL_METAL).next_to(block_B2, UP, buff=0.12)
+        lbl_block = Text("Body B", font_size=10.5, color=COL_METAL).next_to(block_B2, LEFT, buff=0.15)
         self.play(FadeIn(block_B2), FadeIn(lbl_block), run_time=0.5)
 
         slide_arrow = Arrow(block_B2.get_center() + [1.0, 0, 0], block_B2.get_center() + [2.0, 0, 0], buff=0, color=COL_WARN, stroke_width=3.5, max_tip_length_to_length_ratio=0.3)
@@ -1639,7 +1639,7 @@ class IC05_JointTypes(SafeScene):
         dot_P3 = Dot(P3, radius=0.09, color=COL_OK)
         self.play(FadeIn(dot_P3), run_time=0.4)
         self.play(Indicate(dot_P3, color=COL_OK), run_time=0.6)
-        label_IC3 = Text("P = I_BC, I_CB", font_size=12.5, color=COL_OK, weight=BOLD).next_to(dot_P3, UP, buff=0.22)
+        label_IC3 = Text("P = I_BC, I_CB", font_size=12.5, color=COL_OK, weight=BOLD).move_to(P3 + [0.0, 1.65, 0.0])
         self.play(FadeIn(label_IC3), run_time=0.5)
 
         recap3 = Text("(callback: เหมือนล้อกลิ้งใน IC02!)", font_size=10, color=COL_GRAY).move_to([4.4, -2.3, 0.0])
@@ -1675,11 +1675,11 @@ class IC05_JointTypes(SafeScene):
         self.play(FadeIn(dot_OB4), FadeIn(dot_OC4), FadeIn(dot_P4), run_time=0.4)
         self.wait(0.2)
 
-        perp_line4 = DashedLine(P4 + [0, 2.0, 0], P4 + [0, -2.0, 0], color=COL_WARN, stroke_width=2.5)
+        perp_line4 = DashedLine(P4 + [0, 1.5, 0], P4 + [0, -1.5, 0], color=COL_WARN, stroke_width=2.5)
         self.play(Create(perp_line4), run_time=1.0)
         self.wait(0.5)
-        label_IC4 = Text("I_BC, I_CB อยู่บนเส้นนี้ (ยังไม่รู้จุดแน่ๆ)", font_size=11.5, color=COL_WARN, weight=BOLD).next_to(perp_line4, RIGHT, buff=0.2)
-        fit_width(label_IC4, 4.0)
+        label_IC4 = Text("I_BC, I_CB อยู่บนเส้นนี้ (ยังไม่รู้จุดแน่ๆ)", font_size=11.5, color=COL_WARN, weight=BOLD).move_to([1.9, 1.35, 0.0])
+        fit_width(label_IC4, 3.2)
         self.play(FadeIn(label_IC4), run_time=0.5)
 
         reason4 = _ic05_reason("ต่างจาก 3 แบบแรก! รู้แค่ 'แนวเส้น' — ต้องรู้ทิศทางความเร็วเพิ่ม ถึงจะบอกตำแหน่งแน่นอนได้", COL_WARN)
