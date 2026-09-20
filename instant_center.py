@@ -2603,7 +2603,7 @@ class IC09_VelocityRatioFormula(SafeScene):
         lbl_P = Text("P", font_size=11, color=WHITE).next_to(dot_P, UP, buff=0.1)
         self.play(Create(line_rP), FadeIn(dot_P), FadeIn(lbl_P), run_time=0.5)
         vP_arrow = Arrow(P, P + 1.1 * vP_dir, buff=0, color=COL_FORCE, stroke_width=3.6, max_tip_length_to_length_ratio=0.22)
-        lbl_vP = Text("v_P", font_size=11, color=COL_FORCE).next_to(vP_arrow.get_end(), UP, buff=0.08)
+        lbl_vP = Text("v_P", font_size=11, color=COL_FORCE).next_to(vP_arrow.get_end(), vP_dir, buff=0.15)
         self.play(GrowArrow(vP_arrow), FadeIn(lbl_vP), run_time=0.5)
         self.wait(0.4)
 
