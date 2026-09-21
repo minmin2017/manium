@@ -40,9 +40,14 @@ class DCMotor_ArmatureCommutator(SafeThreeDScene):
         self.set_camera_orientation(phi=75 * DEGREES, theta=-50 * DEGREES)
 
         # frames at scale=1 came back with the whole assembly reading tiny
-        # (~15-20% of frame width) once actually viewed -- scaled 2.5x so the
-        # wiring/segment detail Min needs for the physical build is legible
-        SCALE = 2.5
+        # (~15-20% of frame width) once actually viewed -- scaled up so the
+        # wiring/segment detail Min needs for the physical build is legible.
+        # scale=2.5 was too far the other way: the top pole's wire junction
+        # point projected up into the step-6 caption text (found by zooming
+        # into an extracted frame -- the LAYOUT linter can't see this, since
+        # it only checks hud()-fixed mobjects against each other, not a
+        # world-space 3D line against fixed 2D text). Dialed back to 2.0.
+        SCALE = 2.0
         SHAFT_LEN, SHAFT_R = 8.5, 0.09 * SCALE
         ARM_X, ARM_ROUT, ARM_RHUB = -1.0 * SCALE, 1.0 * SCALE, 0.15 * SCALE
         COM_X, COM_ROUT, COM_RIN = 0.55 * SCALE, 0.42 * SCALE, 0.16 * SCALE
