@@ -2658,3 +2658,167 @@ class G38_BigExampleMM(SafeScene):
         fit_width(warn, 12.5)
         self.play(FadeIn(warn, shift=UP * 0.15))
         self.wait(2.4)
+
+
+# =====================================================================
+# G13B -- หน้า 13 (ต่อ): ทำไมต้องมี Line of Action, Path of Contact, Pressure Angle
+# =====================================================================
+class G13B_WhyLineOfAction(SafeScene):
+    def construct(self):
+        # 0.0 - 1.5s: Title & Page ref
+        self.add(title("หน้า 13 (ต่อ) — ทำไมต้องมี 3 คำนี้", size=24))
+        self.add(page_ref("หน้า 13 (ต่อ)"))
+
+        PHI0 = 20 * DEGREES
+        R1, R2 = 1.75, 1.15
+        fr = loa_frame(PHI0, R1, R2, sign=1.0)
+        shift = LEFT * 1.5 + DOWN * 0.2
+        O1, O2, P = fr["O1"] + shift, fr["O2"] + shift, fr["P"] + shift
+        E1, E2 = fr["E1"] + shift, fr["E2"] + shift
+        d = fr["d"]
+        Rb1, Rb2 = fr["Rb1"], fr["Rb2"]
+
+        # Addendum radii and exact intersection calculations with LOA
+        Ro1 = 1.90
+        Ro2 = 1.25
+        E1B = float(np.sqrt(max(Ro1**2 - Rb1**2, 0.0)))
+        E2A = float(np.sqrt(max(Ro2**2 - Rb2**2, 0.0)))
+        B = E1 + d * E1B
+        A = E2 - d * E2A
+
+        # 1.5 - 4.5s: Meshing gears enter
+        cap1 = caption_top("เฟืองสองตัวนี้กำลังขบกันอยู่ — ฟันแต่ละคู่สัมผัสกันตรงไหน?", size=18)
+        gear1 = gear_shape(radius=R1, teeth=18, color=GEAR2, fill_opacity=0.35, stroke_width=2).move_to(O1)
+        gear2 = gear_shape(radius=R2, teeth=12, color=GEAR3, fill_opacity=0.35, stroke_width=2).move_to(O2)
+        pitch1 = Circle(radius=R1, color=PITCH_C, stroke_width=1.5, stroke_opacity=0.5).move_to(O1)
+        pitch2 = Circle(radius=R2, color=PITCH_C, stroke_width=1.5, stroke_opacity=0.5).move_to(O2)
+
+        self.play(FadeIn(cap1), FadeIn(gear1, shift=RIGHT * 0.2), FadeIn(gear2, shift=LEFT * 0.2),
+                  Create(pitch1), Create(pitch2))
+        self.wait(1.0)
+
+        # 4.5 - 5.5s: Draw Line of Action (E1-E2)
+        loa = Line(E1 - d * 0.25, E2 + d * 0.25, color=LOA_C, stroke_width=3)
+        self.play(Create(loa))
+        self.wait(0.5)
+
+        # 5.5 - 11.5s: Beat 1: Rotation + Contact point sliding along LOA
+        self.play(FadeOut(cap1))
+        cap2 = caption_top("ไม่ว่าเฟืองจะหมุนไปมุมไหน จุดสัมผัสวิ่งอยู่บนเส้นนี้เส้นเดียวเสมอ — (ภาพประกอบทฤษฎี ไม่ใช่ simulation ฟันจริง)", size=16)
+        self.play(FadeIn(cap2), Indicate(loa, color=WHITE))
+
+        theta_tracker = ValueTracker(0.0)
+        gear1.add_updater(lambda m: m.become(
+            gear_shape(radius=R1, teeth=18, color=GEAR2, fill_opacity=0.35, stroke_width=2)
+            .move_to(O1).rotate(theta_tracker.get_value())
+        ))
+        gear2.add_updater(lambda m: m.become(
+            gear_shape(radius=R2, teeth=12, color=GEAR3, fill_opacity=0.35, stroke_width=2)
+            .move_to(O2).rotate(-theta_tracker.get_value() * (R1 / R2) + PI / 12)
+        ))
+
+        # Contact point sliding on the same LOA object
+        pt_contact = always_redraw(lambda: Dot(
+            point=A + (B - A) * (0.5 + 0.45 * np.sin(theta_tracker.get_value() * 3.0)),
+            color=LOA_C, radius=0.09
+        ))
+        self.add(pt_contact)
+        self.play(theta_tracker.animate.set_value(TAU), run_time=5.0, rate_func=linear)
+        self.wait(0.5)
+
+        gear1.clear_updaters()
+        gear2.clear_updaters()
+        self.remove(pt_contact)
+
+        # 11.5 - 13.0s: Stop & fade LOA
+        self.play(FadeOut(cap2))
+        cap3 = caption_top("แต่จุดสัมผัสจริงไปได้ไกลแค่ไหน?", size=19)
+        self.play(FadeIn(cap3), loa.animate.set_opacity(0.3))
+        self.wait(0.8)
+
+        # 13.0 - 16.0s: Beat 2: Addendum circles
+        self.play(FadeOut(cap3))
+        cap4 = caption_top("วงยอดฟันของแต่ละเฟือง (addendum circle)", size=19)
+        add1 = DashedVMobject(Circle(radius=Ro1, color=GEAR2, stroke_width=2.5).move_to(O1), num_dashes=32)
+        add2 = DashedVMobject(Circle(radius=Ro2, color=GEAR3, stroke_width=2.5).move_to(O2), num_dashes=24)
+        self.play(FadeIn(cap4), Create(add1), Create(add2))
+        self.wait(1.0)
+
+        # 16.0 - 18.5s: Path of Contact segment (A to B)
+        self.play(FadeOut(cap4))
+        cap5 = caption_top("นี่คือ Path of Contact ตัวจริง — สั้นกว่า E1-E2 เพราะฟันสูงไม่พอ", size=18)
+        path_seg = Line(A, B, color=LOA_C, stroke_width=6)
+        dotA = pt(A, OK, 0.06)
+        dotB = pt(B, OK, 0.06)
+        leader = Arrow(P + UP * 1.5 + RIGHT * 0.8, (A + B) / 2 + UP * 0.1, color=OK, stroke_width=2, buff=0.05)
+        tag_poc = tag("Path of Contact (จริง)", P + UP * 1.6 + RIGHT * 0.8, UP, OK, 16, 0.05)
+
+        self.play(FadeIn(cap5), Create(path_seg), FadeIn(dotA), FadeIn(dotB), Create(leader), FadeIn(tag_poc))
+        self.wait(1.2)
+
+        # 18.5 - 19.5s: Flash contrast E1-E2 vs Path of Contact
+        self.play(Indicate(loa, color=WHITE), Indicate(path_seg, color=WARN))
+        self.wait(0.8)
+
+        # 19.5 - 21.0s: Beat 3: Transition to force analysis at Pitch Point P
+        self.play(FadeOut(cap5), FadeOut(gear1), FadeOut(gear2), FadeOut(pitch1), FadeOut(pitch2),
+                  FadeOut(add1), FadeOut(add2), FadeOut(dotA), FadeOut(dotB), FadeOut(leader), FadeOut(tag_poc),
+                  FadeOut(path_seg))
+        loa.set_opacity(0.4)
+        cap6 = caption_top("ที่จุดสัมผัสนี้ มีแรงส่งผ่านจากเฟืองหนึ่งไปอีกเฟือง", size=19)
+        dotP = pt(P, WHITE, 0.08)
+        lblP = tag("P", P, DOWN, WHITE, 17, 0.1)
+        self.play(FadeIn(cap6), FadeIn(dotP), FadeIn(lblP))
+        self.wait(0.8)
+
+        # 21.0 - 24.0s: Total Force vector F along LOA
+        self.play(FadeOut(cap6))
+        cap7 = caption_top("แรงที่ฟันกดกัน F วิ่งตามแนว line of action เสมอ (สมบัติของฟันอินโวลูท)", size=18)
+        F_vec = d * 1.9
+        arrow_F = Arrow(P, P + F_vec, color=WHITE, stroke_width=5, buff=0)
+        lbl_F = tag("F", P + F_vec, RIGHT, WHITE, 18, 0.1)
+        self.play(FadeIn(cap7), Create(arrow_F), FadeIn(lbl_F))
+        self.wait(1.2)
+
+        # 24.0 - 28.0s: Force decomposition Ft and Fr
+        self.play(FadeOut(cap7))
+        cap8 = caption_top("F_t = F cos(phi) -> แรงที่ใช้ขับหมุนจริง", color=OK, size=18)
+        Ft_vec = np.array([0.0, F_vec[1], 0.0])
+        arrow_Ft = Arrow(P, P + Ft_vec, color=OK, stroke_width=4, buff=0)
+        lbl_Ft = tag("F_t", P + Ft_vec, LEFT, OK, 17, 0.1)
+        self.play(FadeIn(cap8), Create(arrow_Ft), FadeIn(lbl_Ft))
+        self.wait(1.2)
+
+        self.play(FadeOut(cap8))
+        cap9 = caption_top("F_r = F sin(phi) -> แรงที่กดแบริ่งเปล่าๆ", color=WARN, size=18)
+        Fr_vec = np.array([F_vec[0], 0.0, 0.0])
+        arrow_Fr = Arrow(P + Ft_vec, P + Ft_vec + Fr_vec, color=WARN, stroke_width=4, buff=0)
+        lbl_Fr = tag("F_r", P + Ft_vec + Fr_vec, UP, WARN, 17, 0.1)
+        self.play(FadeIn(cap9), Create(arrow_Fr), FadeIn(lbl_Fr))
+        self.wait(1.2)
+
+        # 28.0 - 31.0s: Formulas & Trade-off box
+        self.play(FadeOut(cap9))
+        cap10 = caption_top("phi ใหญ่ -> F_r มากขึ้น (แบริ่งรับแรงเยอะ) แต่ฟันแข็งแรงขึ้น — คือ trade-off ที่หน้า 13 พูดถึง", size=17)
+        formulas = VGroup(
+            MathTex(r"F_t = F \cos\phi \quad (\text{Tangential force})", color=OK, font_size=20),
+            MathTex(r"F_r = F \sin\phi \quad (\text{Radial force})", color=WARN, font_size=20),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.25).to_edge(RIGHT, buff=0.8).shift(UP * 0.5)
+        box_form = SurroundingRectangle(formulas, color=OK, buff=0.15)
+        self.play(FadeIn(cap10), FadeIn(formulas), Create(box_form))
+        self.wait(2.0)
+
+        # 31.0 - 33.0s: Summary Card
+        self.play(FadeOut(cap10), FadeOut(formulas), FadeOut(box_form), FadeOut(arrow_F),
+                  FadeOut(lbl_F), FadeOut(arrow_Ft), FadeOut(lbl_Ft), FadeOut(arrow_Fr),
+                  FadeOut(lbl_Fr), FadeOut(dotP), FadeOut(lblP), FadeOut(loa))
+        card = VGroup(
+            Text("สรุป 3 คำสำคัญของหน้า 13", font_size=22, color=OK),
+            Text("1. Line of Action = เส้นทางเดียวที่การสัมผัสและการส่งแรงเกิดขึ้นได้จริง", font_size=17, color=WHITE),
+            Text("2. Path of Contact = ช่วงที่ขบสัมผัสกันจริง (สั้นกว่า E1-E2 เพราะฟันสูงจำกัด)", font_size=17, color=WHITE),
+            Text("3. Pressure Angle (phi) = ตัวกำหนดการแบ่งแรง (ขับหมุน F_t vs กดแบริ่ง F_r)", font_size=17, color=WHITE),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.35).move_to(ORIGIN)
+        box_card = SurroundingRectangle(card, color=OK, buff=0.25)
+
+        self.play(FadeIn(card, shift=UP * 0.15), Create(box_card))
+        self.wait(2.5)
