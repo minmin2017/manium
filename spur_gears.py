@@ -2663,11 +2663,14 @@ class G38_BigExampleMM(SafeScene):
 # =====================================================================
 # G13B -- หน้า 13 (ต่อ): ทำไมต้องมี Line of Action, Path of Contact, Pressure Angle
 # =====================================================================
-class G13B_WhyLineOfAction(SafeScene):
+class G13B_WhyLineOfAction(LayoutGuard, MovingCameraScene):
     def construct(self):
-        # 0.0 - 1.5s: Title & Page ref
-        self.add(title("หน้า 13 (ต่อ) — ทำไมต้องมี 3 คำนี้", size=24))
-        self.add(page_ref("หน้า 13 (ต่อ)"))
+        # 0.0 - 1.5s: Title & Page ref (fixed in frame)
+        t_mob = title("หน้า 13 (ต่อ) — ทำไมต้องมี 3 คำนี้", size=24)
+        p_mob = page_ref("หน้า 13 (ต่อ)")
+        self.camera.frame.save_state()
+        self.add_fixed_in_frame_mobjects(t_mob, p_mob)
+        self.add(t_mob, p_mob)
 
         PHI0 = 20 * DEGREES
         R1, R2 = 1.75, 1.15
@@ -2688,6 +2691,7 @@ class G13B_WhyLineOfAction(SafeScene):
 
         # 1.5 - 4.5s: Meshing gears enter
         cap1 = caption_top("เฟืองสองตัวนี้กำลังขบกันอยู่ — ฟันแต่ละคู่สัมผัสกันตรงไหน?", size=18)
+        self.add_fixed_in_frame_mobjects(cap1)
         gear1 = gear_shape(radius=R1, teeth=18, color=GEAR2, fill_opacity=0.35, stroke_width=2).move_to(O1)
         gear2 = gear_shape(radius=R2, teeth=12, color=GEAR3, fill_opacity=0.35, stroke_width=2).move_to(O2)
         pitch1 = Circle(radius=R1, color=PITCH_C, stroke_width=1.5, stroke_opacity=0.5).move_to(O1)
@@ -2702,9 +2706,10 @@ class G13B_WhyLineOfAction(SafeScene):
         self.play(Create(loa))
         self.wait(0.5)
 
-        # 5.5 - 11.5s: Beat 1: Rotation + Contact point sliding along LOA
+        # 5.5 - 11.5s: Beat 1: Rotation + Camera Zoom/Tracking shot along LOA (Revision 1)
         self.play(FadeOut(cap1))
         cap2 = caption_top("ไม่ว่าเฟืองจะหมุนไปมุมไหน จุดสัมผัสวิ่งอยู่บนเส้นนี้เส้นเดียวเสมอ — (ภาพประกอบทฤษฎี ไม่ใช่ simulation ฟันจริง)", size=16)
+        self.add_fixed_in_frame_mobjects(cap2)
         self.play(FadeIn(cap2), Indicate(loa, color=WHITE))
 
         theta_tracker = ValueTracker(0.0)
@@ -2720,10 +2725,28 @@ class G13B_WhyLineOfAction(SafeScene):
         # Contact point sliding on the same LOA object
         pt_contact = always_redraw(lambda: Dot(
             point=A + (B - A) * (0.5 + 0.45 * np.sin(theta_tracker.get_value() * 3.0)),
-            color=LOA_C, radius=0.09
+            color=LOA_C, radius=0.08
         ))
         self.add(pt_contact)
-        self.play(theta_tracker.animate.set_value(TAU), run_time=5.0, rate_func=linear)
+
+        # Zoom in close to meeting teeth and contact point (referencing gearAnimation.gif style)
+        self.play(
+            theta_tracker.animate.set_value(TAU * 0.3),
+            self.camera.frame.animate.move_to(P + UP * 0.1).set(width=3.2),
+            run_time=1.5, rate_func=smooth
+        )
+        # Tracking shot: follow contact point as it slides along LOA
+        self.play(
+            theta_tracker.animate.set_value(TAU * 0.7),
+            self.camera.frame.animate.move_to(A + (B - A) * 0.7),
+            run_time=2.0, rate_func=linear
+        )
+        # Zoom back out to wide shot
+        self.play(
+            theta_tracker.animate.set_value(TAU),
+            Restore(self.camera.frame),
+            run_time=1.5, rate_func=smooth
+        )
         self.wait(0.5)
 
         gear1.clear_updaters()
