@@ -2665,11 +2665,10 @@ class G38_BigExampleMM(SafeScene):
 # =====================================================================
 class G13B_WhyLineOfAction(LayoutGuard, MovingCameraScene):
     def construct(self):
-        # 0.0 - 1.5s: Title & Page ref (fixed in frame)
+        # 0.0 - 1.5s: Title & Page ref
         t_mob = title("หน้า 13 (ต่อ) — ทำไมต้องมี 3 คำนี้", size=24)
         p_mob = page_ref("หน้า 13 (ต่อ)")
         self.camera.frame.save_state()
-        self.add_fixed_in_frame_mobjects(t_mob, p_mob)
         self.add(t_mob, p_mob)
 
         PHI0 = 20 * DEGREES
@@ -2691,7 +2690,6 @@ class G13B_WhyLineOfAction(LayoutGuard, MovingCameraScene):
 
         # 1.5 - 4.5s: Meshing gears enter
         cap1 = caption_top("เฟืองสองตัวนี้กำลังขบกันอยู่ — ฟันแต่ละคู่สัมผัสกันตรงไหน?", size=18)
-        self.add_fixed_in_frame_mobjects(cap1)
         gear1 = gear_shape(radius=R1, teeth=18, color=GEAR2, fill_opacity=0.35, stroke_width=2).move_to(O1)
         gear2 = gear_shape(radius=R2, teeth=12, color=GEAR3, fill_opacity=0.35, stroke_width=2).move_to(O2)
         pitch1 = Circle(radius=R1, color=PITCH_C, stroke_width=1.5, stroke_opacity=0.5).move_to(O1)
@@ -2709,7 +2707,6 @@ class G13B_WhyLineOfAction(LayoutGuard, MovingCameraScene):
         # 5.5 - 11.5s: Beat 1: Rotation + Camera Zoom/Tracking shot along LOA (Revision 1)
         self.play(FadeOut(cap1))
         cap2 = caption_top("ไม่ว่าเฟืองจะหมุนไปมุมไหน จุดสัมผัสวิ่งอยู่บนเส้นนี้เส้นเดียวเสมอ — (ภาพประกอบทฤษฎี ไม่ใช่ simulation ฟันจริง)", size=16)
-        self.add_fixed_in_frame_mobjects(cap2)
         self.play(FadeIn(cap2), Indicate(loa, color=WHITE))
 
         theta_tracker = ValueTracker(0.0)
@@ -2729,6 +2726,9 @@ class G13B_WhyLineOfAction(LayoutGuard, MovingCameraScene):
         ))
         self.add(pt_contact)
 
+        # Fade out UI mobjects before camera zooms in
+        self.play(FadeOut(t_mob), FadeOut(p_mob), FadeOut(cap2), run_time=0.4)
+
         # Zoom in close to meeting teeth and contact point (referencing gearAnimation.gif style)
         self.play(
             theta_tracker.animate.set_value(TAU * 0.3),
@@ -2747,14 +2747,15 @@ class G13B_WhyLineOfAction(LayoutGuard, MovingCameraScene):
             Restore(self.camera.frame),
             run_time=1.5, rate_func=smooth
         )
-        self.wait(0.5)
+        # Fade title and page_ref back in
+        self.play(FadeIn(t_mob), FadeIn(p_mob), run_time=0.4)
+        self.wait(0.3)
 
         gear1.clear_updaters()
         gear2.clear_updaters()
         self.remove(pt_contact)
 
         # 11.5 - 13.0s: Stop & fade LOA
-        self.play(FadeOut(cap2))
         cap3 = caption_top("แต่จุดสัมผัสจริงไปได้ไกลแค่ไหน?", size=19)
         self.play(FadeIn(cap3), loa.animate.set_opacity(0.3))
         self.wait(0.8)
