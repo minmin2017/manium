@@ -9,9 +9,9 @@ from manim import *
 from mlib import SafeScene, gear_shape
 
 
-BG = "#F7FBFF"
-GRID = "#4DA8E4"
-GRID_MAJOR = "#147DBB"
+BG = "#CBEAFF"
+GRID = "#258BC4"
+GRID_MAJOR = "#0C669F"
 NAVY = "#173B57"
 GOLD = "#FFC247"
 ORANGE = "#F28C28"
@@ -25,13 +25,13 @@ def blueprint_grid():
         lines.add(Line([x, -4.1, 0], [x, 4.1, 0],
                        color=GRID_MAJOR if major else GRID,
                        stroke_width=1.6 if major else 1.0,
-                       stroke_opacity=0.47 if major else 0.43))
+                       stroke_opacity=0.49 if major else 0.46))
     for y in np.arange(-4.0, 4.1, 0.5):
         major = abs(y - round(y)) < 0.01
         lines.add(Line([-7.2, y, 0], [7.2, y, 0],
                        color=GRID_MAJOR if major else GRID,
                        stroke_width=1.6 if major else 1.0,
-                       stroke_opacity=0.47 if major else 0.43))
+                       stroke_opacity=0.49 if major else 0.46))
     return lines
 
 
