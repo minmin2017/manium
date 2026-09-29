@@ -10,8 +10,8 @@ from mlib import SafeScene, gear_shape
 
 
 BG = "#F7FBFF"
-GRID = "#D8EAF5"
-GRID_MAJOR = "#A9CDE3"
+GRID = "#4DA8E4"
+GRID_MAJOR = "#147DBB"
 NAVY = "#173B57"
 GOLD = "#FFC247"
 ORANGE = "#F28C28"
@@ -24,14 +24,14 @@ def blueprint_grid():
         major = abs(x - round(x)) < 0.01
         lines.add(Line([x, -4.1, 0], [x, 4.1, 0],
                        color=GRID_MAJOR if major else GRID,
-                       stroke_width=1.0 if major else 0.55,
-                       stroke_opacity=0.36 if major else 0.23))
+                       stroke_width=1.6 if major else 1.0,
+                       stroke_opacity=0.47 if major else 0.43))
     for y in np.arange(-4.0, 4.1, 0.5):
         major = abs(y - round(y)) < 0.01
         lines.add(Line([-7.2, y, 0], [7.2, y, 0],
                        color=GRID_MAJOR if major else GRID,
-                       stroke_width=1.0 if major else 0.55,
-                       stroke_opacity=0.36 if major else 0.23))
+                       stroke_width=1.6 if major else 1.0,
+                       stroke_opacity=0.47 if major else 0.43))
     return lines
 
 
