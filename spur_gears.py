@@ -1686,7 +1686,7 @@ ADD_C = "#FFEE58"           # สีวงยอดฟัน (addendum) ทั�
 
 
 class G20B_MeshingTeeth(SafeScene):
-    P0 = (0.0, -1.15)       # จุด P (จุดกลิ้งแตะกัน)
+    P0 = (0.5, -1.15)       # จุด P (จุดกลิ้งแตะกัน) -- เลื่อนขวาให้พ้นป้ายอธิบายวงทางซ้าย
     RUL_Y = 1.85            # ไม้บรรทัดย่อด้านบน (สเกลเดียวกับ G20)
     RUL_W = 8.4
 
@@ -1732,9 +1732,9 @@ class G20B_MeshingTeeth(SafeScene):
                                   num_dashes=dashes, dashed_ratio=0.6)
 
         rows_spec = [("วงโคนฟัน", "dedendum", GRAYTXT, fr["Rd1"], "ก้นร่องระหว่างฟัน"),
-                     ("วงฐาน", "base", BASE_C, fr["Rb1"], "เส้นอินโวลูทงอกจากวงนี้"),
+                     ("วงฐาน", "base", BASE_C, fr["Rb1"], "อินโวลูทงอกจากวงนี้"),
                      ("วงพิตช์", "pitch", OK, fr["R1"], "วงที่เฟืองกลิ้งแตะกัน"),
-                     ("วงยอดฟัน", "addendum", ADD_C, fr["Ra1"], "วงนอกสุด ผ่านปลายยอดฟัน")]
+                     ("วงยอดฟัน", "addendum", ADD_C, fr["Ra1"], "ผ่านปลายยอดฟัน")]
         caps1 = ["วงโคนฟัน (dedendum): ผ่านก้นร่องระหว่างฟัน",
                  "วงฐาน (base): เส้นโค้งอินโวลูทของฟันเริ่มงอกออกมาจากวงนี้",
                  "วงพิตช์ (pitch): วงสมมุติที่เฟืองสองตัวกลิ้งแตะกันพอดี",
@@ -1747,7 +1747,7 @@ class G20B_MeshingTeeth(SafeScene):
             t_hint = Text(hint, font_size=13, color=GRAYTXT)
             txt = VGroup(t_th, t_en, t_hint).arrange(DOWN, aligned_edge=LEFT, buff=0.05)
             row = VGroup(sw_, txt).arrange(RIGHT, buff=0.12, aligned_edge=UP)
-            row.move_to([-5.95, 1.3 - i * 1.15, 0])
+            row.move_to([-5.85, 1.3 - i * 1.15, 0])
             rows.append(row)
             circles.append(circ(O1, r, col))
         for i, (c, row) in enumerate(zip(circles, rows)):
@@ -1785,7 +1785,7 @@ class G20B_MeshingTeeth(SafeScene):
 
         # ---- ไม้บรรทัดย่อด้านบน (สเกลเดียวกับ G20): E1 ซ้าย ... E2 ขวา ----
         Ry, W = self.RUL_Y, self.RUL_W
-        x0 = -W / 2
+        x0 = self.P0[0] - W / 2                          # ให้จุด P บนไม้บรรทัดอยู่เหนือจุด P บนเฟืองพอดี
         sx = W / fr["E1E2"]
 
         def rp(dist):
