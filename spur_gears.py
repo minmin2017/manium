@@ -19,6 +19,7 @@ G07 (page 7), G08 (page 8), G09 (page 9), G10 (page 10), G11 (page 11),
 G12 (page 12), G13 (page 13).
 """
 
+import os
 import numpy as np
 from manim import *
 from mlib import *
@@ -1395,84 +1396,283 @@ class G19_ContactRatioDef(SafeScene):
 
 
 # =====================================================================
-# G20 -- หน้า 20: ที่มาของ Z ขั้นที่ 1: นิยามจุด A และ B
+# G20 -- หน้า 20: ที่มาของ Z ขั้นที่ 1: นิยามจุด A และ B   (เขียนใหม่ 2026-09-29)
+# แผน/ตารางวินาที: Main_note/Claude_Specs/G05_G20 Plan.md
+# ลำดับ: (1) A,B คือจุดไหนบนเฟืองจริง -> (2) ยืดเส้นเป็นไม้บรรทัด -> (3) เดินสมการเวกเตอร์
+#        ของสไลด์ -> (4) ไม้วัด 2 เส้นซ้อนกัน = Z -> (5) แทนเลขจริงจากหน้า 25
 # =====================================================================
+G20_K = 4.4               # ขยายสเกลจริง (นิ้ว) -> หน่วยฉาก ให้เส้น LoA ยาว ~8 หน่วย
+SEG_E1A = FIELD           # ท่อน E1-A  (น้ำเงิน ตามสีลูกศรบนสไลด์)
+SEG_AB = WARN             # ท่อน A-B = Z (แดง)
+SEG_BE2 = FORCE           # ท่อน B-E2  (เขียว)
+WALK_FWD = OK             # เดินหน้าไปทางทิศ E1->E2
+WALK_BACK = "#FFCA28"     # ถอยกลับ
+
+
+def g20_geom(k=G20_K, P_screen=(-1.6, 0.4, 0.0)):
+    """เรขาคณิตหน้า 20 ในทิศแบบสไลด์ (เส้นศูนย์กลางแนวตั้ง เฟือง 1 ขับอยู่บน เฟือง 2 ตามอยู่ล่าง)
+    แต่กลับซ้าย-ขวาให้ E1 อยู่ซ้าย E2 อยู่ขวา (อ่านลำดับ E1-A-P-B-E2 จากซ้ายไปขวาเหมือนโน้ต)
+    ค่าจริงเป็นนิ้ว (หน้า 25) คูณ k เป็นหน่วยฉาก -- assert ตรวจทุกความสัมพันธ์ก่อนใช้"""
+    phi = CR_PHI
+    R1, R2, Ro1, Ro2 = CR_R1_IN, CR_R2_IN, CR_RO1_IN, CR_RO2_IN
+    Rb1, Rb2 = R1 * np.cos(phi), R2 * np.cos(phi)
+    w = np.array([np.cos(phi), -np.sin(phi), 0.0])      # ทิศ E1 -> E2 (ลงขวา)
+    n = np.array([np.sin(phi), np.cos(phi), 0.0])       # ตั้งฉาก LoA ชี้ขึ้น
+    P0 = np.zeros(3)
+    O1 = P0 + np.array([0.0, R1, 0.0])
+    O2 = P0 - np.array([0.0, R2, 0.0])
+    E1 = P0 - R1 * np.sin(phi) * w
+    E2 = P0 + R2 * np.sin(phi) * w
+    E1B = float(np.sqrt(Ro1 ** 2 - Rb1 ** 2))
+    E2A = float(np.sqrt(Ro2 ** 2 - Rb2 ** 2))
+    E1E2 = float(np.linalg.norm(E2 - E1))
+    B = E1 + E1B * w
+    A = E2 - E2A * w
+    Z = E1B + E2A - E1E2
+    assert abs(np.linalg.norm(E1 - O1) - Rb1) < 1e-9 and abs(np.linalg.norm(E2 - O2) - Rb2) < 1e-9
+    assert abs(np.linalg.norm(A - O2) - Ro2) < 1e-9 and abs(np.linalg.norm(B - O1) - Ro1) < 1e-9
+    assert abs(np.linalg.norm(B - A) - Z) < 1e-9 and Z > 0
+    order = [float(np.dot(X - P0, w)) for X in (E1, A, P0, B, E2)]
+    assert order == sorted(order), order                  # E1 < A < P < B < E2
+    assert abs((E1B + E2A - E1E2) - 0.625) < 1e-3         # ตรงกับที่โน้ตหน้า 20 บอก (0.625 นิ้ว)
+    sh = np.array(P_screen, float)
+
+    def S(X):
+        return k * np.asarray(X, float) + sh
+    return dict(P=S(P0), O1=S(O1), O2=S(O2), E1=S(E1), E2=S(E2), A=S(A), B=S(B), w=w, n=n, k=k,
+                Rb1=k * Rb1, Rb2=k * Rb2, Ro1=k * Ro1, Ro2=k * Ro2,
+                E1B=E1B, E2A=E2A, E1E2=E1E2, Z=Z, E1A=E1E2 - E2A, BE2=E1E2 - E1B,
+                E1P=float(np.dot(P0 - E1, w)))
+
+
+def arc_near(C, r, X, half, color, sw=3, dashes=0):
+    """ส่วนโค้งของวงกลมศูนย์กลาง C รัศมี r ช่วงสั้น ๆ รอบจุด X (บนวงนั้น) -- คืน (mobject, จุดปลาย
+    มุมน้อย, จุดปลายมุมมาก) วงจริงใหญ่เกินเฟรม (รัศมีหลายสิบหน่วย) วาดเฉพาะช่วงที่เกี่ยวข้อง"""
+    th = float(np.arctan2(X[1] - C[1], X[0] - C[0]))
+    a = Arc(radius=r, start_angle=th - half, angle=2 * half, arc_center=C, color=color, stroke_width=sw)
+    p_lo = C + r * np.array([np.cos(th - half), np.sin(th - half), 0.0])
+    p_hi = C + r * np.array([np.cos(th + half), np.sin(th + half), 0.0])
+    if dashes:
+        a = DashedVMobject(a, num_dashes=dashes, dashed_ratio=0.6)
+    return a, p_lo, p_hi
+
+
 class G20_ZDefinitionAB(SafeScene):
+    RULER_Y = 1.5             # แนวไม้บรรทัดหลัก
+    RULER_W = 9.6             # ความกว้างของ E1E2 บนจอ
+    TAPE_H = 0.3
+
+    def swap_cap(self, old, txt, size=19):
+        self.play(FadeOut(old), run_time=0.35)
+        new = caption_top(txt, size=size)
+        self.play(FadeIn(new), run_time=0.5)
+        return new
+
+    def _halt(self, tag_):
+        # ใช้ตอนพัฒนาเท่านั้น: G20_STOP=<ชื่อจุด> manim -s ... เพื่อดูเฟรมสุดท้ายของช่วงนั้น
+        return os.environ.get("G20_STOP") == tag_
+
     def construct(self):
-        self.add(title("ที่มาของ Z ขั้นที่ 1: นิยามจุด A และ B", size=24))
+        g = g20_geom()
+        P, O1, O2 = g["P"], g["O1"], g["O2"]
+        E1, E2, A, B = g["E1"], g["E2"], g["A"], g["B"]
+        w, n = g["w"], g["n"]
+
+        self.add(title("ที่มาของ Z ขั้นที่ 1: จุด A และ B", size=26))
         self.add(page_ref("หน้า 20"))
 
-        fr = cr_local()
-        A, B, E1, E2, P = fr["A"], fr["B"], fr["E1"], fr["E2"], fr["P"]
+        # ============ ส่วนที่ 1: A กับ B คือจุดไหน (บนเฟืองจริง) ============
+        cap = caption_top("เป้าหมาย: หา Z = AB คือช่วงที่ฟันสัมผัสกันจริง — เริ่มจากชี้ให้ได้ว่า A กับ B คือจุดไหน",
+                          size=19)
+        self.play(FadeIn(cap), run_time=0.7)
 
-        cap = caption_top("บนเส้น line of action เดียวกัน มี 5 จุดเรียงกัน: E1 - A - P - B - E2", size=18)
-        self.play(FadeIn(cap))
+        loa = Line(E1 - w * 0.4, E2 + w * 0.7, color=LOA_C, stroke_width=3)
+        lb_loa = tag("line of action", E2 + w * 0.7, RIGHT, LOA_C, 16, 0.12)
+        self.play(Create(loa), FadeIn(lb_loa), run_time=1.0)
 
-        # Extrapolating from A/B (Line(A-(B-A)*0.9, B+(B-A)*0.9)) undershoots E2 by a
-        # visible gap -- A and B sit well INSIDE E1/E2 on this line (order is E1-A-P-B-
-        # E2), and the extra 0.9x(B-A) hop from B doesn't reach anywhere close to E2
-        # (confirmed real defect, human review 2026-09-05: verified E2's own t-coordinate
-        # vs the old endpoint's t-coordinate on the line -- ~0.42 units short). Anchor the
-        # line directly to E1/E2 (using the frame's own unit direction fr["d"]) with a
-        # small overshoot margin instead, so it actually reaches both tangent points.
-        loa = Line(E1 - fr["d"] * 0.35, E2 + fr["d"] * 0.35, color=LOA_C, stroke_width=3)
-        self.play(Create(loa))
-        # E1 กับ A อยู่ใกล้กันมาก (~0.17 หน่วย) เช่นเดียวกับ P กับ B (~0.28 หน่วย) --
-        # ทิศ UP/DOWN ตามความสูงเทียบกับ P เดิมทำให้ป้ายที่อยู่กลุ่มเดียวกันชนกันเอง/
-        # ชนจุดอื่น (เจอจริงจาก [LAYOUT] log 2026-09-05: 3 จุดต้องแก้) แก้โดยจัดกลุ่ม
-        # (E1,A) ไปด้านหนึ่งของเส้น, (P,B) ไปอีกด้าน แล้วถ่างระยะ (buff) ต่างกันในกลุ่ม
-        # เดียวกันเพื่อไม่ให้ซ้อนกัน -- E2 อยู่ห่างจากกลุ่มอื่นมากอยู่แล้วใช้ UP ธรรมดาได้
-        perp = np.array([-fr["d"][1], fr["d"][0], 0.0])
-        # A's label previously used the SAME side as E1 (-perp) with a big buff (0.5) to
-        # dodge E1's own label -- but since A and E1 differ only ALONG the line (perp
-        # component of A-E1 is exactly zero, they're collinear), pushing A's label out
-        # along -perp just floats it into the same empty patch E1's label already
-        # occupies, reading as "next to E1" rather than "next to A" (confirmed real
-        # defect, human review 2026-09-05). Fix: put A's label on the OTHER side (perp,
-        # same side as P/B) with a small buff so it hugs its own dot -- opposite side
-        # from E1 means it can't be confused with E1's label, and A is far enough from
-        # P (~0.33 units) that a small buff doesn't collide with P's label either.
-        pts = [(E1, BASE_C, "E1", -perp, 0.14), (A, WARN, "A", perp, 0.18),
-               (P, WHITE, "P", perp, 0.14), (B, WARN, "B", perp, 0.5),
-               (E2, BASE_C, "E2", UP, 0.16)]
-        dots = VGroup(); labels = VGroup()
-        for p, c, name, direc, bf in pts:
-            d = pt(p, c, 0.07)
-            lb = tag(name, p, direc, c, 19, bf)
-            dots.add(d); labels.add(lb)
-        self.play(LaggedStart(*[FadeIn(d) for d in dots], lag_ratio=0.15))
-        self.play(LaggedStart(*[FadeIn(l) for l in labels], lag_ratio=0.15))
+        cap = self.swap_cap(cap, "E1, E2 = จุดที่เส้นนี้แตะ base circle ของเฟือง 1 (ขับ, บน) และเฟือง 2 (ตาม, ล่าง)")
+        base1, _, _ = arc_near(O1, g["Rb1"], E1, 0.28, BASE_C, 2.5)
+        base2, _, _ = arc_near(O2, g["Rb2"], E2, 0.20, BASE_C, 2.5)
+        self.play(Create(base1), Create(base2), run_time=1.2)
+        d_E1, d_E2 = pt(E1, BASE_C, 0.08), pt(E2, BASE_C, 0.08)
+        lb_E1 = tag("E1", E1, LEFT, BASE_C, 20, 0.22)
+        lb_E2 = tag("E2", E2, -n, BASE_C, 20, 0.15)
+        self.play(FadeIn(d_E1), FadeIn(d_E2), FadeIn(lb_E1), FadeIn(lb_E2), run_time=0.7)
+        self.wait(0.9)
+
+        # ---- A: เส้นตัด addendum circle ของเฟือง 2 (ตัวตาม) ----
+        cap = self.swap_cap(cap, "A = เริ่มสัมผัส: เส้นนี้ตัด addendum circle ของเฟือง 2 (ตัวตาม)")
+        add2, a2_lo, a2_hi = arc_near(O2, g["Ro2"], A, 0.16, GEAR3, 3, dashes=26)
+        lb_add2 = tag("addendum circle ของเฟือง 2", a2_lo, RIGHT, GEAR3, 15, 0.1)
+        self.play(Create(add2), FadeIn(lb_add2), run_time=1.0)
+        self.play(Indicate(add2, color=WHITE, scale_factor=1.0), run_time=0.8)
+        d_A, lb_A = pt(A, WARN, 0.09), tag("A", A, n, WARN, 22, 0.14)
+        self.play(FadeIn(d_A), FadeIn(lb_A), run_time=0.5)
+        self.play(Indicate(d_A, color=WARN, scale_factor=1.8), run_time=0.7)
+        self.wait(0.5)
+
+        # ---- B: เส้นตัด addendum circle ของเฟือง 1 (ตัวขับ) ----
+        cap = self.swap_cap(cap, "B = สิ้นสุดสัมผัส: เส้นนี้ตัด addendum circle ของเฟือง 1 (ตัวขับ)")
+        add1, a1_lo, a1_hi = arc_near(O1, g["Ro1"], B, 0.20, GEAR2, 3, dashes=22)
+        lb_add1 = tag("addendum circle ของเฟือง 1", a1_hi, RIGHT, GEAR2, 15, 0.1)
+        self.play(Create(add1), FadeIn(lb_add1), run_time=1.0)
+        self.play(Indicate(add1, color=WHITE, scale_factor=1.0), run_time=0.8)
+        d_B, lb_B = pt(B, WARN, 0.09), tag("B", B, -n, WARN, 22, 0.14)
+        self.play(FadeIn(d_B), FadeIn(lb_B), run_time=0.5)
+        self.play(Indicate(d_B, color=WARN, scale_factor=1.8), run_time=0.7)
+        self.wait(0.4)
+
+        # ---- P + ช่วง AB = Z ----
+        d_P, lb_P = pt(P, WHITE, 0.07), tag("P", P, -n, WHITE, 20, 0.14)
+        cap = self.swap_cap(cap, "ช่วง A → B (ผ่าน P) คือช่วงที่ฟันสัมผัสกันจริง = Z")
+        self.play(FadeIn(d_P), FadeIn(lb_P), run_time=0.5)
+        self.wait(0.4)                                   # หยุดสั้น ๆ ก่อนไฮไลต์ (stillness before climax)
+        seg_ab = Line(A, B, color=SEG_AB, stroke_width=9)
+        self.play(Create(seg_ab), run_time=0.9)
+        self.bring_to_front(d_A, d_B, d_P)               # จุดต้องอยู่เหนือท่อนแดงหนา
+        self.wait(1.0)
+        if self._halt("p1"):
+            return
+
+        # ============ ส่วนที่ 2: ยืดเส้นเป็นไม้บรรทัด (สเกลจริง 3 ท่อน) ============
+        cap = self.swap_cap(cap, "ทำให้ดูง่าย: ยืดเส้น line of action ให้ตรงแนวนอน แล้วแบ่งเป็นท่อน ๆ")
+        Ry, W = self.RULER_Y, self.RULER_W
+        sx = W / g["E1E2"]
+        x0 = -W / 2
+
+        def xr(d_in):                                     # ระยะจาก E1 (นิ้ว) -> พิกัด x บนไม้บรรทัด
+            return x0 + sx * d_in
+
+        def rp(d_in):
+            return np.array([xr(d_in), Ry, 0.0])
+
+        pos = dict(E1=0.0, A=g["E1A"], P=g["E1P"], B=g["E1B"], E2=g["E1E2"])
+        ruler = Line(rp(0) + LEFT * 0.4, rp(g["E1E2"]) + RIGHT * 0.4, color=LOA_C, stroke_width=3)
+        r_E1, r_E2 = pt(rp(pos["E1"]), BASE_C, 0.08), pt(rp(pos["E2"]), BASE_C, 0.08)
+        r_seg = Line(rp(pos["A"]), rp(pos["B"]), color=SEG_AB, stroke_width=9)
+        r_A, r_B = pt(rp(pos["A"]), WARN, 0.09), pt(rp(pos["B"]), WARN, 0.09)
+        r_P = pt(rp(pos["P"]), WHITE, 0.07)
+        self.play(FadeOut(VGroup(add1, add2, base1, base2, lb_add1, lb_add2, lb_loa,
+                                 lb_E1, lb_E2, lb_A, lb_B, lb_P)), run_time=0.7)
+        self.play(ReplacementTransform(loa, ruler), ReplacementTransform(d_E1, r_E1),
+                  ReplacementTransform(d_E2, r_E2), ReplacementTransform(d_A, r_A),
+                  ReplacementTransform(d_B, r_B), ReplacementTransform(d_P, r_P),
+                  ReplacementTransform(seg_ab, r_seg), run_time=1.8)
+        names = VGroup(*[tag(nm, rp(pos[nm]), UP, c, 20, 0.15) for nm, c in
+                         (("E1", BASE_C), ("A", WARN), ("P", WHITE), ("B", WARN), ("E2", BASE_C))])
+        self.play(FadeIn(names), run_time=0.6)
+        cap = self.swap_cap(cap, "แบ่งเป็น 3 ท่อน: E1A (น้ำเงิน) · AB (แดง = Z) · BE2 (เขียว)")
+        s_E1A = Line(rp(pos["E1"]), rp(pos["A"]), color=SEG_E1A, stroke_width=9)
+        s_BE2 = Line(rp(pos["B"]), rp(pos["E2"]), color=SEG_BE2, stroke_width=9)
+        self.play(Create(s_E1A), Create(s_BE2), run_time=1.0)
+        self.add(r_seg)                                   # ให้ท่อนแดงอยู่บนสุดของเส้น
+        self.bring_to_front(r_A, r_B, r_P, r_E1, r_E2)
+        self.wait(1.0)
+        if self._halt("p2"):
+            return
+
+        # ============ ส่วนที่ 3: เดินสมการเวกเตอร์ของสไลด์ ============
+        cap = self.swap_cap(cap, "สมการในสไลด์ = เดินบนเส้นตรง: เดินหน้า A→E2 · ถอยกลับ E2→E1 · เดินหน้า E1→B")
+        y1, y2, y3 = Ry - 0.75, Ry - 1.3, Ry - 1.85
+        guides = VGroup(*[DashedLine([xr(pos[nm]), Ry - 0.15, 0], [xr(pos[nm]), y3 - 0.15, 0],
+                                     color=GRAYTXT, stroke_width=1.5, dash_length=0.1)
+                          for nm in ("E1", "A", "B", "E2")])
+        self.play(Create(guides), run_time=0.7)
+        ar1 = Arrow([xr(pos["A"]), y1, 0], [xr(pos["E2"]), y1, 0], buff=0, color=WALK_FWD,
+                    stroke_width=5, max_tip_length_to_length_ratio=0.08)
+        ar2 = Arrow([xr(pos["E2"]), y2, 0], [xr(pos["E1"]), y2, 0], buff=0, color=WALK_BACK,
+                    stroke_width=5, max_tip_length_to_length_ratio=0.08)
+        ar3 = Arrow([xr(pos["E1"]), y3, 0], [xr(pos["B"]), y3, 0], buff=0, color=WALK_FWD,
+                    stroke_width=5, max_tip_length_to_length_ratio=0.08)
+        t1 = Text("+ AE2 (เดินหน้า)", font_size=16, color=WALK_FWD).move_to([2.0, y1 + 0.2, 0])   # อยู่ในช่องว่างระหว่างเส้นนำ B กับ E2
+        t2 = Text("− E2E1 (ถอยกลับทั้งเส้น)", font_size=16, color=WALK_BACK).move_to([2.2, y2 + 0.2, 0])
+        t3 = Text("+ E1B (เดินหน้าอีกครั้ง)", font_size=16, color=WALK_FWD).move_to([-2.2, y3 + 0.2, 0])  # อยู่ระหว่างเส้นนำ A กับ B
+        for ar, tt in ((ar1, t1), (ar2, t2), (ar3, t3)):
+            self.play(GrowArrow(ar), FadeIn(tt), run_time=1.1)
+            self.wait(0.6)
+        cap = self.swap_cap(cap, "ลงเอยที่ B พอดี → ระยะสุทธิจาก A ถึง B ก็คือ AB = Z")
+        self.play(Indicate(r_seg, color=WHITE, scale_factor=1.0), run_time=0.9)
+        eq = MathTex(r"\overline{AE_2}-\overline{E_2E_1}+\overline{E_1B}=\overline{AB}=Z",
+                     font_size=32, color=WHITE).move_to([0, y3 - 0.85, 0])
+        fit_width(eq, 9.0)
+        self.play(FadeIn(eq, shift=UP * 0.15), run_time=0.7)
+        self.wait(1.6)
+        if self._halt("p3"):
+            return
+        self.play(FadeOut(VGroup(guides, ar1, ar2, ar3, t1, t2, t3, eq)), run_time=0.7)
+
+        # ============ ส่วนที่ 4: ไม้วัด 2 เส้นซ้อนกัน = Z ============
+        TH = self.TAPE_H
+        T1, T2, T3 = Ry - 0.85, Ry - 1.4, Ry - 1.95
+
+        def bar(d_a, d_b, y, color):
+            b = Rectangle(width=sx * (d_b - d_a), height=TH, fill_color=color, fill_opacity=0.9,
+                          stroke_width=0)
+            return b.move_to([xr((d_a + d_b) / 2), y, 0])
+
+        def end_label(txt, d_end, y, color=WHITE, size=18):
+            m = Text(txt, font_size=size, color=color)
+            m.move_to([xr(d_end) + 0.2 + m.width / 2, y, 0])
+            return m
+
+        L = g["E1E2"]
+        cap = self.swap_cap(cap, "ไม้ 1: เนื้อฟันเฟือง 1 อยู่บนเส้นนี้ได้แค่ช่วง E1 → B (เลย B ไปพ้นวง addendum เฟือง 1)", 18)
+        t1_blue, t1_red = bar(0, pos["A"], T1, SEG_E1A), bar(pos["A"], pos["B"], T1, SEG_AB)
+        lb_t1 = end_label("E1B", pos["B"], T1)
+        self.play(GrowFromEdge(t1_blue, LEFT), run_time=0.5)
+        self.play(GrowFromEdge(t1_red, LEFT), FadeIn(lb_t1), run_time=0.8)
         self.wait(0.8)
 
-        cap2 = caption_top("A = begin contact -- ตัด addendum circle ของเฟือง 2 (ตัวตาม)", size=18)
-        self.play(FadeOut(cap)); self.play(FadeIn(cap2))
-        self.play(Indicate(dots[1], color=WARN, scale_factor=1.6))
+        cap = self.swap_cap(cap, "ไม้ 2: เนื้อฟันเฟือง 2 อยู่ได้แค่ช่วง E2 → A (วัดจากปลาย E2 ย้อนกลับมา)", 18)
+        t2_green, t2_red = bar(pos["B"], L, T2, SEG_BE2), bar(pos["A"], pos["B"], T2, SEG_AB)
+        lb_t2 = end_label("E2A", L, T2)
+        self.play(GrowFromEdge(t2_green, RIGHT), run_time=0.5)
+        self.play(GrowFromEdge(t2_red, RIGHT), FadeIn(lb_t2), run_time=0.8)
+        self.wait(0.8)
+
+        cap = self.swap_cap(cap, "ฟันสองตัวแตะกันได้เฉพาะตรงที่ทั้งคู่มีเนื้อฟัน = ช่วงที่ไม้ทั้งสองซ้อนกัน = A → B = Z", 18)
+        self.wait(0.5)                                   # หยุดสั้น ๆ ก่อนไฮไลต์ช่วงที่ซ้อน
+        ovl = SurroundingRectangle(VGroup(t1_red, t2_red), color=WHITE, buff=0.07, stroke_width=3)
+        self.play(Create(ovl), run_time=0.7)
+        self.play(Indicate(VGroup(t1_red, t2_red), color=WHITE, scale_factor=1.0), run_time=0.9)
         self.wait(1.0)
+        self.play(FadeOut(ovl), run_time=0.4)
 
-        cap3 = caption_top("B = end contact -- ตัด addendum circle ของเฟือง 1 (ตัวขับ)", size=18)
-        self.play(FadeOut(cap2)); self.play(FadeIn(cap3))
-        self.play(Indicate(dots[3], color=WARN, scale_factor=1.6))
-        self.wait(1.0)
+        cap = self.swap_cap(cap, "ไม้ทั้งเส้น E1E2 = น้ำเงิน + แดง + เขียว", 19)
+        t3_blue, t3_red, t3_green = (bar(0, pos["A"], T3, SEG_E1A), bar(pos["A"], pos["B"], T3, SEG_AB),
+                                     bar(pos["B"], L, T3, SEG_BE2))
+        lb_t3 = end_label("E1E2", L, T3)
+        self.play(LaggedStart(GrowFromEdge(t3_blue, LEFT), GrowFromEdge(t3_red, LEFT),
+                              GrowFromEdge(t3_green, LEFT), lag_ratio=0.5), FadeIn(lb_t3), run_time=1.6)
+        self.wait(0.8)
 
-        cap4 = caption_top("มองบนเส้นเดียวกันเป็นเวกเตอร์: AE2 - E2E1 + E1B = AB", size=18)
-        self.play(FadeOut(cap3)); self.play(FadeIn(cap4))
-        eq = MathTex(r"\overline{AE_2}-\overline{E_2E_1}+\overline{E_1B}=\overline{AB}",
-                      font_size=26, color=WHITE).to_edge(RIGHT, buff=0.4).shift(UP * 1.6)
-        fit_width(eq, 4.6)
-        self.play(FadeIn(eq, shift=UP * 0.15))
+        cap = self.swap_cap(cap, "ไม้ 1 + ไม้ 2 นับท่อนแดง 2 รอบ · ลบไม้ทั้งเส้น 1 รอบ → เหลือท่อนแดงรอบเดียว = Z", 18)
+        self.play(Indicate(VGroup(t1_red, t2_red), color=WHITE, scale_factor=1.0), run_time=0.8)
+        self.play(Indicate(t3_red, color=WHITE, scale_factor=1.0), run_time=0.8)
+        self.wait(0.6)                                   # หยุดสั้น ๆ ก่อนกรอบสูตร
+        formula = MathTex(r"Z=E_1B+E_2A-E_1E_2", font_size=38, color=WHITE).move_to([0, T3 - 0.85, 0])
+        box = SurroundingRectangle(formula, color=OK, buff=0.18, stroke_width=4)
+        self.play(FadeIn(formula, shift=UP * 0.15), Create(box), run_time=0.9)
         self.wait(1.4)
+        if self._halt("p4"):
+            return
 
-        result = MathTex(r"Z=E_1B+E_2A-E_1E_2", font_size=28, color=OK).next_to(eq, DOWN, buff=0.5)
-        box = SurroundingRectangle(result, color=OK, buff=0.18)
-        self.play(FadeOut(cap4))
-        self.play(FadeIn(result, shift=UP * 0.15), Create(box))
-        self.wait(1.4)
-
-        mnemonic = Text("จำง่าย: ยื่นออกจาก base circle ทั้งสองข้าง แล้วลบส่วนที่นับซ้ำ (E1E2) ทิ้ง",
-                         font_size=17, color=GRAYTXT).move_to([0, -3.15, 0])
-        fit_width(mnemonic, 11.5)
-        self.play(FadeIn(mnemonic, shift=UP * 0.15))
-        self.wait(2.0)
+        # ============ ส่วนที่ 5: แทนเลขจริงจากหน้า 25 ============
+        cap = self.swap_cap(cap, "แทนเลขจากตัวอย่างหน้า 25: มุมกด 20°, R1 = 1.5, R2 = 3.75, Ro1 = 1.625, Ro2 = 3.875 (นิ้ว)", 17)
+        n1 = end_label("E1B = 0.809", pos["B"], T1)
+        n2 = end_label("E2A = 1.612", L, T2)
+        n3 = end_label("E1E2 = 1.796", L, T3)
+        self.play(ReplacementTransform(lb_t1, n1), run_time=0.6)
+        self.play(ReplacementTransform(lb_t2, n2), run_time=0.6)
+        self.play(ReplacementTransform(lb_t3, n3), run_time=0.6)
+        num = MathTex(r"Z=0.809+1.612-1.796=\mathbf{0.625}\ \mathrm{in}", font_size=34, color=WHITE)
+        num.move_to([0, T3 - 1.7, 0])
+        self.play(FadeIn(num, shift=UP * 0.15), run_time=0.8)
+        self.wait(0.6)
+        z_lab = Text("Z = AB = 0.625 นิ้ว", font_size=18, color=SEG_AB).move_to([xr((pos["A"] + pos["B"]) / 2), Ry - 0.38, 0])
+        self.play(FadeIn(z_lab, shift=DOWN * 0.1), Indicate(r_seg, color=WHITE, scale_factor=1.0), run_time=0.9)
+        cap = self.swap_cap(cap, "ท่อนแดงที่วาดตามสเกลจริงยาว 0.625 นิ้ว ตรงกับผลลัพธ์ — Z ตัวนี้จะเอาไปหารด้วย p_b ในหน้า 25", 18)
+        self.wait(2.4)
 
 
 # =====================================================================
