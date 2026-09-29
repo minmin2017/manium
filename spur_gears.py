@@ -24,6 +24,7 @@ import numpy as np
 from manim import *
 from mlib import *
 from gear_law_similar import seg, pt, tag, ra_mark
+from involute_geom import gear_outline, mesh_frame, placed, contact_point, check
 
 # ----------------------------------------------------------------- palette
 GEAR2 = GEAR_IN            # "#4FC3F7" -- gear/body 2 (driver), matches mlib convention
@@ -1673,6 +1674,201 @@ class G20_ZDefinitionAB(SafeScene):
         self.play(FadeIn(z_lab, shift=DOWN * 0.1), Indicate(r_seg, color=WHITE, scale_factor=1.0), run_time=0.9)
         cap = self.swap_cap(cap, "ท่อนแดงที่วาดตามสเกลจริงยาว 0.625 นิ้ว ตรงกับผลลัพธ์ — Z ตัวนี้จะเอาไปหารด้วย p_b ในหน้า 25", 18)
         self.wait(2.4)
+
+
+# =====================================================================
+# G20B -- หน้า 20 (ขยาย): เฟืองจริงมีฟันอินโวลูทขบกัน -- E1,E2 คืออะไร / วงยอดฟัน (addendum)
+# ทำไมจุด A กับ B ถึงอยู่บนวงยอดฟัน  (2026-09-29, Min: "อยากเห็นถึงเนื้อฟันขบกันเป็นช่วง")
+# เรขาคณิตมาจาก involute_geom.py (numpy ล้วน) -- check() พิสูจน์ก่อนวาดว่าจุดสัมผัสอยู่บนผิวฟันจริง
+# =====================================================================
+G20B_M = 2.0 / 9.0          # module (หน่วยฉาก) -> R = 2.0 เมื่อ N = 18
+ADD_C = "#FFEE58"           # สีวงยอดฟัน (addendum) ทั้งสองเฟือง
+
+
+class G20B_MeshingTeeth(SafeScene):
+    P0 = (0.0, -0.95)       # จุด P (จุดกลิ้งแตะกัน)
+    RUL_Y = 1.85            # ไม้บรรทัดย่อด้านบน (สเกลเดียวกับ G20)
+    RUL_W = 8.4
+
+    def swap_cap(self, old, txt, size=19):
+        self.play(FadeOut(old), run_time=0.35)
+        new = caption_top(txt, size=size)
+        self.play(FadeIn(new), run_time=0.5)
+        return new
+
+    def _halt(self, tag_):
+        return os.environ.get("G20_STOP") == tag_
+
+    def construct(self):
+        phi = CR_PHI
+        fr = mesh_frame(18, 18, G20B_M, phi, self.P0)
+        o1, _ = gear_outline(18, G20B_M, phi)
+        o2, _ = gear_outline(18, G20B_M, phi)
+        check(fr, o1, o2)                                # จุดสัมผัสต้องอยู่บนผิวฟันทั้งสองเฟืองทุก theta
+
+        def v3(p):
+            return np.array([float(p[0]), float(p[1]), 0.0])
+
+        O1, O2, P, E1, E2, A, B = (v3(fr[k]) for k in ("O1", "O2", "P", "E1", "E2", "A", "B"))
+        d = v3(fr["d"])
+        tr = ValueTracker(0.0)
+
+        self.add(title("เฟืองจริง: ฟันอินโวลูทขบกัน", size=26))
+        self.add(page_ref("หน้า 20 (ขยาย)"))
+
+        g1 = Polygon(*[v3(p) for p in placed(o1, fr["O1"], fr["alpha1"])], color=GEAR2,
+                     fill_color=GEAR2, fill_opacity=0.2, stroke_width=2.5)
+        g2 = Polygon(*[v3(p) for p in placed(o2, fr["O2"], fr["alpha2"])], color=GEAR3,
+                     fill_color=GEAR3, fill_opacity=0.2, stroke_width=2.5)
+
+        # ============ ส่วนที่ 1: เฟืองคู่ + 4 วงของฟัน ============
+        cap = caption_top("เฟืองตรง 18 ฟัน 2 ตัว (module เท่ากัน): เฟือง 1 ขับ (ซ้าย, ฟ้า) · เฟือง 2 ตาม (ขวา, ส้ม)",
+                          size=19)
+        self.play(FadeIn(g1), FadeIn(g2), FadeIn(cap), run_time=1.3)
+        self.wait(0.6)
+
+        def circ(O, r, color, dashes=48, sw=2.5):
+            return DashedVMobject(Circle(radius=r, color=color, stroke_width=sw).move_to(O),
+                                  num_dashes=dashes, dashed_ratio=0.6)
+
+        rows_spec = [("วงโคนฟัน", "dedendum", GRAYTXT, fr["Rd1"], "ก้นร่องระหว่างฟัน"),
+                     ("วงฐาน", "base", BASE_C, fr["Rb1"], "เส้นอินโวลูทงอกจากวงนี้"),
+                     ("วงพิตช์", "pitch", OK, fr["R1"], "วงที่เฟืองกลิ้งแตะกัน"),
+                     ("วงยอดฟัน", "addendum", ADD_C, fr["Ra1"], "วงนอกสุด ผ่านปลายยอดฟัน")]
+        caps1 = ["วงโคนฟัน (dedendum): ผ่านก้นร่องระหว่างฟัน",
+                 "วงฐาน (base): เส้นโค้งอินโวลูทของฟันเริ่มงอกออกมาจากวงนี้",
+                 "วงพิตช์ (pitch): วงสมมุติที่เฟืองสองตัวกลิ้งแตะกันพอดี",
+                 "วงยอดฟัน (addendum): วงนอกสุด ผ่านปลายยอดฟัน"]
+        circles, rows = [], []
+        for i, (th_, en_, col, r, hint) in enumerate(rows_spec):
+            sw_ = Line(ORIGIN, RIGHT * 0.4, color=col, stroke_width=4)
+            t_th = Text(th_, font_size=17, color=col)
+            t_en = Text(en_, font_size=13, color=GRAYTXT)
+            t_hint = Text(hint, font_size=13, color=GRAYTXT)
+            txt = VGroup(t_th, t_en, t_hint).arrange(DOWN, aligned_edge=LEFT, buff=0.05)
+            row = VGroup(sw_, txt).arrange(RIGHT, buff=0.12, aligned_edge=UP)
+            row.move_to([-5.95, 1.3 - i * 1.15, 0])
+            rows.append(row)
+            circles.append(circ(O1, r, col))
+        for i, (c, row) in enumerate(zip(circles, rows)):
+            cap = self.swap_cap(cap, caps1[i])
+            self.play(Create(c), FadeIn(row), run_time=1.0)
+            self.play(Indicate(c, color=WHITE, scale_factor=1.0), run_time=0.7)
+            self.wait(0.5)
+        self.wait(0.8)
+        if self._halt("s1"):
+            return
+
+        # ============ ส่วนที่ 1b: E1, E2 คืออะไร ============
+        cap = self.swap_cap(cap, "เส้นแดง = line of action: เส้นที่จุดสัมผัสของฟันวิ่งตาม ผ่านจุด P")
+        # เก็บวงโคนฟัน/วงพิตช์ออก เหลือวงฐานกับวงยอดฟัน
+        self.play(FadeOut(circles[0]), FadeOut(circles[2]), FadeOut(rows[0]), FadeOut(rows[2]),
+                  run_time=0.7)
+        loa = Line(E1 - d * 0.55, E2 + d * 0.55, color=LOA_C, stroke_width=3.5)
+        d_P = pt(P, WHITE, 0.07)
+        self.play(Create(loa), FadeIn(d_P), run_time=1.0)
+        base2 = circ(O2, fr["Rb2"], BASE_C)
+        cap = self.swap_cap(cap, "วงฐานของเฟือง 2 ก็เหมือนกัน — เส้นแดงแตะวงฐานของแต่ละเฟืองพอดีที่จุดเดียว")
+        self.play(Create(base2), run_time=0.9)
+        e1_rad = DashedLine(O1, E1, color=BASE_C, stroke_width=2, dash_length=0.08)
+        e2_rad = DashedLine(O2, E2, color=BASE_C, stroke_width=2, dash_length=0.08)
+        d_E1, d_E2 = pt(E1, BASE_C, 0.085), pt(E2, BASE_C, 0.085)
+        ra1 = ra_mark(E1, O1 - E1, d, BASE_C, 0.16)
+        ra2 = ra_mark(E2, O2 - E2, -d, BASE_C, 0.16)
+        cap = self.swap_cap(cap, "E1 = จุดที่เส้นแดงแตะวงฐานเฟือง 1 · รัศมี O1→E1 ตั้งฉากกับเส้นแดง (มุมฉาก)")
+        self.play(Create(e1_rad), FadeIn(d_E1), Create(ra1), run_time=1.0)
+        self.play(Indicate(d_E1, color=BASE_C, scale_factor=1.9), run_time=0.8)
+        cap = self.swap_cap(cap, "E2 = จุดที่เส้นแดงแตะวงฐานเฟือง 2 · รัศมี O2→E2 ตั้งฉากกับเส้นแดงเช่นกัน")
+        self.play(Create(e2_rad), FadeIn(d_E2), Create(ra2), run_time=1.0)
+        self.play(Indicate(d_E2, color=BASE_C, scale_factor=1.9), run_time=0.8)
+        self.wait(0.8)
+
+        # ---- ไม้บรรทัดย่อด้านบน (สเกลเดียวกับ G20): E1 ซ้าย ... E2 ขวา ----
+        Ry, W = self.RUL_Y, self.RUL_W
+        x0 = -W / 2
+        sx = W / fr["E1E2"]
+
+        def rp(dist):
+            return np.array([x0 + sx * dist, Ry, 0.0])
+
+        cap = self.swap_cap(cap, "เรียงจุดบนเส้นแดงเป็นไม้บรรทัด (เหมือนคลิปก่อนหน้า): E1 ซ้าย → E2 ขวา")
+        ruler = Line(rp(0) + LEFT * 0.35, rp(fr["E1E2"]) + RIGHT * 0.35, color=LOA_C, stroke_width=3)
+        r_E1, r_E2 = pt(rp(0), BASE_C, 0.08), pt(rp(fr["E1E2"]), BASE_C, 0.08)
+        r_P = pt(rp(fr["E1P"]), WHITE, 0.07)
+        self.play(Create(ruler), TransformFromCopy(d_E1, r_E1), TransformFromCopy(d_E2, r_E2),
+                  TransformFromCopy(d_P, r_P), run_time=1.6)
+        names = VGroup(*[tag(nm, rp(x_), UP, c, 20, 0.15) for nm, x_, c in
+                         (("E1", 0, BASE_C), ("P", fr["E1P"], WHITE), ("E2", fr["E1E2"], BASE_C))])
+        self.play(FadeIn(names), run_time=0.6)
+        self.wait(1.0)
+        if self._halt("s1b"):
+            return
+
+        # ============ ส่วนที่ 2: วงยอดฟันกำหนด A และ B — ดูฟันขบกันจริง ============
+        cap = self.swap_cap(cap, "ตอนนี้ดูฟันขบกันจริง: จุดสัมผัสของฟันจะวิ่งบนเส้นแดงจาก A ไป B")
+        self.play(FadeOut(VGroup(e1_rad, e2_rad, ra1, ra2, base2, circles[1], rows[1])), run_time=0.7)
+        add1 = circles[3]                                   # วงยอดฟันเฟือง 1 (วาดไว้แล้วตอนส่วนที่ 1)
+        add2 = circ(O2, fr["Ra2"], ADD_C)
+        self.play(Create(add2), run_time=0.9)
+        d_A, d_B = pt(A, WARN, 0.085), pt(B, WARN, 0.085)
+        r_A, r_B = pt(rp(fr["rho_A"]), WARN, 0.09), pt(rp(fr["rho_B"]), WARN, 0.09)
+        mk = Dot(A, color="#FFFFFF", radius=0.075)
+        mk_r = Dot(rp(fr["rho_A"]), color="#FFFFFF", radius=0.055)
+        nm_AB = VGroup(tag("A", rp(fr["rho_A"]), UP, WARN, 20, 0.15),
+                       tag("B", rp(fr["rho_B"]), UP, WARN, 20, 0.15))
+        self.play(FadeIn(d_A), FadeIn(d_B), TransformFromCopy(d_A, r_A), TransformFromCopy(d_B, r_B),
+                  FadeIn(nm_AB), run_time=1.0)
+        self.bring_to_front(d_E1, d_E2, d_P)
+
+        # ตัวหมุนเฟือง (คำนวณมุมสัมบูรณ์จาก tracker ทุกเฟรม)
+        st = {"t1": 0.0, "t2": 0.0}
+
+        def rot1(m):
+            th = tr.get_value()
+            m.rotate(th - st["t1"], about_point=O1)
+            st["t1"] = th
+
+        def rot2(m):
+            th = tr.get_value() * fr["ratio"]
+            m.rotate(-(th - st["t2"]), about_point=O2)
+            st["t2"] = th
+
+        def place_mk(m):
+            m.move_to(v3(contact_point(fr, tr.get_value())))
+
+        def place_mk_r(m):
+            m.move_to(rp(fr["rho_A"] + fr["Rb1"] * tr.get_value()))
+
+        g1.add_updater(rot1)
+        g2.add_updater(rot2)
+        mk.add_updater(place_mk)
+        mk_r.add_updater(place_mk_r)
+        self.add(mk, mk_r)
+
+        cap = self.swap_cap(cap, "A = เริ่มสัมผัส: ยอดฟันเฟือง 2 (บนวงยอดฟันของมัน) เพิ่งแตะผิวฟันเฟือง 1", 18)
+        self.play(Indicate(add2, color=WHITE, scale_factor=1.0), Flash(mk, color=WARN, flash_radius=0.4),
+                  run_time=1.1)
+        self.wait(1.2)
+        cap = self.swap_cap(cap, "หมุนเฟืองช้า ๆ: จุดสัมผัสของฟันเลื่อนไปตามเส้นแดง (ดูจุดขาวบนไม้บรรทัดด้วย)", 18)
+        self.play(tr.animate.set_value(fr["theta_P"]), run_time=4.5, rate_func=linear)
+        cap = self.swap_cap(cap, "ผ่าน P: จุดที่เฟืองกลิ้งแตะกัน (วงพิตช์แตะกัน) — ที่ P ผิวฟันไม่ไถล", 18)
+        self.play(Flash(mk, color=WHITE, flash_radius=0.4), run_time=0.9)
+        self.wait(1.0)
+        cap = self.swap_cap(cap, "หมุนต่อ: ยอดฟันเฟือง 1 กำลังไต่ขึ้นไปหาปลายผิวฟันเฟือง 2", 18)
+        self.play(tr.animate.set_value(fr["theta_B"]), run_time=4.5, rate_func=linear)
+        cap = self.swap_cap(cap, "B = สิ้นสุดสัมผัส: ยอดฟันเฟือง 1 (บนวงยอดฟันของมัน) กำลังหลุดจากฟันเฟือง 2", 18)
+        self.play(Indicate(add1, color=WHITE, scale_factor=1.0), Flash(mk, color=WARN, flash_radius=0.4),
+                  run_time=1.1)
+        self.wait(1.2)
+        if self._halt("s2"):
+            return
+
+        # ============ สรุป ============
+        seg_ab = Line(rp(fr["rho_A"]), rp(fr["rho_B"]), color=WARN, stroke_width=9)
+        self.play(Create(seg_ab), run_time=0.9)
+        self.bring_to_front(r_A, r_B, r_P, mk_r)
+        cap = self.swap_cap(cap, "ช่วง A → B (แดง) = Z: วงยอดฟันของเฟือง 2 กำหนดจุด A · วงยอดฟันของเฟือง 1 กำหนดจุด B", 18)
+        self.wait(3.0)
 
 
 # =====================================================================
