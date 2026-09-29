@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from manim import *
-from mlib import SafeScene, caption_top, title, page_ref
+from mlib import SafeScene, caption_top, title, page_ref, WARN  # Claude patch: WARN was missing (NameError in cloud run 36566281797)
 from gear_law_similar import pt, tag, ra_mark
 from spur_gears import g20_geom, arc_near, side_label, ADD_C, BASE_C, LOA_C
 from g21c_captions import CAP, TITLE, PAGE
