@@ -13,6 +13,17 @@ class G21C_TermGlow(SafeScene):
         self.play(FadeIn(new), run_time=0.5)
         return new
 
+    def glow(self, term, fig, color):
+        """Stronger highlight (Min 2026-09-29: text glow was too weak): the equation term flashes WHITE, grows 25%,
+        and gets a sweeping rectangle in its own variable color, while the matching figure segment flashes white --
+        all in ONE self.play."""
+        self.play(
+            Indicate(term, color=WHITE, scale_factor=1.25),
+            Circumscribe(term, color=color, buff=0.12, stroke_width=5, fade_out=True),
+            Indicate(fig, color=WHITE, scale_factor=1.0),
+            run_time=1.5,
+        )
+
     def construct(self):
         g = g20_geom(k=1.0, P_screen=(-3.6, 0.55, 0.0))
         P, O1, O2, E1, E2, A, B = (g[k_] for k_ in ("P", "O1", "O2", "E1", "E2", "A", "B"))
@@ -83,33 +94,21 @@ class G21C_TermGlow(SafeScene):
         # Row 5 (14-17s): Glow Ro1 (term eq1[3] + line s_o1)
         # ---------------------------------------------------------
         cap = self.swap_cap(cap, CAP["g1_ro"])
-        self.play(
-            Indicate(eq1[3], color=ADD_C, scale_factor=1.15),
-            Indicate(s_o1, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(eq1[3], s_o1, ADD_C)
         self.wait(1.0)
 
         # ---------------------------------------------------------
         # Row 6 (17-20s): Glow Rb1 (term eq1[5] + line s_b1)
         # ---------------------------------------------------------
         cap = self.swap_cap(cap, CAP["g1_rb"])
-        self.play(
-            Indicate(eq1[5], color=BASE_C, scale_factor=1.15),
-            Indicate(s_b1, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(eq1[5], s_b1, BASE_C)
         self.wait(1.0)
 
         # ---------------------------------------------------------
         # Row 7 (20-23s): Glow result E1B (term eq1[0] + line s_e1b)
         # ---------------------------------------------------------
         cap = self.swap_cap(cap, CAP["g1_res"])
-        self.play(
-            Indicate(eq1[0], color=WARN, scale_factor=1.15),
-            Indicate(s_e1b, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(eq1[0], s_e1b, WARN)
         self.wait(1.0)
 
         # ---------------------------------------------------------
@@ -127,27 +126,15 @@ class G21C_TermGlow(SafeScene):
         self.wait(0.6)
 
         cap = self.swap_cap(cap, CAP["g1_n_ro"])
-        self.play(
-            Indicate(num1[3], color=ADD_C, scale_factor=1.15),
-            Indicate(s_o1, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(num1[3], s_o1, ADD_C)
         self.wait(0.8)
 
         cap = self.swap_cap(cap, CAP["g1_n_rb"])
-        self.play(
-            Indicate(num1[5], color=BASE_C, scale_factor=1.15),
-            Indicate(s_b1, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(num1[5], s_b1, BASE_C)
         self.wait(0.8)
 
         cap = self.swap_cap(cap, CAP["g1_n_res"])
-        self.play(
-            Indicate(num1[8], color=WARN, scale_factor=1.15),
-            Indicate(s_e1b, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(num1[8], s_e1b, WARN)
         self.wait(1.0)
 
         # ---------------------------------------------------------
@@ -204,27 +191,15 @@ class G21C_TermGlow(SafeScene):
         self.wait(0.8)
 
         cap = self.swap_cap(cap, CAP["g2_ro"])
-        self.play(
-            Indicate(eq2[3], color=ADD_C, scale_factor=1.15),
-            Indicate(s_o2, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(eq2[3], s_o2, ADD_C)
         self.wait(1.0)
 
         cap = self.swap_cap(cap, CAP["g2_rb"])
-        self.play(
-            Indicate(eq2[5], color=BASE_C, scale_factor=1.15),
-            Indicate(s_b2, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(eq2[5], s_b2, BASE_C)
         self.wait(1.0)
 
         cap = self.swap_cap(cap, CAP["g2_res"])
-        self.play(
-            Indicate(eq2[0], color=WARN, scale_factor=1.15),
-            Indicate(s_e2a, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(eq2[0], s_e2a, WARN)
         self.wait(1.0)
 
         # Numbers for Gear 2: 3.875, 3.5238, 1.612
@@ -240,27 +215,15 @@ class G21C_TermGlow(SafeScene):
         self.wait(0.6)
 
         cap = self.swap_cap(cap, CAP["g2_n_ro"])
-        self.play(
-            Indicate(num2[3], color=ADD_C, scale_factor=1.15),
-            Indicate(s_o2, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(num2[3], s_o2, ADD_C)
         self.wait(0.8)
 
         cap = self.swap_cap(cap, CAP["g2_n_rb"])
-        self.play(
-            Indicate(num2[5], color=BASE_C, scale_factor=1.15),
-            Indicate(s_b2, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(num2[5], s_b2, BASE_C)
         self.wait(0.8)
 
         cap = self.swap_cap(cap, CAP["g2_n_res"])
-        self.play(
-            Indicate(num2[8], color=WARN, scale_factor=1.15),
-            Indicate(s_e2a, color=WHITE, scale_factor=1.0),
-            run_time=1.0
-        )
+        self.glow(num2[8], s_e2a, WARN)
         self.wait(1.0)
 
         r2_box = SurroundingRectangle(eq2, color=WARN, buff=0.14, stroke_width=3)
