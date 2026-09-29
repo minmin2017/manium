@@ -1922,8 +1922,8 @@ class G21B_TriangleEnds(SafeScene):
         s_o1 = Line(O1, B, color=ADD_C, stroke_width=4)
         s_e1b = Line(E1, B, color=WARN, stroke_width=6)
         tri1 = Polygon(O1, E1, B, color=WHITE, stroke_width=0, fill_color=WHITE, fill_opacity=0.10)
-        lb_E1 = tag("E1", E1, LEFT, BASE_C, 20, 0.12)
-        lb_B = tag("B", B, RIGHT, WARN, 20, 0.12)
+        lb_E1 = tag("E1", E1, DL, BASE_C, 20, 0.1)
+        lb_B = tag("B", B, DOWN, WARN, 20, 0.14)
         self.play(FadeIn(d_O1), FadeIn(lb_O1), FadeIn(lb_E1), FadeIn(lb_B), FadeIn(tri1), run_time=0.8)
         self.play(Create(s_b1), Create(s_o1), Create(s_e1b), run_time=1.2)
         cen1 = (O1 + E1 + B) / 3
