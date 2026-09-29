@@ -1872,6 +1872,310 @@ class G20B_MeshingTeeth(SafeScene):
 
 
 # =====================================================================
+# G21B / G23B -- หน้า 21-24 (เขียนใหม่ 2026-09-29 สไตล์เดียวกับ G20): ที่มาของ Z ทีละท่อน
+#   G21B: E1B = sqrt(Ro1^2 - Rb1^2), E2A = sqrt(Ro2^2 - Rb2^2)  (สามเหลี่ยมมุมฉาก O-E-B / O-E-A)
+#   G23B: E1E2 = C sin(phi) แล้วประกอบเป็นสูตรหน้า 24 + กรณี rack & pinion (Z = PB + PA)
+# ใช้เรขาคณิตชุดเดียวกับ G20 (g20_geom) สเกลจริง k=1 (นิ้ว) เพื่อให้เห็นทั้งสองสามเหลี่ยมพร้อมกันเหมือนสไลด์
+# =====================================================================
+def side_label(txt, p, q, inside, color, size=18, off=0.3):
+    mid = (np.asarray(p, float) + np.asarray(q, float)) / 2
+    v = np.asarray(q, float) - np.asarray(p, float)
+    nrm = np.array([-v[1], v[0], 0.0])
+    nrm = nrm / np.linalg.norm(nrm)
+    if np.dot(nrm, mid - np.asarray(inside, float)) < 0:
+        nrm = -nrm
+    return Text(txt, font_size=size, color=color).move_to(mid + nrm * off)
+
+
+class G21B_TriangleEnds(SafeScene):
+    def swap_cap(self, old, txt, size=19):
+        self.play(FadeOut(old), run_time=0.35)
+        new = caption_top(txt, size=size)
+        self.play(FadeIn(new), run_time=0.5)
+        return new
+
+    def _halt(self, tag_):
+        return os.environ.get("G20_STOP") == tag_
+
+    def construct(self):
+        g = g20_geom(k=1.0, P_screen=(-3.6, 0.55, 0.0))
+        P, O1, O2, E1, E2, A, B = (g[k_] for k_ in ("P", "O1", "O2", "E1", "E2", "A", "B"))
+        w, n = g["w"], g["n"]
+        self.add(title("ที่มาของ Z ขั้นที่ 2: หา E1B และ E2A", size=26))
+        self.add(page_ref("หน้า 21–22"))
+
+        cap = caption_top("สูตรจากหน้า 20: Z = E1B + E2A − E1E2 — ตอนนี้หาค่าท่อน E1B กับ E2A ก่อน", size=19)
+        formula = MathTex(r"Z=E_1B+E_2A-E_1E_2", font_size=34, color=WHITE).move_to([3.3, 2.0, 0])
+        self.play(FadeIn(cap), FadeIn(formula), run_time=0.8)
+
+        # ---- เส้นแดง + จุดทั้งหมด (ยังไม่ใส่ป้ายทุกจุด เพราะ E1-A ห่างกันแค่ 0.18 นิ้ว) ----
+        loa = Line(E1 - w * 0.3, E2 + w * 0.3, color=LOA_C, stroke_width=3)
+        dots = {nm: pt(p_, c_, 0.055) for nm, p_, c_ in (("E1", E1, BASE_C), ("A", A, WARN), ("P", P, WHITE),
+                                                        ("B", B, WARN), ("E2", E2, BASE_C))}
+        self.play(Create(loa), FadeIn(VGroup(*dots.values())), run_time=1.0)
+
+        # ============ ท่อนที่ 1: สามเหลี่ยม O1-E1-B ============
+        cap = self.swap_cap(cap, "ท่อน E1B อยู่ในสามเหลี่ยม O1-E1-B ของเฟือง 1 (O1 = จุดศูนย์กลางเฟือง 1)")
+        d_O1 = pt(O1, WHITE, 0.07)
+        lb_O1 = tag("O1", O1, UP, WHITE, 20, 0.12)
+        s_b1 = Line(O1, E1, color=BASE_C, stroke_width=4)
+        s_o1 = Line(O1, B, color=ADD_C, stroke_width=4)
+        s_e1b = Line(E1, B, color=WARN, stroke_width=6)
+        tri1 = Polygon(O1, E1, B, color=WHITE, stroke_width=0, fill_color=WHITE, fill_opacity=0.10)
+        lb_E1 = tag("E1", E1, LEFT, BASE_C, 20, 0.12)
+        lb_B = tag("B", B, RIGHT, WARN, 20, 0.12)
+        self.play(FadeIn(d_O1), FadeIn(lb_O1), FadeIn(lb_E1), FadeIn(lb_B), FadeIn(tri1), run_time=0.8)
+        self.play(Create(s_b1), Create(s_o1), Create(s_e1b), run_time=1.2)
+        cen1 = (O1 + E1 + B) / 3
+        tb1 = side_label("Rb1", O1, E1, cen1, BASE_C)
+        to1 = side_label("Ro1", O1, B, cen1, ADD_C)
+        te1 = side_label("E1B", E1, B, cen1, WARN)
+        cap = self.swap_cap(cap, "O1E1 = Rb1 (E1 อยู่บนวงฐาน) · O1B = Ro1 (B อยู่บนวงยอดฟันของเฟือง 1)")
+        self.play(FadeIn(tb1), FadeIn(to1), FadeIn(te1), run_time=0.8)
+        self.play(Indicate(s_b1, color=WHITE, scale_factor=1.0), run_time=0.7)
+        self.play(Indicate(s_o1, color=WHITE, scale_factor=1.0), run_time=0.7)
+        self.wait(0.6)
+        cap = self.swap_cap(cap, "รัศมี O1E1 ตั้งฉากกับเส้นแดงที่จุดแตะ E1 → สามเหลี่ยมนี้มีมุมฉากที่ E1")
+        ra1 = ra_mark(E1, O1 - E1, B - E1, BASE_C, 0.16)
+        self.play(Create(ra1), run_time=0.8)
+        self.wait(0.8)
+        cap = self.swap_cap(cap, "ทฤษฎีบทพีทาโกรัส: ด้านตรงข้ามมุมฉาก Ro1 ยกกำลังสอง = ผลรวมกำลังสองของอีกสองด้าน")
+        py1 = MathTex(r"R_{o1}^{2}=R_{b1}^{2}+\overline{E_1B}^{\,2}", font_size=34).move_to([3.3, 0.7, 0])
+        py1.set_color_by_tex("R_{o1}", ADD_C)
+        self.play(FadeIn(py1, shift=UP * 0.15), run_time=0.8)
+        self.wait(1.0)                                   # หยุดสั้น ๆ ก่อนสรุปผล
+        r1 = MathTex(r"\overline{E_1B}=\sqrt{R_{o1}^{2}-R_{b1}^{2}}", font_size=40, color=WHITE).move_to([3.3, -0.4, 0])
+        box1 = SurroundingRectangle(r1, color=OK, buff=0.16, stroke_width=4)
+        self.play(FadeIn(r1, shift=UP * 0.15), Create(box1), run_time=0.9)
+        self.wait(1.4)
+        if self._halt("t1"):
+            return
+
+        # ============ ท่อนที่ 2: สามเหลี่ยม O2-E2-A ============
+        cap = self.swap_cap(cap, "ท่อน E2A: ทำแบบเดียวกันกับเฟือง 2 — สามเหลี่ยม O2-E2-A (A อยู่บนวงยอดฟันของเฟือง 2)")
+        keep = VGroup(r1, box1)
+        self.play(FadeOut(VGroup(tri1, s_b1, s_o1, s_e1b, tb1, to1, te1, ra1, d_O1, lb_O1, lb_E1, lb_B, py1)),
+                  keep.animate.scale(0.72).move_to([3.3, 1.05, 0]), formula.animate.move_to([3.3, 2.15, 0]),
+                  run_time=1.0)
+        d_O2 = pt(O2, WHITE, 0.07)
+        lb_O2 = tag("O2", O2, LEFT, WHITE, 20, 0.12)
+        s_b2 = Line(O2, E2, color=BASE_C, stroke_width=4)
+        s_o2 = Line(O2, A, color=ADD_C, stroke_width=4)
+        s_e2a = Line(E2, A, color=WARN, stroke_width=6)
+        tri2 = Polygon(O2, E2, A, color=WHITE, stroke_width=0, fill_color=WHITE, fill_opacity=0.10)
+        lb_E2 = tag("E2", E2, RIGHT, BASE_C, 20, 0.12)
+        lb_A = tag("A", A, LEFT, WARN, 20, 0.12)
+        self.play(FadeIn(d_O2), FadeIn(lb_O2), FadeIn(lb_E2), FadeIn(lb_A), FadeIn(tri2), run_time=0.8)
+        self.play(Create(s_b2), Create(s_o2), Create(s_e2a), run_time=1.2)
+        cen2 = (O2 + E2 + A) / 3
+        tb2 = side_label("Rb2", O2, E2, cen2, BASE_C)
+        to2 = side_label("Ro2", O2, A, cen2, ADD_C)
+        te2 = side_label("E2A", E2, A, cen2, WARN, off=0.45)
+        cap = self.swap_cap(cap, "O2E2 = Rb2 (E2 อยู่บนวงฐาน) · O2A = Ro2 (A อยู่บนวงยอดฟันเฟือง 2) · มุมฉากที่ E2")
+        ra2 = ra_mark(E2, O2 - E2, A - E2, BASE_C, 0.16)
+        self.play(FadeIn(tb2), FadeIn(to2), FadeIn(te2), Create(ra2), run_time=1.0)
+        self.wait(1.0)
+        py2 = MathTex(r"R_{o2}^{2}=R_{b2}^{2}+\overline{E_2A}^{\,2}", font_size=34).move_to([3.3, 0.0, 0])
+        py2.set_color_by_tex("R_{o2}", ADD_C)
+        self.play(FadeIn(py2, shift=UP * 0.15), run_time=0.8)
+        self.wait(1.0)
+        r2 = MathTex(r"\overline{E_2A}=\sqrt{R_{o2}^{2}-R_{b2}^{2}}", font_size=40, color=WHITE).move_to([3.3, -1.0, 0])
+        box2 = SurroundingRectangle(r2, color=OK, buff=0.16, stroke_width=4)
+        self.play(FadeIn(r2, shift=UP * 0.15), Create(box2), run_time=0.9)
+        self.wait(1.4)
+        if self._halt("t2"):
+            return
+
+        # ============ แทนเลขจริง (หน้า 25) ============
+        cap = self.swap_cap(cap, "แทนเลขจากตัวอย่างหน้า 25 (มุมกด 20°, Ro1 = 1.625, Rb1 = 1.4095, Ro2 = 3.875, Rb2 = 3.5238 นิ้ว)", 17)
+        self.play(FadeOut(VGroup(py2, tri2, tb2, to2, te2, ra2)), run_time=0.6)
+        n1 = MathTex(r"\overline{E_1B}=\sqrt{1.625^{2}-1.4095^{2}}=\mathbf{0.809}\ \mathrm{in}", font_size=32).move_to([3.3, -1.3, 0])
+        n2 = MathTex(r"\overline{E_2A}=\sqrt{3.875^{2}-3.5238^{2}}=\mathbf{1.612}\ \mathrm{in}", font_size=32).move_to([3.3, -2.1, 0])
+        self.play(FadeIn(n1, shift=UP * 0.1), run_time=0.8)
+        self.play(FadeIn(n2, shift=UP * 0.1), run_time=0.8)
+        self.wait(0.6)
+        cap = self.swap_cap(cap, "เหลือท่อนสุดท้าย E1E2 — ดูในคลิปหน้า 23", 19)
+        self.wait(2.4)
+
+
+class G23B_E1E2Final(SafeScene):
+    def swap_cap(self, old, txt, size=19):
+        self.play(FadeOut(old), run_time=0.35)
+        new = caption_top(txt, size=size)
+        self.play(FadeIn(new), run_time=0.5)
+        return new
+
+    def _halt(self, tag_):
+        return os.environ.get("G20_STOP") == tag_
+
+    def construct(self):
+        g = g20_geom(k=1.0, P_screen=(-3.6, 0.55, 0.0))
+        P, O1, O2, E1, E2 = (g[k_] for k_ in ("P", "O1", "O2", "E1", "E2"))
+        w = g["w"]
+        phi = CR_PHI
+        self.add(title("ที่มาของ Z ขั้นที่ 3–4: E1E2 = C sinφ แล้วประกอบเป็นสูตรสำเร็จ", size=24))
+        self.add(page_ref("หน้า 23–24"))
+
+        # ============ ส่วนที่ 1: E1E2 จากสามเหลี่ยม O1-E1-P และ O2-E2-P ============
+        cap = caption_top("ท่อนสุดท้าย E1E2 = E1P + E2P — ดูสามเหลี่ยมมุมฉาก O1-E1-P และ O2-E2-P", size=19)
+        self.play(FadeIn(cap), run_time=0.7)
+        centers = DashedLine(O1 + UP * 0.35, O2 + DOWN * 0.35, color=GRAYTXT, stroke_width=2, dash_length=0.1)
+        tangent = DashedLine(P + LEFT * 1.6, P + RIGHT * 1.9, color=GRAYTXT, stroke_width=2, dash_length=0.1)
+        loa = Line(E1 - w * 0.3, E2 + w * 0.3, color=LOA_C, stroke_width=3.5)
+        self.play(Create(centers), Create(tangent), Create(loa), run_time=1.2)
+        dots = VGroup(pt(O1, WHITE, 0.07), pt(O2, WHITE, 0.07), pt(P, WHITE, 0.07),
+                      pt(E1, BASE_C, 0.075), pt(E2, BASE_C, 0.075))
+        lbs = VGroup(tag("O1", O1, RIGHT, WHITE, 20, 0.12), tag("O2", O2, RIGHT, WHITE, 20, 0.12),
+                     tag("P", P, DL, WHITE, 20, 0.12), tag("E1", E1, LEFT, BASE_C, 20, 0.12),
+                     tag("E2", E2, RIGHT, BASE_C, 20, 0.12))
+        self.play(FadeIn(dots), FadeIn(lbs), run_time=0.8)
+        r1_seg, r2_seg = Line(O1, P, color=GEAR2, stroke_width=4), Line(O2, P, color=GEAR3, stroke_width=4)
+        b1_seg, b2_seg = Line(O1, E1, color=BASE_C, stroke_width=4), Line(O2, E2, color=BASE_C, stroke_width=4)
+        cap = self.swap_cap(cap, "O1P = R1 และ O2P = R2 (รัศมีวงพิตช์ ตามเส้นศูนย์กลาง) · O1E1, O2E2 = รัศมีวงฐาน ⊥ เส้นแดง")
+        ra1 = ra_mark(E1, O1 - E1, P - E1, BASE_C, 0.14)
+        ra2 = ra_mark(E2, O2 - E2, P - E2, BASE_C, 0.14)
+        self.play(Create(r1_seg), Create(r2_seg), Create(b1_seg), Create(b2_seg), Create(ra1), Create(ra2),
+                  run_time=1.4)
+        self.wait(0.8)
+
+        # ---- มุม phi ที่ P แล้ว ส่งต่อไปที่ O1, O2 (เส้นสองคู่ตั้งฉากกันคู่ต่อคู่ -> มุมเท่ากัน) ----
+        cap = self.swap_cap(cap, "มุมกด φ = มุมระหว่างเส้นแดงกับเส้นสัมผัสร่วมที่ P (เส้นประแนวนอน)")
+        arc_P = Arc(radius=0.7, start_angle=-phi, angle=phi, arc_center=P, color=WARN, stroke_width=4)
+        lb_phiP = MathTex(r"\phi", font_size=30, color=WARN).move_to(P + np.array([1.0, -0.14, 0.0]))
+        self.play(Create(arc_P), FadeIn(lb_phiP), run_time=0.9)
+        cap = self.swap_cap(cap, "เส้นศูนย์กลาง ⊥ เส้นสัมผัส · O1E1 ⊥ เส้นแดง → มุมระหว่างเส้นคู่ใหม่ = มุมเดิม = φ (ที่ O1 และ O2)", 18)
+        arc_O1 = Arc(radius=0.7, start_angle=-np.pi / 2 - phi, angle=phi, arc_center=O1, color=WARN, stroke_width=4)
+        arc_O2 = Arc(radius=0.7, start_angle=np.pi / 2 - phi, angle=phi, arc_center=O2, color=WARN, stroke_width=4)
+        lb_phi1 = MathTex(r"\phi", font_size=30, color=WARN).move_to(O1 + np.array([-0.3, -0.95, 0.0]))
+        lb_phi2 = MathTex(r"\phi", font_size=30, color=WARN).move_to(O2 + np.array([0.3, 0.95, 0.0]))
+        self.play(TransformFromCopy(arc_P, arc_O1), TransformFromCopy(arc_P, arc_O2), run_time=1.4)
+        self.play(FadeIn(lb_phi1), FadeIn(lb_phi2), run_time=0.6)
+        self.wait(1.0)
+        if self._halt("u1"):
+            return
+
+        # ---- ตรีโกณ: E1P = R1 sin phi, E2P = R2 sin phi ----
+        cap = self.swap_cap(cap, "ในสามเหลี่ยมมุมฉาก O1-E1-P: sinφ = ด้านตรงข้าม ÷ ด้านตรงข้ามมุมฉาก = E1P ÷ R1")
+        tri1 = Polygon(O1, E1, P, color=WHITE, stroke_width=0, fill_color=WHITE, fill_opacity=0.10)
+        e1p = Line(E1, P, color=WARN, stroke_width=6)
+        self.play(FadeIn(tri1), Create(e1p), run_time=0.9)
+        eq1 = MathTex(r"\sin\phi=\dfrac{E_1P}{R_1}\ \Rightarrow\ E_1P=R_1\sin\phi", font_size=32).move_to([2.6, 1.6, 0])
+        self.play(FadeIn(eq1, shift=UP * 0.1), run_time=0.8)
+        self.wait(1.0)
+        cap = self.swap_cap(cap, "สามเหลี่ยม O2-E2-P ทำนองเดียวกัน: E2P = R2 sinφ")
+        tri2 = Polygon(O2, E2, P, color=WHITE, stroke_width=0, fill_color=WHITE, fill_opacity=0.10)
+        e2p = Line(E2, P, color=WARN, stroke_width=6)
+        self.play(FadeOut(tri1), FadeIn(tri2), Create(e2p), run_time=0.9)
+        eq2 = MathTex(r"E_2P=R_2\sin\phi", font_size=32).move_to([2.6, 0.8, 0])
+        self.play(FadeIn(eq2, shift=UP * 0.1), run_time=0.8)
+        self.wait(0.8)
+        cap = self.swap_cap(cap, "E1E2 = E1P + E2P = (R1 + R2) sinφ  และ  C = R1 + R2 (ระยะศูนย์กลาง)")
+        self.wait(0.5)
+        eq3 = MathTex(r"E_1E_2=(R_1+R_2)\sin\phi=C\sin\phi", font_size=36).move_to([2.6, -0.3, 0])
+        box3 = SurroundingRectangle(eq3, color=OK, buff=0.16, stroke_width=4)
+        self.play(FadeIn(eq3, shift=UP * 0.1), Create(box3), run_time=0.9)
+        num = MathTex(r"0.513+1.283=1.796\ \mathrm{in}\ (=5.25\sin20^\circ)", font_size=28, color=GRAYTXT).move_to([2.6, -1.3, 0])
+        self.play(FadeIn(num), run_time=0.6)
+        self.wait(1.6)
+        if self._halt("u2"):
+            return
+
+        # ============ ส่วนที่ 2 (หน้า 24): ประกอบสูตรสำเร็จ ============
+        cap = self.swap_cap(cap, "ประกอบสามท่อนเข้าสูตรจากหน้า 20 → ได้สูตรสำเร็จรูปของหน้า 24")
+        self.play(FadeOut(VGroup(centers, tangent, loa, dots, lbs, r1_seg, r2_seg, b1_seg, b2_seg, ra1, ra2,
+                                 arc_P, lb_phiP, arc_O1, arc_O2, lb_phi1, lb_phi2, tri2, e1p, e2p,
+                                 eq1, eq2, eq3, box3, num)), run_time=0.9)
+        z0 = MathTex(r"Z=E_1B+E_2A-E_1E_2", font_size=44).move_to([0, 1.5, 0])
+        self.play(FadeIn(z0, shift=UP * 0.1), run_time=0.7)
+        t1 = MathTex(r"\sqrt{R_{o1}^{2}-R_{b1}^{2}}", font_size=34, color=WHITE).move_to([-3.6, 0.2, 0])
+        t2 = MathTex(r"\sqrt{R_{o2}^{2}-R_{b2}^{2}}", font_size=34, color=WHITE).move_to([0.0, 0.2, 0])
+        t3 = MathTex(r"C\sin\phi", font_size=34, color=WHITE).move_to([3.6, 0.2, 0])
+        n1 = Text("E1B (หน้า 21)", font_size=17, color=GRAYTXT).next_to(t1, DOWN, buff=0.25)
+        n2 = Text("E2A (หน้า 22)", font_size=17, color=GRAYTXT).next_to(t2, DOWN, buff=0.25)
+        n3 = Text("E1E2 (หน้า 23)", font_size=17, color=GRAYTXT).next_to(t3, DOWN, buff=0.25)
+        for tt, nn in ((t1, n1), (t2, n2), (t3, n3)):
+            self.play(FadeIn(tt, shift=DOWN * 0.15), FadeIn(nn), run_time=0.8)
+            self.wait(0.4)
+        final = MathTex(r"Z=\sqrt{R_{o1}^{2}-R_{b1}^{2}}+\sqrt{R_{o2}^{2}-R_{b2}^{2}}-C\sin\phi", font_size=40).move_to([0, -1.5, 0])
+        fit_width(final, 11.5)
+        self.wait(0.5)
+        boxf = SurroundingRectangle(final, color=OK, buff=0.2, stroke_width=4)
+        self.play(FadeIn(final, shift=UP * 0.1), Create(boxf), run_time=1.0)
+        chk = MathTex(r"0.809+1.612-1.796=\mathbf{0.625}\ \mathrm{in}", font_size=30, color=GRAYTXT).move_to([0, -2.5, 0])
+        self.play(FadeIn(chk), run_time=0.7)
+        self.wait(2.0)
+        if self._halt("u3"):
+            return
+
+        # ============ ส่วนที่ 3: อีกมุมมอง Z = PA + PB และกรณี rack & pinion ============
+        cap = self.swap_cap(cap, "อีกมุมมอง: Z = PA + PB (ช่วงก่อน P + ช่วงหลัง P) — ใช้อธิบายกรณี rack & pinion")
+        self.play(FadeOut(VGroup(z0, t1, t2, t3, n1, n2, n3, final, boxf, chk)), run_time=0.8)
+        L = g["E1E2"]
+        W = 8.4
+        sx = W / L
+        x0 = -W / 2
+        Ry = 1.2
+
+        def rp(dist):
+            return np.array([x0 + sx * dist, Ry, 0.0])
+
+        pos = dict(E1=0.0, A=g["E1A"], P=g["E1P"], B=g["E1B"], E2=L)
+        ruler = Line(rp(0) + LEFT * 0.3, rp(L) + RIGHT * 0.3, color=LOA_C, stroke_width=3)
+        seg_pa = Line(rp(pos["A"]), rp(pos["P"]), color=GEAR3, stroke_width=9)
+        seg_pb = Line(rp(pos["P"]), rp(pos["B"]), color=GEAR2, stroke_width=9)
+        cols = (("E1", BASE_C), ("A", WARN), ("P", WHITE), ("B", WARN), ("E2", BASE_C))
+        rdots = VGroup(*[pt(rp(pos[nm]), c_, 0.08) for nm, c_ in cols])
+        rnames = VGroup(*[tag(nm, rp(pos[nm]), UP, c_, 20, 0.15) for nm, c_ in cols])
+        self.play(Create(ruler), FadeIn(rdots), FadeIn(rnames), run_time=1.0)
+        self.play(Create(seg_pa), Create(seg_pb), run_time=1.0)
+        lpa = Text("PA", font_size=20, color=GEAR3).move_to(rp((pos["A"] + pos["P"]) / 2) + DOWN * 0.35)
+        lpb = Text("PB", font_size=20, color=GEAR2).move_to(rp((pos["P"] + pos["B"]) / 2) + DOWN * 0.35)
+        self.play(FadeIn(lpa), FadeIn(lpb), run_time=0.6)
+        eqpb = MathTex(r"PB=E_1B-E_1P=\sqrt{R_{o1}^{2}-R_{b1}^{2}}-R_1\sin\phi", font_size=30).move_to([0, -0.3, 0])
+        eqpa = MathTex(r"PA=E_2A-E_2P=\sqrt{R_{o2}^{2}-R_{b2}^{2}}-R_2\sin\phi", font_size=30).move_to([0, -1.0, 0])
+        fit_width(eqpb, 11.0)
+        fit_width(eqpa, 11.0)
+        self.play(FadeIn(eqpb, shift=UP * 0.1), run_time=0.8)
+        self.play(FadeIn(eqpa, shift=UP * 0.1), run_time=0.8)
+        self.wait(1.4)
+        cap = self.swap_cap(cap, "เฟือง 2 เป็น rack (ฟันตรง ไม่มีวงฐาน) → PA หาจากความสูงฟัน a ของแร็คแทน", 18)
+        self.play(FadeOut(VGroup(eqpa, lpa)), run_time=0.6)
+        # แผนภาพ rack: เส้นพิตช์แนวนอน + เส้น addendum ของแร็คสูง a เหนือเส้นพิตช์ + เส้นแดงจาก P ขึ้นซ้ายไปตัดที่ A
+        Pp = np.array([-1.0, -2.2, 0.0])
+        a_h = 1.0
+        PA = a_h / np.sin(phi)
+        up_left = np.array([-np.cos(phi), np.sin(phi), 0.0])
+        Ap = Pp + PA * up_left
+        pitch_line = Line(Pp + LEFT * 4.0, Pp + RIGHT * 2.2, color=GRAYTXT, stroke_width=2.5)
+        add_line = DashedLine(Pp + LEFT * 4.0 + UP * a_h, Pp + RIGHT * 2.2 + UP * a_h, color=ADD_C,
+                              stroke_width=2.5, dash_length=0.12)
+        loa2 = Line(Pp - up_left * 0.8, Ap + up_left * 0.3, color=LOA_C, stroke_width=3.5)
+        pa_line = Line(Pp, Ap, color=GEAR3, stroke_width=7)
+        drop = DashedLine(Ap, Ap + DOWN * a_h, color=WARN, stroke_width=3, dash_length=0.1)
+        d_Pp, d_Ap = pt(Pp, WHITE, 0.07), pt(Ap, WARN, 0.08)
+        t_P, t_A = tag("P", Pp, DR, WHITE, 20, 0.1), tag("A", Ap, UP, WARN, 20, 0.12)
+        t_pl = Text("เส้นพิตช์", font_size=16, color=GRAYTXT).move_to(Pp + RIGHT * 1.6 + DOWN * 0.3)
+        t_al = Text("เส้นยอดฟันแร็ค (สูง a)", font_size=16, color=ADD_C).move_to(Pp + RIGHT * 0.4 + UP * (a_h + 0.3))
+        ang = Arc(radius=0.9, start_angle=np.pi - phi, angle=phi, arc_center=Pp, color=WARN, stroke_width=4)
+        lb_ang = MathTex(r"\phi", font_size=28, color=WARN).move_to(Pp + np.array([-1.25, 0.18, 0.0]))
+        lb_a = Text("a", font_size=22, color=WARN).next_to(drop, RIGHT, buff=0.12)
+        self.play(Create(pitch_line), Create(add_line), FadeIn(t_pl), FadeIn(t_al), run_time=1.0)
+        self.play(Create(loa2), FadeIn(d_Pp), FadeIn(t_P), run_time=0.8)
+        self.play(FadeIn(d_Ap), FadeIn(t_A), Create(pa_line), run_time=0.8)
+        self.play(Create(drop), FadeIn(lb_a), Create(ang), FadeIn(lb_ang), run_time=1.0)
+        eqr = MathTex(r"\sin\phi=\dfrac{a}{PA}\ \Rightarrow\ PA=\dfrac{a}{\sin\phi}", font_size=32).move_to([3.7, -1.9, 0])
+        self.play(FadeIn(eqr, shift=UP * 0.1), run_time=0.8)
+        self.wait(1.2)
+        cap = self.swap_cap(cap, "Z = PB + PA → สูตร rack & pinion (R, Rb, Ro, a เป็นค่าของ pinion ทั้งหมด)", 18)
+        fr_ = MathTex(r"Z=\sqrt{R_o^{2}-R_b^{2}}-R\sin\phi+\dfrac{a}{\sin\phi}", font_size=36).move_to([3.5, -0.6, 0])
+        fit_width(fr_, 6.0)
+        boxr = SurroundingRectangle(fr_, color=OK, buff=0.16, stroke_width=4)
+        self.wait(0.5)
+        self.play(FadeIn(fr_, shift=UP * 0.1), Create(boxr), run_time=1.0)
+        self.wait(3.0)
+
+
+# =====================================================================
 # G21 -- หน้า 21-22: ที่มาของ Z ขั้นที่ 2 -- E1B และ E2A เป็นสามเหลี่ยมมุมฉาก
 # =====================================================================
 class G21_TriangleEnds(SafeScene):
