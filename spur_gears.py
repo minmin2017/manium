@@ -1931,7 +1931,9 @@ class G21B_TriangleEnds(SafeScene):
         to1 = side_label("Ro1", O1, B, cen1, ADD_C)
         te1 = side_label("E1B", E1, B, cen1, WARN)
         cap = self.swap_cap(cap, "O1E1 = Rb1 (E1 อยู่บนวงฐาน) · O1B = Ro1 (B อยู่บนวงยอดฟันของเฟือง 1)")
-        self.play(FadeIn(tb1), FadeIn(to1), FadeIn(te1), run_time=0.8)
+        arc_b1, _, _ = arc_near(O1, g["Rb1"], E1, 0.5, BASE_C, 2.5, dashes=16)   # วงฐานเฟือง 1 (ผ่าน E1)
+        arc_o1, _, _ = arc_near(O1, g["Ro1"], B, 0.45, ADD_C, 2.5, dashes=16)    # วงยอดฟันเฟือง 1 (ผ่าน B)
+        self.play(FadeIn(tb1), FadeIn(to1), FadeIn(te1), Create(arc_b1), Create(arc_o1), run_time=1.0)
         self.play(Indicate(s_b1, color=WHITE, scale_factor=1.0), run_time=0.7)
         self.play(Indicate(s_o1, color=WHITE, scale_factor=1.0), run_time=0.7)
         self.wait(0.6)
@@ -1954,7 +1956,7 @@ class G21B_TriangleEnds(SafeScene):
         # ============ ท่อนที่ 2: สามเหลี่ยม O2-E2-A ============
         cap = self.swap_cap(cap, "ท่อน E2A: ทำแบบเดียวกันกับเฟือง 2 — สามเหลี่ยม O2-E2-A (A อยู่บนวงยอดฟันของเฟือง 2)")
         keep = VGroup(r1, box1)
-        self.play(FadeOut(VGroup(tri1, s_b1, s_o1, s_e1b, tb1, to1, te1, ra1, d_O1, lb_O1, lb_E1, lb_B, py1)),
+        self.play(FadeOut(VGroup(tri1, s_b1, s_o1, s_e1b, tb1, to1, te1, ra1, d_O1, lb_O1, lb_E1, lb_B, py1, arc_b1, arc_o1)),
                   keep.animate.scale(0.72).move_to([3.3, 1.05, 0]), formula.animate.move_to([3.3, 2.15, 0]),
                   run_time=1.0)
         d_O2 = pt(O2, WHITE, 0.07)
@@ -1964,7 +1966,7 @@ class G21B_TriangleEnds(SafeScene):
         s_e2a = Line(E2, A, color=WARN, stroke_width=6)
         tri2 = Polygon(O2, E2, A, color=WHITE, stroke_width=0, fill_color=WHITE, fill_opacity=0.10)
         lb_E2 = tag("E2", E2, RIGHT, BASE_C, 20, 0.12)
-        lb_A = tag("A", A, LEFT, WARN, 20, 0.12)
+        lb_A = tag("A", A, UP, WARN, 20, 0.14)
         self.play(FadeIn(d_O2), FadeIn(lb_O2), FadeIn(lb_E2), FadeIn(lb_A), FadeIn(tri2), run_time=0.8)
         self.play(Create(s_b2), Create(s_o2), Create(s_e2a), run_time=1.2)
         cen2 = (O2 + E2 + A) / 3
@@ -1973,7 +1975,9 @@ class G21B_TriangleEnds(SafeScene):
         te2 = side_label("E2A", E2, A, cen2, WARN, off=0.45)
         cap = self.swap_cap(cap, "O2E2 = Rb2 (E2 อยู่บนวงฐาน) · O2A = Ro2 (A อยู่บนวงยอดฟันเฟือง 2) · มุมฉากที่ E2")
         ra2 = ra_mark(E2, O2 - E2, A - E2, BASE_C, 0.16)
-        self.play(FadeIn(tb2), FadeIn(to2), FadeIn(te2), Create(ra2), run_time=1.0)
+        arc_b2, _, _ = arc_near(O2, g["Rb2"], E2, 0.16, BASE_C, 2.5, dashes=14)  # วงฐานเฟือง 2 (ผ่าน E2)
+        arc_o2, _, _ = arc_near(O2, g["Ro2"], A, 0.14, ADD_C, 2.5, dashes=14)    # วงยอดฟันเฟือง 2 (ผ่าน A)
+        self.play(FadeIn(tb2), FadeIn(to2), FadeIn(te2), Create(ra2), Create(arc_b2), Create(arc_o2), run_time=1.0)
         self.wait(1.0)
         py2 = MathTex(r"R_{o2}^{2}=R_{b2}^{2}+\overline{E_2A}^{\,2}", font_size=34).move_to([3.3, 0.0, 0])
         py2.set_color_by_tex("R_{o2}", ADD_C)
@@ -1988,9 +1992,11 @@ class G21B_TriangleEnds(SafeScene):
 
         # ============ แทนเลขจริง (หน้า 25) ============
         cap = self.swap_cap(cap, "แทนเลขจากตัวอย่างหน้า 25 (มุมกด 20°, Ro1 = 1.625, Rb1 = 1.4095, Ro2 = 3.875, Rb2 = 3.5238 นิ้ว)", 17)
-        self.play(FadeOut(VGroup(py2, tri2, tb2, to2, te2, ra2)), run_time=0.6)
-        n1 = MathTex(r"\overline{E_1B}=\sqrt{1.625^{2}-1.4095^{2}}=\mathbf{0.809}\ \mathrm{in}", font_size=32).move_to([3.3, -1.3, 0])
-        n2 = MathTex(r"\overline{E_2A}=\sqrt{3.875^{2}-3.5238^{2}}=\mathbf{1.612}\ \mathrm{in}", font_size=32).move_to([3.3, -2.1, 0])
+        keep2 = VGroup(r2, box2)
+        self.play(FadeOut(VGroup(py2, tri2, tb2, to2, te2, ra2, arc_b2, arc_o2)),
+                  keep2.animate.scale(0.72).move_to([3.3, 0.3, 0]), run_time=0.8)
+        n1 = MathTex(r"\overline{E_1B}=\sqrt{1.625^{2}-1.4095^{2}}=\mathbf{0.809}\ \mathrm{in}", font_size=32).move_to([3.3, -0.7, 0])
+        n2 = MathTex(r"\overline{E_2A}=\sqrt{3.875^{2}-3.5238^{2}}=\mathbf{1.612}\ \mathrm{in}", font_size=32).move_to([3.3, -1.6, 0])
         self.play(FadeIn(n1, shift=UP * 0.1), run_time=0.8)
         self.play(FadeIn(n2, shift=UP * 0.1), run_time=0.8)
         self.wait(0.6)
@@ -2020,13 +2026,13 @@ class G23B_E1E2Final(SafeScene):
         cap = caption_top("ท่อนสุดท้าย E1E2 = E1P + E2P — ดูสามเหลี่ยมมุมฉาก O1-E1-P และ O2-E2-P", size=19)
         self.play(FadeIn(cap), run_time=0.7)
         centers = DashedLine(O1 + UP * 0.35, O2 + DOWN * 0.35, color=GRAYTXT, stroke_width=2, dash_length=0.1)
-        tangent = DashedLine(P + LEFT * 1.6, P + RIGHT * 1.9, color=GRAYTXT, stroke_width=2, dash_length=0.1)
+        tangent = DashedLine(P + LEFT * 0.9, P + RIGHT * 1.9, color=GRAYTXT, stroke_width=2, dash_length=0.1)
         loa = Line(E1 - w * 0.3, E2 + w * 0.3, color=LOA_C, stroke_width=3.5)
         self.play(Create(centers), Create(tangent), Create(loa), run_time=1.2)
         dots = VGroup(pt(O1, WHITE, 0.07), pt(O2, WHITE, 0.07), pt(P, WHITE, 0.07),
                       pt(E1, BASE_C, 0.075), pt(E2, BASE_C, 0.075))
         lbs = VGroup(tag("O1", O1, RIGHT, WHITE, 20, 0.12), tag("O2", O2, RIGHT, WHITE, 20, 0.12),
-                     tag("P", P, DL, WHITE, 20, 0.12), tag("E1", E1, LEFT, BASE_C, 20, 0.12),
+                     tag("P", P, DL, WHITE, 20, 0.12), tag("E1", E1, UL, BASE_C, 20, 0.1),
                      tag("E2", E2, RIGHT, BASE_C, 20, 0.12))
         self.play(FadeIn(dots), FadeIn(lbs), run_time=0.8)
         r1_seg, r2_seg = Line(O1, P, color=GEAR2, stroke_width=4), Line(O2, P, color=GEAR3, stroke_width=4)
@@ -2167,10 +2173,11 @@ class G23B_E1E2Final(SafeScene):
         self.play(FadeIn(eqr, shift=UP * 0.1), run_time=0.8)
         self.wait(1.2)
         cap = self.swap_cap(cap, "Z = PB + PA → สูตร rack & pinion (R, Rb, Ro, a เป็นค่าของ pinion ทั้งหมด)", 18)
-        fr_ = MathTex(r"Z=\sqrt{R_o^{2}-R_b^{2}}-R\sin\phi+\dfrac{a}{\sin\phi}", font_size=36).move_to([3.5, -0.6, 0])
-        fit_width(fr_, 6.0)
+        fr_ = MathTex(r"Z=\sqrt{R_o^{2}-R_b^{2}}-R\sin\phi+\dfrac{a}{\sin\phi}", font_size=36).move_to([3.4, -0.4, 0])
+        fit_width(fr_, 6.2)
         boxr = SurroundingRectangle(fr_, color=OK, buff=0.16, stroke_width=4)
-        self.wait(0.5)
+        self.play(FadeOut(eqpb), run_time=0.5)              # เคลียร์สมการ PB เดิมก่อนขึ้นสูตรสุดท้าย (กันทับกัน)
+        self.wait(0.4)
         self.play(FadeIn(fr_, shift=UP * 0.1), Create(boxr), run_time=1.0)
         self.wait(3.0)
 
