@@ -186,7 +186,7 @@ class ElysiaShowcase(Scene):
         self.play(FadeIn(rows[1], shift=LEFT * 0.2), c2.animate.move_to(app.get_center() + UP * 1.25 + RIGHT * 1.6), run_time=0.9)
         self.at(t0 + d * 0.82)
         c3 = hook.copy()
-        self.play(FadeIn(rows[2], shift=LEFT * 0.2), c3.animate.move_to(sib.get_center() + DOWN * 0.05 + RIGHT * 0.9), run_time=1.0)
+        self.play(FadeIn(rows[2], shift=LEFT * 0.2), c3.animate.move_to(sib.get_corner(UR) + LEFT * 0.35 + DOWN * 0.35), run_time=1.0)
         return VGroup(h, app, app_l, plug, plug_l, hook, hook_l, sib, sib_l, rows, c2, c3)
 
     # ---- 7 eden ---------------------------------------------------------
