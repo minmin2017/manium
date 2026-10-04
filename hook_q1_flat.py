@@ -67,8 +67,7 @@ class HookQ1_A_Setup(Beats, SafeThreeDScene):
         self.set_camera_orientation(**CAM_LYING)
 
         # ============================================================ 0.0-3.0  title + page ref
-        ttl = title(cap("q1_title"), size=26)
-        ref = page_ref(cap("q1_ref"), color=GRAYTXT)
+        ttl, ref = hook_title("q1_title", "q1_ref", size=28, ref_size=15)
         ttl.set_z_index(100), ref.set_z_index(100)
         self.hud(ttl, ref)
         self.mark(0.0, "title")
@@ -128,7 +127,7 @@ class HookQ1_A_Setup(Beats, SafeThreeDScene):
         self.mark(15.0, "name the parts")
         parts = []
         for key, wp, at in [("q1_lab_stem", flat_pt(0, 24, zt), (-3.0, 0.7)),
-                            ("q1_lab_base", flat_pt(20, 0, -T_EQ / 2), (-0.5, -3.5)),
+                            ("q1_lab_base", flat_pt(18, 4, zt), (-0.5, -3.5)),      # the J's base BAR (top sheet), not the bed
                             ("q1_lab_tip", flat_pt(38, 26, zt), (3.3, -0.3)),
                             ("q1_lab_eye", flat_pt(0, 76.5, zt), (-1.1, 1.8))]:
             lab, arr = self.label_to(key, wp, at)
@@ -268,8 +267,7 @@ class HookQ1_B_Cards(Beats, SafeScene):
         # ============================================================ 0.0-3.0  bridge -> title (continuity from A)
         bridge = Text(cap("q1_a_bridge"), font_size=40, color=WHITE).move_to(BRIDGE_POS)
         self.add(bridge)
-        ttl = title(cap("q1_b_title"), size=28)
-        ref = page_ref(cap("q1_ref"), color=GRAYTXT)
+        ttl, ref = hook_title("q1_b_title", "q1_ref", size=28, ref_size=15)
         self.mark(0.0, "bridge -> title")
         self.play(ReplacementTransform(bridge, ttl), FadeIn(ref, shift=UP * 0.2), run_time=1.5)
         self.until(3.0)
@@ -326,7 +324,7 @@ class HookQ1_B_Cards(Beats, SafeScene):
         self.play(cap_swap(cap2, cap3), FadeOut(right_deck, shift=DOWN * 0.3), FadeIn(sheets, shift=UP * 0.3),
                   FadeIn(rod), FadeIn(cord), run_time=1.5)
         lab_rod = Text(cap("q1_lab_rod"), font_size=20, color=WHITE).move_to([-0.8, 1.45, 0])
-        lab_cord = Text(cap("q1_lab_cord"), font_size=20, color=WHITE).move_to([5.0, -2.35, 0])
+        lab_cord = fit_width(Text(cap("q1_lab_cord"), font_size=20, color=WHITE), 3.7).move_to([4.95, -2.35, 0])
         arr_rod = Arrow(lab_rod.get_right() + RIGHT * 0.08, hpt(-0.5, 0, EYE_C[1]), buff=0.05, color=GRAYTXT, stroke_width=2,
                         tip_length=0.14, max_tip_length_to_length_ratio=0.5)
         arr_cord = Arrow(lab_cord.get_left() + LEFT * 0.08, hpt(6.2, 19, BASE_T + 0.4), buff=0.05, color=GRAYTXT,
@@ -358,7 +356,8 @@ class HookQ1_B_Cards(Beats, SafeScene):
         ys_t = [1.9, 0.85, -0.2, -1.25]
 
         def step_text(key, y):
-            return Text(cap(key), font_size=22, color=WHITE).move_to([x0, y, 0]).align_to([x0, 0, 0], LEFT)
+            t = fit_width(Text(cap(key), font_size=22, color=WHITE), 6.3)      # cloud font is ~19% wider: fit, never overflow
+            return t.move_to([x0, y, 0]).align_to([x0, 0, 0], LEFT)
 
         def put_eq(eq, y):
             return eq.move_to([x0, y - 0.5, 0]).align_to([x0, 0, 0], LEFT)
@@ -413,4 +412,173 @@ class HookQ1_B_Cards(Beats, SafeScene):
         others = [m for m in self.mobjects if m not in (eq4, box)]
         self.play(*[FadeOut(m) for m in others], FadeOut(box), ReplacementTransform(eq4, keep), run_time=1.0)
         self.until(60.0)
+
+
+# =====================================================================================================================
+# C -- when the interface DOES carry load (2D)
+# =====================================================================================================================
+def q1c_table(size=24):
+    """TABLE_Q1C as rows (0 = header); the same object is rebuilt in D so row 1 hands over seamlessly."""
+    colors = {1: {1: C_AVG, 2: C_AVG}, 2: {1: WARN, 2: WARN}, 3: {1: WARN, 2: WARN}, 4: {1: WARN, 2: WARN}}
+    return table_mob(TABLE_Q1C, col_w=[4.6, 2.2, 3.6], size=size, row_h=0.7, colors=colors).move_to([0, 0.35, 0])
+
+
+def beam_strips(R, L=5.4, n=N_SHOW, t=0.22, pitch=0.27, x0=-3.2, y_mid=0.1, npts=28, opac=(0.9, 0.78)):
+    """n horizontal strips (i = 0 top ... n-1 bottom) clamped at x0 and bent about a centre R below the beam.
+    Every strip keeps its own length L (a loose stack, like a bent deck of cards): end angle phi_i = L / R_i, so the
+    strip ends slip against each other. R = 1e6 gives the straight beam with the SAME point count (clean Transform)."""
+    strips = VGroup()
+    cx, cy = x0, y_mid - R
+    for i in range(n):
+        h = ((n - 1) / 2 - i) * pitch
+        Ri = R + h
+        th = np.linspace(0.0, L / Ri, npts)
+        outer = np.stack([cx + (Ri + t / 2) * np.sin(th), cy + (Ri + t / 2) * np.cos(th), np.zeros(npts)], 1)
+        inner = np.stack([cx + (Ri - t / 2) * np.sin(th), cy + (Ri - t / 2) * np.cos(th), np.zeros(npts)], 1)[::-1]
+        m = VMobject()
+        m.set_points_as_corners(np.concatenate([outer, inner, outer[:1]], 0))
+        m.set_fill(C_HOOK, opacity=opac[i % 2]).set_stroke(C_HOOK_EDGE, width=1.4)
+        strips.add(m)
+    return strips
+
+
+def beam_pt(R, i, theta_frac, n=N_SHOW, pitch=0.27, L=5.4, x0=-3.2, y_mid=0.1, off=0.0):
+    """Point on strip i's centre line (off = radial offset) at a fraction of that strip's own end angle; also returns
+    the polar angle."""
+    h = ((n - 1) / 2 - i) * pitch
+    Ri = R + h + off
+    th = theta_frac * L / (R + h)
+    return np.array([x0 + Ri * np.sin(th), y_mid - R + Ri * np.cos(th), 0.0]), th
+
+
+class HookQ1_C_Cases(Beats, SafeScene):
+    def construct(self):
+        # ============================================================ 0.0-3.0  result of B -> new question
+        eq = eq_final()
+        self.add(eq)
+        ttl, ref = hook_title("q1_c_title", "q1_ref", size=28, ref_size=15)
+        self.mark(0.0, "F_interface = 0 -> title")
+        self.play(TransformFromCopy(eq, ttl), FadeIn(ref, shift=UP * 0.2), run_time=1.5)
+        self.until(3.0)
+
+        # ============================================================ 3.0-19.0  case 1: only a few layers are loaded
+        self.mark(3.0, "case 1")
+        cap1 = caption_c("q1_c_case1")
+        deck = Deck().move_to([0, -0.5, 0])
+        ups = pull_arrows(deck, length=0.32)                       # the rod pulls every card equally (F/8 each)
+        big_dn = VGroup(*[force_arrow(deck.card(i).get_bottom() + DOWN * 0.04, deck.card(i).get_bottom() + DOWN * 1.24,
+                                      width=7, tip=0.24) for i in (0, 7)])   # the cord loads the 2 outer cards (F/2 each)
+        self.play(FadeOut(eq, shift=UP * 0.4), FadeIn(cap1, shift=UP * 0.2),
+                  LaggedStart(*[FadeIn(c, shift=UP * 0.2) for c in deck.cards], lag_ratio=0.15), run_time=1.5)
+        self.play(LaggedStart(*[GrowArrow(a) for a in ups], lag_ratio=0.1), run_time=1.0)
+        self.play(*[GrowArrow(a) for a in big_dn], run_time=1.5)
+        outer = [VGroup(deck.card(0), big_dn[0], ups[0]), VGroup(deck.card(7), big_dn[1], ups[7])]
+        self.play(*[g.animate.shift(DOWN * 0.4) for g in outer], run_time=2.5)
+        # shear across the joints: 3, 2, 1, 0, 1, 2, 3 (x F/8) -- the force has to flow inward through the interfaces
+        mags = [3, 2, 1, 0, 1, 2, 3]
+        taus = VGroup()
+        for i in (0, 6, 1, 5, 2, 4):
+            lo = max(deck.card(i).get_bottom()[1], deck.card(i + 1).get_bottom()[1])
+            hi = min(deck.card(i).get_top()[1], deck.card(i + 1).get_top()[1])
+            for f in (0.3, 0.7):
+                taus.add(shear_pair(deck.iface_x(i), lo + (hi - lo) * f, UP if i < 3 else DOWN,
+                                    length=0.22 * mags[i], width=4.0, tip=0.11))
+        self.play(LaggedStart(*[GrowArrow(a) for pr in taus for a in pr], lag_ratio=0.2), run_time=3.0)
+        tag1 = Text(cap("q1_c_tag_shear"), font_size=22, color=WARN).move_to([0, -3.1, 0])
+        lead1 = Line(tag1.get_top() + UP * 0.05, [deck.iface_x(2) + 0.07, -1.75, 0], color=WARN, stroke_width=2)
+        self.play(FadeIn(tag1, shift=UP * 0.15), Create(lead1), run_time=0.5)
+        self.until(19.0)
+
+        # ============================================================ 19.0-36.0  case 2: pull across the layers
+        self.mark(19.0, "case 2")
+        cap2 = caption_c("q1_c_case2")
+        self.play(cap_swap(cap1, cap2), FadeOut(taus), FadeOut(big_dn), FadeOut(ups), FadeOut(tag1), FadeOut(lead1),
+                  *[g[0].animate.shift(UP * 0.4) for g in outer], run_time=1.5)
+        ys_b = [deck.card(0).get_bottom()[1] + 2.2 * (j + 0.5) / 5 for j in range(5)]
+        c6, c7 = deck.card(6), deck.card(7)
+
+        def bond67(y):
+            def mk():
+                a = np.array([c6.get_right()[0], y, 0.0])
+                b = np.array([c7.get_left()[0], y, 0.0])
+                s = float(np.clip((b[0] - a[0] - 0.22) / 1.2, 0, 1))
+                col = interpolate_color(ManimColor(C_BOND), ManimColor(WARN), s)
+                return VGroup(Line(a, b, color=col, stroke_width=2.5), Dot(a, radius=0.035, color=col),
+                              Dot(b, radius=0.035, color=col))
+            return always_redraw(mk)
+        static_bonds = VGroup(*[VGroup(Line([deck.card(i).get_right()[0], y, 0], [deck.card(i + 1).get_left()[0], y, 0],
+                                            color=C_BOND, stroke_width=2.5),
+                                       Dot([deck.card(i).get_right()[0], y, 0], radius=0.035, color=C_BOND),
+                                       Dot([deck.card(i + 1).get_left()[0], y, 0], radius=0.035, color=C_BOND))
+                                for i in range(6) for y in ys_b])
+        live_bonds = VGroup(*[bond67(y) for y in ys_b])
+        self.mark(20.5, "bonds appear")
+        self.play(LaggedStart(FadeIn(static_bonds), FadeIn(live_bonds), lag_ratio=0.3), run_time=1.5)
+        self.play(Indicate(static_bonds, color=WHITE, scale_factor=1.0), Indicate(live_bonds, color=WHITE, scale_factor=1.0),
+                  run_time=1.5)
+        self.until(26.5)
+        pull = force_arrow(c7.get_right(), c7.get_right() + RIGHT * 1.0, width=7, tip=0.24)
+        self.play(GrowArrow(pull), run_time=1.5)
+        self.mark(28.0, "stretch")
+        self.play(VGroup(c7, pull).animate.shift(RIGHT * 1.2), run_time=3.0, rate_func=linear)
+        self.mark(31.0, "break")
+        pts_flash = [np.array([(c6.get_right()[0] + c7.get_left()[0]) / 2, y, 0.0]) for y in ys_b]
+        for m in live_bonds:
+            m.clear_updaters()
+        self.play(*[Flash(p, color=WARN, flash_radius=0.3, line_length=0.16, num_lines=10) for p in pts_flash],
+                  FadeOut(live_bonds), run_time=1.0)
+        self.play(VGroup(c7, pull).animate.shift(RIGHT * 0.8), run_time=1.0, rate_func=rush_from)
+        tag2 = Text(cap("q1_c_tag_peel"), font_size=22, color=WARN).move_to([c6.get_right()[0] + 0.9, -2.55, 0])
+        lead2 = Line(tag2.get_top() + UP * 0.05, [c6.get_right()[0] + 0.5, -1.2, 0], color=WARN, stroke_width=2)
+        self.play(FadeIn(tag2, shift=UP * 0.15), Create(lead2), run_time=0.5)
+        self.until(36.0)
+
+        # ============================================================ 36.0-51.0  case 3: bend out of the plane
+        self.mark(36.0, "case 3")
+        cap3 = caption_c("q1_c_case3")
+        R_B = 9.0
+        flat = beam_strips(1e6)
+        bent = beam_strips(R_B)
+        wall = Rectangle(width=0.3, height=3.0, stroke_width=0, fill_color=METAL, fill_opacity=0.55).move_to([-3.35, 0.1, 0])
+        hatch = VGroup(*[Line([-3.5, 0.1 + 1.5 - 0.3 * k, 0], [-3.9, 0.1 + 1.5 - 0.3 * k + 0.4, 0], color=METAL, stroke_width=2)
+                         for k in range(11)])
+        self.play(cap_swap(cap2, cap3), FadeOut(static_bonds), FadeOut(pull), FadeOut(tag2), FadeOut(lead2),
+                  Transform(deck.cards, flat), FadeIn(wall), FadeIn(hatch), run_time=1.5)
+        tip_flat = np.array([-3.2 + 5.4, 0.1 + 3.5 * 0.27 + 0.11, 0])
+        f_pt, _ = beam_pt(R_B, 0, 1.0, off=0.11)
+        f_arr = force_arrow(tip_flat + UP * 1.0, tip_flat + UP * 0.06, width=7, tip=0.24)
+        self.play(GrowArrow(f_arr), run_time=1.0)
+        self.mark(38.5, "bend")
+        self.play(Transform(deck.cards, bent), f_arr.animate.shift(f_pt - tip_flat), run_time=3.5)
+        taus3 = VGroup()
+        for j in range(N_SHOW - 1):
+            p, th = beam_pt(R_B, j, 0.6, off=-0.135)                 # on the interface between strip j and j+1
+            nrm = np.array([np.sin(th), np.cos(th), 0.0])
+            tg = np.array([np.cos(th), -np.sin(th), 0.0])
+            taus3.add(VGroup(force_arrow(p + nrm * 0.05 - tg * 0.2, p + nrm * 0.05 + tg * 0.2, C_TAU, 3.5, 0.1),
+                             force_arrow(p - nrm * 0.05 + tg * 0.2, p - nrm * 0.05 - tg * 0.2, C_TAU, 3.5, 0.1)))
+        self.play(LaggedStart(*[GrowArrow(a) for pr in taus3 for a in pr], lag_ratio=0.06), run_time=2.0)
+        tag3 = Text(cap("q1_c_tag_shear"), font_size=22, color=WARN).move_to([3.6, -2.7, 0])
+        p_t, _ = beam_pt(R_B, 4, 0.6, off=-0.135)
+        lead3 = Line(tag3.get_left() + LEFT * 0.05, p_t + RIGHT * 0.1, color=WARN, stroke_width=2)
+        self.play(FadeIn(tag3, shift=UP * 0.15), Create(lead3), run_time=0.5)
+        self.until(51.0)
+
+        # ============================================================ 51.0-65.0  summary table
+        self.mark(51.0, "table")
+        cap4 = caption_c("q1_c_table_title", size=28, color=WHITE)
+        table = q1c_table()
+        self.play(cap_swap(cap3, cap4), FadeOut(deck.cards), FadeOut(taus3), FadeOut(f_arr), FadeOut(wall), FadeOut(hatch),
+                  FadeOut(tag3), FadeOut(lead3), run_time=1.0)
+        self.play(LaggedStart(*[FadeIn(row, shift=RIGHT * 0.2) for row in table], lag_ratio=0.5), run_time=6.0)
+        box = SurroundingRectangle(table[1][0], color=C_AVG, buff=0.12, stroke_width=3)
+        self.play(Create(box), run_time=1.5)
+        foot = Text(cap("q1_c_foot"), font_size=24, color=C_AVG).move_to([0, -2.3, 0])
+        self.play(FadeIn(foot, shift=UP * 0.2), run_time=1.0)
+        self.until(64.0)
+        # hand over to D: only row 1 (the in-plane case) stays on screen
+        self.mark(64.0, "hand-over")
+        self.play(FadeOut(table[0]), FadeOut(table[2]), FadeOut(table[3]), FadeOut(table[4]), FadeOut(foot),
+                  FadeOut(ttl), FadeOut(ref), FadeOut(cap4), run_time=1.0)
+        self.until(65.0)
 

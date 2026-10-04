@@ -432,6 +432,18 @@ def table_mob(rows, col_w, size=24, row_h=0.62, header_color=C_TXT2, colors=None
     return rows_out
 
 
+# ----------------------------------------------------------------------------- title + page ref that never touch
+def hook_title(key_title, key_ref, size=28, gap=0.4, ref_size=17, ref_max_w=3.5):
+    """(title, page_ref) for the top bar. The cloud font (Loma) is ~19% wider than the local one (Leelawadee UI), so the
+    title is fitted to the free width left of the ref at BUILD time, from the real measured widths: they cannot touch,
+    in any font. (Cloud frame of A at t=1.5 s showed the title running into the ref before this helper.)"""
+    ref = fit_width(page_ref(cap(key_ref), size=ref_size, color=GRAYTXT), ref_max_w)
+    ref.move_to([X_MAX - ref.width / 2 - 0.28, REF_Y, 0])
+    ttl = title(cap(key_title), size=size)
+    fit_width(ttl, 2 * (ref.get_left()[0] - gap))          # the title is centred on x = 0, so the free width is symmetric
+    return ttl, ref
+
+
 # ----------------------------------------------------------------------------- centred caption (top zone)
 def caption_c(key, size=24, color=GRAYTXT, max_w=11.0, y=CAP_TOP_Y, line_buff=0.1):
     """Top-zone caption from hook_captions, each line centred (the stock caption_top left-aligns line 2)."""
