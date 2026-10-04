@@ -309,7 +309,8 @@ class HookQ1_B_Cards(Beats, SafeScene):
         lo, hi = deck_r.card(2).get_bottom()[1] + 0.8, deck_r.card(2).get_top()[1]
         ys = [lo + (hi - lo) * f for f in (0.2, 0.5, 0.8)]
         x_a, x_b = deck_r.iface_x(2), deck_r.iface_x(3)
-        taus = VGroup(*[shear_pair(x_a, y, UP, length=0.42) for y in ys], *[shear_pair(x_b, y, DOWN, length=0.42) for y in ys])
+        taus = VGroup(*[shear_pair(x_a, y, UP, length=0.5, width=4.0, tip=0.12) for y in ys],
+                      *[shear_pair(x_b, y, DOWN, length=0.5, width=4.0, tip=0.12) for y in ys])
         self.play(LaggedStart(*[GrowArrow(a) for pr in taus for a in pr], lag_ratio=0.08), run_time=2.0)
         tag = Text(cap("q1_c_tag_shear"), font_size=22, color=C_TAU)
         tag.move_to([x_b + 0.9, DECK_Y - 1.65, 0])
@@ -353,19 +354,19 @@ class HookQ1_B_Cards(Beats, SafeScene):
         side_r = DashedLine(big.get_corner(UR) + RIGHT * 0.35, big.get_corner(DR) + RIGHT * 0.35, color=C_TAU,
                             stroke_width=2.5, dash_length=0.12)
         joints = VGroup(side_l, side_r)
-        x0 = 0.9                                            # left edge of the equation column
+        x0 = 0.55                                           # left edge of the equation column
         ys_t = [1.9, 0.85, -0.2, -1.25]
 
         def step_text(key, y):
-            return Text(cap(key), font_size=20, color=WHITE).move_to([x0, y, 0]).align_to([x0, 0, 0], LEFT)
+            return Text(cap(key), font_size=22, color=WHITE).move_to([x0, y, 0]).align_to([x0, 0, 0], LEFT)
 
         def put_eq(eq, y):
             return eq.move_to([x0, y - 0.5, 0]).align_to([x0, 0, 0], LEFT)
         st = [step_text(f"q1_b_step{i + 1}", ys_t[i]) for i in range(4)]
-        eq1 = MathTex(r"F_{i}", r"=", r"F", r"/", r"n", font_size=40)
-        eq2 = MathTex(r"100", r"/", r"40", r"=", r"2.5\ \mathrm{N}", font_size=40)
-        eq3 = MathTex(r"\Sigma F", r"=", r"F/n", r"-", r"F/n", font_size=40)
-        eq4 = MathTex(r"F_{\mathrm{interface}}", r"=", r"0", font_size=40)
+        eq1 = MathTex(r"F_{i}", r"=", r"F", r"/", r"n", font_size=44)
+        eq2 = MathTex(r"100", r"/", r"40", r"=", r"2.5\ \mathrm{N}", font_size=44)
+        eq3 = MathTex(r"\Sigma F", r"=", r"F/n", r"-", r"F/n", font_size=44)
+        eq4 = MathTex(r"F_{\mathrm{interface}}", r"=", r"0", font_size=44)
         for eq, cols in ((eq1, [C_F, WHITE, C_F, WHITE, C_REF]), (eq2, [C_F, WHITE, C_REF, WHITE, C_F]),
                          (eq3, [WHITE, WHITE, C_F, WHITE, C_F]), (eq4, [C_TAU, WHITE, C_AVG])):
             for part, col in zip(eq, cols):
