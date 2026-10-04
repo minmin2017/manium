@@ -374,7 +374,7 @@ class BarPair(VGroup):
     Remember .stop() before FadeOut (SKILL 3: clear_updaters before removing always_redraw objects)."""
 
     def __init__(self, get_a, get_b, color_a, color_b, base=ORIGIN, unit=0.12, bar_w=1.1, gap=1.4,
-                 num_size=34, decimals=1):
+                 num_size=34, decimals=1, decimals_b=None):
         super().__init__()
         self.get_a, self.get_b, self.unit = get_a, get_b, unit
         self.base = np.asarray(base, float)
@@ -385,8 +385,8 @@ class BarPair(VGroup):
         self.base_line = Line(self.base + LEFT * (gap / 2 + bar_w), self.base + RIGHT * (gap / 2 + bar_w),
                               color=C_REF, stroke_width=2)
 
-        def mk_num(get, anchor_x):
-            n = DecimalNumber(get(), num_decimal_places=decimals, font_size=num_size, color=WHITE, mob_class=Text)
+        def mk_num(get, anchor_x, dec):
+            n = DecimalNumber(get(), num_decimal_places=dec, font_size=num_size, color=WHITE, mob_class=Text)
 
             def place(m):
                 m.set_value(get())
@@ -394,8 +394,8 @@ class BarPair(VGroup):
             place(n)
             n.add_updater(place)
             return n
-        self.num_a = mk_num(get_a, xa)
-        self.num_b = mk_num(get_b, xb)
+        self.num_a = mk_num(get_a, xa, decimals)
+        self.num_b = mk_num(get_b, xb, decimals if decimals_b is None else decimals_b)
         self.add(self.base_line, self.bar_a, self.bar_b, self.num_a, self.num_b)
 
     def _bar(self, x, v, w, color):
@@ -496,8 +496,9 @@ class Beats:
 
     def until(self, t, label=""):
         d = t - float(self.time)
-        if d > 0.02:
-            self.wait(round(d * config.frame_rate) / config.frame_rate)
+        n = int(round(d * config.frame_rate))
+        if n >= 1:                                   # wait(0) raises in Manim: skip gaps shorter than half a frame
+            self.wait(n / config.frame_rate)
         elif d < -self.TOL:
             print(f"[BEAT] OVERRUN {-d:.2f}s before {t:.2f}s {label}", flush=True)
 

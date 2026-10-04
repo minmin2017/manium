@@ -503,13 +503,13 @@ class HookQ1_C_Cases(Beats, SafeScene):
                 b = np.array([c7.get_left()[0], y, 0.0])
                 s = float(np.clip((b[0] - a[0] - 0.22) / 1.2, 0, 1))
                 col = interpolate_color(ManimColor(C_BOND), ManimColor(WARN), s)
-                return VGroup(Line(a, b, color=col, stroke_width=2.5), Dot(a, radius=0.035, color=col),
-                              Dot(b, radius=0.035, color=col))
+                return VGroup(Line(a, b, color=col, stroke_width=3.5), Dot(a, radius=0.05, color=col),
+                              Dot(b, radius=0.05, color=col))
             return always_redraw(mk)
         static_bonds = VGroup(*[VGroup(Line([deck.card(i).get_right()[0], y, 0], [deck.card(i + 1).get_left()[0], y, 0],
-                                            color=C_BOND, stroke_width=2.5),
-                                       Dot([deck.card(i).get_right()[0], y, 0], radius=0.035, color=C_BOND),
-                                       Dot([deck.card(i + 1).get_left()[0], y, 0], radius=0.035, color=C_BOND))
+                                            color=C_BOND, stroke_width=3.5),
+                                       Dot([deck.card(i).get_right()[0], y, 0], radius=0.05, color=C_BOND),
+                                       Dot([deck.card(i + 1).get_left()[0], y, 0], radius=0.05, color=C_BOND))
                                 for i in range(6) for y in ys_b])
         live_bonds = VGroup(*[bond67(y) for y in ys_b])
         self.mark(20.5, "bonds appear")
@@ -581,4 +581,240 @@ class HookQ1_C_Cases(Beats, SafeScene):
         self.play(FadeOut(table[0]), FadeOut(table[2]), FadeOut(table[3]), FadeOut(table[4]), FadeOut(foot),
                   FadeOut(ttl), FadeOut(ref), FadeOut(cap4), run_time=1.0)
         self.until(65.0)
+
+
+# =====================================================================================================================
+# D -- the shear that remains lives INSIDE the layer, plus the numbers (2D)
+# =====================================================================================================================
+MM_D = 0.058                      # world units per mm in the big top view of one layer
+J_CY = -0.78                      # screen y of the J's bounding-box centre in the big view
+SLIDE = 3.9                       # the big view slides left by this much when the magnifier arrives
+WALL_OFFS = (0.0, 0.85, 1.7)      # mm inward from the outline: 3 wall loops (drawn ~2x the real pitch so they read at 480p;
+                                  # they must stay < 2 mm = radius of the tip corners, or the offset loops invert)
+INFILL_OFF = 1.95                 # mm: the infill region starts just inside the last wall loop
+LOAD_OFF = 0.85                   # mm: the tension load path runs along the middle wall loop
+ICON_MM = 0.036                   # the small hook icon of the numbers part
+ICON_C = (-4.9, -0.55)
+SUM_X = 1.9                       # centre x of the three summary statements
+ASSUME_Y = -3.65                  # the 'assumed example' tag stays here from the moment numbers appear
+
+
+def wall_loop(off, mm, org, **style):
+    """One wall loop = the outline offset `off` mm inward, plus the same offset around the eye hole (2 sub-paths)."""
+    outer, hole = hook_outline_mm()
+    m = loop_mob(offset_loop(outer, off), mm, org, **style)
+    m.append_points(loop_mob(offset_loop(hole, off), mm, org, **style).points)
+    return m
+
+
+def hatch_mob(loops, mm, org, spacing=2.2, angles=(45.0, -45.0), **style):
+    """Infill lines as ONE VMobject with many sub-paths (hundreds of Line objects would make the fade slow)."""
+    m = VMobject(**style)
+    for ang in angles:
+        for p0, p1 in hatch_segments(loops, angle_deg=ang, spacing=spacing):
+            m.start_new_path(org + np.array([p0[0] * mm, p0[1] * mm, 0.0]))
+            m.add_line_to(org + np.array([p1[0] * mm, p1[1] * mm, 0.0]))
+    return m
+
+
+def top_view_layer(mm, org):
+    """One printed layer seen from above, as separate mobjects so the scene can reveal them one by one: faint body,
+    3 wall loops, +/-45 degree infill, tension load path (+ chevrons) along the middle wall loop, marker on the inner
+    fillet, the two force arrows (rod up in the eye, cord down on the base)."""
+    outer, hole = hook_outline_mm()
+
+    def P(x, y):
+        return org + np.array([x * mm, y * mm, 0.0])
+
+    body = hook_profile(mm, org, color=C_HOOK, opacity=0.16, stroke_color=C_HOOK, stroke_width=0)
+    walls = [wall_loop(o, mm, org, stroke_color=C_HOOK, stroke_width=2.4) for o in WALL_OFFS]
+    infill = hatch_mob([offset_loop(outer, INFILL_OFF), offset_loop(hole, INFILL_OFF)], mm, org,
+                       stroke_color=C_HOOK, stroke_width=1.3, stroke_opacity=0.4)
+    # load path: from the cord side along the base, round the inner fillet (centre (6, 10), radius 2 + offset), up the stem
+    r = R_INNER + LOAD_OFF
+    cen = np.array([STEM_HW + R_INNER, BASE_T + R_INNER])
+    ang = np.linspace(-np.pi / 2, -np.pi, 16)
+    arc = np.stack([cen[0] + r * np.cos(ang), cen[1] + r * np.sin(ang)], axis=1)
+    pts = np.concatenate([[[17.0, BASE_T - LOAD_OFF]], arc, [[STEM_HW - LOAD_OFF, 34.0]]], axis=0)
+    scr = np.stack([org[0] + pts[:, 0] * mm, org[1] + pts[:, 1] * mm, np.zeros(len(pts))], axis=1)
+    path = VMobject(stroke_color=C_SIG_T, stroke_width=4.5, stroke_opacity=0.9, fill_opacity=0)
+    path.set_points_as_corners(scr)
+    seg = np.linalg.norm(np.diff(scr, axis=0), axis=1)
+    cum = np.concatenate([[0.0], np.cumsum(seg)])
+    chevrons = VGroup()
+    for s_mm in (4.5, 13.0, 22.0, 31.0):                  # distance along the path (mm): base, fillet, stem, stem
+        s = s_mm * mm
+        i = int(np.clip(np.searchsorted(cum, s) - 1, 0, len(seg) - 1))
+        p = scr[i] + (s - cum[i]) / seg[i] * (scr[i + 1] - scr[i])
+        u = (scr[i + 1] - scr[i]) / seg[i]
+        chevrons.add(Arrow(p - u * 0.17, p + u * 0.17, buff=0, color=C_SIG_T, stroke_width=5, tip_length=0.17,
+                           max_tip_length_to_length_ratio=0.5))
+    ring = Circle(radius=0.17, color=C_SIG_T, stroke_width=3.5).move_to(P(4.6, 8.6))
+    f_cord = force_arrow(P(19.0, BASE_T), P(19.0, -6.0), color=C_F, width=5, tip=0.14)
+    f_rod = force_arrow(P(0.0, 77.0), P(0.0, 81.4), color=C_F, width=4, tip=0.1)
+    return dict(body=body, walls=walls, infill=infill, path=path, chevrons=chevrons, ring=ring, f_cord=f_cord,
+                f_rod=f_rod)
+
+
+def magnifier_cone(c1, r1, c2, r2, color=GRAYTXT, width=2):
+    """External tangents of two circles (small one on the part, big one = the inset): the classic magnifier cone."""
+    c1, c2 = np.asarray(c1, float)[:2], np.asarray(c2, float)[:2]
+    v = c2 - c1
+    dist = float(np.hypot(v[0], v[1]))
+    u = v / dist
+    n = np.array([-u[1], u[0]])
+    k = (r1 - r2) / dist
+    s = float(np.sqrt(1.0 - k * k))
+    out = VGroup()
+    for sg in (1.0, -1.0):
+        m = k * u + sg * s * n
+        a, b = c1 + r1 * m, c2 + r2 * m
+        out.add(Line([a[0], a[1], 0.0], [b[0], b[1], 0.0], color=color, stroke_width=width))
+    return out
+
+
+def inset_strands(c, w=2.3, h=0.5):
+    """Two neighbouring strands (stadium shapes, fused along their contact line) + the thin bond line with dots."""
+    c = np.asarray(c, float)
+    kw = dict(width=w, height=h, corner_radius=h / 2 - 0.01, stroke_color=C_HOOK_EDGE, stroke_width=2,
+              fill_color=C_HOOK, fill_opacity=0.85)
+    top = RoundedRectangle(**kw).move_to(c + UP * (h / 2 - 0.02))
+    bot = RoundedRectangle(**kw).move_to(c + DOWN * (h / 2 - 0.02))
+    bond = VGroup(Line(c + LEFT * 0.95, c + RIGHT * 0.95, color=C_BOND, stroke_width=3),
+                  *[Dot(c + RIGHT * x, radius=0.045, color=C_BOND) for x in (-0.95, -0.475, 0.0, 0.475, 0.95)])
+    return top, bot, bond
+
+
+class HookQ1_D_InPlane(Beats, SafeScene):
+    def construct(self):
+        # ============================================================ 0.0-3.0  row 1 of C's table -> title (continuity from C)
+        table = q1c_table()
+        row1 = table[1]
+        box = SurroundingRectangle(row1[0], color=C_AVG, buff=0.12, stroke_width=3)
+        self.add(row1, box)
+        ttl, ref = hook_title("q1_d_title", "q1_ref", size=28, ref_size=15)
+        self.mark(0.0, "row 1 of C -> title")
+        self.play(TransformFromCopy(row1, ttl), FadeIn(ref, shift=UP * 0.2), run_time=1.5)
+        self.until(3.0)
+
+        # ============================================================ 3.0-20.0  one layer seen from above
+        self.mark(3.0, "one layer from above")
+        org = hook_centre_origin(MM_D, (0.0, J_CY, 0.0))
+        V = top_view_layer(MM_D, org)
+        body, walls, infill, path = V["body"], V["walls"], V["infill"], V["path"]
+        chevrons, ring, f_cord, f_rod = V["chevrons"], V["ring"], V["f_cord"], V["f_rod"]
+        cap1 = caption_c("q1_d_inplane")
+        # 3.0-6.0 the table row goes first (no overlap with the layer), then the layer appears (faint body + the two
+        # force arrows), then the 3 wall loops in turn
+        self.play(FadeOut(row1, shift=DOWN * 0.3), FadeOut(box, shift=DOWN * 0.3), FadeIn(cap1, shift=UP * 0.2),
+                  run_time=0.6)
+        self.play(FadeIn(body), FadeIn(f_cord), FadeIn(f_rod), run_time=0.6)
+        self.play(LaggedStart(*[Create(w) for w in walls], lag_ratio=0.5), run_time=1.8)
+        self.until(6.0)
+        # 6.0-8.0 the +/-45 degree infill
+        self.play(FadeIn(infill), run_time=2.0)
+        self.until(8.0)
+        # 8.0-13.5 strands + the tension path round the inner fillet
+        self.mark(8.0, "strands + tension path")
+        cap2 = caption_c("q1_d_strands")
+        self.play(cap_swap(cap1, cap2), Indicate(VGroup(*walls), color=WHITE, scale_factor=1.0), run_time=1.0)
+        self.play(Create(path), LaggedStart(*[GrowArrow(a) for a in chevrons], lag_ratio=0.25), run_time=2.0)
+        self.until(11.0)
+        self.play(Create(ring), run_time=0.5)
+        self.play(Flash(ring.get_center(), color=C_SIG_T, flash_radius=0.3, line_length=0.14, num_lines=10), run_time=0.8)
+        self.until(13.5)
+        # 13.5-20.0 the layer slides left; magnifier on the base: two neighbouring strands and the shear tau between them
+        self.mark(13.5, "magnifier")
+        cap3 = caption_c("q1_d_infill")
+        j_items = [body, *walls, infill, path, *chevrons, ring, f_cord, f_rod]
+        self.play(cap_swap(cap2, cap3), *[m.animate.shift(LEFT * SLIDE) for m in j_items], run_time=0.8)
+        org2 = org + np.array([-SLIDE, 0.0, 0.0])
+        sc = org2 + np.array([39.5 * MM_D, 2.2 * MM_D, 0.0])                 # small circle: the base, bottom-right
+        bc = np.array([2.2, -1.9, 0.0])                                      # the inset
+        sr, br = 0.2, 1.8
+        circ_s = Circle(radius=sr, color=GRAYTXT, stroke_width=2.5).move_to(sc)
+        circ_b = Circle(radius=br, color=GRAYTXT, stroke_width=2.5).move_to(bc)
+        cone = magnifier_cone(sc, sr, bc, br)
+        top_s, bot_s, bond = inset_strands(bc)
+        tau_up = force_arrow(bc + LEFT * 0.7 + UP * 0.17, bc + RIGHT * 0.7 + UP * 0.17, color=C_TAU, width=5, tip=0.16)
+        tau_dn = force_arrow(bc + RIGHT * 0.7 + DOWN * 0.17, bc + LEFT * 0.7 + DOWN * 0.17, color=C_TAU, width=5, tip=0.16)
+        tau_lab = MathTex(r"\tau", font_size=44, color=C_TAU).move_to(bc + RIGHT * 1.45)
+        self.play(Indicate(infill, color=WHITE, scale_factor=1.0), Create(circ_s), Create(cone), run_time=0.8)
+        self.play(FadeIn(circ_b), FadeIn(top_s), FadeIn(bot_s), FadeIn(bond), run_time=1.0)
+        self.play(GrowArrow(tau_up), GrowArrow(tau_dn), Write(tau_lab), run_time=1.5)
+        self.until(18.5)
+        self.play(Indicate(VGroup(tau_up, tau_dn), color=WHITE, scale_factor=1.0), run_time=1.0)
+        self.until(20.0)
+
+        # ============================================================ 20.0-40.0  the numbers (assumed example)
+        self.mark(20.0, "numbers")
+        cap4 = caption_c("q1_d_numbers")
+        org_i = hook_centre_origin(ICON_MM, (ICON_C[0], ICON_C[1], 0.0))
+
+        def ipt(x, y):
+            return org_i + np.array([x * ICON_MM, y * ICON_MM, 0.0])
+        d = ValueTracker(D_CASE_A)
+        icon = hook_profile(ICON_MM, org_i, opacity=0.9)
+        axis_i = DashedLine(ipt(0, BASE_T + 1.0), ipt(0, 36.0), color=C_REF, stroke_width=2, dash_length=0.08)
+        cord = always_redraw(lambda: force_arrow(ipt(d.get_value(), BASE_T), ipt(d.get_value(), -7.0), color=C_F,
+                                                 width=5, tip=0.13))
+
+        def dim_mk():
+            x, y = d.get_value(), BASE_T + 4.0
+            return VGroup(Line(ipt(0, y), ipt(x, y), color=C_D, stroke_width=5),
+                          Line(ipt(0, y - 1.6), ipt(0, y + 1.6), color=C_D, stroke_width=3),
+                          Line(ipt(x, y - 1.6), ipt(x, y + 1.6), color=C_D, stroke_width=3),
+                          Line(ipt(x, BASE_T), ipt(x, y), color=C_D, stroke_width=2))
+        dim = always_redraw(dim_mk)
+        d_txt = always_redraw(lambda: Text(f"d = {d.get_value():.0f} mm", font_size=26, color=C_D)
+                              .move_to([ICON_C[0], -2.85, 0]))
+        bars = BarPair(lambda: sigma_inner(d.get_value()), lambda: tau_max(), C_SIG_T, C_TAU, base=[1.6, -2.45, 0],
+                       unit=0.14, bar_w=1.2, gap=2.9, num_size=34, decimals=1, decimals_b=2)
+        lab_s = fit_width(Text(cap("q1_d_bar_sigma"), font_size=22, color=WHITE), 2.6).move_to(bars.ax + DOWN * 0.4)
+        lab_t = fit_width(Text(cap("q1_d_bar_tau"), font_size=22, color=WHITE), 2.6).move_to(bars.bx + DOWN * 0.4)
+        r_lab = MathTex(r"\sigma", r"/", r"\tau", font_size=44)
+        r_lab[0].set_color(C_SIG_T)
+        r_lab[2].set_color(C_TAU)
+        r_lab.move_to([5.55, 0.75, 0])
+        ratio = always_redraw(lambda: Text(f"{sigma_inner(d.get_value()) / tau_max():.1f}×", font_size=52, color=WHITE)
+                              .move_to([5.55, -0.15, 0]))
+        ass = Text(cap("q1_b_assume"), font_size=20, color=GRAYTXT).move_to([0, ASSUME_Y, 0])
+        # 20.0-21.5 the big top view shrinks into the small hook icon, every detail of it leaves
+        detail = [*walls, infill, path, *chevrons, ring, f_cord, f_rod, circ_s, circ_b, cone, top_s, bot_s, bond,
+                  tau_up, tau_dn, tau_lab]
+        self.play(cap_swap(cap3, cap4), ReplacementTransform(body, icon), *[FadeOut(m) for m in detail], run_time=1.5)
+        # 21.5-23.0 bars, labels, and the live d marker on the icon (ONE ValueTracker drives numbers, bars and picture)
+        self.play(FadeIn(bars, shift=UP * 0.2), FadeIn(lab_s), FadeIn(lab_t), FadeIn(ass), FadeIn(axis_i), FadeIn(cord),
+                  FadeIn(dim), FadeIn(d_txt), FadeIn(r_lab), FadeIn(ratio), run_time=1.5)
+        self.until(23.0)
+        self.mark(23.0, "numbers at d = 19")
+        self.play(Indicate(bars.num_a, color=WHITE, scale_factor=1.25), run_time=1.2)
+        self.play(Indicate(bars.num_b, color=WHITE, scale_factor=1.25), run_time=1.2)
+        self.play(Indicate(ratio, color=WHITE, scale_factor=1.15), run_time=1.2)
+        self.until(27.0)
+        self.mark(27.0, "d: 19 -> 5")
+        self.play(d.animate.set_value(D_CASE_B), run_time=6.0, rate_func=smooth)
+        self.until(33.0)
+        self.mark(33.0, "conclusion")
+        cap5 = caption_c("q1_d_conclude")
+        self.play(cap_swap(cap4, cap5), run_time=1.0)
+        self.play(Indicate(ratio, color=WHITE, scale_factor=1.15), run_time=1.5)
+        self.until(40.0)
+
+        # ============================================================ 40.0-55.0  summary: 3 statements, 5 s each
+        self.mark(40.0, "summary")
+        bars.stop()
+        ratio.clear_updaters()
+        line1 = caption_c("q1_d_conclude", size=28, color=C_AVG, max_w=9.4, y=1.05).shift(RIGHT * SUM_X)
+        self.play(ReplacementTransform(cap5, line1), FadeOut(bars, shift=DOWN * 0.2), FadeOut(lab_s), FadeOut(lab_t),
+                  FadeOut(r_lab), FadeOut(ratio), run_time=1.0)
+        self.until(45.0)
+        self.mark(45.0, "final")
+        line2 = caption_c("q1_d_final", size=28, color=C_AVG, max_w=9.4, y=-0.35).shift(RIGHT * SUM_X)
+        self.play(FadeIn(line2, shift=UP * 0.2), run_time=0.8)
+        self.until(50.0)
+        self.mark(50.0, "caveat")
+        line3 = caption_c("q1_d_caveat", size=28, color=WARN, max_w=9.4, y=-1.65).shift(RIGHT * SUM_X)
+        self.play(FadeIn(line3, shift=UP * 0.2), run_time=0.8)
+        self.until(55.0)
 
