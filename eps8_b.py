@@ -43,8 +43,9 @@ class P07_FieldLine(Lesson):
         self.wait(0.6)
 
         self.say("ปรับรีโอสตาท R มาก → เส้นชัน    R น้อย → เส้นราบ   (สโลปคือค่า R รวมของวงจรฟิลด์)", color=C_R)
-        # ป้าย max วางทางซ้ายของปลายเส้นชันสุด (เส้นไม่เคยกวาดผ่านด้านซ้ายนี้ ตอนสโลปลดลง)
-        lmax = Text("max (R มาก)", font_size=18, color=C_R).next_to(ax.c2p(1.0 / 3.2, 1.0), LEFT, buff=0.14)
+        # ป้าย max วางเหนือปลายเส้นชันสุด (เหนือยอดแกน V: ทุกเส้นอยู่ต่ำกว่าระดับนี้เสมอ จึงไม่ถูกเส้นที่กวาดพาดทับ และไม่ชนแกน)
+        lmax = Text("max (R มาก)", font_size=18, color=C_R)
+        lmax.move_to(ax.c2p(1.0 / 3.2, 1.0) + UP * 0.34 + RIGHT * (lmax.width / 2 - 0.1))
         lmin = Text("min (R น้อย)", font_size=18, color=C_R).move_to(ax.c2p(0.78, 0.46))
         self.play(s.animate.set_value(3.2), run_time=1.6)
         self.play(FadeIn(lmax), run_time=0.4)

@@ -40,7 +40,7 @@ class P12_HighRAndLoad(Lesson):
         t_f = tag("ขดลวดฟิลด์", size=18, color=C_IF).move_to([-3.5, YT + 0.45, 0])
         t_r = tag("รีโอสตาท", size=18, color=C_R).move_to([-1.95, YT + 0.45, 0])
         t_a = tag("อาร์เมเจอร์", size=18, color=C_E)
-        t_a.move_to([-5.6 - 0.16 - t_a.width / 2, -0.95, 0])     # อยู่ซ้ายสายต่อออกจากอาร์เมเจอร์ (เดิมสายพาดกลางตัวอักษร)
+        t_a.move_to([-5.6 + 0.18 + t_a.width / 2, -0.95, 0])     # อยู่ขวาสายต่อออกจากอาร์เมเจอร์ ในวงจร (ซ้ายสายชิดขอบเฟรมเกินเมื่อใช้ฟอนต์ Loma)
         circ = VGroup(arm, coil, rh, w_top, w_r, w_r2, t_f, t_r, t_a)
         # แถบ R รวมของฟิลด์
         X0, X1, BY = 1.3, 6.6, 0.4
@@ -63,7 +63,7 @@ class P12_HighRAndLoad(Lesson):
                      Line([-0.8, -0.12, 0], [-0.8, -0.3, 0], color=GRAYTXT, stroke_width=3))
         spark = Line([-0.95, 0.1, 0], [-0.65, -0.1, 0], color=YEL, stroke_width=4)
         t_op = tag("ต่อขาด (วงจรเปิด)", size=18, color=WARN)
-        t_op.move_to([-0.8 + 0.2 + t_op.width / 2, -0.75, 0])    # อยู่ขวาสายด้านล่าง (เดิมสายพาดผ่านตัวอักษร)
+        t_op.move_to([-0.8 - 0.2 - t_op.width / 2, -0.75, 0])    # ซ้ายสายขวาสุดของวงจร (ภายในวงจรว่าง; ด้านขวาชิดข้อความ R ของแถบ)
         inf = MathTex(r"R=\infty", font_size=34, color=WARN).move_to([X1 - 0.6, BY + 0.0, 0])
         self.play(FadeOut(w_mid), FadeIn(gap), FadeIn(spark), FadeIn(t_op), run_time=0.8)
         self.play(s2.animate.stretch_to_fit_width(X1 - X0 - 1.3 - 0.05, about_edge=LEFT).shift(RIGHT * 0.0),
@@ -78,7 +78,7 @@ class P12_HighRAndLoad(Lesson):
         dirt = VGroup(*[Dot([-5.6 + dx, 0.42 + dy, 0], radius=0.05, color="#8D6E63") for dx, dy in
                         ((-0.18, 0.12), (0.0, 0.2), (0.18, 0.1), (0.1, 0.28), (-0.1, 0.3))])
         dirt2 = dirt.copy().shift(DOWN * 0.84)
-        t_d = tag("คอมมิวเตเตอร์สกปรก", size=18, color="#BCAAA4").move_to([-5.6, -1.65, 0])
+        t_d = tag("คอมมิวเตเตอร์สกปรก", size=18, color="#BCAAA4").move_to([-4.75, -1.65, 0])
         s3 = Rectangle(width=0.05, height=0.5, stroke_width=0, fill_color="#BCAAA4", fill_opacity=0.9).move_to([X0 + 2.7 + 0.025, BY, 0])
         t_cr = Text("R หน้าสัมผัส", font_size=16, color="#1c2a30").move_to([X0 + 4.4, BY - 0.0, 0])
         self.play(FadeIn(dirt), FadeIn(dirt2), FadeIn(t_d), FadeIn(s3), run_time=0.8)
@@ -106,7 +106,7 @@ class P12_HighRAndLoad(Lesson):
             va, vb = wire((xx, rt), (xx, 0.3), color=GRAYTXT), wire((xx, -0.3), (xx, rb), color=GRAYTXT)
             loads.add(VGroup(lamp, va, vb))
         gen_t = tag("เครื่องกำเนิด", size=18, color=C_E)
-        gen_t.move_to([-5.4 - 0.16 - gen_t.width / 2, -0.95, 0])  # ซ้ายสายลงล่าง ไม่ให้สายพาดทับตัวอักษร
+        gen_t.move_to([-5.4 + 0.18 + gen_t.width / 2, -0.95, 0])  # ขวาสายลงล่าง ในวงจร ไม่ให้สายพาดทับตัวอักษร
         t_par = tag("โหลดต่อขนานกับขั้ว", size=19, color=GRAYTXT).move_to([-0.9, rt + 0.4, 0])
         # มาตรวัด: IL (ฟ้าเขียว) เพิ่ม / Vt ลด
         bi = Rectangle(width=0.5, height=2.4, stroke_color=GRAYTXT, stroke_width=2).move_to([4.5, 0.0, 0])
@@ -141,7 +141,7 @@ class P13_VtEq_ExtChar(Lesson):
     """Vt = E - Ia Ra (8-3); อาร์เมเจอร์รีแอคชัน; กระแสฟิลด์ลด; 8-9 รูป 8-7 สร้างเส้นลักษณะสมบัติภายนอกทีละสาเหตุ"""
 
     def construct(self):
-        self.head("สมการ 8-3 และลักษณะสมบัติภายนอก (รูป 8-7)", "หน้า 13 · 8-3 (สมการ), 8-9")
+        self.head("สมการ 8-3 · ลักษณะสมบัติภายนอก (รูป 8-7)", "หน้า 13 · 8-3, 8-9")
         # ---- วงจรสมมูล
         ex, ey = -3.8, 0.2
         src = meter([ex, ey], "E", color=C_E, r=0.4)
@@ -183,7 +183,7 @@ class P13_VtEq_ExtChar(Lesson):
         t_ar = Text("ฟลักซ์จากอาร์เมเจอร์", font_size=18, color=TORQUE).move_to([-3.2, -1.65, 0])
         self.play(Create(ar), FadeIn(t_ar), lv.animate.set_value(0.55), run_time=1.6)
         chain = chips([(r"\phi", "ฟลักซ์ขั้ว ↓", C_PHI), (r"E", "แรงเคลื่อน ↓", C_E), (r"V_t", "แรงดันขั้ว ↓", C_E)])
-        chain.move_to([3.2, 0.6, 0])
+        chain.move_to([3.0, 0.6, 0])
         self.play(FadeIn(chain), run_time=0.8)
         self.play(*[Indicate(c, color=col) for c, col in zip(chain.cs, (C_PHI, C_E, C_E))], run_time=1.2)
         self.wait(0.6)
@@ -191,7 +191,7 @@ class P13_VtEq_ExtChar(Lesson):
         # ---- กระแสฟิลด์ลด
         self.say("กระแสฟิลด์ลด: ฟิลด์ต่อคร่อมขั้ว → Vt ลด → If ลด → ฟลักซ์ลด → E ลดอีก", color=C_IF)
         chain2 = chips([(r"V_t", "แรงดันขั้ว ↓", C_E), (r"I_f", "กระแสฟิลด์ ↓", C_IF), (r"\phi", "ฟลักซ์ ↓", C_PHI)])
-        chain2.move_to([3.2, -1.1, 0])
+        chain2.move_to([3.0, -1.1, 0])
         self.play(FadeIn(chain2), run_time=0.8)
         self.play(*[Indicate(c, color=col) for c, col in zip(chain2.cs, (C_E, C_IF, C_PHI))], run_time=1.2)
         self.wait(0.8)
@@ -204,7 +204,7 @@ class P13_VtEq_ExtChar(Lesson):
         g = make_axes(pos=[-5.4, -2.6], x_len=8.4, y_len=4.2, xmax=1.55, ymax=1.1, xl=r"I_L", yl=r"V_t")
         ax = g.ax
         cv, levels = ext_curves(ax)
-        c_nl = Text("แรงดันขั้วขณะไม่มีโหลด", font_size=18, color=GRAYTXT).next_to(ax.c2p(0, 1.0), RIGHT, buff=0.0).shift(UP * 0.35 + RIGHT * 0.1)
+        c_nl = Text("แรงดันขั้วขณะไม่มีโหลด", font_size=18, color=GRAYTXT).next_to(ax.c2p(0, 1.0), RIGHT, buff=0.0).shift(UP * 0.35 + RIGHT * 0.4)
         rated = DashedLine(ax.c2p(1.0, 0), ax.c2p(1.0, 1.05), color=GRAYTXT, stroke_width=2, dash_length=0.1)
         t_rated = Text("กระแสพิกัด", font_size=18, color=GRAYTXT).next_to(ax.c2p(1.0, 0), DOWN, buff=0.45)
         self.play(Create(g), Create(cv["ideal"]), FadeIn(c_nl), Create(rated), FadeIn(t_rated), run_time=1.4)
@@ -218,8 +218,8 @@ class P13_VtEq_ExtChar(Lesson):
         brs = VGroup()
         for lo, hi, col in ((levels["ar"], levels["nl"], C_PHI), (levels["ra"], levels["ar"], C_IA), (levels["fl"], levels["ra"], C_IF)):
             brs.add(DoubleArrow(ax.c2p(1.03, hi), ax.c2p(1.03, lo), buff=0, color=col, stroke_width=3, tip_length=0.12))
-        tx = VGroup(*[VGroup(Rectangle(width=0.26, height=0.26, stroke_width=0, fill_color=col, fill_opacity=1),
-                             Text(t, font_size=18, color=col)).arrange(RIGHT, buff=0.15)
+        tx = VGroup(*[VGroup(Rectangle(width=0.24, height=0.24, stroke_width=0, fill_color=col, fill_opacity=1),
+                             Text(t, font_size=17, color=col)).arrange(RIGHT, buff=0.15)
                       for t, col in (("ลดเพราะอาร์เมเจอร์รีแอคชัน", C_PHI), ("ลดเพราะความต้านทานอาร์เมเจอร์", C_IA),
                                      ("ลดเพราะกระแสฟิลด์ลดลง", C_IF))]).arrange(DOWN, aligned_edge=LEFT, buff=0.25).move_to([4.75, 0.9, 0])
         self.play(*[Create(b) for b in brs], FadeIn(tx), run_time=1.4)

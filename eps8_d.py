@@ -124,6 +124,8 @@ class P16_ShortLong(Lesson):
         il = Arrow([1.1, YT - 0.4, 0], [1.9, YT - 0.4, 0], buff=0, color=C_IL, stroke_width=4, tip_length=0.16)
         t_il = _lv(r"I_L", C_IL, 24).next_to(il, DOWN, buff=0.05)
         base = VGroup(arm, t_a1, t_a2, t_arm, w_a, ser, w_s, t_ser, w_b, term_p, term_n, t_p, t_n, rh, sh, sh_b, t_rh, t_sh)
+        for m in (base, top_short, top_long, j1, j2, ia, t_ia, ifa, t_if, il, t_il):
+            m.shift(RIGHT * 0.5)      # ขยับวงจรไปขวา: ป้ายชันท์ฟิลด์ทางซ้ายเดิมชิดขอบเฟรมเมื่อใช้ฟอนต์ Loma
 
         self.say("สร้างเครื่องแบบผสม = เครื่องแบบขนาน + ขดลวดเซรี่ฟิลด์ (S1–S2) ต่ออนุกรมกับโหลด")
         self.play(Create(base), run_time=1.6)
@@ -132,14 +134,14 @@ class P16_ShortLong(Lesson):
         self.say("(ก) short-shunt: ชันท์ฟิลด์ต่อคร่อมอาร์เมเจอร์โดยตรง — กระแสโหลดผ่านเซรี่", color=C_IF)
         self.play(Create(top_short), FadeIn(j1, scale=1.8), run_time=1.0)
         self.play(FadeIn(ia), FadeIn(t_ia), FadeIn(ifa), FadeIn(t_if), FadeIn(il), FadeIn(t_il), run_time=0.9)
-        card_s = card([("short-shunt", C_IF), "Is = IL", "Ia = If + IL"], color=C_IF, w=3.0).move_to([5.0, 0.6, 0])
+        card_s = card([("short-shunt", C_IF), "Is = IL", "Ia = If + IL"], color=C_IF, w=3.0).move_to([5.25, 0.6, 0])
         self.play(FadeIn(card_s, shift=LEFT * 0.2), run_time=0.8)
-        self.play(flow(wire((XS, YT), (XA, YT)), C_IF, run=1.2), Indicate(ser, color=C_IS, scale_factor=1.15))
+        self.play(flow(top_short, C_IF, run=1.2), Indicate(ser, color=C_IS, scale_factor=1.15))
         self.wait(1.0)
 
         self.say("(ข) long-shunt: ย้ายจุดต่อชันท์ฟิลด์ไปที่ขั้วโหลด — เซรี่ฟิลด์อยู่ทางอาร์เมเจอร์", color=C_IF)
         t_ia2 = _lv(r"I_a=I_s", C_IA, 24).next_to(il, DOWN, buff=0.05)
-        card_l = card([("long-shunt", C_IF), "Is = Ia", "Ia = If + IL"], color=C_IF, w=3.0).move_to([5.0, 0.6, 0])
+        card_l = card([("long-shunt", C_IF), "Is = Ia", "Ia = If + IL"], color=C_IF, w=3.0).move_to([5.25, 0.6, 0])
         self.play(FadeOut(top_short), FadeOut(j1), FadeOut(card_s), run_time=0.5)
         self.play(Create(top_long), FadeIn(j2, scale=1.8), run_time=1.4)
         self.play(FadeIn(card_l, shift=LEFT * 0.2), Transform(t_il, t_ia2), run_time=0.9)
@@ -211,7 +213,7 @@ class P17_Eq85SeriesField(Lesson):
         self.play(Create(a2), FadeIn(t_ph2), run_time=0.8)
         self.play(Transform(a2, a2b), run_time=1.6)
         self.say("ไม่มีโหลด Is = 0 → เหมือนเครื่องแบบขนาน | มีโหลด ฟลักซ์เซรี่เสริมเพิ่มขึ้น", color=OK)
-        tot = card([("ฟลักซ์รวม = ฟลักซ์ชันท์ + ฟลักซ์เซรี่", OK), "(cumulative = เสริมกัน)"], color=OK, w=5.2).move_to([3.7, -2.2, 0])
+        tot = card([("ฟลักซ์รวม = ฟลักซ์ชันท์ + ฟลักซ์เซรี่", OK), "(cumulative = เสริมกัน)"], color=OK, w=5.2).move_to([3.7, -2.65, 0])
         self.play(FadeIn(tot, shift=UP * 0.2), run_time=0.9)
         self.wait(2.0)
         self.exam("จุดออกสอบ 8-11: เขียนสมการแรงดันขั้วของเครื่องกำเนิดแบบผสม และบอกหน้าที่ขดลวดเซรี่",

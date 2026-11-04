@@ -198,9 +198,9 @@ class P11_CriticalR(Lesson):
 
         self.say("เส้นชันสุด R3 ทับช่วงตรงของเคอร์ฟ = ความต้านทานวิกฤต", color=C_R)
         r3 = lines["R3"]
-        crit = Text("ความต้านทานวิกฤต", font_size=21, color=YEL).move_to(ax.c2p(0, 0.96))
-        crit.shift(RIGHT * (0.32 + crit.width / 2))     # อยู่ทางขวาของแกน E (เดิมพาดทับแกน) และซ้ายของเส้น R3
-        ar = Arrow(crit.get_bottom() + RIGHT * 0.2, ax.c2p(0.3, 0.6), buff=0.05, color=YEL, stroke_width=3,
+        # ป้ายอยู่เหนือพื้นที่กราฟ (ฟอนต์ Loma บนคลาวด์กว้างกว่า ป้ายที่วางข้างเส้น R3 จะถูกเส้นพาดทับ) แล้วใช้ลูกศรชี้ลงบนเส้น R3
+        crit = Text("ความต้านทานวิกฤต", font_size=21, color=YEL).move_to([-4.9, 2.08, 0])
+        ar = Arrow(crit.get_bottom() + RIGHT * 0.6, ax.c2p(0.6, 0.96), buff=0.05, color=YEL, stroke_width=3,
                    tip_length=0.15, max_tip_length_to_length_ratio=0.35)
         self.play(Indicate(r3, color=YEL, scale_factor=1.0), Circumscribe(labs["R3"], color=YEL), FadeIn(crit), Create(ar),
                   run_time=1.4)
@@ -223,8 +223,8 @@ class P11_CriticalR(Lesson):
         self.add(ln, dot)
         self.play(sl.animate.set_value(1.6), run_time=2.4)
         self.play(sl.animate.set_value(2.4), run_time=1.6)
-        note = Text("หมายเหตุ: เอกสารเขียนเส้นวิกฤตเป็น R1 แต่ลูกศรในรูป 8-6 ชี้ R3 — คลิปนี้ใช้ตามรูป", font_size=17,
-                    color=GRAYTXT).move_to([3.0, -3.55, 0])     # ต่ำกว่าป้ายแกน If (เดิมชนตัว f)
+        note = fit_width(Text("หมายเหตุ: เอกสารเขียนเส้นวิกฤตเป็น R1 แต่ลูกศรในรูป 8-6 ชี้ R3 — คลิปนี้ใช้ตามรูป", font_size=17,
+                              color=GRAYTXT), 12.0).move_to([0.0, -3.55, 0])     # กลางเฟรม ต่ำกว่าป้ายแกน If (Loma กว้างกว่า จึงกันล้นขอบ)
         self.play(FadeIn(note), run_time=0.5)
         self.wait(1.4)
 

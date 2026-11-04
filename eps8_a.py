@@ -6,11 +6,13 @@ def chips(labels, w=1.75, h=0.7):
     """โซ่เหตุผล 3 ช่อง:  [สัญลักษณ์ ชื่อ] -> [..] -> [..]   labels = [(tex, ไทย, สี), ...]"""
     cs = VGroup()
     for tex, th, col in labels:
-        box = RoundedRectangle(width=w, height=h, corner_radius=0.12, stroke_color=col, stroke_width=3,
-                               fill_color=col, fill_opacity=0.14)
         sym = MathTex(tex, font_size=30, color=col)
         nm = Text(th, font_size=18, color=WHITE)
-        inner = VGroup(sym, nm).arrange(RIGHT, buff=0.1).move_to(box)
+        inner = VGroup(sym, nm).arrange(RIGHT, buff=0.1)
+        bw = max(w, inner.width + 0.4)     # กล่องขยายตามความกว้างตัวอักษรจริง (ฟอนต์ Loma บนคลาวด์กว้างกว่า Leelawadee ตัวอักษรล้นกล่อง/ทับลูกศร)
+        box = RoundedRectangle(width=bw, height=h, corner_radius=0.12, stroke_color=col, stroke_width=3,
+                               fill_color=col, fill_opacity=0.14)
+        inner.move_to(box)
         cs.add(VGroup(box, inner))
     cs.arrange(RIGHT, buff=0.42)
     arrows = VGroup(*[Arrow(cs[i].get_right(), cs[i + 1].get_left(), buff=0.04, color=GRAYTXT, stroke_width=3,
