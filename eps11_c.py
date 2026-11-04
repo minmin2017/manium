@@ -814,9 +814,9 @@ class P71_Motors(L):
     def construct(self):
         self.head("ขั้น 6–7: รีแอคแตนซ์มอเตอร์ M1 และ M2", "หน้า 71–72")
         self.say("ฐานโซนมอเตอร์: 13.8 kV , 300 MVA  แต่มอเตอร์พิกัด 13.2 kV  และ 200 / 100 MVA — ไม่ตรงทั้งคู่", color=OK)
-        fac = _m(r"\left(\frac{13.2}{13.8}\right)^{2}=0.9149", C_S, 24)
+        fac = _m(r"(13.2/13.8)^{2}=0.9149", C_S, 24)
         facl = T("= ตัวคูณแรงดัน ใช้ร่วมกันทั้ง M1 และ M2", 15, GRAYTXT)
-        fg = VGroup(fac, facl).arrange(RIGHT, buff=0.4).move_to([0, -3.55, 0])
+        fg = VGroup(fac, facl).arrange(RIGHT, buff=0.4).move_to([0, -3.6, 0])
         self.play(Write(fac), FadeIn(facl), run_time=1.2)
         self.wait(0.6)
         b1 = B(self, x=-6.8, y=2.0, gap=0.08)
