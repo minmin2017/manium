@@ -6,9 +6,15 @@
 """
 from eps8_lib import *
 
+KM, KT, SLOW = 1.28, 1.18, 1.45
+
+
+def MX(*parts, font_size=26, **kw):
+    return MathTex(*parts, font_size=font_size * KM, **kw)
+
 
 def _m(tex, color=WHITE, size=26):
-    return MathTex(tex, font_size=size, color=color)
+    return MX(tex, font_size=size, color=color)
 
 
 def _two(a, b, gap=0.5):
@@ -16,11 +22,53 @@ def _two(a, b, gap=0.5):
 
 
 def T(txt, size=20, color=WHITE):
-    return Text(txt, font_size=size, color=color, line_spacing=0.9)
+    return Text(txt, font_size=size * KT, color=color, line_spacing=0.9)
+
+
+class B(Board):
+    """Board ตัวใหญ่ขึ้น (อ่านง่ายตอนดูอย่างเดียว)"""
+
+    def add(self, num, head, body=None, color=OK, run=0.9, hold=0.4):
+        badge = VGroup(Circle(radius=0.25, stroke_color=color, stroke_width=3, fill_color=color, fill_opacity=0.2),
+                       Text(str(num), font_size=25, color=color))
+        badge[1].move_to(badge[0])
+        h = Text(head, font_size=28, color=color)
+        top = VGroup(badge, h).arrange(RIGHT, buff=0.18)
+        row = VGroup(top)
+        if body is not None:
+            body.next_to(top, DOWN, buff=0.1).align_to(top, LEFT).shift(RIGHT * 0.45)
+            row.add(body)
+        row.move_to([0, 0, 0])
+        prev_bottom = self.rows[-1].get_bottom()[1] - self.gap if self.rows else self.y
+        row.align_to([self.x, 0, 0], LEFT)
+        row.shift(UP * (prev_bottom - row.get_top()[1]))
+        self.rows.append(row)
+        self.sc.mark("step")
+        self.sc.play(FadeIn(top, shift=RIGHT * 0.25), run_time=0.5)
+        if body is not None:
+            self.sc.play(Write(body) if isinstance(body, MathTex) else FadeIn(body), run_time=run)
+        if hold:
+            self.sc.wait(hold)
+        return row
 
 
 class L(Lesson):
-    """Lesson + หน้าสรุป 'ประโยคหลัก + จำแบบนี้'"""
+    """Lesson + หน้าสรุป 'ประโยคหลัก + จำแบบนี้' + จังหวะช้าลง (SLOW) + ตัวหนังสือใหญ่"""
+
+    def play(self, *a, **k):
+        if "run_time" in k:
+            k["run_time"] = k["run_time"] * SLOW
+        return super().play(*a, **k)
+
+    def wait(self, *a, **k):
+        if a:
+            a = (a[0] * SLOW,) + tuple(a[1:])
+        elif "duration" in k:
+            k["duration"] = k["duration"] * SLOW
+        return super().wait(*a, **k)
+
+    def say(self, txt, color=GRAYTXT, hold=0.0, size=26):
+        return super().say(txt, color=color, hold=hold, size=size)
 
     def keep(self, sentence, rule, hold=3.6):
         self.fade_out_all(run_time=0.6)
@@ -124,7 +172,7 @@ class P40_Base3ph(L):
         self.play(GrowFromCenter(vll), FadeIn(lll), run_time=0.8)
         self.play(FadeIn(lln), Indicate(fy.leg_top, color=C_IL), run_time=0.8)
         self.wait(1.0)
-        bd = Board(self, x=-6.6, y=2.0, gap=0.08)
+        bd = B(self, x=-6.6, y=2.0, gap=0.08)
         self.say("เลือกฐานแค่ 2 ตัว: กำลัง 3 เฟส (VA 3 เฟส) กับ แรงดันสาย V_LL", color=YEL)
         r1 = bd.add(1, "เลือกฐาน 2 ตัว", _two(_m(r"VA_{3\phi}", YEL, 30), _m(r"V_{LL}", YEL, 30)), color=YEL, hold=0.6)
         self.glow(r1[1], fig=VGroup(vll, lll), color=YEL)
@@ -240,7 +288,7 @@ class P49_Derive(L):
     def construct(self):
         self.head("สูตรเปลี่ยนฐาน มาจากไหน", "หน้า 49")
         self.say("เริ่มจากสูตร p.u. ของค่าเดิม (given) กับค่าใหม่ (new) — Z จริงตัวเดียวกัน", color=OK)
-        bd = Board(self, x=-6.6, y=2.0, gap=0.1)
+        bd = B(self, x=-6.6, y=2.0, gap=0.1)
         r1 = bd.add(1, "เขียน 2 สมการ",
                     VGroup(_m(r"Z_{given}=\frac{Z\cdot MVA_{given}}{kV_{given}^{2}}", WHITE, 27),
                            _m(r"Z_{new}=\frac{Z\cdot MVA_{new}}{kV_{new}^{2}}", WHITE, 27)).arrange(RIGHT, buff=0.5),
@@ -251,7 +299,7 @@ class P49_Derive(L):
                     color=YEL, hold=1.0)
         self.glow(r2[1], color=YEL)
         self.say("ย้าย Z_given ไปคูณ ได้สูตรสุดท้าย (สูตรหน้า 49)", color=OK)
-        f = MathTex(r"Z_{new}", r"=", r"Z_{given}", r"\left(\frac{kV_{given}}{kV_{new}}\right)^{2}",
+        f = MX(r"Z_{new}", r"=", r"Z_{given}", r"\left(\frac{kV_{given}}{kV_{new}}\right)^{2}",
                     r"\frac{MVA_{new}}{MVA_{given}}", font_size=34)
         f[3].set_color(C_S)
         f[4].set_color(YEL)
@@ -289,7 +337,7 @@ class P50_XfmrBase(L):
         self.play(Create(VGroup(wl, wr, t)), FadeIn(hv), FadeIn(lv), run_time=1.2)
         self.wait(0.6)
         self.say("หน้า 50: ค่า Z p.u. ขึ้นกับว่าฐาน kV ที่ใช้เป็นด้านแรงสูง หรือด้านแรงต่ำ", color=OK)
-        bd = Board(self, x=-6.6, y=2.0, gap=0.15)
+        bd = B(self, x=-6.6, y=2.0, gap=0.15)
         r1 = bd.add(1, "ฐาน kV = ด้านแรงสูง", T("→ Z อ้างอิงด้านแรงสูง", 22, C_N), color=C_N, hold=0.3)
         self.play(Indicate(hv, color=C_N, scale_factor=1.3), Circumscribe(wl, color=C_N), run_time=1.2)
         r2 = bd.add(2, "ฐาน kV = ด้านแรงต่ำ", T("→ Z อ้างอิงด้านแรงต่ำ", 22, C_S), color=C_S, hold=0.3)
@@ -342,7 +390,7 @@ class P52_YY(L):
         self.play(FadeIn(ph1), FadeIn(ph2), run_time=0.6)
         self.play(GrowFromCenter(d1), GrowFromCenter(d2), FadeIn(l1), FadeIn(l2), FadeIn(ld), run_time=0.9)
         self.wait(0.8)
-        bd = Board(self, x=-6.6, y=2.0, gap=0.1)
+        bd = B(self, x=-6.6, y=2.0, gap=0.1)
         self.say("พิกัด 3 เฟส = 3 × 25 = 75 MVA", color=YEL)
         r1 = bd.add(1, "พิกัด 3 เฟส", _m(r"3\times25=75\,MVA", YEL, 30), color=YEL, hold=0.6)
         self.play(Indicate(VGroup(y1, y2), color=YEL, scale_factor=1.05), run_time=1.0)
@@ -354,7 +402,7 @@ class P52_YY(L):
         self.say("หน้า 53: ต่อโหลดด้านแรงต่ำ แต่คิด Z ต่อเฟสที่ด้านแรงสูงได้ — MVA สองด้านเท่ากัน", color=OK)
         r3 = bd.add(3, "MVA เท่ากันสองด้าน", _m(r"\frac{kV_{LV}^{2}}{Z_{LV}}=\frac{kV_{HV}^{2}}{Z_{HV}}", OK, 30), color=OK, hold=0.6)
         self.say("แก้หา Z_HV แล้วแทนค่า — kV ใช้แรงดันเฟสคู่กัน (39.8 กับ 3.98) หรือแรงดันสาย (69 กับ 6.9) ก็ได้", color=OK)
-        f = MathTex(r"Z_{HV}", r"=", r"0.6", r"\left(\frac{39.8}{3.98}\right)^{2}", r"=", r"0.6", r"\left(\frac{69}{6.9}\right)^{2}",
+        f = MX(r"Z_{HV}", r"=", r"0.6", r"\left(\frac{39.8}{3.98}\right)^{2}", r"=", r"0.6", r"\left(\frac{69}{6.9}\right)^{2}",
                     font_size=28)
         r4 = bd.add(4, "Z ที่ด้านแรงสูง", f, color=OK, hold=0.6)
         self.glow(f[3], fig=VGroup(ph1, ph2), color=C_IL)
@@ -385,7 +433,7 @@ class P54_YDelta(L):
         self.play(Create(y1), Create(d2), FadeIn(h1), FadeIn(h2), run_time=1.2)
         self.play(FadeIn(ph), GrowFromCenter(d1), GrowFromCenter(dd), FadeIn(l1), FadeIn(l2), run_time=0.9)
         self.wait(0.8)
-        bd = Board(self, x=-6.6, y=2.0, gap=0.1)
+        bd = B(self, x=-6.6, y=2.0, gap=0.1)
         self.say("Delta: แรงดันบนขดลวด = แรงดันสาย  ดังนั้นด้านต่ำใช้ 3.98 kV (ไม่หาร sqrt3)", color=YEL)
         r1 = bd.add(1, "อัตราส่วนแรงดันสาย", _m(r"\frac{69}{3.98}=17.3", YEL, 30), color=YEL, hold=0.6)
         self.play(Indicate(VGroup(l1, l2), color=YEL), run_time=1.0)
@@ -393,7 +441,7 @@ class P54_YDelta(L):
         cmp_.move_to([0.0, -3.4, 0])
         self.play(FadeIn(cmp_), run_time=0.7)
         self.say("แทนในสูตรเดิม  Z ด้านแรงสูง = 0.6 × (69 / 3.98)²", color=OK)
-        f = MathTex(r"Z_{HV}", r"=", r"0.6", r"\left(\frac{69}{3.98}\right)^{2}", font_size=32)
+        f = MX(r"Z_{HV}", r"=", r"0.6", r"\left(\frac{69}{3.98}\right)^{2}", font_size=32)
         r2 = bd.add(2, "แทนค่า", f, color=OK, hold=0.6)
         self.glow(f[3], fig=VGroup(l1, l2), color=YEL)
         r3 = bd.add(3, "ผล (สไลด์หน้า 54)", VGroup(_m(r"\approx 180\,\Omega", OK, 34), T("(คำนวณละเอียด 180.3)", 19, GRAYTXT)).arrange(RIGHT, buff=0.3),
@@ -582,17 +630,17 @@ class P65_T1(L):
         k2 = T("230 kV ?", 22, OK).move_to([5.7, -0.8, 0])
         self.play(FadeIn(g), Create(VGroup(w1, w2, t1)), run_time=1.0)
         self.play(Create(z1), FadeIn(k1), run_time=0.8)
-        bd = Board(self, x=-6.6, y=2.0, gap=0.06)
+        bd = B(self, x=-6.6, y=2.0, gap=0.06)
         r1 = bd.add(1, "เข้าใจ: ฐานฝั่ง G", T("20 kV , 300 MVA", 22, YEL), color=YEL, hold=0.4)
         self.say("สูตร: kV ฐานอีกด้าน = kV ฐานเดิม × อัตราส่วนแรงดันสายของหม้อแปลง  (230/20)", color=OK)
-        f = MathTex(r"20", r"\times", r"\frac{230}{20}", r"=", r"230\,kV", font_size=32)
+        f = MX(r"20", r"\times", r"\frac{230}{20}", r"=", r"230\,kV", font_size=32)
         r2 = bd.add(2, "แรงดันฐานอีกด้าน", f, color=OK, hold=0.4)
         self.play(Create(z2), FadeIn(k2), run_time=0.8)
         self.glow(f[4], fig=VGroup(z2, k2), color=OK)
         self.say("กำลังฐาน 300 MVA เท่าเดิม แต่พิกัด T1 = 350 MVA ไม่เท่า → ต้องเปลี่ยนฐาน X", color=YEL)
         r3 = bd.add(3, "เช็คกำลัง", T("ฐาน 300  ≠  พิกัด T1 350  → เปลี่ยนฐาน", 21, YEL), color=YEL, hold=0.6)
         self.say("หน้า 66: X ใหม่ = X เดิม × (kV เดิม / kV ใหม่)² × (MVA ใหม่ / MVA เดิม)", color=OK)
-        g2 = MathTex(r"0.1", r"\times", r"\left(\frac{230}{230}\right)^{2}", r"\times", r"\frac{300}{350}", font_size=32)
+        g2 = MX(r"0.1", r"\times", r"\left(\frac{230}{230}\right)^{2}", r"\times", r"\frac{300}{350}", font_size=32)
         r4 = bd.add(4, "แทนค่า", g2, color=OK, hold=0.5)
         self.glow(g2[0], fig=t1, color=WHITE)
         self.glow(g2[2], fig=VGroup(k2), color=OK)
@@ -622,7 +670,7 @@ class P67_T2(L):
         l2 = T("13.2 kV (สาย = เฟส)", 18, YEL).move_to([5.6, p2[1][1] - 0.75, 0])
         self.play(Create(y1), Create(d2), FadeIn(h1), FadeIn(h2), FadeIn(ph), run_time=1.2)
         self.play(GrowFromCenter(a1), GrowFromCenter(a2), FadeIn(l1), FadeIn(l2), run_time=0.8)
-        bd = Board(self, x=-6.6, y=2.0, gap=0.06)
+        bd = B(self, x=-6.6, y=2.0, gap=0.06)
         self.say("ด้าน Y: แรงดันสาย = sqrt3 × แรงดันเฟส   ด้าน Delta: แรงดันสาย = แรงดันบนขดลวด", color=YEL)
         f1 = _m(r"\sqrt{3}\times127=220\,kV", YEL, 30)
         r1 = bd.add(1, "แรงดันสาย สองด้าน", VGroup(f1, T("ด้าน Delta 13.2 kV  →  อัตราส่วนสาย 220/13.2", 21, C_S)).arrange(DOWN, aligned_edge=LEFT, buff=0.12),
@@ -631,16 +679,16 @@ class P67_T2(L):
         self.play(Transform(l1, l1n), run_time=0.5)
         self.glow(f1, fig=VGroup(a1, l1), color=YEL)
         self.say("kV ฐานด้านนี้ = 230 × (13.2 / 220)  (ข้าม T2 ลงมา)", color=OK)
-        f2 = MathTex(r"230", r"\times", r"\frac{13.2}{220}", r"=", r"13.8\,kV", font_size=32)
+        f2 = MX(r"230", r"\times", r"\frac{13.2}{220}", r"=", r"13.8\,kV", font_size=32)
         r3 = bd.add(2, "แรงดันฐานด้านต่ำ", f2, color=OK, hold=0.5)
         self.glow(f2[4], fig=VGroup(a2, l2), color=OK)
         r4 = bd.add(3, "พิกัดรวม T2", _m(r"3\times100=300\,MVA", YEL, 28), color=YEL, hold=0.4)
         self.say("พิกัด 300 MVA เท่ากับฐาน 300 MVA → ส่วนกำลังไม่ต้องปรับ", color=YEL)
         self.wait(1.5)
         self.play(*[FadeOut(r) for r in bd.rows], run_time=0.5)
-        bd = Board(self, x=-6.6, y=2.0, gap=0.06)
+        bd = B(self, x=-6.6, y=2.0, gap=0.06)
         self.say("หน้า 68: แทนในสูตรเปลี่ยนฐาน  kV เดิม = 13.2   kV ใหม่ = 13.8", color=OK)
-        g = MathTex(r"0.1", r"\times", r"\left(\frac{13.2}{13.8}\right)^{2}", r"\times", r"\frac{300}{300}", font_size=32)
+        g = MX(r"0.1", r"\times", r"\left(\frac{13.2}{13.8}\right)^{2}", r"\times", r"\frac{300}{300}", font_size=32)
         r5 = bd.add(1, "แทนค่า X_T2", g, color=OK, hold=0.4)
         self.glow(g[2], fig=VGroup(a2, l2), color=C_S)
         r6 = bd.add(2, "ผล", VGroup(_m(r"X_{T2}=0.0915\,p.u.", OK, 32), T("= 9.15 %", 22, GRAYTXT)).arrange(RIGHT, buff=0.3), color=OK, hold=0.5)
@@ -709,14 +757,14 @@ class P70_Line(L):
         self.wait(0.4)
         pic = VGroup(ln, ta, tb, km, kt, zb, zt)
         self.play(pic.animate.scale(0.55).move_to([3.9, 0.9, 0]), run_time=0.9)
-        bd = Board(self, x=-6.6, y=2.0, gap=0.1)
+        bd = B(self, x=-6.6, y=2.0, gap=0.1)
         self.say("ขั้น 1: Z จริงทั้งสาย = 0.5 × 64", color=C_IL)
         r1 = bd.add(1, "Z จริงทั้งสาย", _m(r"0.5\times64=32\,\Omega", C_IL, 30), color=C_IL, hold=0.6)
         self.glow(r1[1], fig=pic, color=C_IL)
         self.say("ขั้น 2: Z ฐาน = kV ฐาน² ÷ MVA ฐาน  ใช้ 230 kV (โซนสายส่ง)", color=OK)
         r2 = bd.add(2, "Z ฐาน ของโซน 230 kV", _m(r"Z_{b}=\frac{230^{2}}{300}=176.3\,\Omega", OK, 30), color=OK, hold=0.6)
         self.say("ขั้น 3: p.u. = Z จริง ÷ Z ฐาน", color=YEL)
-        f = MathTex(r"X_{line}", r"=", r"\frac{32}{176.3}", r"=", r"0.1815", font_size=34)
+        f = MX(r"X_{line}", r"=", r"\frac{32}{176.3}", r"=", r"0.1815", font_size=34)
         r3 = bd.add(3, "p.u.", f, color=YEL, hold=0.6)
         self.glow(f[4], color=YEL)
         self.say("ตรวจกับดัก: ถ้าเผลอใช้ kV ของโซนอื่น จะได้ผลผิดมาก", color=WARN)
@@ -742,8 +790,8 @@ class P71_Motors(L):
         facl = T("ตัวคูณแรงดัน (ใช้ร่วมกันทั้ง M1 และ M2)", 18, GRAYTXT).move_to([0, -3.55, 0])
         self.play(Write(fac), FadeIn(facl), run_time=1.2)
         self.wait(0.6)
-        b1 = Board(self, x=-6.8, y=2.0, gap=0.08)
-        b2 = Board(self, x=0.3, y=2.0, gap=0.08)
+        b1 = B(self, x=-6.8, y=2.0, gap=0.08)
+        b2 = B(self, x=0.3, y=2.0, gap=0.08)
         H1 = T("M1", 26, C_S).move_to([-4.6, 2.2, 0])
         H2 = T("M2", 26, C_S).move_to([2.5, 2.2, 0])
         self.play(FadeIn(H1), FadeIn(H2), run_time=0.4)
@@ -751,8 +799,8 @@ class P71_Motors(L):
         self.say("แถวซ้าย M1 (200 MVA)  แถวขวา M2 (100 MVA)  สูตรเดียวกัน  ต่างกันที่ MVA", color=OK)
         b1.add(1, "ข้อมูล", T("13.2 kV , 200 MVA , X'' = 20 %", 20, WHITE), color=C_S, hold=0.3)
         b2.add(1, "ข้อมูล", T("13.2 kV , 100 MVA , X'' = 20 %", 20, WHITE), color=C_S, hold=0.6)
-        f1 = MathTex(r"0.2", r"\times", r"\frac{300}{200}", r"\times", r"\left(\frac{13.2}{13.8}\right)^{2}", font_size=26)
-        f2 = MathTex(r"0.2", r"\times", r"\frac{300}{100}", r"\times", r"\left(\frac{13.2}{13.8}\right)^{2}", font_size=26)
+        f1 = MX(r"0.2", r"\times", r"\frac{300}{200}", r"\times", r"\left(\frac{13.2}{13.8}\right)^{2}", font_size=26)
+        f2 = MX(r"0.2", r"\times", r"\frac{300}{100}", r"\times", r"\left(\frac{13.2}{13.8}\right)^{2}", font_size=26)
         r1 = b1.add(2, "แทนค่า", f1, color=C_S, hold=0.3)
         r2 = b2.add(2, "แทนค่า", f2, color=C_S, hold=0.6)
         self.say("ส่วนกำลัง: M1 = 300/200 = 1.5   M2 = 300/100 = 3", color=YEL)
