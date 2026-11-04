@@ -262,8 +262,10 @@ class P28_SeriesUsesQuestions(Lesson):
         dgm = VGroup(bwires, gen, rl, bo, bt, ld, t_rl, t_bo, t_ld2)
         self.play(Create(dgm), run_time=1.5)
         self.play(flow(wire((XG, (YTP + YBT) / 2 + 0.3), (XG, YTP), (XR2, YTP), (XR2, YBT), (XG, YBT), (XG, (YTP + YBT) / 2 - 0.3)), C_IL, run=1.6))
-        note = fit_width(Text("กระแสมาก → แรงดันตกในสายมาก แต่ E ของบูสเตอร์ก็เพิ่มตามกระแส (ส่วนที่เพิ่มขึ้นของเคอร์ฟ) ช่วยชดเชย", font_size=17, color=GRAYTXT), 7.4)
-        note.move_to([3.4, -0.85, 0])
+        note = Text("กระแสมาก → แรงดันตกในสายมาก แต่ E ของบูสเตอร์ก็เพิ่มตามกระแส
+(ส่วนที่เพิ่มขึ้นของเคอร์ฟ) ช่วยชดเชย", font_size=17, color=GRAYTXT, line_spacing=0.9)
+        note = fit_width(note, 6.2)
+        note.move_to([3.5, -0.5, 0])
         self.play(FadeIn(note), run_time=0.7)
         self.wait(2.2)
 
