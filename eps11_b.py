@@ -383,7 +383,7 @@ class P31_WhyBase(Lesson):
         # วงจรแทน
         top, bot = -0.5, -2.6
         e = src(-5.4, (top + bot) / 2, "", C_E, r=0.3)
-        el = VGroup(MathTex(r"E=115\,kV", font_size=22, color=C_E).next_to(e, DOWN, buff=0.15))
+        el = VGroup(MathTex(r"E=115\,kV", font_size=22, color=C_E).move_to([-6.2, (top + bot) / 2 - 0.75, 0]))
         xt_ = coil_sym((-4.2, top), (-2.9, top), n=3, color=C_IF)
         rl = res_zig((-1.2, top), (-1.2, bot), color=C_IA)
         eq = VGroup(wire((-5.4, (top + bot) / 2 + 0.3), (-5.4, top), (-4.2, top)),

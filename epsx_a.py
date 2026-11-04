@@ -58,7 +58,7 @@ class Q01_F64_LongShunt(Solve):
 class Q02_F64_Diverter(Solve):
     def construct(self):
         self.head("ปลายภาค 2/2564 ข้อ 2 · ไดเวอร์เตอร์", "ข้อ 2")
-        self.say("ผสม 100 kW 600 V · อยากได้ 625 V ที่ 135 A · ชันท์ต้องเพิ่มอีก 2.3 A · ชันท์ 400 รอบ · เซรี่ 7.5 รอบ", color=OK)
+        self.say("ผสม 100 kW 600 V  ต้องการ 625 V ที่ 135 A  (ชันท์ต้องเพิ่ม 2.3 A)", color=OK)
         nl, nr = (1.6, 0.15), (6.0, 0.15)
         w_in = wire((0.7, 0.15), nl)
         w_out = wire(nr, (6.9, 0.15))
@@ -82,7 +82,7 @@ class Q02_F64_Diverter(Solve):
         t2 = fit_width(T("เซรี่ต้องให้เท่ากัน = 7.5 รอบ × Is", 18, C_IS), 5.6).move_to([3.7, -2.85, 0])
         bar2 = Rectangle(width=4.4, height=0.3, stroke_color=C_IS, stroke_width=3, fill_color=C_IS, fill_opacity=0.35)
         bar2.move_to([3.7, -3.2, 0])
-        self.say("ไอเดีย: ให้เซรี่ฟิลด์สร้างแอมแปร์-เทิร์นเท่ากับที่ชันท์จะต้องเพิ่ม  แล้วเอาไดเวอร์เตอร์แบ่งกระแสส่วนเกิน", color=YEL)
+        self.say("ให้เซรี่ฟิลด์สร้างแอมแปร์-เทิร์นแทน แล้วใช้ไดเวอร์เตอร์แบ่งกระแส", color=YEL)
         self.play(FadeIn(t1), GrowFromEdge(bar1, LEFT), run_time=1.0)
         self.play(FadeIn(t2), GrowFromEdge(bar2, LEFT), run_time=1.0)
         self.wait(1.2)
@@ -116,7 +116,7 @@ class Q02_F64_Diverter(Solve):
 class Q03_F64_OverCompoundVR(Solve):
     def construct(self):
         self.head("ปลายภาค 2/2564 ข้อ 3 · ผสมเกิน + VR", "ข้อ 3")
-        self.say("ผสมแบบแรงดันเพิ่มขึ้น: ขั้ว 130 V ตอนจ่ายโหลดไกล · สายตก 10 V · ปลดโหลดแล้วขั้วเหลือ 120 V", color=OK)
+        self.say("ผสมแรงดันเพิ่มขึ้น: ขั้ว 130 V ตอนจ่ายโหลด · สายตก 10 V · ไม่มีโหลดเหลือ 120 V", color=OK)
         g = VGroup(Circle(radius=0.38, stroke_color=C_E, stroke_width=3, fill_color=C_E, fill_opacity=0.15).move_to([1.0, 0.95, 0]),
                    Text("G", font_size=22, color=C_E).move_to([1.0, 0.95, 0]))
         w1 = wire((1.38, 0.95), (1.9, 0.95))
@@ -335,7 +335,7 @@ class M15_Mid64_ShortShunt(Solve):
         self.head("มิดเทอม 1/2564 ข้อ 15 · short-shunt", "ข้อ 15")
         self.say("short-shunt: Vt 240 V · IL 50 A · Rse 0.04 โอห์ม · กระแสชันท์ If = 2 A (โจทย์ให้มาตรง ๆ)", color=OK)
         fig = cg_fig("short", r"R_{sh}", r"R_a", r"R_{se}=0.04\,\Omega", r"V_t=240\,V", r"Load", il_t=r"I_L=50\,A",
-                     if_t=r"I_{sh}=2\,A", is_t=r"I_{se}")
+                     if_t=r"I_{sh}", is_t=r"I_{se}")
         self.play(Create(fig), run_time=2.0)
         self.wait(1.5)
         self.say("ใจความ: short-shunt = ชันท์คร่อมอาร์เมเจอร์  เซรี่อยู่ในสายโหลด  Ise = IL", color=YEL)
@@ -371,11 +371,11 @@ class PR01_Practice_BaseValues(Solve):
         self.head("ข้อฝึก 1 · ค่าฐาน 3 เฟส และ p.u.", "บท 11 หน้า 40-46")
         tg = _prtag()
         self.add(tg)
-        self.say("ฐาน 100 MVA (3 เฟส) 138 kV (สาย) · สายส่ง X = 47.61 โอห์ม · บัส 131.1 kV · โหลด 60 MVA", color=OK)
+        self.say("ฐาน 100 MVA (3 เฟส) 138 kV (สาย) · สายส่ง X = 47.61 โอห์ม", color=OK)
         lg = T("เต็มแถบ = ฐาน = 1.0 p.u.   หมุดสี = ค่าจริง ÷ ฐาน", 19, GRAYTXT).move_to([3.6, 2.2, 0])
         bars = []
-        specs = [(1.3, 131.1 / 138, r"V:\ \frac{131.1}{138}=0.95", C_E), (0.0, 0.6, r"S:\ \frac{60}{100}=0.6", C_IA),
-                 (-1.3, 0.25, r"X:\ \frac{47.61}{190.44}=0.25", C_IL)]
+        specs = [(0.95, 131.1 / 138, r"V:\ \frac{131.1}{138}=0.95", C_E), (-0.35, 0.6, r"S:\ \frac{60}{100}=0.6", C_IA),
+                 (-1.65, 0.25, r"X:\ \frac{47.61}{190.44}=0.25", C_IL)]
         self.play(FadeIn(lg), run_time=0.5)
         for y, fr, tex, col in specs:
             b = pu_bar(y, fr, "", "", col, w=4.6, x0=1.2)
@@ -468,7 +468,7 @@ class PR03_Practice_BaseZones(Solve):
         self.head("ข้อฝึก 3 · แรงดันฐานแต่ละโซน + Zb + Ib", "บท 11 หน้า 61-69")
         tg = _prtag()
         self.add(tg)
-        self.say("G 50 MVA 11 kV → T1 11/110 kV → สายส่ง j60.5 โอห์ม → T2 110/33 kV → โหลด · ฐาน = 50 MVA , 11 kV (ที่ G)", color=OK)
+        self.say("G 50 MVA 11 kV → T1 11/110 kV → สายส่ง j60.5 โอห์ม → T2 110/33 kV → โหลด", color=OK)
         Y = 0.9
         g, t1, t2 = _mc(0.8, Y, "G", YEL), _xf(2.1, Y), _xf(4.4, Y)
         w1, w2, w3 = wire((1.13, Y), (1.65, Y)), wire((2.55, Y), (3.0, Y)), wire((3.0, Y), (3.95, Y))
@@ -481,6 +481,7 @@ class PR03_Practice_BaseZones(Solve):
         zt = VGroup(M(r"11\,kV", color=YEL, size=24).move_to([1.1, -0.75, 0]), M(r"110\,kV", color=OK, size=24).move_to([3.3, -0.75, 0]),
                     M(r"33\,kV", color=C_S, size=24).move_to([5.6, -0.75, 0]))
         self.play(Create(zl), FadeIn(zt), run_time=1.0)
+        self.say("ฐานระบบ = 50 MVA , 11 kV ที่ G", color=YEL)
         self.wait(1.0)
         bd, r = self.rows([
             ("เข้าใจโจทย์", [T("ฐาน 50 MVA , 11 kV ที่ G  (MVA ฐานเท่าเดิมทุกโซน)", 20), T("หา kV ฐานทุกโซน , Zb , Ib และ X สายส่ง (p.u.)", 20)], OK),
@@ -526,7 +527,7 @@ class PR04_Practice_ReactanceDiagram(Solve):
         self.head("ข้อฝึก 4 · วาด reactance diagram + p.u.", "บท 11 หน้า 61-73")
         tg = _prtag()
         self.add(tg)
-        self.say("G 30 MVA 13.8 kV X=0.20 · T1 30 MVA 13.8/138 kV X=0.10 · สาย j80 โอห์ม · T2 25 MVA 138/6.6 kV X=0.08 · M 20 MVA 6.6 kV X=0.25", color=OK, size=20)
+        self.say("G 30 MVA 13.8 kV X=0.20 · T1 30 MVA 13.8/138 kV X=0.10 · สาย j80 โอห์ม", color=OK)
         RY, NY = 1.0, -0.7
         xs = [1.55, 2.6, 3.65, 4.7, 5.75]
         eg, em = _sr(0.6, RY, "Eg", YEL), _sr(6.7, RY, "Em", C_S)
@@ -545,6 +546,8 @@ class PR04_Practice_ReactanceDiagram(Solve):
                     M(r"6.6\,kV", color=C_S, size=22).move_to([6.05, -2.05, 0]))
         base = T("ฐาน 30 MVA · โซน 13.8 / 138 / 6.6 kV", 20, YEL).move_to([3.7, -2.7, 0])
         self.play(Create(zone), FadeIn(zt), FadeIn(base), run_time=1.0)
+        self.say("T2 25 MVA 138/6.6 kV X=0.08 · มอเตอร์ 20 MVA 6.6 kV X=0.25", color=OK)
+        self.wait(1.5)
 
         def put(i, v, col):
             nv = Text(v, font_size=16, color=col).move_to(bx[i][2])
@@ -582,7 +585,7 @@ class PR05_Practice_TransformerBank(Solve):
         self.head("ข้อฝึก 5 · หม้อแปลง 1 เฟส 3 ตัว → 3 เฟส", "บท 11 หน้า 50-55")
         tg = _prtag()
         self.add(tg)
-        self.say("หม้อแปลง 1 เฟส 3 ตัว ต่อ Y-Y · ตัวละ 10 MVA 76.2/12.7 kV X = 8 % · ฐานระบบ 100 MVA , 22 kV (ด้านต่ำ)", color=OK)
+        self.say("หม้อแปลง 1 เฟส 3 ตัว ต่อ Y-Y · ตัวละ 10 MVA 76.2/12.7 kV X = 8 %", color=OK)
         xf = VGroup(*[_xf(x, 1.2) for x in (1.4, 2.8, 4.2)])
         lab1 = fit_width(T("1 เฟส ตัวละ  10 MVA  76.2/12.7 kV", 18, GRAYTXT), 4.2).move_to([2.8, 0.45, 0])
         br = Brace(xf, DOWN, buff=1.0, color=YEL)
@@ -591,6 +594,7 @@ class PR05_Practice_TransformerBank(Solve):
         self.play(GrowFromCenter(br), FadeIn(brt), run_time=0.9)
         rule = VGroup(T("กำลัง ×3", 22, C_IA), T("แรงดันสาย × sqrt3 (ต่อ Y)", 22, C_IL)).arrange(DOWN, aligned_edge=LEFT, buff=0.15).move_to([3.5, -2.3, 0])
         self.play(FadeIn(rule), run_time=0.7)
+        self.say("ฐานระบบ 100 MVA , 22 kV (ด้านต่ำ)", color=YEL)
         self.wait(1.0)
         bd, r = self.rows([
             ("เข้าใจโจทย์", [T("หาพิกัด 3 เฟส · X ที่ฐาน 100 MVA 22 kV", 20), T("และ Z จริงฝั่งแรงสูง/ต่ำ  ตรวจอัตรา", 20)], OK),
