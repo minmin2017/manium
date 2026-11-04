@@ -73,7 +73,7 @@ def fig811():
     t_dim = Text("990 m", font_size=20, color=GRAYTXT).next_to(dim, DOWN, buff=0.1)
     g = VGroup(gen, a1, a2, pl, mi, top, bot, rz_t, rz_b, load, t_load, vt, vl, t_vt, t_vl, il, t_il, t_rl, dim, t_dim)
     g.gen, g.top, g.bot, g.rz_t, g.rz_b, g.load, g.vt, g.vl, g.t_vt, g.t_vl = gen, top, bot, rz_t, rz_b, load, vt, vl, t_vt, t_vl
-    g.il, g.t_il, g.t_rl, g.dim, g.t_dim, g.t_load = il, t_il, t_rl, dim, t_dim, t_load
+    g.il, g.t_il, g.t_rl, g.dimarr, g.t_dim, g.t_load = il, t_il, t_rl, dim, t_dim, t_load
     g.path = wire((XG, 0.15), (XG, YT), (XL, YT), (XL, -0.8), (XL, YB), (XG, YB), (XG, -0.75))   # วงกระแสโหลด (ใช้ทำแสงวิ่ง)
     return g
 
@@ -206,7 +206,7 @@ class P20_Ex84Setup(Lesson):
         f.shift(LEFT * 0.0)
         self.say("ส่งกำลังไกล: สายยาว → ความต้านทานสายมาก → โหลดยิ่งมาก แรงดันตกคร่อมสายยิ่งมาก", color=WARN)
         self.play(Create(VGroup(f.gen, f.top, f.bot, f.rz_t, f.rz_b, f.load)), run_time=1.4)
-        self.play(FadeIn(VGroup(*f[1:5])), FadeIn(f.t_load), FadeIn(f.t_rl), Create(f.dim), FadeIn(f.t_dim), run_time=0.9)
+        self.play(FadeIn(VGroup(*f[1:5])), FadeIn(f.t_load), FadeIn(f.t_rl), Create(f.dimarr), FadeIn(f.t_dim), run_time=0.9)
         self.play(Create(f.vt), Create(f.vl), FadeIn(f.t_vt), FadeIn(f.t_vl), Create(f.il), FadeIn(f.t_il), run_time=1.0)
         self.play(flow(f.path, C_IL, run=1.4), Indicate(f.rz_t, color=C_R), Indicate(f.rz_b, color=C_R))
         gapt = Text("Vt > VL : ส่วนต่างคือแรงดันตกในสาย", font_size=19, color=WARN).move_to([-3.15, 0.05, 0])

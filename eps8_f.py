@@ -251,7 +251,7 @@ class P28_SeriesUsesQuestions(Lesson):
         XG, XR2, YTP, YBT = 0.55, 5.9, -1.55, -3.25
         gen = arm_sym([XG, (YTP + YBT) / 2], r=0.3, letter="G")
         rl = res_zig([1.3, YTP], [2.7, YTP], n=4, color=C_R)
-        bo = Circle(radius=0.28, stroke_color=OK, stroke_width=3, fill_color="#1B3A2B", fill_opacity=0.9).move_to([3.8, YTP])
+        bo = Circle(radius=0.28, stroke_color=OK, stroke_width=3, fill_color="#1B3A2B", fill_opacity=0.9).move_to([3.8, YTP, 0])
         bt = Text("B", font_size=22, color=OK).move_to(bo)
         ld = res_zig([XR2, YTP], [XR2, YBT], n=4, color=C_R)
         bwires = VGroup(wire((XG, (YTP + YBT) / 2 + 0.3), (XG, YTP), (1.3, YTP)), wire((2.7, YTP), (3.52, YTP)), wire((4.08, YTP), (XR2, YTP)),
