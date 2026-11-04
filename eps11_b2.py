@@ -8,7 +8,7 @@ from eps11_lib import *
 def _row(sym, text, x0, y, color=WHITE, size=21, maxw=4.6):
     sym.move_to([x0, y, 0])
     t = fit_width(T(text, size, color), maxw)
-    t.move_to([x0 + 1.15, y, 0]).align_to([x0 + 0.95, 0, 0], LEFT)
+    t.move_to([x0 + 1.15, y, 0]).align_to([x0 + max(0.95, sym.width / 2 + 0.3), 0, 0], LEFT)
     return VGroup(sym, t)
 
 
