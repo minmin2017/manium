@@ -185,8 +185,8 @@ class P19_OverCompound(Lesson):
         c_ov = cv(ax2, FAM_A["over"], K_OVER, 6)
         lg2 = VGroup(legend_item(K_OVER, "ผสมเกิน (cumulative)"), legend_item(K_SHUNT, "แบบขนาน")).arrange(DOWN, aligned_edge=LEFT, buff=0.16)
         lg2.move_to([2.4, -0.55, 0], aligned_edge=LEFT)
-        why = card([("แอมแปร์-เทอร์นเซรี่เสริมฟลักซ์ชันท์", K_OVER), "โหลดเพิ่ม → ฟลักซ์รวม ↑ → E ↑", "→ Vt ที่ขั้ว ↑ (สูงกว่าตอนไม่มีโหลด)"],
-                   w=4.5, color=K_OVER).move_to([4.65, -1.95, 0])
+        why = fit_width(card([("แอมแปร์-เทอร์นเซรี่เสริมฟลักซ์ชันท์", K_OVER), "โหลดเพิ่ม → ฟลักซ์รวม ↑ → E ↑", "→ Vt ที่ขั้ว ↑ (สูงกว่าตอนไม่มีโหลด)"],
+                   w=4.2, color=K_OVER, size=19), 4.4).move_to([4.5, -1.95, 0])
         self.play(Create(g2), Create(nl2), Create(rated2), FadeIn(t_nl2), FadeIn(t_rated2), run_time=1.0)
         self.play(Create(c_sh), FadeIn(lg2[1]), Indicate(chips3[0], color=K_OVER), run_time=1.0)
         self.play(Create(c_ov), FadeIn(lg2[0]), run_time=1.4)
@@ -277,7 +277,7 @@ class P21_Ex84Solution(Lesson):
         c_fl = cv(ax, FAM_A["flat"], K_FLAT, 6)
         lg = VGroup(legend_item(K_OVER, "ผสมเกิน"), legend_item(K_FLAT, "ผสมพอดี")).arrange(DOWN, aligned_edge=LEFT, buff=0.16).move_to([3.4, 1.0, 0], aligned_edge=LEFT)
         dot = Dot(ax.c2p(1.0, 1.0), radius=0.1, color=K_FLAT)
-        t_eq = fit_width(Text("ที่กระแสพิกัด Vt = Vt ไม่มีโหลด", font_size=19, color=K_FLAT), 4.4).move_to([3.4, -0.4, 0], aligned_edge=LEFT)
+        t_eq = fit_width(Text("ที่กระแสพิกัด\nVt = Vt ไม่มีโหลด", font_size=19, color=K_FLAT, line_spacing=0.9), 3.2).move_to([3.4, -0.55, 0], aligned_edge=LEFT)
         self.play(Create(gg), Create(nl), Create(rated), FadeIn(t_nl), FadeIn(t_rated), run_time=1.0)
         self.play(Create(c_ov), FadeIn(lg[0]), run_time=1.0)
         self.play(Create(c_fl), FadeIn(lg[1]), run_time=1.2)
@@ -547,8 +547,8 @@ class P24_CompareAllTypes(Lesson):
 
         self.say("8-14 แอมแปร์-เทอร์นของเซรี่ฟิลด์: ตั้งระดับการผสมที่ต้องการได้อย่างไร (ต่อหน้า 25)", color=C_IS)
         self.play(FadeOut(VGroup(cd1, cd2)), run_time=0.5)
-        nx = card([("8-14 แอมแปร์-เทอร์นของเซรี่ฟิลด์", C_IS), "หาแอมแปร์-เทอร์นของเซรี่ ให้ได้ระดับการผสมที่ต้องการ", "ที่กระแสโหลดเต็มพิกัด (สมการ 8-6)"], w=4.4, color=C_IS)
-        nx = fit_width(nx, 4.6).move_to([4.7, 0.5, 0])
+        nx = card([("8-14 แอมแปร์-เทอร์นของเซรี่ฟิลด์", C_IS), "หาแอมแปร์-เทอร์นของเซรี่", "ให้ได้ระดับการผสมที่ต้องการ", "ที่กระแสโหลดเต็มพิกัด (สมการ 8-6)"], w=4.2, color=C_IS, size=19)
+        nx = fit_width(nx, 4.4).move_to([4.5, 0.5, 0])
         self.play(FadeIn(nx, shift=UP * 0.2), run_time=0.9)
         self.wait(1.8)
         self.exam("คำถามท้ายบท 8-16 ถึง 8-18: เทียบผสมเกิน · ผสมพอดี · ผสมขาด (รูป 8-13)",
