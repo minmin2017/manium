@@ -195,6 +195,9 @@ class P40_Base3ph(L):
         self.say("กระแสฐาน: จาก S = sqrt3 × V × I  ย้ายข้าง", color=C_IA)
         r3 = bd.add(3, "กระแสฐาน", _m(r"I_{b}=\frac{VA_{3\phi}}{\sqrt{3}\,V_{LL}}", C_IA, 32), color=C_IA, hold=0.8)
         self.glow(r3[1], color=C_IA)
+        self.wait(1.0)
+        self.play(*[FadeOut(r) for r in bd.rows], run_time=0.5)
+        bd = B(self, x=-6.6, y=2.0, gap=0.08)
         self.say("Z ฐาน: ใช้ค่าต่อเฟส  เลข 3 ตัดกันพอดี เหลือ V_LL กำลังสอง หาร VA 3 เฟส", color=C_E)
         r4 = bd.add(4, "Z ฐาน (ตัวเลข 3 ตัดกัน)",
                     _m(r"Z_{b}=\frac{(V_{LL}/\sqrt{3})^{2}}{VA_{3\phi}/3}=\frac{V_{LL}^{2}}{VA_{3\phi}}", C_E, 28), color=C_E, hold=0.8)
@@ -268,17 +271,17 @@ class P47_WhyChange(L):
         L1 = 6.0
         L2 = 6.0 * (230 ** 2 / 300) / (230 ** 2 / 350)
         zr = 0.1 * L1
-        tA = T("ฐาน 350 MVA :  Z ฐาน = 230² / 350 = 151.1 โอห์ม", 21, YEL).move_to([x0 + 3.5, 0.95, 0])
+        tA = fit_width(T("ฐาน 350 MVA :  Z ฐาน = 230² / 350 = 151.1 โอห์ม", 21, YEL), 8.4); tA.move_to([-6.8 + tA.width / 2, 0.95, 0])
         bA = Rectangle(width=L1, height=0.5, stroke_color=YEL, stroke_width=3).move_to([x0 + L1 / 2, 0.35, 0])
         sA = Rectangle(width=zr, height=0.5, stroke_width=0, fill_color=C_E, fill_opacity=0.9).move_to([x0 + zr / 2, 0.35, 0])
         pA = _m(r"\frac{15.11}{151.1}=0.1", YEL, 28).move_to([3.6, 0.35, 0])
         self.play(FadeIn(tA), Create(bA), run_time=0.9)
         self.play(FadeIn(sA), run_time=0.7)
-        zt = T("Z จริง = 0.1 × 151.1 = 15.11 โอห์ม (คำนวณเอง)", 19, C_E).move_to([x0 + 3.4, -0.3, 0])
+        zt = fit_width(T("Z จริง = 0.1 × 151.1 = 15.11 โอห์ม (คำนวณเอง)", 19, C_E), 8.4); zt.move_to([-6.8 + zt.width / 2, -0.3, 0])
         self.play(FadeIn(zt), Write(pA), run_time=1.0)
         self.wait(1.2)
         self.say("เปลี่ยนฐานเป็น 300 MVA: Z ฐาน ใหญ่ขึ้น  Z จริงเท่าเดิม → ส่วนที่ได้เล็กลง", color=C_E)
-        tB = T("ฐาน 300 MVA :  Z ฐาน = 230² / 300 = 176.3 โอห์ม", 21, OK).move_to([x0 + 3.5, -1.2, 0])
+        tB = fit_width(T("ฐาน 300 MVA :  Z ฐาน = 230² / 300 = 176.3 โอห์ม", 21, OK), 8.4); tB.move_to([-6.8 + tB.width / 2, -1.2, 0])
         bB = Rectangle(width=L2, height=0.5, stroke_color=OK, stroke_width=3).move_to([x0 + L2 / 2, -1.8, 0])
         sB = Rectangle(width=zr, height=0.5, stroke_width=0, fill_color=C_E, fill_opacity=0.9).move_to([x0 + zr / 2, -1.8, 0])
         pB = _m(r"\frac{15.11}{176.3}=0.0857", OK, 28).move_to([3.7, -1.8, 0])
@@ -324,8 +327,8 @@ class P49_Derive(L):
                    ("MVA ฐาน 350 → 300 : คูณ 300/350", YEL),
                    ("  p.u. เล็กลง  (0.1 → 0.0857)", YEL),
                    ("kV ฐาน 13.8 > 13.2 : คูณ (13.2/13.8)²", C_S),
-                   ("  = 0.9149  p.u. เล็กลง", C_S)], w=5.3, color=GRAYTXT, size=18)
-        cd.move_to([3.9, -3.0, 0])
+                   ("  = 0.9149  p.u. เล็กลง", C_S)], w=4.6, color=GRAYTXT, size=17)
+        cd.move_to([4.7, -0.7, 0])
         cd2 = None
         self.play(FadeIn(cd), run_time=0.8)
         self.wait(3.0)
@@ -387,17 +390,17 @@ class P52_YY(L):
     def construct(self):
         self.head("หม้อแปลง 3 ตัวต่อ Y-Y: พิกัดรวม + อ้างอิง Z", "หน้า 52–53")
         self.say("หน้า 52: 3 ตัว ตัวละ 25 MVA, 39.8/3.98 kV ต่อ Y-Y โหลด 0.6 โอห์ม/เฟส", color=OK)
-        y1 = ystar(2.9, -0.1, 1.2, C_N)
-        y2 = ystar(6.0, -0.1, 1.2, C_S)
+        y1 = ystar(2.6, -0.1, 1.2, C_N)
+        y2 = ystar(5.5, -0.1, 1.2, C_S)
         p1, p2 = y1.pts, y2.pts
-        h1, h2 = T("HV (แรงสูง)", 15, C_N).move_to([2.9, 1.6, 0]), T("LV (แรงต่ำ)", 15, C_S).move_to([6.0, 1.6, 0])
-        ph1 = T("39.8 kV", 15, WHITE).move_to([2.0, 0.55, 0])
-        ph2 = T("3.98 kV", 15, WHITE).move_to([5.1, 0.55, 0])
+        h1, h2 = T("HV (แรงสูง)", 15, C_N).move_to([2.6, 1.6, 0]), T("LV (แรงต่ำ)", 15, C_S).move_to([5.5, 1.6, 0])
+        ph1 = T("39.8 kV", 15, WHITE).move_to([1.7, 0.55, 0])
+        ph2 = T("3.98 kV", 15, WHITE).move_to([4.6, 0.55, 0])
         d1 = dim([p1[1][0], p1[1][1] - 0.4], [p1[2][0], p1[2][1] - 0.4])
         d2 = dim([p2[1][0], p2[1][1] - 0.4], [p2[2][0], p2[2][1] - 0.4])
-        l1 = T("69 kV", 17, YEL).move_to([2.9, p1[1][1] - 0.8, 0])
-        l2 = T("6.9 kV", 17, YEL).move_to([6.0, p2[1][1] - 0.8, 0])
-        ld = T("โหลด Y: 0.6 โอห์ม/เฟส", 15, WARN).move_to([5.0, -2.9, 0])
+        l1 = T("69 kV", 17, YEL).move_to([2.6, p1[1][1] - 0.8, 0])
+        l2 = T("6.9 kV", 17, YEL).move_to([5.5, p2[1][1] - 0.8, 0])
+        ld = T("โหลด Y: 0.6 โอห์ม/เฟส", 15, WARN).move_to([4.5, -2.9, 0])
         self.play(Create(y1), Create(y2), FadeIn(h1), FadeIn(h2), run_time=1.2)
         self.play(FadeIn(ph1), FadeIn(ph2), run_time=0.6)
         self.play(GrowFromCenter(d1), GrowFromCenter(d2), FadeIn(l1), FadeIn(l2), FadeIn(ld), run_time=0.9)
@@ -435,15 +438,15 @@ class P54_YDelta(L):
     def construct(self):
         self.head("หม้อแปลง Y-Delta: แรงดันสาย 69 กับ 3.98 kV", "หน้า 54–55")
         self.say("หน้า 54: ด้านสูง Y (69 kV สาย) · ด้านต่ำ Delta (3.98 kV) · โหลด Y 0.6 โอห์ม", color=OK)
-        y1 = ystar(2.9, 0.0, 1.2, C_N)
-        d2 = delta_tri(6.0, 0.0, 1.2, C_S)
+        y1 = ystar(2.6, 0.0, 1.2, C_N)
+        d2 = delta_tri(5.5, 0.0, 1.2, C_S)
         p1, p2 = y1.pts, d2.pts
-        h1, h2 = T("HV  Y", 16, C_N).move_to([2.9, 1.6, 0]), T("LV  Delta", 16, C_S).move_to([6.0, 1.6, 0])
+        h1, h2 = T("HV  Y", 16, C_N).move_to([2.6, 1.6, 0]), T("LV  Delta", 16, C_S).move_to([5.5, 1.6, 0])
         d1 = dim([p1[1][0], p1[1][1] - 0.4], [p1[2][0], p1[2][1] - 0.4])
         dd = dim([p2[1][0], p2[1][1] - 0.4], [p2[2][0], p2[2][1] - 0.4])
-        l1 = T("69 kV (สาย)", 15, YEL).move_to([2.9, p1[1][1] - 0.8, 0])
-        l2 = T("3.98 kV (สาย)", 15, YEL).move_to([6.0, p2[1][1] - 0.8, 0])
-        ph = T("39.8 kV", 15, WHITE).move_to([2.0, 0.55, 0])
+        l1 = T("69 kV (สาย)", 15, YEL).move_to([2.6, p1[1][1] - 0.8, 0])
+        l2 = T("3.98 kV (สาย)", 15, YEL).move_to([5.5, p2[1][1] - 0.8, 0])
+        ph = T("39.8 kV", 15, WHITE).move_to([1.7, 0.55, 0])
         self.play(Create(y1), Create(d2), FadeIn(h1), FadeIn(h2), run_time=1.2)
         self.play(FadeIn(ph), GrowFromCenter(d1), GrowFromCenter(dd), FadeIn(l1), FadeIn(l2), run_time=0.9)
         self.wait(0.8)
@@ -466,15 +469,15 @@ class P54_YDelta(L):
         # ---- หน้า 55
         self.say("หน้า 55: วาด Delta ใหม่เป็น Y ได้ แรงดันเฟสด้านต่ำ = 3.98 / sqrt3 = 2.3 kV", color=OK)
         self.play(FadeOut(VGroup(d2, h2, dd, l2)), run_time=0.5)
-        y2 = ystar(6.0, 0.0, 1.2, C_S)
+        y2 = ystar(5.5, 0.0, 1.2, C_S)
         q = y2.pts
-        h2b = T("LV  Y (วาดใหม่)", 16, C_S).move_to([6.0, 1.6, 0])
-        ph2 = T("2.3 kV", 15, C_S).move_to([5.2, 0.55, 0])
+        h2b = T("LV  Y (วาดใหม่)", 16, C_S).move_to([5.5, 1.6, 0])
+        ph2 = T("2.3 kV", 15, C_S).move_to([4.7, 0.55, 0])
         self.play(Create(y2), FadeIn(h2b), FadeIn(ph2), run_time=1.0)
         r4 = bd.add(1, "หน้า 55: เทียบทางที่สอง",
                     _m(r"Z_{HV}=0.6\left(\frac{39.8}{2.3}\right)^{2}\approx180\,\Omega", C_IL, 28), color=C_IL, hold=0.6)
         self.play(Indicate(ph, color=WHITE), Indicate(ph2, color=WHITE), run_time=1.0)
-        cm = T("ได้ 180 เท่ากันทั้งสองทาง  (179.6 ถึง 180.3 = ปัดเศษ)", 17, OK).move_to([-1.5, -1.6, 0])
+        cm = T("ได้ 180 เท่ากันทั้งสองทาง  (179.6 ถึง 180.3 = ปัดเศษ)", 17, OK).move_to([-2.6, -1.6, 0])
         self.play(FadeIn(cm), run_time=0.6)
         self.wait(3.0)
         self.keep("Y-Delta: แรงดันสายสองด้านเทียบกันตรงๆ (69 กับ 3.98) — ไม่ใช่ 69 กับ 6.9",
@@ -535,7 +538,7 @@ class P59_Principles(L):
     def construct(self):
         self.head("หลักคำนวณเขียนรีแอคแตนซ์ 5 ข้อ", "หน้า 59–60")
         self.say("ท่องทีละข้อ  ซ้าย = หลักการ  ขวา = ภาพประกอบ (ใช้เลขจากตัวอย่างหลัก)", color=OK)
-        XR = 4.4
+        XR = 3.9
         rules = [
             ("1. ฐาน 3 เฟส = แรงดันสาย (V_line)\n    + กำลังรวม 3 เฟส (S)", YEL),
             ("2. อีกด้านของหม้อแปลง: kV ตามอัตราส่วนแรงดันสาย\n    MVA เท่ากันทุกจุด", OK),
@@ -569,6 +572,7 @@ class P59_Principles(L):
                              T("Z 3 เฟส = Z 1 เฟส", 22, C_IA).move_to([XR + 1.3, -0.3, 0]))
             else:
                 vis = _m(r"Z_{new}=Z_{given}\left(\frac{kV_{g}}{kV_{n}}\right)^{2}\frac{MVA_{n}}{MVA_{g}}", C_E, 30).move_to([XR, 0.3, 0])
+            vis = fit_width(vis, 6.0).move_to([3.9, vis.get_center()[1], 0])
             self.play(FadeIn(vis), run_time=0.7)
             self.wait(2.0)
         self.wait(1.5)
@@ -788,6 +792,9 @@ class P70_Line(L):
         f = MX(r"X_{line}", r"=", r"\frac{32}{176.3}", r"=", r"0.1815", font_size=34)
         r3 = bd.add(3, "p.u.", f, color=YEL, hold=0.6)
         self.glow(f[4], color=YEL)
+        self.wait(1.0)
+        self.play(*[FadeOut(r) for r in bd.rows], run_time=0.5)
+        bd = B(self, x=-6.6, y=2.0, gap=0.1)
         self.say("ตรวจกับดัก: ถ้าเผลอใช้ kV ของโซนอื่น จะได้ผลผิดมาก", color=WARN)
         r4 = bd.add(4, "ใช้ฐานผิดโซน (คำนวณเอง)",
                     VGroup(_m(r"32/(20^{2}/300)=24.0", WARN, 26), _m(r"32/(13.8^{2}/300)=50.4", WARN, 26)).arrange(DOWN, aligned_edge=LEFT, buff=0.1),
@@ -807,8 +814,9 @@ class P71_Motors(L):
     def construct(self):
         self.head("ขั้น 6–7: รีแอคแตนซ์มอเตอร์ M1 และ M2", "หน้า 71–72")
         self.say("ฐานโซนมอเตอร์: 13.8 kV , 300 MVA  แต่มอเตอร์พิกัด 13.2 kV  และ 200 / 100 MVA — ไม่ตรงทั้งคู่", color=OK)
-        fac = _m(r"\left(\frac{13.2}{13.8}\right)^{2}=0.9149", C_S, 30).move_to([-3.2, -3.2, 0])
-        facl = T("ตัวคูณแรงดัน (ใช้ร่วมกันทั้ง M1 และ M2)", 15, GRAYTXT).move_to([2.8, -3.2, 0])
+        fac = _m(r"\left(\frac{13.2}{13.8}\right)^{2}=0.9149", C_S, 24)
+        facl = T("= ตัวคูณแรงดัน ใช้ร่วมกันทั้ง M1 และ M2", 15, GRAYTXT)
+        fg = VGroup(fac, facl).arrange(RIGHT, buff=0.4).move_to([0, -3.55, 0])
         self.play(Write(fac), FadeIn(facl), run_time=1.2)
         self.wait(0.6)
         b1 = B(self, x=-6.8, y=2.0, gap=0.08)
