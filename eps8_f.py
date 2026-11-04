@@ -49,7 +49,7 @@ class P01_EMFFormula(Lesson):
     """8-1 บทนำ + 8-2: E = (ZP/60a) φ n = k φ n  (Z, P, a คงที่ → ตัวแปรมีแค่ φ และ n)"""
 
     def construct(self):
-        self.head("8-2 แรงเคลื่อนที่ถูกเหนี่ยวนำในอาร์เมเจอร์", "หน้า 1 · 8-1, 8-2, สมการ 8-1, 8-2")
+        self.head("8-2 แรงเคลื่อนที่ถูกเหนี่ยวนำในอาร์เมเจอร์", "หน้า 1 · 8-1, 8-2")
         # ---------- 8-1 บทนำ
         self.say("8-1: เครื่องกำเนิดกระแสตรงมีหลายแบบ ลักษณะการทำงานต่างกัน → ต้องรู้ลักษณะสมบัติก่อนเลือกใช้ (บทนี้เทียบทุกแบบ)")
         lead = fit_width(Text("เครื่องกำเนิดไฟฟ้ากระแสตรง: ชนิดที่จะเรียนในบทนี้", font_size=22, color=GRAYTXT), 11).move_to([0, 1.4, 0])
@@ -130,7 +130,7 @@ class P27_SeriesGenerator(Lesson):
         ld = res_zig([XR, 0.7], [XR, -0.7], n=4, color=C_R)
         wires = VGroup(wire((XL, 0.45), (XL, YT), (-4.6, YT)), wire((-2.6, YT), (XR, YT), (XR, 0.7)),
                        wire((XR, -0.7), (XR, YB), (XL, YB), (XL, -0.45)))
-        t_arm = Text("อาร์เมเจอร์", font_size=18, color=C_E).move_to([-5.05, 0.0, 0])
+        t_arm = Text("อาร์เมเจอร์", font_size=18, color=C_E).move_to([-4.8, 0.0, 0])
         t_ser = Text("เซรี่ฟิลด์ (ฟิลด์ชุดเดียว)", font_size=18, color=C_IS).move_to([-3.6, YT + 0.5, 0])
         t_ld = Text("โหลด", font_size=18, color=C_R).move_to([XR + 0.65, 0.0, 0])
         circ = VGroup(wires, ser, ld, arm, t_arm, t_ser, t_ld)
@@ -177,15 +177,15 @@ class P27_SeriesGenerator(Lesson):
         c_e = dotted(scv(ax, E0, C_E, 3), C_E, 3)
         c_2 = dotted(scv(ax, V2, YEL, 3), YEL, 3)
         c_3 = scv(ax, V3, WHITE, 6, 0.0, 1.16)
-        t_e = Text("แรงเคลื่อนที่เกิดขึ้น\nขณะที่ไม่มีโหลด", font_size=19, color=C_E, line_spacing=0.9).move_to([-0.2, 0.85, 0])
+        t_e = Text("แรงเคลื่อนที่เกิดขึ้น\nขณะที่ไม่มีโหลด", font_size=19, color=C_E, line_spacing=0.9).move_to([0.0, 1.6, 0])
         pa, pb2 = ax.c2p(1.06, E0(1.06)), ax.c2p(1.06, V2(1.06))
         pc = ax.c2p(1.06, float(V3(1.06)))
         arr_a = DoubleArrow(pa, pb2, buff=0, color=YEL, stroke_width=3, tip_length=0.13)
         arr_b = DoubleArrow(pb2, pc, buff=0, color=WARN, stroke_width=3, tip_length=0.13)
         t_a = Text("แรงดันลดลง เนื่องจากความต้านทาน\nของอาร์เมเจอร์และเซรี่ฟิลด์", font_size=18, color=YEL, line_spacing=0.9)
-        t_a.move_to([pa[0] + 0.25 + t_a.width / 2, (pa[1] + pb2[1]) / 2 + 0.55, 0])
+        t_a.move_to([pa[0] + 0.45 + t_a.width / 2, 0.75, 0])
         t_b = Text("แรงดันลดลง เนื่องจาก\nอาร์เมเจอร์รีแอคชั่น", font_size=18, color=WARN, line_spacing=0.9)
-        t_b.move_to([pb2[0] + 0.25 + t_b.width / 2, (pb2[1] + pc[1]) / 2 - 0.2, 0])
+        t_b.move_to([pb2[0] + 0.45 + t_b.width / 2, -0.1, 0])
         self.play(Create(g), run_time=1.0)
         self.play(Create(c_e), FadeIn(t_e), run_time=1.4)
         self.say("หักแรงดันตกที่ความต้านทานของอาร์เมเจอร์และเซรี่ฟิลด์ (Ia·Ra + Is·Rs) → เส้นประล่าง", color=YEL)
