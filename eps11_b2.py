@@ -5,9 +5,9 @@ P17_ThreePhase (17-19) · P20_SingleLine (20) · P21_Impedance (21) · P22_React
 from eps11_lib import *
 
 
-def _row(sym, text, x0, y, color=WHITE, size=21):
+def _row(sym, text, x0, y, color=WHITE, size=21, maxw=4.6):
     sym.move_to([x0, y, 0])
-    t = T(text, size, color)
+    t = fit_width(T(text, size, color), maxw)
     t.move_to([x0 + 1.15, y, 0]).align_to([x0 + 0.95, 0, 0], LEFT)
     return VGroup(sym, t)
 
@@ -65,8 +65,7 @@ class P03_Symbols1(Lesson):
             (cap, "คาปาซิเตอร์ (C)", 0.9, -2.2),
         ]
         for sym, txt, x0, y in rows:
-            r = _row(sym, txt, x0 + 0.5, y, size=24)
-            fit_width(r[1], 4.6)
+            r = _row(sym, txt, x0 + 0.5, y, size=24, maxw=4.4)
             self.play(FadeIn(r, shift=UP * 0.15), run_time=0.7)
             self.wait(0.9)
         self.wait(1.0)
@@ -101,7 +100,7 @@ class P04_Symbols2(Lesson):
             col, row = divmod(i, 5)
             x0 = -6.4 + 6.7 * col
             y = 1.6 - row * 1.0
-            r = _row(sym, txt, x0 + 0.5, y, size=23)
+            r = _row(sym, txt, x0 + 0.5, y, size=22, maxw=4.9)
             self.play(FadeIn(r, shift=UP * 0.12), run_time=0.55)
             self.wait(0.55)
         self.wait(1.2)

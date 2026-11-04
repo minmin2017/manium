@@ -332,7 +332,7 @@ class P26_PerUnitDef(Lesson):
         # ภาพ: แท่ง
         self.play(f.animate.scale(0.7).move_to([-3.8, 1.5, 0]), run_time=0.8)
         base = Rectangle(width=1.2, height=2.2, fill_color=C_B, fill_opacity=0.5, stroke_color=C_B).move_to([3.4, -1.1, 0])
-        act = Rectangle(width=1.2, height=2.2 * 1.03, fill_color=C_A, fill_opacity=0.5, stroke_color=C_A).next_to(base, LEFT, buff=0.7).align_to(base, DOWN)
+        act = Rectangle(width=1.2, height=2.2 * 1.03, fill_color=C_A, fill_opacity=0.5, stroke_color=C_A).next_to(base, LEFT, buff=1.2).align_to(base, DOWN)
         bl = T("ฐาน = 1.00", 20, C_B).next_to(base, DOWN, buff=0.15)
         al = T("จริง = 1.03", 20, C_A).next_to(act, DOWN, buff=0.15)
         self.play(FadeIn(base), FadeIn(bl), run_time=0.7)
