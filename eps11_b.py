@@ -108,8 +108,8 @@ class P11_ModelCircuit(Lesson):
         self.play(Create(VGroup(L, S, X, R)), run_time=2.0)
         self.wait(0.8)
         # chip อธิบาย
-        c1 = card([("r₁ x₁ r₂ x₂", YEL), "ต้านทาน / รีแอคแตนซ์รั่ว", "ของขดลวดแต่ละด้าน"], w=3.0, color=YEL, size=19).move_to([5.7, 1.6, 0])
-        c2 = card([("B , G", C_PHI), "สาขาขนาน (I_E)", "= สร้างฟลักซ์ + สูญเสียแกน"], w=3.0, color=C_PHI, size=19).move_to([5.7, -0.4, 0])
+        c1 = fit_width(card([("r₁ x₁ r₂ x₂", YEL), "ต้านทาน / รีแอคแตนซ์รั่ว", "ของขดลวดแต่ละด้าน"], w=2.8, color=YEL, size=19), 3.0).move_to([5.45, 1.6, 0])
+        c2 = fit_width(card([("B , G", C_PHI), "สาขาขนาน (I_E)", "สร้างฟลักซ์ + สูญเสียแกน"], w=2.8, color=C_PHI, size=19), 3.0).move_to([5.45, -0.4, 0])
         self.play(FadeIn(c1), Indicate(L[6], color=C_IF), Indicate(R[5], color=C_IF), run_time=1.0)
         self.wait(1.0)
         self.play(FadeIn(c2), Indicate(S[2], color=C_PHI), Indicate(S[3], color=C_E), run_time=1.0)
@@ -181,12 +181,12 @@ class P13_Collapse(Lesson):
         self.say("2) เหลือ 4 ตัวต่ออนุกรมกัน → บวกกันได้เลย:  R₁ = r₁ + a²r₂ ,  X₁ = x₁ + a²x₂", color=OK)
         box1 = SurroundingRectangle(VGroup(e["r1"], e["a2r2"]), color=C_R, buff=0.18)
         self.play(Create(box1), run_time=0.6)
-        f1 = M(r"R_1=r_1+a^2 r_2", C_R, 32).move_to([2.9, 1.7, 0])
+        f1 = M(r"R_1=r_1+a^2 r_2", C_R, 32).move_to([3.4, 2.0, 0])
         self.play(Write(f1), run_time=1.2)
         self.play(FadeOut(box1), run_time=0.3)
         box2 = SurroundingRectangle(VGroup(e["x1"], e["a2x2"]), color=C_IF, buff=0.18)
         self.play(Create(box2), run_time=0.6)
-        f2 = M(r"X_1=x_1+a^2 x_2", C_IF, 32).move_to([2.9, 0.6, 0])
+        f2 = M(r"X_1=x_1+a^2 x_2", C_IF, 32).move_to([3.4, 1.2, 0])
         self.play(Write(f2), run_time=1.2)
         self.play(FadeOut(box2), run_time=0.3)
         self.wait(0.8)
@@ -204,7 +204,7 @@ class P13_Collapse(Lesson):
         self.say("3) หน้า 14: X₁ มากกว่า R₁ เป็นจำนวนมาก → ตัด R₁ ได้", color=C_E)
         bars = VGroup(Rectangle(width=0.5, height=1.9, fill_color=C_IF, fill_opacity=0.8, stroke_width=0),
                       Rectangle(width=0.5, height=0.2, fill_color=C_R, fill_opacity=0.8, stroke_width=0)).arrange(RIGHT, buff=0.5, aligned_edge=DOWN)
-        bars.move_to([3.4, -0.7, 0])
+        bars.move_to([3.4, -1.4, 0])
         bl = VGroup(M(r"X_1", C_IF, 22).next_to(bars[0], DOWN, buff=0.1), M(r"R_1", C_R, 22).next_to(bars[1], DOWN, buff=0.1))
         bn = T("ภาพเปรียบเทียบขนาด (ประกอบ)", 16, GRAYTXT).next_to(bars, UP, buff=0.2)
         self.play(FadeIn(bars), FadeIn(bl), FadeIn(bn), run_time=1.0)
@@ -331,8 +331,8 @@ class P26_PerUnitDef(Lesson):
         self.wait(1.5)
         # ภาพ: แท่ง
         self.play(f.animate.scale(0.7).move_to([-3.8, 1.5, 0]), run_time=0.8)
-        base = Rectangle(width=1.2, height=1.6, fill_color=C_B, fill_opacity=0.5, stroke_color=C_B).move_to([2.4, -1.3, 0])
-        act = Rectangle(width=1.2, height=1.6 * 1.03, fill_color=C_A, fill_opacity=0.5, stroke_color=C_A).align_to(base, DOWN).shift(RIGHT * 1.6)
+        base = Rectangle(width=1.2, height=2.2, fill_color=C_B, fill_opacity=0.5, stroke_color=C_B).move_to([3.4, -1.1, 0])
+        act = Rectangle(width=1.2, height=2.2 * 1.03, fill_color=C_A, fill_opacity=0.5, stroke_color=C_A).next_to(base, LEFT, buff=0.7).align_to(base, DOWN)
         bl = T("ฐาน = 1.00", 20, C_B).next_to(base, DOWN, buff=0.15)
         al = T("จริง = 1.03", 20, C_A).next_to(act, DOWN, buff=0.15)
         self.play(FadeIn(base), FadeIn(bl), run_time=0.7)
@@ -353,8 +353,9 @@ class P26_PerUnitDef(Lesson):
         self.play(FadeOut(VGroup(f, base, act, bl, al, card1, ck)), run_time=0.7)
         items = [("Z", "อิมพีแดนซ์", C_E), ("V", "แรงดัน", C_IL), ("I", "กระแส", C_IA), ("P,Q,S", "กำลังไฟฟ้า", C_B)]
         cards = VGroup(*[VGroup(M(a, c, 40), T(b, 24, c)).arrange(DOWN, buff=0.2) for a, b, c in items])
-        cards.arrange(RIGHT, buff=1.0).move_to([0, 0, 0])
-        frames = VGroup(*[RoundedRectangle(width=2.5, height=1.9, corner_radius=0.12, stroke_color=c[0].get_color(), stroke_width=3).move_to(c) for c in cards])
+        for c, x in zip(cards, (-5.25, -1.75, 1.75, 5.25)):
+            c.move_to([x, 0, 0])
+        frames = VGroup(*[RoundedRectangle(width=3.0, height=2.0, corner_radius=0.12, stroke_color=c[0].get_color(), stroke_width=3).move_to(c) for c in cards])
         for c, fr in zip(cards, frames):
             self.play(FadeIn(c), Create(fr), run_time=0.7)
         self.wait(1.2)
@@ -382,12 +383,13 @@ class P31_WhyBase(Lesson):
         # วงจรแทน
         top, bot = -0.5, -2.6
         e = src(-5.4, (top + bot) / 2, "", C_E, r=0.3)
-        el = VGroup(MathTex(r"E=115\,kV", font_size=22, color=C_E).next_to(e, LEFT, buff=0.1))
+        el = VGroup(MathTex(r"E=115\,kV", font_size=22, color=C_E).next_to(e, DOWN, buff=0.15))
         xt_ = coil_sym((-4.2, top), (-2.9, top), n=3, color=C_IF)
         rl = res_zig((-1.2, top), (-1.2, bot), color=C_IA)
         eq = VGroup(wire((-5.4, (top + bot) / 2 + 0.3), (-5.4, top), (-4.2, top)),
                     wire((-2.9, top), (-1.2, top)), wire((-5.4, (top + bot) / 2 - 0.3), (-5.4, bot), (-1.2, bot)),
                     xt_, rl, el, M(r"jX_t", C_IF, 22).move_to([-3.55, top + 0.4, 0]), M(r"600\,\Omega", C_IA, 22).move_to([-0.5, (top + bot) / 2, 0]))
+        eq.add(e)
         self.play(Create(eq), run_time=1.4)
         f = M(r"I\ \neq\ \frac{E}{jX_t+600}\ \ [A]", WHITE, 34).move_to([3.7, -1.5, 0])
         self.play(Write(f), run_time=1.3)

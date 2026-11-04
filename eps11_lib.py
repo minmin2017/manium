@@ -26,7 +26,7 @@ def M(tex, color=WHITE, size=26):
 
 
 def T(txt, size=22, color=WHITE):
-    return Text(txt, font_size=size, color=color, line_spacing=0.9)
+    return Text(txt, font_size=size * 1.12, color=color, line_spacing=0.9)
 
 
 def ebox(cx, cy, tex, color=WHITE, w=0.95, h=0.44, size=22):

@@ -55,18 +55,18 @@ class P03_Symbols1(Lesson):
         cap = VGroup(Line([0, 0.45, 0], [0, 0.08, 0], color=WHITE, stroke_width=3), Line([-0.25, 0.08, 0], [0.25, 0.08, 0], color=WHITE, stroke_width=3),
                      Line([-0.25, -0.05, 0], [0.25, -0.05, 0], color=WHITE, stroke_width=3), Line([0, -0.05, 0], [0, -0.3, 0], color=WHITE, stroke_width=3), _ground(0, -0.3))
         rows = [
-            (VGroup(_mach("M"), T("หรือ", 16, GRAYTXT), _mach("G")).arrange(RIGHT, buff=0.1), "เครื่องจักรไฟฟ้า (M = มอเตอร์ , G = เครื่องกำเนิด)", -6.6, 1.55),
+            (VGroup(_mach("M"), T("หรือ", 16, GRAYTXT), _mach("G")).arrange(RIGHT, buff=0.1), "เครื่องจักรไฟฟ้า (M, G)", -6.6, 1.55),
             (Line([-0.5, 0, 0], [0.5, 0, 0], color=WHITE, stroke_width=3), "สายส่ง", -6.6, 0.3),
             (two, "หม้อแปลงไฟฟ้ากำลัง 2 ขดลวด", -6.6, -0.95),
             (three, "หม้อแปลงไฟฟ้ากำลัง 3 ขดลวด", -6.6, -2.2),
-            (_ysym(False), "ระบบ 3 เฟส แบบ Y  ไม่ต่อลงดิน", 0.4, 1.55),
-            (_ysym(True), "ระบบ 3 เฟส แบบ Y  ต่อลงดิน", 0.4, 0.3),
-            (tri, "ระบบ 3 เฟส แบบเดลต้า (Δ)", 0.4, -0.95),
-            (cap, "คาปาซิเตอร์ (C)", 0.4, -2.2),
+            (_ysym(False), "ระบบ 3 เฟส แบบ Y  ไม่ต่อลงดิน", 0.9, 1.55),
+            (_ysym(True), "ระบบ 3 เฟส แบบ Y  ต่อลงดิน", 0.9, 0.3),
+            (tri, "ระบบ 3 เฟส แบบเดลต้า (Δ)", 0.9, -0.95),
+            (cap, "คาปาซิเตอร์ (C)", 0.9, -2.2),
         ]
         for sym, txt, x0, y in rows:
-            r = _row(sym, txt, x0 + 0.5, y)
-            fit_width(r[1], 5.6)
+            r = _row(sym, txt, x0 + 0.5, y, size=24)
+            fit_width(r[1], 4.6)
             self.play(FadeIn(r, shift=UP * 0.15), run_time=0.7)
             self.wait(0.9)
         self.wait(1.0)
@@ -88,8 +88,8 @@ class P04_Symbols2(Lesson):
         pt = VGroup(coil_sym((-0.45, 0), (-0.05, 0), n=2, r=0.1), coil_sym((0.05, 0), (0.45, 0), n=2, r=0.1))
         ct = on_line(Arc(radius=0.2, start_angle=0, angle=PI, color=WHITE, stroke_width=3), Arc(radius=0.2, start_angle=PI, angle=PI, color=WHITE, stroke_width=3).shift(RIGHT * 0.0))
         oil = on_line(Square(0.38, color=WHITE, stroke_width=3))
-        am = VGroup(ln(), Circle(radius=0.26, color=WHITE, stroke_width=3), Text("A", font_size=20, color=WHITE))
-        vm = VGroup(ln(), Circle(radius=0.26, color=WHITE, stroke_width=3), Text("V", font_size=20, color=WHITE))
+        am = VGroup(Line([-0.55, 0, 0], [-0.26, 0, 0], color=WHITE, stroke_width=3), Line([0.26, 0, 0], [0.55, 0, 0], color=WHITE, stroke_width=3), Circle(radius=0.26, color=WHITE, stroke_width=3), Text("A", font_size=20, color=WHITE))
+        vm = VGroup(Line([-0.55, 0, 0], [-0.26, 0, 0], color=WHITE, stroke_width=3), Line([0.26, 0, 0], [0.55, 0, 0], color=WHITE, stroke_width=3), Circle(radius=0.26, color=WHITE, stroke_width=3), Text("V", font_size=20, color=WHITE))
         bus = VGroup(Line([-0.5, 0, 0], [0.5, 0, 0], color=WHITE, stroke_width=3), Line([0, -0.25, 0], [0, 0.25, 0], color=WHITE, stroke_width=3))
         load = VGroup(Line([0, -0.25, 0], [0, 0.25, 0], color=WHITE, stroke_width=3), Arrow([0, 0, 0], [0.45, 0, 0], buff=0, color=WHITE, stroke_width=3, tip_length=0.15))
         sw = VGroup(Line([-0.5, 0, 0], [-0.15, 0, 0], color=WHITE, stroke_width=3), Line([-0.15, 0, 0], [0.25, 0.25, 0], color=WHITE, stroke_width=3), Line([0.25, 0, 0], [0.5, 0, 0], color=WHITE, stroke_width=3))
@@ -101,7 +101,7 @@ class P04_Symbols2(Lesson):
             col, row = divmod(i, 5)
             x0 = -6.4 + 6.7 * col
             y = 1.6 - row * 1.0
-            r = _row(sym, txt, x0 + 0.5, y, size=20)
+            r = _row(sym, txt, x0 + 0.5, y, size=23)
             self.play(FadeIn(r, shift=UP * 0.12), run_time=0.55)
             self.wait(0.55)
         self.wait(1.2)
@@ -142,7 +142,7 @@ class P05_SingleLineSystem(Lesson):
         self.wait(1.0)
         # หน้า 6
         self.newpage("หน้า 6")
-        self.say("หน้า 6: ตัวอย่างจริง — โรงงาน 115 kV → 13.8 kV → 2.4 kV / 0.48 kV  (มีหม้อแปลง TX-1…TX-4 , มอเตอร์ M-1…M-4)", color=OK)
+        self.say("หน้า 6: ตัวอย่างจริงของโรงงาน — แรงดันลดเป็นขั้นด้วยหม้อแปลง TX-1…TX-4", color=OK)
         self.fade_out_all(run_time=0.6)
         self._cap = None
         lv = [(115, "115 kV", C_E, 1.9), (13.8, "13.8 kV", C_IA, 0.5), (2.4, "2.4 kV / 0.48 kV", C_IL, -0.9)]
@@ -150,7 +150,7 @@ class P05_SingleLineSystem(Lesson):
         pr = page_ref("หน้า 6")
         self.play(FadeIn(t), FadeIn(pr), run_time=0.5)
         self._ttl, self._ref = t, pr
-        cap = caption_top("ไล่จากบนลงล่าง: แหล่งจ่าย 115 kV → TX-1 → บัส 13.8 kV → TX-2, TX-3, TX-4 → บัสแรงต่ำ → มอเตอร์", color=OK)
+        cap = caption_top("ไล่จากบนลงล่าง: 115 kV → TX-1 → บัส 13.8 kV → TX-2/3/4 → บัสแรงต่ำ → มอเตอร์", color=OK)
         self.play(FadeIn(cap), run_time=0.5)
         self._cap = cap
         bus1 = Line([-4.0, 1.0, 0], [4.0, 1.0, 0], color=WHITE, stroke_width=7)
@@ -195,11 +195,11 @@ class P08_IdealModel(Lesson):
         self.wait(1.6)
         self.say("หน้า 9: แบบจำลองอุดมคติ — ไม่มีการสูญเสียเลย", color=OK)
         self.play(FadeOut(VGroup(cc, fr)), run_time=0.6)
-        p = core_pic(-3.2, 0.1)
-        p["all"].scale(1.2, about_point=np.array([-3.2, 0.1, 0]))
+        p = core_pic(-2.9, 0.1)
+        p["all"].scale(1.1, about_point=np.array([-2.9, 0.1, 0]))
         n1 = M(r"N_1", C_R, 26).next_to(p["c1"], LEFT, buff=0.1).shift(UP * 0.1)
         n2 = M(r"N_2", C_S, 26).next_to(p["c2"], RIGHT, buff=0.1).shift(UP * 0.1)
-        lab = VGroup(T("แหล่งจ่าย", 17, GRAYTXT).next_to(p["src"], DOWN, buff=0.15), T("โหลด", 17, GRAYTXT).next_to(p["load"], DOWN, buff=0.15))
+        lab = VGroup(T("แหล่งจ่าย", 17, GRAYTXT).move_to(p["src"].get_center() + DOWN * 1.25), T("โหลด", 17, GRAYTXT).move_to(p["load"].get_center() + DOWN * 1.25))
         self.play(FadeIn(p["all"]), run_time=1.0)
         self.play(FadeIn(n1), FadeIn(n2), FadeIn(lab), run_time=0.6)
         self.wait(0.8)
@@ -350,7 +350,7 @@ class P21_Impedance(Lesson):
         parts = VGroup()
         s1, s2 = src(-6.4, -0.4, "", YEL, r=0.24), src(-5.4, -0.4, "", YEL, r=0.24)
         parts.add(s1, s2)
-        parts.add(MathTex("E_1", font_size=20, color=YEL).next_to(s1, LEFT, buff=0.1), MathTex("E_2", font_size=20, color=YEL).next_to(s2, DOWN, buff=0.1))
+        parts.add(MathTex("E_1", font_size=20, color=YEL).next_to(s1, LEFT, buff=0.1), MathTex("E_2", font_size=20, color=YEL).next_to(s2, RIGHT, buff=0.12))
         parts.add(wire((-6.4, -0.14), (-6.4, top), (-5.4, top)), wire((-5.4, -0.14), (-5.4, top)))
         parts.add(wire((-6.4, -0.66), (-6.4, bot), (6.2, bot)), wire((-5.4, -0.66), (-5.4, bot)))
         la = ebox(-4.2, -0.4, "A", C_IA, w=0.6, h=0.7, size=22)
@@ -399,14 +399,14 @@ class P22_Reactance(Lesson):
                       wire((-5.6, -0.97), (-5.6, bot), (5.6, bot)), wire((-4.5, -0.97), (-4.5, bot)), wire((5.6, -0.97), (5.6, bot)))
         labs = VGroup(M(r"E_1", YEL, 20).next_to(e1, LEFT, buff=0.12), M(r"E_2", YEL, 20).next_to(e2, RIGHT, buff=0.12), M(r"E_3", YEL, 20).next_to(e3, RIGHT, buff=0.12),
                       M(r"T_1", WHITE, 22).move_to([-2.9, 1.4, 0]), T("สายส่ง", 20, C_E).move_to([0.15, 1.4, 0]), M(r"T_2", WHITE, 22).move_to([3.3, 1.4, 0]),
-                      T("นิวทรัล", 20, C_E).move_to([0.2, bot - 0.35, 0]))
+                      T("นิวทรัล", 20, C_E).move_to([-1.9, bot - 0.35, 0]))
         self.play(Create(base), FadeIn(labs), run_time=1.8)
         self.wait(1.0)
         # รายการตัด
         self.say("ตัดได้ 3 อย่าง: ความต้านทาน · กระแส magnetizing ของหม้อแปลง · รีแอคแตนซ์ความจุของสายส่ง", color=YEL)
-        rr = VGroup(M(r"R", C_R, 26), T("ความต้านทาน", 17, C_R)).arrange(DOWN, buff=0.1).move_to([-4.0, -2.5, 0])
-        mm = VGroup(M(r"I_E", C_PHI, 26), T("กระแส magnetizing", 17, C_PHI)).arrange(DOWN, buff=0.1).move_to([0.0, -2.5, 0])
-        cc = VGroup(M(r"X_C", C_PHI, 26), T("ความจุของสายส่ง", 17, C_PHI)).arrange(DOWN, buff=0.1).move_to([4.0, -2.5, 0])
+        rr = VGroup(M(r"R", C_R, 26), T("ความต้านทาน", 17, C_R)).arrange(DOWN, buff=0.1).move_to([-4.6, -2.75, 0])
+        mm = VGroup(M(r"I_E", C_PHI, 26), T("กระแส magnetizing", 17, C_PHI)).arrange(DOWN, buff=0.1).move_to([0.8, -2.75, 0])
+        cc = VGroup(M(r"X_C", C_PHI, 26), T("ความจุของสายส่ง", 17, C_PHI)).arrange(DOWN, buff=0.1).move_to([4.8, -2.75, 0])
         bars = []
         for g_, col in ((rr, C_R), (mm, C_PHI), (cc, C_PHI)):
             self.play(FadeIn(g_), run_time=0.7)
