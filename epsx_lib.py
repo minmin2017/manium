@@ -50,14 +50,14 @@ XSH, XA, XJ, XL = 0.35, 1.95, 4.25, 6.15
 YT, YB, YM = 1.2, -2.1, -0.45
 
 
-def cur(p0, p1, tex, color, where=UP, size=22, buff=0.06):
+def cur(p0, p1, tex, color, where=UP, size=26, buff=0.06):
     a = Arrow([p0[0], p0[1], 0], [p1[0], p1[1], 0], buff=0, color=color, stroke_width=4, tip_length=0.15,
               max_tip_length_to_length_ratio=0.5)
     t = MathTex(tex, font_size=size, color=color).next_to(a, where, buff=buff)
     return VGroup(a, t)
 
 
-def cg_fig(kind, rf_t, ra_t, rse_t, vt_t, load_t, ia_t="I_a", if_t="I_f", is_t="I_s", il_t="I_L", ls=20):
+def cg_fig(kind, rf_t, ra_t, rse_t, vt_t, load_t, ia_t="I_a", if_t="I_f", is_t="I_s", il_t="I_L", ls=24):
     """วงจรเครื่องกำเนิดผสม kind='long'|'short' ตามรูปข้อสอบ: ชันท์ซ้าย, อาร์เมเจอร์กลาง, เซรี่บน, โหลดขวา"""
     arm = arm_sym([XA, YM], r=0.42)
     w_a = wire((XA, YM + 0.45), (XA, YT), (XA + 0.2, YT))

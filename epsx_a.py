@@ -7,7 +7,7 @@ from epsx_lib import *
 # =============================================================== Q01 ข้อสอบปลายภาค 2/2564 ข้อ 1
 class Q01_F64_LongShunt(Solve):
     def construct(self):
-        self.head("ข้อสอบปลายภาค 2/2564 ข้อ 1 · compound long-shunt", "final 2/2564 · ข้อ 1 · รูปที่ 1")
+        self.head("ปลายภาค 2/2564 ข้อ 1 · long-shunt", "ข้อ 1 · รูปที่ 1")
         self.say("เครื่องกำเนิดผสม long-shunt 10 kW 125 V · สูญเสียหมุน 580 W · จ่ายเต็มพิกัด", color=OK)
         fig = cg_fig("long", r"R_f=62.5\,\Omega", r"R_a=0.12\,\Omega", r"R_{se}=0.022\,\Omega", r"V_t=125\,V", r"10\,kW")
         self.play(Create(fig), run_time=2.0)
@@ -57,7 +57,7 @@ class Q01_F64_LongShunt(Solve):
 # =============================================================== Q02 ไดเวอร์เตอร์
 class Q02_F64_Diverter(Solve):
     def construct(self):
-        self.head("ข้อสอบปลายภาค 2/2564 ข้อ 2 · ไดเวอร์เตอร์", "final 2/2564 · ข้อ 2")
+        self.head("ปลายภาค 2/2564 ข้อ 2 · ไดเวอร์เตอร์", "ข้อ 2")
         self.say("ผสม 100 kW 600 V · อยากได้ 625 V ที่ 135 A · ชันท์ต้องเพิ่มอีก 2.3 A · ชันท์ 400 รอบ · เซรี่ 7.5 รอบ", color=OK)
         nl, nr = (1.6, 0.15), (6.0, 0.15)
         w_in = wire((0.7, 0.15), nl)
@@ -115,7 +115,7 @@ class Q02_F64_Diverter(Solve):
 # =============================================================== Q03 แรงดันเพิ่มขึ้น (over-compound) + voltage regulation
 class Q03_F64_OverCompoundVR(Solve):
     def construct(self):
-        self.head("ข้อสอบปลายภาค 2/2564 ข้อ 3 · ผสมเกิน + voltage regulation", "final 2/2564 · ข้อ 3")
+        self.head("ปลายภาค 2/2564 ข้อ 3 · ผสมเกิน + VR", "ข้อ 3")
         self.say("ผสมแบบแรงดันเพิ่มขึ้น: ขั้ว 130 V ตอนจ่ายโหลดไกล · สายตก 10 V · ปลดโหลดแล้วขั้วเหลือ 120 V", color=OK)
         g = VGroup(Circle(radius=0.38, stroke_color=C_E, stroke_width=3, fill_color=C_E, fill_opacity=0.15).move_to([1.0, 0.95, 0]),
                    Text("G", font_size=22, color=C_E).move_to([1.0, 0.95, 0]))
@@ -181,7 +181,7 @@ class Q03_F64_OverCompoundVR(Solve):
 # =============================================================== Q04 short-shunt
 class Q04_F64_ShortShunt(Solve):
     def construct(self):
-        self.head("ข้อสอบปลายภาค 2/2564 ข้อ 4 · compound short-shunt", "final 2/2564 · ข้อ 4 · รูปที่ 2")
+        self.head("ปลายภาค 2/2564 ข้อ 4 · short-shunt", "ข้อ 4 · รูปที่ 2")
         self.say("short-shunt จ่าย 50 A ที่ 500 V · Ra 0.162 โอห์ม · Rse 0.08 โอห์ม · Rf 200 โอห์ม · สูญเสียหมุน 520 W", color=OK)
         fig = cg_fig("short", r"R_f=200\,\Omega", r"R_a=0.162\,\Omega", r"R_{se}=0.08\,\Omega", r"V_t=500\,V", r"Load",
                      il_t=r"I_L=50\,A")
@@ -242,7 +242,7 @@ def _sw(x, y0, y1, label):
 
 class Q05_F64_ParallelEqualizer(Solve):
     def construct(self):
-        self.head("ข้อสอบปลายภาค 2/2564 ข้อ 5 · ผสม cumulative 2 เครื่องขนานกัน", "final 2/2564 · ข้อ 5")
+        self.head("ปลายภาค 2/2564 ข้อ 5 · ขนาน + equalizer", "ข้อ 5")
         self.say("โจทย์: เขียนไดอะแกรมต่อเครื่องกำเนิดผสมชนิด cumulative 2 เครื่องขนานกัน โดยใช้สวิตช์ 2 ตัว", color=OK)
         a1 = arm_sym([1.7, -0.9], r=0.42, letter="G_1")
         a2 = arm_sym([5.0, -0.9], r=0.42, letter="G_2")
@@ -300,7 +300,7 @@ class Q05_F64_ParallelEqualizer(Solve):
 # =============================================================== M14 / M15  มิดเทอม 1/2564
 class M14_Mid64_LongShunt(Solve):
     def construct(self):
-        self.head("มิดเทอม 1/2564 ข้อ 14 · compound long-shunt 30 kW", "มิดเทอม 1/2564 · ข้อ 14")
+        self.head("มิดเทอม 1/2564 ข้อ 14 · long-shunt", "ข้อ 14")
         self.say("ผสม 30 kW 240 V long-shunt · Rsh 75 โอห์ม · Ra 0.03 โอห์ม · Rse 0.012 โอห์ม · จ่ายเต็มโหลด", color=OK)
         fig = cg_fig("long", r"R_{sh}=75\,\Omega", r"R_a=0.03\,\Omega", r"R_{se}=0.012\,\Omega", r"V_t=240\,V", r"30\,kW")
         self.play(Create(fig), run_time=2.0)
@@ -332,7 +332,7 @@ class M14_Mid64_LongShunt(Solve):
 
 class M15_Mid64_ShortShunt(Solve):
     def construct(self):
-        self.head("มิดเทอม 1/2564 ข้อ 15 · compound short-shunt", "มิดเทอม 1/2564 · ข้อ 15")
+        self.head("มิดเทอม 1/2564 ข้อ 15 · short-shunt", "ข้อ 15")
         self.say("short-shunt: Vt 240 V · IL 50 A · Rse 0.04 โอห์ม · กระแสชันท์ If = 2 A (โจทย์ให้มาตรง ๆ)", color=OK)
         fig = cg_fig("short", r"R_{sh}", r"R_a", r"R_{se}=0.04\,\Omega", r"V_t=240\,V", r"Load", il_t=r"I_L=50\,A",
                      if_t=r"I_{sh}=2\,A", is_t=r"I_{se}")
@@ -368,7 +368,7 @@ def _prtag():
 
 class PR01_Practice_BaseValues(Solve):
     def construct(self):
-        self.head("ข้อฝึก 1 · ค่าฐาน 3 เฟส และ p.u.", "ข้อฝึกบทที่ 11 · ใช้สูตรหน้า 40-46")
+        self.head("ข้อฝึก 1 · ค่าฐาน 3 เฟส และ p.u.", "บท 11 หน้า 40-46")
         tg = _prtag()
         self.add(tg)
         self.say("ฐาน 100 MVA (3 เฟส) 138 kV (สาย) · สายส่ง X = 47.61 โอห์ม · บัส 131.1 kV · โหลด 60 MVA", color=OK)
@@ -408,7 +408,7 @@ class PR01_Practice_BaseValues(Solve):
 
 class PR02_Practice_ChangeBase(Solve):
     def construct(self):
-        self.head("ข้อฝึก 2 · เปลี่ยนฐาน p.u.", "ข้อฝึกบทที่ 11 · ใช้สูตรหน้า 48-49")
+        self.head("ข้อฝึก 2 · เปลี่ยนฐาน p.u.", "บท 11 หน้า 48-49")
         tg = _prtag()
         self.add(tg)
         self.say("เครื่องกำเนิดกับหม้อแปลง บอก p.u. ที่ฐานของตัวเอง → ต้องแปลงเป็นฐานระบบ 100 MVA 13.8 kV", color=OK)
@@ -465,7 +465,7 @@ def _mc(cx, cy, letter, color):
 
 class PR03_Practice_BaseZones(Solve):
     def construct(self):
-        self.head("ข้อฝึก 3 · แรงดันฐานแต่ละโซน + Zb + Ib", "ข้อฝึกบทที่ 11 · ใช้วิธีหน้า 61-69")
+        self.head("ข้อฝึก 3 · แรงดันฐานแต่ละโซน + Zb + Ib", "บท 11 หน้า 61-69")
         tg = _prtag()
         self.add(tg)
         self.say("G 50 MVA 11 kV → T1 11/110 kV → สายส่ง j60.5 โอห์ม → T2 110/33 kV → โหลด · ฐาน = 50 MVA , 11 kV (ที่ G)", color=OK)
@@ -523,7 +523,7 @@ def _sr(cx, cy, label, color):
 
 class PR04_Practice_ReactanceDiagram(Solve):
     def construct(self):
-        self.head("ข้อฝึก 4 · วาด reactance diagram + p.u.", "ข้อฝึกบทที่ 11 · วิธีหน้า 61-73")
+        self.head("ข้อฝึก 4 · วาด reactance diagram + p.u.", "บท 11 หน้า 61-73")
         tg = _prtag()
         self.add(tg)
         self.say("G 30 MVA 13.8 kV X=0.20 · T1 30 MVA 13.8/138 kV X=0.10 · สาย j80 โอห์ม · T2 25 MVA 138/6.6 kV X=0.08 · M 20 MVA 6.6 kV X=0.25", color=OK, size=20)
@@ -579,7 +579,7 @@ class PR04_Practice_ReactanceDiagram(Solve):
 
 class PR05_Practice_TransformerBank(Solve):
     def construct(self):
-        self.head("ข้อฝึก 5 · หม้อแปลง 1 เฟส 3 ตัว → 3 เฟส", "ข้อฝึกบทที่ 11 · ใช้วิธีหน้า 50-55, 67")
+        self.head("ข้อฝึก 5 · หม้อแปลง 1 เฟส 3 ตัว → 3 เฟส", "บท 11 หน้า 50-55")
         tg = _prtag()
         self.add(tg)
         self.say("หม้อแปลง 1 เฟส 3 ตัว ต่อ Y-Y · ตัวละ 10 MVA 76.2/12.7 kV X = 8 % · ฐานระบบ 100 MVA , 22 kV (ด้านต่ำ)", color=OK)
