@@ -380,7 +380,7 @@ class P54_YDelta(L):
         d1 = dim([p1[1][0], p1[1][1] - 0.4], [p1[2][0], p1[2][1] - 0.4])
         dd = dim([p2[1][0], p2[1][1] - 0.4], [p2[2][0], p2[2][1] - 0.4])
         l1 = T("69 kV (สาย)", 18, YEL).move_to([2.4, p1[1][1] - 0.75, 0])
-        l2 = T("3.98 kV (สาย = เฟส)", 18, YEL).move_to([5.7, p2[1][1] - 0.75, 0])
+        l2 = T("3.98 kV (สาย)", 18, YEL).move_to([5.7, p2[1][1] - 0.75, 0])
         ph = T("39.8 kV", 18, WHITE).move_to([1.65, 0.45, 0])
         self.play(Create(y1), Create(d2), FadeIn(h1), FadeIn(h2), run_time=1.2)
         self.play(FadeIn(ph), GrowFromCenter(d1), GrowFromCenter(dd), FadeIn(l1), FadeIn(l2), run_time=0.9)
@@ -544,7 +544,7 @@ class P61_Problem(L):
         for key, sym, sc in order:
             txt, col, pos = lab[key]
             lb = n_text(txt, size=15 if key in ("m1", "m2") else 16, color=col).move_to([pos[0], pos[1], 0])
-            self.say(sc, color=col if col != WHITE else OK)
+            self.say(sc, color=OK if col is WHITE else col)
             self.play(FadeIn(lb), Indicate(sym, color=col, scale_factor=1.25), run_time=1.0)
             self.wait(1.4)
             shown.append(lb)
