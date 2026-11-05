@@ -12,6 +12,27 @@ C_MAG = "#AB47BC"
 
 
 class Lesson(_L11):
+    def head(self, ttl, pg, size=28):
+        """หัวเรื่อง + ป้ายหน้า: ถ้าหัวเรื่องยาวจนชนป้ายหน้า ให้เลื่อน/ย่อหัวเรื่องเข้าช่องว่างด้านซ้ายของป้าย"""
+        self._ttl = title(ttl, size=size)
+        self._ref = page_ref(pg)
+        right = self._ref.get_left()[0] - 0.3
+        if self._ttl.get_right()[0] > right:
+            avail = right - (-6.9)
+            if self._ttl.width > avail:
+                self._ttl.scale_to_fit_width(avail)
+            self._ttl.move_to([(-6.9 + right) / 2, self._ttl.get_center()[1], 0])
+        self.play(FadeIn(self._ttl), FadeIn(self._ref), run_time=0.5)
+
+    def newpage(self, pg):
+        self.mark("page")
+        new = page_ref(pg)
+        gap = new.get_left()[0] - (self._ttl.get_right()[0] + 0.25)
+        if gap < 0:
+            new.scale_to_fit_width(max(new.width + gap, 1.0))
+            new.move_to([X_MAX - new.width / 2 - 0.28, new.get_center()[1], 0])
+        self.play(Transform(self._ref, new), run_time=0.4)
+
     def clear(self, run_time=0.6):
         """เก็บทุกอย่างบนเวที ยกเว้นหัวเรื่อง ป้ายหน้า"""
         keep = {id(self._ttl), id(self._ref)}

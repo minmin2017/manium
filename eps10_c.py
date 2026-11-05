@@ -7,7 +7,7 @@ from eps10_lib import *
 # =============================================================== P10  หน้า 9-13
 class P10_PerUnitScale(Lesson):
     def construct(self):
-        self.head("ค่าต่อหน่วย + กฎมาตราส่วน (หม้อแปลงเล็ก vs ใหญ่)", "หน้า 9–13 · รูป 10-7, 10-8")
+        self.head("ค่าต่อหน่วย + กฎมาตราส่วน", "หน้า 9–13 · รูป 10-7, 10-8")
         self.say("ค่าต่อหน่วย (p.u.) = ค่าจริง ÷ ค่าพิกัด  → หม้อแปลงทุกขนาดเทียบกันได้", color=OK)
         f = VGroup(MathTex(r"S_n=V_{1n}I_{1n}=V_{2n}I_{2n}", font_size=36, color=YEL),
                    MathTex(r"Z_n=\frac{V_n}{I_n}\qquad z=\frac{Z}{Z_n}", font_size=36, color=WHITE)).arrange(DOWN, buff=0.35).move_to([0, 1.0, 0])
@@ -82,7 +82,7 @@ class P10_PerUnitScale(Lesson):
 # =============================================================== P14  หน้า 14-17
 class P14_Core(Lesson):
     def construct(self):
-        self.head("แกนเหล็ก: แผ่นบาง + ฟลักซ์ถูกกำหนดโดยแรงดัน", "หน้า 14–17 · รูป 10-9 ถึง 10-11")
+        self.head("แกนเหล็กแผ่นบาง + แรงดันกำหนดฟลักซ์", "หน้า 14–17 · รูป 10-9 ถึง 10-11")
         self.say("แกนตัน: ฟลักซ์สลับทำให้เกิดกระแสไหลวนวงใหญ่ → ร้อน สูญเสียมาก", color=C_LOSS)
         solid = Rectangle(width=2.6, height=2.6, stroke_color=METAL, fill_color=METAL, fill_opacity=0.35).move_to([-3.2, -0.2, 0])
         ed1 = Ellipse(width=2.0, height=2.0, stroke_color=C_LOSS, stroke_width=4).move_to(solid)
@@ -125,7 +125,7 @@ class P14_Core(Lesson):
         lh = MathTex("H", font_size=28, color=C_MAG).next_to(ax.x_axis.get_end(), RIGHT, buff=0.08)
         ax2 = Axes(x_range=[0, 2 * PI, PI], y_range=[-3.2, 3.2, 1], x_length=4.6, y_length=3.0,
                    axis_config={"color": GRAYTXT, "include_ticks": False, "include_tip": False}).move_to([3.1, 0.0, 0])
-        bt = ax2.plot(lambda t: 2.4 * np.sin(t) / 0.97 * 0.97, x_range=[0, 2 * PI], color=C_PHI, stroke_width=3)
+        bt = ax2.plot(lambda t: 1.3 * np.sin(t), x_range=[0, 2 * PI], color=C_PHI, stroke_width=3)
         ht = ax2.plot(lambda t: np.arctanh(0.97 * np.sin(t)), x_range=[0, 2 * PI], color=C_MAG, stroke_width=4)
         l1 = MathTex(r"B(t)\ \text{sine}", font_size=26, color=C_PHI).move_to([3.1, 1.9, 0])
         l2 = MathTex(r"H(t)\sim i_m(t)\ \text{peaky}", font_size=26, color=C_MAG).move_to([3.1, -1.9, 0])
@@ -157,11 +157,11 @@ class P18_TLCircuit(Lesson):
         self.clear()
         # ---- วงจร L (รูป 10-14a)
         y1, y0 = 1.0, -1.0
-        w = VGroup(wire((-5.0, y1), (-1.0, y1)), wire((1.4, y1), (5.0, y1)), wire((-5.0, y0), (5.0, y0)))
+        w = VGroup(wire((-5.0, y1), (-1.9, y1)), wire((2.5, y1), (5.0, y1)), wire((-5.0, y0), (5.0, y0)))
         xm = ind_sym((-3.9, y1 - 0.3), (-3.9, y0 + 0.3), color=C_MAG)
         rm = res_zig((-2.9, y1 - 0.3), (-2.9, y0 + 0.3), color=C_LOSS)
         brs = VGroup(wire((-3.9, y1), (-3.9, y1 - 0.3)), wire((-3.9, y0 + 0.3), (-3.9, y0)), wire((-2.9, y1), (-2.9, y1 - 0.3)), wire((-2.9, y0 + 0.3), (-2.9, y0)))
-        zs = ebox(0.2, y1, r"(R_1+R_2')+j(X_{1\sigma}+X_{2\sigma}')", C_P, w=2.4, h=0.55, size=20)
+        zs = ebox(0.3, y1, r"(R_1+R_2')+j(X_{1\sigma}+X_{2\sigma}')", C_P, w=4.4, h=0.7, size=30)
         lab = VGroup(MathTex("jX_m", font_size=24, color=C_MAG).next_to(xm, LEFT, buff=0.12),
                      MathTex("R_c", font_size=24, color=C_LOSS).next_to(rm, RIGHT, buff=0.12))
         tt = Text("วงจร L (รูป 10-14): ขาแม่เหล็กอยู่ด้านแหล่งจ่าย → หากระแสแม่เหล็กได้ตรงๆ", font_size=21, color=GRAYTXT).move_to([0, -1.75, 0])
@@ -169,7 +169,7 @@ class P18_TLCircuit(Lesson):
         self.wait(1.5)
         self.say("หม้อแปลงกำลังสูง: ตัดขาแม่เหล็กทิ้ง (+ ตัด R) เหลือ jX ตัวเดียว (รูป 10-15)", color=OK)
         self.play(FadeOut(VGroup(xm, rm, brs, lab)), run_time=0.8)
-        zx = ebox(0.2, y1, r"j(X_{1\sigma}+X_{2\sigma}')", C_P, w=2.4, h=0.55, size=22)
+        zx = ebox(0.3, y1, r"j(X_{1\sigma}+X_{2\sigma}')", C_P, w=4.4, h=0.7, size=32)
         self.play(Transform(zs, zx), run_time=0.8)
         t2 = Text("นี่คือ jX ของหม้อแปลงใน reactance diagram บทที่ 11", font_size=21, color=YEL).move_to([0, -2.4, 0])
         self.play(FadeIn(t2), run_time=0.6)
@@ -203,7 +203,7 @@ class P18_TLCircuit(Lesson):
 # =============================================================== P21  หน้า 20-21
 class P21_NoLoad(Lesson):
     def construct(self):
-        self.head("สมดุลกำลัง + การทดสอบไม่มีโหลด (Open-circuit test)", "หน้า 21 · สมการ 1.48–1.52")
+        self.head("สมดุลกำลัง + ทดสอบไม่มีโหลด", "หน้า 21 · สมการ 1.48–1.52")
         self.say("กำลังเข้า = กำลังออก + สูญเสียทองแดง 2 ขด + สูญเสียแกน", color=OK)
         c = tee_circuit(x0=-5.6, y_top=1.3, y_bot=-0.7, labels=True, size=24)
         self.play(Create(c), run_time=1.6)

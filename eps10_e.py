@@ -37,7 +37,7 @@ class P34_VectorGroups(Lesson):
         self.add(lv)
         for grp, lbl in ((5, "Yd5 → 150°"), (6, "Dd6 → 180°"), (11, "Yz11 → 330°")):
             self.play(k.animate.set_value(grp), run_time=1.4)
-            tt = Text(lbl, font_size=28, color=YEL).move_to([3.3, -2.35, 0])
+            tt = Text(lbl, font_size=28, color=YEL).move_to([0.2, -2.0, 0])
             self.play(FadeIn(tt), run_time=0.4)
             self.wait(0.8)
             self.play(FadeOut(tt), run_time=0.3)
@@ -82,7 +82,7 @@ class P38_Unbalanced(Lesson):
             m.move_to([x + 0.42, -0.8, 0])
         self.play(*[FadeIn(m) for m in sec], run_time=0.6)
         self.say("แยกกระแส I: ลำดับศูนย์ I/3 ทุกเฟส + ลำดับบวก/ลบ — ปฐมภูมิ Y ไม่มีนิวทรัล ส่ง I/3 ลำดับศูนย์ไม่ได้", color=C_IA)
-        pri = [MathTex(r"+\tfrac{I'}{3}", font_size=28, color=C_P), MathTex(r"-\tfrac{2I'}{3}", font_size=28, color=C_P), MathTex(r"+\tfrac{I'}{3}", font_size=28, color=C_P)]
+        pri = [MathTex(r"+\frac{I'}{3}", font_size=34, color=C_P), MathTex(r"-\frac{2I'}{3}", font_size=34, color=C_P), MathTex(r"+\frac{I'}{3}", font_size=34, color=C_P)]
         for x, m in zip(xs, pri):
             m.move_to([x + 0.55, 1.4, 0])
         self.play(*[FadeIn(m) for m in pri], run_time=0.8)
@@ -106,7 +106,7 @@ class P38_Unbalanced(Lesson):
         self.play(Create(tri), FadeIn(lu), FadeIn(lvv), FadeIn(lw), run_time=0.8)
         self.add(sp, nd)
         self.play(nt.animate.set_value(1.0), run_time=2.0)
-        du = MathTex(r"\Delta U", font_size=30, color=YEL).move_to(n0 + np.array([0.5, 0.65, 0]))
+        du = MathTex(r"\Delta U", font_size=30, color=YEL).move_to(n0 + np.array([0.6, -0.45, 0]))
         self.play(FadeIn(du), run_time=0.5)
         rules = VGroup(Text("shell / 5 ขา / 1 เฟส 3 ตัว: หลีกเลี่ยงโหลดลำดับศูนย์", font_size=21, color=WHITE),
                        Text("core 3 ขา: จำกัด ≤ 10% ของกระแสพิกัด", font_size=21, color=WHITE),
@@ -239,13 +239,15 @@ class P46_InstrXf(Lesson):
         self.head("หม้อแปลงวัด: CT (กระแส) และ VT (แรงดัน)", "หน้า 46–49 · รูป 10-38 ถึง 10-41")
         self.say("หม้อแปลงวัด: 1 เฟส พิกัดต่ำ (< 1 kVA มักน้อยกว่า 100 VA) แยกเครื่องวัดออกจากแรงสูง", color=OK)
         core = Rectangle(width=2.2, height=2.0, stroke_color=METAL, stroke_width=16).move_to([-2.8, 0.2, 0])
-        prim = Line([-6.0, 0.2, 0], [0.4, 0.2, 0], color=C_P, stroke_width=7)
+        prim = VGroup(wire((-6.0, 0.45), (-4.2, 0.45), color=C_P, width=6), Ellipse(width=0.7, height=0.5, stroke_color=C_P, stroke_width=6).move_to([-3.9, 0.2, 0]),
+                      wire((-4.2, -0.05), (-6.0, -0.05), color=C_P, width=6))
+        i1 = MathTex(r"I_1", font_size=28, color=C_P).move_to([-5.4, 0.8, 0])
         sec = VGroup(*[Ellipse(width=0.55, height=0.13, stroke_color=C_SEC, stroke_width=3).move_to([-1.7, -0.5 + i * 0.18, 0]) for i in range(8)])
         am = meter((0.6, -1.4), "A", C_SEC)
         ws = VGroup(wire((-1.42, 0.76), (0.6, 0.76), (0.6, -1.13)), wire((-1.42, -0.5), (-1.0, -0.5), (-1.0, -1.4), (0.33, -1.4)))
-        self.play(Create(core), Create(prim), run_time=0.8)
+        self.play(Create(core), Create(prim), FadeIn(i1), run_time=0.8)
         self.play(Create(sec), Create(ws), FadeIn(am), run_time=1.0)
-        t1 = Text("ปฐมภูมิ: รอบน้อย (1 รอบ) อนุกรมกับสาย", font_size=20, color=C_P).move_to([-3.0, 1.75, 0])
+        t1 = Text("ปฐมภูมิ: รอบน้อย (1 รอบ) อนุกรมกับสาย", font_size=20, color=C_P).move_to([-3.6, 1.75, 0])
         t2 = Text("ทุติยภูมิ: รอบมาก → แอมมิเตอร์ (เกือบลัดวงจร)", font_size=20, color=C_SEC).move_to([3.6, 0.6, 0])
         self.play(FadeIn(t1), FadeIn(t2), run_time=0.6)
         f = MathTex(r"I_2=I_1\frac{w_1}{w_2}", font_size=40, color=C_SEC).move_to([3.6, -0.3, 0])

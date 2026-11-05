@@ -52,43 +52,52 @@ class P24_Regulation(Lesson):
     def construct(self):
         self.head("แรงดันเปลี่ยนเมื่อมีโหลด (Voltage regulation)", "หน้า 24–26 · รูป 10-18, 10-19")
         self.say("มองจากโหลด: แหล่ง V20 (แรงดันไม่มีโหลด) อนุกรม Zk = Rk + jXk", color=OK)
-        O = np.array([-5.4, -1.2, 0])
-        S = 7.0
-        rk, xk = 0.04, 0.12     # ขนาดแสดงผล (ขยายให้เห็น)
+        O = np.array([-5.8, -1.7, 0])
+        S = 5.0
+        rk, xk = 0.10, 0.30     # ขยายให้เห็นชัด (ไม่ใช่ค่าจริง)
         ph = ValueTracker(37 * DEGREES)
 
-        def build():
+        def pts():
             p = ph.get_value()
-            v2 = O + RIGHT * S * 1.0
+            v2 = O + RIGHT * S
             i = np.array([np.cos(-p), np.sin(-p), 0])
             ri = rk * S * i
             xi = xk * S * np.array([-i[1], i[0], 0])
-            a_v2 = Arrow(O, v2, buff=0, color=OK, stroke_width=5, tip_length=0.2)
-            a_i = Arrow(O, O + 1.6 * i, buff=0, color=C_IA, stroke_width=4, tip_length=0.16)
-            a_r = Arrow(v2, v2 + ri, buff=0, color=C_LOSS, stroke_width=4, tip_length=0.12, max_tip_length_to_length_ratio=0.5)
-            a_x = Arrow(v2 + ri, v2 + ri + xi, buff=0, color=C_P, stroke_width=4, tip_length=0.15, max_tip_length_to_length_ratio=0.4)
-            a_v20 = Arrow(O, v2 + ri + xi, buff=0, color=YEL, stroke_width=5, tip_length=0.2)
-            return VGroup(a_v2, a_i, a_r, a_x, a_v20)
+            return v2, i, ri, xi
+
+        def build():
+            v2, i, ri, xi = pts()
+            return VGroup(Arrow(O, v2, buff=0, color=OK, stroke_width=5, tip_length=0.2),
+                          Arrow(O, O + 1.6 * i, buff=0, color=C_IA, stroke_width=4, tip_length=0.16),
+                          Arrow(v2, v2 + ri, buff=0, color=C_LOSS, stroke_width=5, tip_length=0.14, max_tip_length_to_length_ratio=0.4),
+                          Arrow(v2 + ri, v2 + ri + xi, buff=0, color=C_P, stroke_width=5, tip_length=0.18),
+                          Arrow(O, v2 + ri + xi, buff=0, color=YEL, stroke_width=5, tip_length=0.2))
         dia = always_redraw(build)
         self.add(dia)
-        lv2 = MathTex("V_2", font_size=30, color=OK).move_to(O + RIGHT * 3.5 + DOWN * 0.3)
-        li = MathTex("I", font_size=30, color=C_IA).move_to(O + RIGHT * 0.7 + DOWN * 1.05)
-        lv20 = MathTex("V_{20}", font_size=30, color=YEL).move_to(O + RIGHT * 3.4 + UP * 0.75)
-        lrx = MathTex(r"R_kI\ ,\ jX_kI", font_size=26, color=C_P).move_to(O + RIGHT * 7.95 + UP * 1.4)
-        self.play(FadeIn(lv2), FadeIn(li), FadeIn(lv20), FadeIn(lrx), run_time=0.8)
-        rd = always_redraw(lambda: MathTex(r"|V_{20}|-|V_2|=%+.2f\ \text{(scaled)}" % (
-            np.linalg.norm(np.array([1 + rk * np.cos(ph.get_value()) + xk * np.sin(ph.get_value()),
-                                     -rk * np.sin(ph.get_value()) + xk * np.cos(ph.get_value())])) - 1), font_size=30, color=WHITE).move_to([2.6, 1.9, 0]))
+        lv2 = MathTex("V_2", font_size=32, color=OK).move_to(O + RIGHT * 2.5 + DOWN * 0.35)
+        li = always_redraw(lambda: MathTex("I", font_size=30, color=C_IA).move_to(O + 1.95 * pts()[1] + DOWN * 0.15))
+        lv20 = always_redraw(lambda: MathTex("V_{20}", font_size=32, color=YEL).move_to(O + 0.75 * (pts()[0] + pts()[2] + pts()[3] - O) + UP * 0.38))
+        lr = always_redraw(lambda: MathTex(r"R_kI", font_size=26, color=C_LOSS).move_to(pts()[0] + 0.5 * pts()[2] + RIGHT * 0.55 + DOWN * 0.1))
+        lx = always_redraw(lambda: MathTex(r"jX_kI", font_size=26, color=C_P).move_to(pts()[0] + pts()[2] + 0.5 * pts()[3] + RIGHT * 0.75))
+        self.add(li, lv20, lr, lx)
+        self.play(FadeIn(lv2), run_time=0.5)
+
+        def mag():
+            v2, i, ri, xi = pts()
+            return np.linalg.norm(v2 + ri + xi - O) / S
+        rd = always_redraw(lambda: MathTex(r"\frac{|V_{20}|}{|V_2|}=%.2f" % mag(), font_size=34, color=WHITE).move_to([3.9, 1.85, 0]))
         tg = always_redraw(lambda: Text("โหลดอินดักทีฟ (ล้าหลัง) → V2 ตก" if ph.get_value() > 0.05 else
-                                        ("โหลดคาปาซิทีฟ (นำหน้า) → V2 สูงขึ้น" if ph.get_value() < -0.05 else "โหลด R ล้วน"),
-                                        font_size=24, color=C_IA).move_to([2.6, 1.3, 0]))
+                                        ("โหลดคาปาซิทีฟ (นำหน้า) → V2 สูงกว่า V20" if ph.get_value() < -0.05 else "โหลด R ล้วน"),
+                                        font_size=24, color=C_IA).move_to([3.9, 1.1, 0]))
+        sc = Text("(ขยาย Rk, Xk ให้เห็นชัด)", font_size=18, color=GRAYTXT).move_to([3.9, 0.55, 0])
         self.add(rd, tg)
+        self.play(FadeIn(sc), run_time=0.4)
         self.say("โหลดอินดักทีฟ: jXk I ชี้ขึ้นแรง → V20 ยาวกว่า V2 มาก = แรงดันตก", color=C_IA)
         self.wait(2.0)
         self.say("ค่อยๆ เปลี่ยนเป็นโหลดคาปาซิทีฟ: jXk I เอียงลง → V2 อาจสูงกว่า V20", color=C_IA)
         self.play(ph.animate.set_value(-37 * DEGREES), run_time=4.0)
         self.wait(1.5)
-        for m in (dia, rd, tg):
+        for m in (dia, rd, tg, li, lv20, lr, lx):
             m.clear_updaters()
         self.clear()
         # ---- สูตร + ตัวอย่าง
@@ -130,7 +139,7 @@ class P26_Parallel(Lesson):
         f[4].set_color(OK)
         self.play(Write(f), run_time=1.4)
         t1 = Text("กระแสหมุนเวียน (ไม่ต้องการ)", font_size=19, color=C_LOSS).next_to(f[2], DOWN, buff=0.25)
-        t2 = Text("ส่วนแบ่งโหลด", font_size=19, color=OK).next_to(f[4], DOWN, buff=0.25)
+        t2 = Text("ส่วนแบ่งโหลด", font_size=19, color=OK).next_to(f[4], DOWN, buff=0.75)
         self.play(FadeIn(t1), FadeIn(t2), run_time=0.6)
         self.say("เงื่อนไข 1: อัตราส่วนรอบเท่ากัน → V20A = V20B → กระแสหมุนเวียน = 0", color=C_LOSS)
         self.glow(f[2], VGroup(xa, xb), color=C_LOSS)
@@ -159,7 +168,7 @@ class P26_Parallel(Lesson):
 # =============================================================== P30  หน้า 30-33
 class P30_Construction(Lesson):
     def construct(self):
-        self.head("โครงสร้าง: core vs shell, แกน 3 เฟส, ชนิดขดลวด", "หน้า 30–33 · รูป 10-25 ถึง 10-29")
+        self.head("โครงสร้าง + ชนิดขดลวด", "หน้า 30–33 · รูป 10-25 ถึง 10-29")
         self.say("1 เฟสแบบ core: ขดล้อมแกน 2 ขา  |  แบบ shell: แกนล้อมขด ขดอยู่ขากลาง", color=OK)
         cc = Rectangle(width=2.6, height=2.4, stroke_color=METAL, stroke_width=16).move_to([-3.6, 0.1, 0])
         ccl = VGroup(*[Rectangle(width=0.35, height=1.4, stroke_color=c, fill_color=c, fill_opacity=0.6).move_to([x, 0.1, 0])
