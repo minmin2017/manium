@@ -94,7 +94,7 @@ def solve(D):
 
 class ExamScene(SafeScene):
     _cap = None
-    PACE = 1.8   # reading time: every wait() is stretched (exam-cram clip, Min reads Thai captions)
+    PACE = 2.3   # reading time: every wait() is stretched (exam-cram clip, Min reads Thai captions)
 
     def wait(self, duration=1.0, *args, **kwargs):
         return super().wait(duration * self.PACE, *args, **kwargs)
@@ -107,7 +107,7 @@ class ExamScene(SafeScene):
         else:
             self.play(FadeIn(new), run_time=0.6)
         self._cap = new
-        super().wait(1.2)
+        super().wait(1.7)
 
     def glow(self, term, fig, color, rt=1.4):
         wide = term.width > 3.2 or isinstance(term, Text)
@@ -122,7 +122,7 @@ class ExamScene(SafeScene):
         self.play(FadeIn(new), run_time=rt)
 
     # ---------------------------------------------------------------- shared figures
-    def side_view(self, ms, lB, values, xA=-6.3, xB=-1.3, ys=1.3):
+    def side_view(self, ms, lB, values, xA=-6.3, xB=-1.8, ys=1.3):
         """axial (side) view: planes A (l = 0) and B (l = lB), unbalance masses on discs,
         distances l_i measured from plane A."""
         k = (xB - xA) / lB
@@ -186,8 +186,8 @@ class ExamScene(SafeScene):
         ly = DashedLine(tip, py, color=col, stroke_width=2, dash_length=0.06)
         bx = Line(O, px, color=col, stroke_width=7, stroke_opacity=0.7)
         by = Line(O, py, color=col, stroke_width=7, stroke_opacity=0.7)
-        tx = M(r"R_{%dx}" % (i + 1), 20, col).next_to(bx, DOWN if tip[1] > O[1] else UP, buff=0.06)
-        ty = M(r"R_{%dy}" % (i + 1), 20, col).next_to(by, LEFT if tip[0] > O[0] else RIGHT, buff=0.06)
+        tx = M(r"R_{%dx}" % (i + 1), 20, col).next_to(px, DOWN if tip[1] > O[1] else UP, buff=0.12)
+        ty = M(r"R_{%dy}" % (i + 1), 20, col).next_to(py, LEFT if tip[0] > O[0] else RIGHT, buff=0.1)
         return VGroup(lx, ly, bx, by, tx, ty)
 
     def polygon(self, vecs, cols, labs, close_col, close_lab, box, ttl):
@@ -214,7 +214,7 @@ class ExamScene(SafeScene):
             for (pc, pw, ph) in placed:
                 if abs(c[0] - pc[0]) < (w + pw) / 2 + 0.06 and abs(c[1] - pc[1]) < (h + ph) / 2 + 0.04:
                     return True
-            return (c[0] - w / 2 < -7.0 or c[0] + w / 2 > -0.4 or c[1] - h / 2 < -3.95
+            return (c[0] - w / 2 < -7.0 or c[0] + w / 2 > -0.15 or c[1] - h / 2 < -3.95
                     or c[1] + h / 2 > y1 + 0.1)
 
         for a, b, col, lab in segs:
@@ -257,7 +257,7 @@ class ExamScene(SafeScene):
         r_corr = D.get("r")
         sv = self.side_view(ms, lB, [mm[3] for mm in D["ms"]] + [D["lB"]])
         ev = self.end_view(ms)
-        X0 = -0.25
+        X0 = 0.0
 
         def table(heads, cells, widths, y_head, dy, row_cols, size=24, sum_gap=0.0):
             xs = [X0]
@@ -297,7 +297,7 @@ class ExamScene(SafeScene):
                       rt=1.1)
         note1 = T(D["note1"], 19, GRAYTXT)
         self.play(FadeIn(rows1[n]), FadeIn(rows1[n + 1]))
-        fit_width(note1, 7.0)
+        fit_width(note1, 6.9)
         note1.move_to([X0 + note1.width / 2, 2.0 - (n + 3) * 0.5 - 0.1, 0])
         self.play(FadeIn(note1))
         self.glow(rows1[n], VGroup(sv["pA"], sv["lA"]), CA, rt=1.1)
@@ -310,11 +310,12 @@ class ExamScene(SafeScene):
         self.play(FadeOut(VGroup(head1, hl1, *rows1, note1)), run_time=0.4)
         fm = panel(M(r"R_x = R\cos\theta,\qquad R_y = R\sin\theta", 30),
                    M(r"mR_x,\ \ mR_y\ \ (\text{kg}\cdot\text{m}),\qquad mR_xl,\ \ mR_yl\ \ (\text{kg}\cdot\text{m}^2)", 28),
-                   x0=X0, top=-0.6, gap=0.25, max_w=7.0)
-        pj = self.projection(ev, ms, 0)
+                   x0=X0, top=-0.6, gap=0.25, max_w=6.9)
+        pi_ = D.get("proj", 0)
+        pj = self.projection(ev, ms, pi_)
         self.play(FadeIn(fm[0]))
         self.play(Create(pj[:4]), FadeIn(pj[4:]), run_time=1.0)
-        self.glow(fm[0], pj, C1)
+        self.glow(fm[0], pj, MCOL[pi_])
         self.play(FadeIn(fm[1]))
         self.wait(1.5)
 
@@ -325,16 +326,16 @@ class ExamScene(SafeScene):
                    for i, r in enumerate(rows)]
         c_cells.append([r"\Sigma", f4(S["mRx"]), f4(S["mRy"]), f4(S["mRxl"]), f4(S["mRyl"])])
         head2, rows2, hl2 = table([r"i", r"mR_x", r"mR_y", r"mR_x\,l", r"mR_y\,l"], c_cells,
-                                  [0.7, 1.6, 1.6, 1.6, 1.6], 2.05, 0.46, MCOL[:n] + [WHITE],
+                                  [0.55, 1.6, 1.6, 1.6, 1.6], 2.05, 0.46, MCOL[:n] + [WHITE],
                                   size=25, sum_gap=0.12)
-        sumline = Line(P2(X0, rows2[-1].get_y() + 0.27), P2(X0 + 7.1, rows2[-1].get_y() + 0.27),
+        sumline = Line(P2(X0, rows2[-1].get_y() + 0.27), P2(X0 + 6.95, rows2[-1].get_y() + 0.27),
                        color=GRAYTXT, stroke_width=1.5)
         self.say(D["say2"])
         self.play(FadeIn(head2), Create(hl2))
         for i in range(n):
             self.play(FadeIn(rows2[i]), run_time=0.5)
             self.glow(rows2[i], VGroup(ev["vecs"][i], sv["dots"][i], sv["dims"][i]), MCOL[i], rt=1.1)
-            if i == 0:
+            if i == pi_:
                 self.play(FadeOut(pj), run_time=0.4)
         self.say("รวมแต่ละคอลัมน์ — ผลรวม 4 ตัวนี้คือทุกอย่างที่ต้องใช้ต่อ")
         self.play(Create(sumline), FadeIn(rows2[n]))
@@ -351,9 +352,10 @@ class ExamScene(SafeScene):
             M(r"m_BR_{By} = -\frac{\sum mR_yl}{l_B} = -\frac{(%.4f)}{%s} = %+.4f" % (S["mRyl"], D["lB"], By), 28, CB),
             M(r"m_BR_B = \sqrt{(%.4f)^2 + (%.4f)^2} = %.4f" % (Bx, By, magB) + KGM, 28, CB),
             M(angB_tex, 28, CB),
-            x0=X0, top=-0.35, gap=0.13, max_w=7.0)
+            x0=X0, top=-0.35, gap=0.13, max_w=6.9)
         self.say("ขั้น 3a หา B ก่อน: เอาโมเมนต์รอบระนาบ A — m_A อยู่ที่ l = 0 ไม่มีแขนโมเมนต์ จึงหายไปจากสมการ")
-        self.play(FadeOut(ev["all"]), run_time=0.5)
+        SVS = 0.62
+        self.play(FadeOut(ev["all"]), sv["all"].animate.scale(SVS, about_point=P2(-6.8, 2.37)), run_time=0.9)
         self.play(FadeIn(pB[0]))
         self.glow(pB[0], VGroup(sv["pA"], sv["lA"]), CA, rt=1.1)
         self.play(FadeIn(pB[1]))
@@ -361,7 +363,7 @@ class ExamScene(SafeScene):
         self.play(FadeIn(pB[2]))
         self.glow(pB[2], VGroup(rows2[n][4], sv["dims"][n], sv["dlabs"][n]), CB)
 
-        box = ((-6.3, -1.4), (-3.75, -1.3))
+        box = ((-6.3, -1.3), (-3.8, -0.3))
         cv = [(r["m"] * r["R"] * r["l"] * np.cos(np.radians(r["t"])),
                r["m"] * r["R"] * r["l"] * np.sin(np.radians(r["t"]))) for r in rows]
         clabs = [r"m_%dR_%dl_%d = %.3f" % (i + 1, i + 1, i + 1, r["m"] * r["R"] * r["l"]) for i, r in enumerate(rows)]
@@ -375,8 +377,8 @@ class ExamScene(SafeScene):
         self.play(FadeIn(pB[3]))
         self.glow(pB[3], VGroup(ca[n], cl[n]), CB)
         self.play(FadeIn(pB[4]))
-        dB = Dot(P2(sv["xB"], sv["ys"] + 0.45 * np.sin(np.radians(angB))), radius=0.12, color=CB)
-        mB = M(r"m_B", 24, CB).next_to(dB, RIGHT, buff=0.08)
+        dB = Dot(P2(sv["pB"].get_x(), sv["shaft"].get_y() + 0.45 * SVS * np.sin(np.radians(angB))), radius=0.09, color=CB)
+        mB = M(r"m_B", 19, CB).next_to(dB, RIGHT, buff=0.08)
         self.play(FadeIn(dB, scale=1.5), FadeIn(mB))
         self.glow(pB[4], VGroup(ca[n], dB), CB)
         self.wait(2.0)
@@ -391,7 +393,7 @@ class ExamScene(SafeScene):
             M(r"m_AR_{Ay} = -\sum mR_y - m_BR_{By} = -(%.4f) - (%.4f) \approx %+.4f" % (S["mRy"], By, Ay), 28, CA),
             M(r"m_AR_A = \sqrt{(%.4f)^2 + (%.4f)^2} = %.4f" % (Ax, Ay, magA) + KGM, 28, CA),
             M(angA_tex, 28, CA),
-            x0=X0, top=-0.35, gap=0.13, max_w=7.0)
+            x0=X0, top=-0.35, gap=0.13, max_w=6.9)
         self.say("ขั้น 3b หา A: แรงรวมต้องเป็นศูนย์ — รู้ m_B R_B แล้ว เหลือตัวไม่รู้แค่ m_A R_A")
         self.play(FadeOut(pB), FadeOut(VGroup(ca, cl, cs, ch)), run_time=0.4)
         self.play(FadeIn(pA[0]), FadeIn(pA[1]))
@@ -412,8 +414,8 @@ class ExamScene(SafeScene):
         self.play(FadeIn(pA[4]))
         self.glow(pA[4], VGroup(fa[n + 1], fl[n + 1]), CA)
         self.play(FadeIn(pA[5]))
-        dA = Dot(P2(sv["xA"], sv["ys"] + 0.45 * np.sin(np.radians(angA))), radius=0.12, color=CA)
-        mA = M(r"m_A", 24, CA).next_to(dA, RIGHT, buff=0.08)
+        dA = Dot(P2(sv["pA"].get_x(), sv["shaft"].get_y() + 0.45 * SVS * np.sin(np.radians(angA))), radius=0.09, color=CA)
+        mA = M(r"m_A", 19, CA).next_to(dA, RIGHT, buff=0.08)
         self.play(FadeIn(dA, scale=1.5), FadeIn(mA))
         self.glow(pA[5], VGroup(fa[n + 1], dA), CA)
         self.say(D["say_quad"])
@@ -434,7 +436,7 @@ class ExamScene(SafeScene):
             lines += [M(r"m_B = \frac{%.4f}{%s} = %.3f\ \text{kg}\qquad m_A = \frac{%.4f}{%s} = %.3f\ \text{kg}"
                         % (magB, r_corr, magB / r, magA, r_corr, magA / r), 30, OK)]
         lines += [T(D["trap"], 19, WARN)]
-        chk = panel(*lines, x0=X0, top=2.05, gap=0.24, max_w=7.0)
+        chk = panel(*lines, x0=X0, top=2.05, gap=0.24, max_w=6.9)
         self.play(FadeIn(chk[0]), FadeIn(chk[1]))
         self.glow(chk[1], VGroup(fa, dA, dB), OK)
         self.play(FadeIn(chk[2]))
@@ -569,7 +571,7 @@ class B40_ExamBalancingWhyTwoPlanes(ExamScene):
 
         i1 = always_redraw(lambda: Dot(ipos(1), radius=0.08, color=C1))
         i2 = always_redraw(lambda: Dot(ipos(-1), radius=0.08, color=C2))
-        ilab = T("มองจากปลายเพลา", 16, GRAYTXT).next_to(inset_c, RIGHT, buff=0.15)
+        ilab = T("มองจากปลายเพลา", 16, GRAYTXT).next_to(inset_c, DOWN, buff=0.1)
         sv_lab = T("มองด้านข้าง", 16, GRAYTXT).move_to(P2(-3.75, -2.75))
 
         self.play(Create(shaft), FadeIn(brg), Create(discs), FadeIn(sv_lab), run_time=1.0)
@@ -640,8 +642,8 @@ class B40_ExamBalancingWhyTwoPlanes(ExamScene):
             T("4 ขั้นทำข้อสอบ two-plane", 22, OK),
             T("1 เข้าใจ: จด m, R, θ, l ทุกมวล — A ที่ l = 0, แปลง mm → m", 19),
             T("2 สูตร/ตาราง: mRx, mRy, mRx·l, mRy·l แล้วรวมคอลัมน์", 19),
-            M(r"m_BR_{Bx} = -\frac{\sum m_iR_{ix}l_i}{l_B},\quad m_BR_{By} = -\frac{\sum m_iR_{iy}l_i}{l_B}", 28, CB),
-            M(r"m_AR_{Ax} = -\sum m_iR_{ix} - m_BR_{Bx},\quad m_AR_{Ay} = -\sum m_iR_{iy} - m_BR_{By}", 28, CA),
+            vrow(M(r"m_BR_{Bx} = -\frac{\sum m_iR_{ix}l_i}{l_B}", 30, CB), T("(แกน y: เปลี่ยน x → y)", 18, GRAYTXT)),
+            vrow(M(r"m_AR_{Ax} = -\sum m_iR_{ix} - m_BR_{Bx}", 30, CA), T("(แกน y เหมือนกัน)", 18, GRAYTXT)),
             T("3 แทนค่า: B ก่อน (โมเมนต์รอบ A) แล้ว A (แรงรวม)", 19),
             M(r"mR = \sqrt{(mR_x)^2 + (mR_y)^2},\qquad \theta = \tan^{-1}\frac{mR_y}{mR_x}", 28),
             T("4 ตรวจ: แรงรวม = 0, โมเมนต์ = 0, quadrant ของมุม, หน่วย kg·m", 19),
@@ -680,7 +682,7 @@ LECT = dict(
 
 PRAC = dict(
     ms=[("2.0", "0.10", "0", "0.20"), ("3.0", "0.08", "120", "0.40"), ("2.5", "0.12", "210", "0.65")],
-    lB="0.80", r="0.10",
+    lB="0.80", r="0.10", proj=1,
     say0="โจทย์ฝึก: วาดรูปก่อน — มุมมองข้าง (ระยะ l จากระนาบ A) และมุมมองตามแกน (มุม θ)",
     say1="ขั้น 1: แปลง mm → m ทุกตัว, A ที่ l = 0, B ที่ l_B = 0.80 m, มวลถ่วงที่รัศมี 0.10 m",
     note1="รู้รัศมีมวลถ่วง r = 0.10 m → ตอบเป็นมวล m = (mR)/r",
