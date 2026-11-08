@@ -208,17 +208,42 @@ class ExamScene(SafeScene):
         arrows, labels = VGroup(), VGroup()
         segs = [(pts[i], pts[i + 1], cols[i], labs[i]) for i in range(len(vecs))]
         segs.append((pts[-1], pts[0], close_col, close_lab))
+        placed = []
+
+        def hits(c, w, h):
+            for (pc, pw, ph) in placed:
+                if abs(c[0] - pc[0]) < (w + pw) / 2 + 0.06 and abs(c[1] - pc[1]) < (h + ph) / 2 + 0.04:
+                    return True
+            return (c[0] - w / 2 < -7.0 or c[0] + w / 2 > -0.4 or c[1] - h / 2 < -3.95
+                    or c[1] + h / 2 > y1 + 0.1)
+
         for a, b, col, lab in segs:
             pa, pb = to(a), to(b)
             arrows.add(vec(pa, pb, col, sw=5, tip=0.2))
             d = (pb - pa) / max(np.linalg.norm(pb - pa), 1e-9)
             n = np.array([-d[1], d[0], 0.0])
-            mid = (pa + pb) / 2
-            if np.dot(mid - cen, n) < 0:
+            if np.dot((pa + pb) / 2 - cen, n) < 0:
                 n = -n
             t = M(lab, 21, col)
-            ext = 0.5 * (abs(n[0]) * t.width + abs(n[1]) * t.height)
-            t.move_to(mid + n * (0.12 + ext))
+            best = None
+            for frac in (0.5, 0.65, 0.35, 0.8, 0.2):
+                p = pa + frac * (pb - pa)
+                for sgn in (1, -1):
+                    nn = n * sgn
+                    ext = 0.5 * (abs(nn[0]) * t.width + abs(nn[1]) * t.height)
+                    for k in range(5):
+                        c = p + nn * (0.12 + ext + 0.22 * k)
+                        if not hits(c, t.width, t.height):
+                            best = c
+                            break
+                    if best is not None:
+                        break
+                if best is not None:
+                    break
+            if best is None:
+                best = (pa + pb) / 2 + n * (0.12 + 0.5 * (abs(n[0]) * t.width + abs(n[1]) * t.height))
+            t.move_to(best)
+            placed.append((best, t.width, t.height))
             labels.add(t)
         start = Dot(to(pts[0]), radius=0.07, color=WHITE)
         head = T(ttl, 18, GRAYTXT)
@@ -336,7 +361,7 @@ class ExamScene(SafeScene):
         self.play(FadeIn(pB[2]))
         self.glow(pB[2], VGroup(rows2[n][4], sv["dims"][n], sv["dlabs"][n]), CB)
 
-        box = ((-6.6, -1.1), (-3.75, -0.95))
+        box = ((-6.3, -1.4), (-3.75, -1.3))
         cv = [(r["m"] * r["R"] * r["l"] * np.cos(np.radians(r["t"])),
                r["m"] * r["R"] * r["l"] * np.sin(np.radians(r["t"]))) for r in rows]
         clabs = [r"m_%dR_%dl_%d = %.3f" % (i + 1, i + 1, i + 1, r["m"] * r["R"] * r["l"]) for i, r in enumerate(rows)]
@@ -400,7 +425,7 @@ class ExamScene(SafeScene):
         lines = [
             T("ขั้น 4 — ตรวจ: มวล %d ก้อน + m_A + m_B" % n, 22, OK),
             M(r"\textstyle\sum m\vec R = 0\ \checkmark\qquad \sum m\vec R\,l = 0\ \checkmark", 32, OK),
-            T("คำนวณซ้ำ (สคริปต์): เศษเหลือ %.0e ≈ 0 และ force polygon ปิดพอดี" % max(res, 1e-18), 19, GRAYTXT),
+            T("คำนวณซ้ำ (สคริปต์): แรงและโมเมนต์ที่เหลือ = 0 (เศษปัดของเครื่อง) — polygon ปิดพอดี", 19, GRAYTXT),
             M(r"\text{B: } m_BR_B = %.4f%s\ \text{@}\ %.2f^\circ" % (magB, KGM, angB), 30, CB),
             M(r"\text{A: } m_AR_A = %.4f%s\ \text{@}\ %s" % (magA, KGM, D["angA_str"]), 30, CA),
         ]
