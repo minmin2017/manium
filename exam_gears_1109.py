@@ -241,7 +241,8 @@ class G40_ExamNomenclature(ExamScene):
             row(M(r"h_t = a + b = 2.25\,m", 30), T("whole depth: สูงทั้งฟัน", 19)),
         )
         for rw, y in zip(hrows, ys):
-            place_left(rw, 1.0, y)
+            fit_width(rw, 5.4)
+            place_left(rw, 1.42, y)
         self.play(Create(ext), Create(bar_a), FadeIn(la), FadeIn(hrows[0]))
         self.glow(hrows[0][0], VGroup(bar_a, la), A_C)
         self.play(Create(ext_i), Create(bar_b), FadeIn(lb), FadeIn(hrows[1]))
@@ -795,7 +796,7 @@ class G42_ExamPlanetaryEx74(ExamScene):
         note = M(r"\text{ring: } +\tfrac{N_3}{N_1}Y = +\tfrac{20}{80}Y,\quad \text{sun: } -\tfrac{N_3}{N_2}Y = -\tfrac{20}{40}Y",
                  26, GRAYTXT)
         fit_width(note, 7.0)
-        note.move_to([X0 + note.width / 2, yh - 3.75 * dy, 0])
+        note.move_to([X0 + note.width / 2, yh - 3.95 * dy, 0])
         self.glow(rows_m[1][3], pl, GEAR_MID)
         self.play(FadeIn(note))
         self.glow(rows_m[1][1], ring, RING_G)
@@ -808,7 +809,7 @@ class G42_ExamPlanetaryEx74(ExamScene):
             M(r"\text{ring: } 50 + \frac{Y}{4} = 0\ \Rightarrow\ Y = -200", 30, RING_G),
             M(r"\text{sun: } 50 - \frac{1}{2}(-200) = +150\ \text{rad/s (ccw)}", 30, GEAR_IN),
             M(r"\text{planet: } 50 + (-200) = -150\ \text{rad/s (cw)}", 30, GEAR_MID),
-            top=-0.85, gap=0.14)
+            top=-1.0, gap=0.14)
         tags = tags_at()
         self.say("รู้ arm กับ ring → ตั้ง 2 สมการจากแถวรวม แก้ X, Y แล้วอ่านคำตอบ")
         self.play(FadeIn(tags))
