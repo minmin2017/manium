@@ -723,15 +723,15 @@ class D42_ExamDFABarDrill(ExamScene):
         b = bar(ang0)
         self.remove(live)
         self.add(b)
-        lab = VGroup(M("O", 26).move_to(O + P2(0.45, -0.35)),
+        lab = VGroup(M("O", 26).move_to(O + P2(-0.3, 0.32)),
                      M("A", 26).next_to(A, RIGHT, buff=0.15),
                      M("G", 26).move_to(G + 0.4 * U(-60)))
-        Lm = M(r"L=0.4\ \text{m},\ m=3\ \text{kg}", 26, L1_C).move_to((G + A) / 2 + 0.55 * U(120))
+        Lm = M(r"L=0.4\ \text{m},\ m=3\ \text{kg}", 26, L1_C).move_to(A + P2(-1.75, 0.7))
         w = VGroup(arc_arrow(O, 0.7, 45, 50, W_C), M(r"\omega", 26, W_C).move_to(O + 0.95 * U(75)))
         al = VGroup(arc_arrow(O, 1.15, 48, 47, ALP_C), M(r"\alpha", 26, ALP_C).move_to(O + 1.42 * U(68)))
-        ang = VGroup(DashedLine(O, O + P2(1.4, 0), color=GRAYTXT, stroke_width=2),
+        ang = VGroup(DashedLine(O, O + P2(0.65, 0), color=GRAYTXT, stroke_width=2),
                      Arc(radius=0.45, start_angle=0, angle=ang0, arc_center=O, color=WHITE, stroke_width=3),
-                     M(r"30^\circ", 22).move_to(O + 0.75 * U(12)))
+                     M(r"30^\circ", 22).move_to(O + P2(0.62, -0.22)))
         self.play(FadeIn(lab), FadeIn(Lm), FadeIn(ang))
         q = prow(M(r"\omega=6\ \text{rad/s},\ \ \alpha=15\ \text{rad/s}^2\ \ (\text{ccw})", 30), 0, x=-0.4, max_w=7.0)
         q2 = prow(T("หา: แรงที่หมุด O กระทำต่อแท่ง และแรงบิดขับ T", 21), 1, x=-0.4, max_w=7.0)
@@ -741,17 +741,18 @@ class D42_ExamDFABarDrill(ExamScene):
         self.wait(1.0)
 
         # step 1-2: r_OG, I_G, a_G
-        dim = VGroup(Line(O + 0.35 * U(-60), G + 0.35 * U(-60), color=DIM_C, stroke_width=2.5),
-                     M(r"\vec r_{OG}", 24, DIM_C).move_to((O + G) / 2 + 0.68 * U(-60)))
+        dim = VGroup(Line(O, G, color=WHITE, stroke_width=5),
+                     M(r"\vec r_{OG}", 24, DIM_C).move_to((O + G) / 2 + 0.45 * U(-60)))
         self.say("ขั้น 1: G อยู่กลางแท่ง ; I_G ของแท่ง = mL²/12")
         s1 = prow(M(r"\vec r_{OG}=0.2(\cos30^\circ,\ \sin30^\circ)=(0.17321,\ 0.1)\ \text{m}", 30), 2, x=-0.4, max_w=7.0)
         s2 = prow(M(r"I_G=\tfrac{1}{12}mL^2=\tfrac{1}{12}(3)(0.4)^2=0.04\ \text{kg m}^2", 30), 3, x=-0.4, max_w=7.0)
-        self.play(FadeIn(s1), Create(dim))
+        self.play(FadeIn(s1), Create(dim[0]), FadeIn(dim[1]))
         self.glow(s1, dim, DIM_C)
+        self.play(FadeOut(dim[0], run_time=0.35))
         self.play(FadeIn(s2))
         self.glow(s2, VGroup(lab[2], b[3]), WHITE)
         d1 = np.array([-7.735, -1.002, 0])
-        aG = farrow(G, 0.1 * d1, ACC_C, r"\vec a_G", UP)
+        aG = farrow(G, 0.1 * d1, ACC_C, r"\vec a_G", LEFT)
         self.say("ขั้น 2: a_G = α×r − ω²r → a_Gx = α(−r_y) − ω² r_x, a_Gy = α r_x − ω² r_y")
         s3 = prow(M(r"a_{Gx}=15(-0.1)-36(0.17321)=-7.735\ \text{m/s}^2", 30, ACC_C), 4, x=-0.4, max_w=7.0)
         s4 = prow(M(r"a_{Gy}=15(0.17321)-36(0.1)=-1.002\ \text{m/s}^2", 30, ACC_C), 5, x=-0.4, max_w=7.0)
@@ -774,7 +775,7 @@ class D42_ExamDFABarDrill(ExamScene):
         # step 4: pin force + torque
         self.play(FadeOut(VGroup(s3, s4), run_time=0.35))
         self.play(FadeOut(VGroup(w, al), run_time=0.35))
-        FO = farrow(O, 0.035 * np.array([-23.21, -3.01, 0]), UNK_C, r"\vec F_O", UP)
+        FO = farrow(O, 0.035 * np.array([-23.21, -3.01, 0]), UNK_C, r"\vec F_O", LEFT)
         Tq = VGroup(arc_arrow(O, 0.55, 200, 100, TQ_C), M("T", 26, TQ_C).move_to(O + 0.88 * U(255)))
         self.say("ขั้น 4 สมดุล: ΣF = 0 ได้แรงหมุด ; ΣM รอบ O ตัดแรงหมุดทิ้ง ได้ T")
         s7 = prow(M(r"\Sigma\vec F=0:\ \vec F_O=-\vec F_i=(-23.21,\ -3.01)\ \text{N}", 30, UNK_C), 3, x=-0.4, max_w=7.0)
@@ -784,7 +785,7 @@ class D42_ExamDFABarDrill(ExamScene):
         s9 = prow(M(r"T-1.80-0.6=0\ \Rightarrow\ T=2.40\ \text{N m (ccw)}", 32, TQ_C), 5, x=-0.4, max_w=7.0)
         self.play(FadeIn(s8), Create(Tq[0]), FadeIn(Tq[1]))
         self.glow(s8[0], Tq, TQ_C)
-        self.glow(s8[1], VGroup(Fi, dim), INR_C)
+        self.glow(s8[1], VGroup(Fi, dim[1]), INR_C)
         self.glow(s8[2], Ci, INR_C)
         self.play(FadeIn(s9))
         box = SurroundingRectangle(s9, color=TQ_C, buff=0.1)
