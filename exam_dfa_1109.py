@@ -252,6 +252,7 @@ def ring(p, lab, ldir=DOWN):
 
 class ExamScene(SafeScene):
     _cap = None
+    SAY_HOLD = 1.2
     PACE = 1.8   # reading time: every wait() is stretched (exam-cram clip, Min reads Thai captions)
 
     def wait(self, duration=1.0, *args, **kwargs):
@@ -265,7 +266,7 @@ class ExamScene(SafeScene):
         else:
             self.play(FadeIn(new), run_time=0.6)
         self._cap = new
-        super().wait(1.2)
+        super().wait(self.SAY_HOLD)
 
     def glow(self, term, fig, color, rt=1.4):
         wide = term.width > 3.2 or isinstance(term, Text)
@@ -700,6 +701,9 @@ class D41_ExamDFASP106(ExamScene):
 # D42 -- practice 1: single bar pinned at O
 # =====================================================================
 class D42_ExamDFABarDrill(ExamScene):
+    PACE = 2.6
+    SAY_HOLD = 2.4
+
     def construct(self):
         ttl = fit_width(title("โจทย์ฝึก 1 — แท่งเดี่ยวหมุนรอบหมุด O", size=28), 8.2)
         self.add(ttl, page_ref("โจทย์ฝึก (ผู้ช่วยแต่ง)"))
@@ -716,7 +720,7 @@ class D42_ExamDFABarDrill(ExamScene):
         A = O + k * 0.4 * U(30)
         G = (O + A) / 2
         self.say("แท่งสม่ำเสมอ OA ยาว 0.4 m มวล 3 kg หมุดที่ O วางในระนาบนอน (ไม่คิดน้ำหนัก)")
-        tr = ValueTracker(-40 * DEGREES)
+        tr = ValueTracker(75 * DEGREES)
         live = always_redraw(lambda: bar(tr.get_value()))
         self.add(sup, live)
         self.play(tr.animate.set_value(ang0), run_time=3.0, rate_func=smooth)
@@ -752,13 +756,13 @@ class D42_ExamDFABarDrill(ExamScene):
         self.play(FadeIn(s2))
         self.glow(s2, VGroup(lab[2], b[3]), WHITE)
         d1 = np.array([-7.735, -1.002, 0])
-        aG = farrow(G, 0.1 * d1, ACC_C, r"\vec a_G", LEFT)
+        aG = farrow(G, 0.1 * d1, ACC_C, r"\vec a_G", UP)
         self.say("ขั้น 2: a_G = α×r − ω²r → a_Gx = α(−r_y) − ω² r_x, a_Gy = α r_x − ω² r_y")
         s3 = prow(M(r"a_{Gx}=15(-0.1)-36(0.17321)=-7.735\ \text{m/s}^2", 30, ACC_C), 4, x=-0.4, max_w=7.0)
         s4 = prow(M(r"a_{Gy}=15(0.17321)-36(0.1)=-1.002\ \text{m/s}^2", 30, ACC_C), 5, x=-0.4, max_w=7.0)
         self.play(FadeIn(s3), FadeIn(s4), GrowArrow(aG[0]), FadeIn(aG[1]))
         self.glow(VGroup(s3, s4), aG, ACC_C)
-        self.wait(1.0)
+        self.wait(2.0)
 
         # step 3: D'Alembert
         Fi = farrow(G, -0.035 * np.array([-23.21, -3.01, 0]) * 1.0, INR_C, r"\vec F_i", RIGHT)
@@ -771,6 +775,7 @@ class D42_ExamDFABarDrill(ExamScene):
         self.glow(s5, VGroup(Fi, aG), INR_C)
         self.play(FadeIn(s6), Create(Ci[0]), FadeIn(Ci[1]))
         self.glow(s6, Ci, INR_C)
+        self.wait(1.5)
 
         # step 4: pin force + torque
         self.play(FadeOut(VGroup(s3, s4), run_time=0.35))
@@ -781,6 +786,7 @@ class D42_ExamDFABarDrill(ExamScene):
         s7 = prow(M(r"\Sigma\vec F=0:\ \vec F_O=-\vec F_i=(-23.21,\ -3.01)\ \text{N}", 30, UNK_C), 3, x=-0.4, max_w=7.0)
         self.play(FadeIn(s7), GrowArrow(FO[0]), FadeIn(FO[1]))
         self.glow(s7, FO, UNK_C)
+        self.wait(1.5)
         s8 = prow(MP(r"\Sigma M_O:\ T", r"+(0.17321\cdot3.006-0.1\cdot23.206)", r"-0.6", "=0", size=30), 4, x=-0.4, max_w=7.0)
         s9 = prow(M(r"T-1.80-0.6=0\ \Rightarrow\ T=2.40\ \text{N m (ccw)}", 32, TQ_C), 5, x=-0.4, max_w=7.0)
         self.play(FadeIn(s8), Create(Tq[0]), FadeIn(Tq[1]))
@@ -790,6 +796,7 @@ class D42_ExamDFABarDrill(ExamScene):
         self.play(FadeIn(s9))
         box = SurroundingRectangle(s9, color=TQ_C, buff=0.1)
         self.play(Create(box))
+        self.wait(2.0)
         self.say("ขั้น 5 ตรวจ: แท่งหมุนรอบจุดตายตัว → T = I_O α ต้องได้เท่ากัน (แกนขนาน หน้า 6)")
         s10 = prow(M(r"I_O=\tfrac13mL^2=0.16,\quad I_O\alpha=0.16(15)=2.40\ \checkmark", 30, OK), 6, x=-0.4, max_w=7.0)
         self.play(FadeIn(s10))
