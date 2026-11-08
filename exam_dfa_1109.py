@@ -206,7 +206,7 @@ def fbd(num=False):
                               stroke_width=3).move_to(Cs), pin(Cs))
     names = VGroup(M("O_1", 24).move_to(O1 + P2(0.05, -0.4)),
                    M("B", 24).next_to(Bc, LEFT, buff=0.18),
-                   M("B", 24).next_to(Br, LEFT, buff=0.18),
+                   M("B", 24).next_to(Br, LEFT, buff=0.36),
                    M("C", 24).next_to(Cr, DOWN, buff=0.18))
     tags = VGroup(VGroup(tag(1, L1_C), T("ข้อเหวี่ยง", 20, L1_C)).arrange(RIGHT, buff=0.15).move_to(P2(-5.9, 1.55)),
                   VGroup(tag(2, L2_C), T("ก้านสูบ", 20, L2_C)).arrange(RIGHT, buff=0.15).move_to(P2(-0.9, 2.05)),
@@ -343,7 +343,7 @@ class D40_ExamDFAMethod(ExamScene):
         # ---------------- step 1: kinematics
         aG1, aG2, aG3, al1, al2 = accel_marks()
         O, B, C, G1, G2, th = geo(PHI0, O_A)
-        w1 = VGroup(arc_arrow(O, 0.5, 15, 40, W_C), M(r"\omega_1", 24, W_C).move_to(O + 0.62 * U(70) + P2(-0.55, 0.05)))
+        w1 = VGroup(arc_arrow(O, 0.5, 15, 40, W_C), M(r"\omega_1", 24, W_C).move_to(O + P2(0.98, -0.15)))
         seg = Line(O, G1, color=WHITE, stroke_width=5)
         self.say("ขั้น 1 Kinematics: หาความเร่งของจุด G ทุกชิ้น และ α ทุกชิ้น (สูตรเดียวกับ W04)")
         e1 = prow(MP(r"\vec a_{G1}", "=", r"\vec\alpha_1", r"\times\vec r_{O_1G_1}", r"-\omega_1^2",
