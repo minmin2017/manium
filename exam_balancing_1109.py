@@ -141,7 +141,7 @@ class ExamScene(SafeScene):
             g["discs"].add(Line(P2(x, ys - 0.6), P2(x, ys + 0.6), color=GRAYTXT, stroke_width=3))
             d = Dot(P2(x, y), radius=0.1, color=MCOL[i])
             g["dots"].add(d)
-            g["mlabs"].add(M(r"m_%d" % (i + 1), 24, MCOL[i]).next_to(d, RIGHT, buff=0.08))
+            g["mlabs"].add(M(r"m_%d" % (i + 1), 24, MCOL[i]).next_to(d, UR, buff=0.02))
         rows = [(l, MCOL[i], r"l_%d" % (i + 1), values[i] if values else None)
                 for i, (m, R, t, l) in enumerate(ms)]
         rows.append((lB, CB, r"l_B", values[-1] if values else None))
@@ -226,19 +226,12 @@ class ExamScene(SafeScene):
                 n = -n
             t = M(lab, 21, col)
             best = None
-            for frac in (0.5, 0.65, 0.35, 0.8, 0.2):
-                p = pa + frac * (pb - pa)
-                for sgn in (1, -1):
-                    nn = n * sgn
-                    ext = 0.5 * (abs(nn[0]) * t.width + abs(nn[1]) * t.height)
-                    for k in range(5):
-                        c = p + nn * (0.12 + ext + 0.22 * k)
-                        if not hits(c, t.width, t.height):
-                            best = c
-                            break
-                    if best is not None:
-                        break
-                if best is not None:
+            ext = 0.5 * (abs(n[0]) * t.width + abs(n[1]) * t.height)
+            cands = [pa + frac * (pb - pa) + n * sgn * (0.12 + ext + 0.22 * k)
+                     for k in range(5) for frac in (0.5, 0.65, 0.35, 0.8, 0.2) for sgn in (1, -1)]
+            for c in cands:
+                if not hits(c, t.width, t.height):
+                    best = c
                     break
             if best is None:
                 best = (pa + pb) / 2 + n * (0.12 + 0.5 * (abs(n[0]) * t.width + abs(n[1]) * t.height))
@@ -378,7 +371,7 @@ class ExamScene(SafeScene):
         self.glow(pB[3], VGroup(ca[n], cl[n]), CB)
         self.play(FadeIn(pB[4]))
         dB = Dot(P2(sv["pB"].get_x(), sv["shaft"].get_y() + 0.45 * SVS * np.sin(np.radians(angB))), radius=0.09, color=CB)
-        mB = M(r"m_B", 19, CB).next_to(dB, RIGHT, buff=0.08)
+        mB = M(r"m_B", 19, CB).next_to(dB, UR, buff=0.02)
         self.play(FadeIn(dB, scale=1.5), FadeIn(mB))
         self.glow(pB[4], VGroup(ca[n], dB), CB)
         self.wait(2.0)
@@ -415,7 +408,7 @@ class ExamScene(SafeScene):
         self.glow(pA[4], VGroup(fa[n + 1], fl[n + 1]), CA)
         self.play(FadeIn(pA[5]))
         dA = Dot(P2(sv["pA"].get_x(), sv["shaft"].get_y() + 0.45 * SVS * np.sin(np.radians(angA))), radius=0.09, color=CA)
-        mA = M(r"m_A", 19, CA).next_to(dA, RIGHT, buff=0.08)
+        mA = M(r"m_A", 19, CA).next_to(dA, UR, buff=0.02)
         self.play(FadeIn(dA, scale=1.5), FadeIn(mA))
         self.glow(pA[5], VGroup(fa[n + 1], dA), CA)
         self.say(D["say_quad"])
@@ -436,7 +429,7 @@ class ExamScene(SafeScene):
             lines += [M(r"m_B = \frac{%.4f}{%s} = %.3f\ \text{kg}\qquad m_A = \frac{%.4f}{%s} = %.3f\ \text{kg}"
                         % (magB, r_corr, magB / r, magA, r_corr, magA / r), 30, OK)]
         lines += [T(D["trap"], 19, WARN)]
-        chk = panel(*lines, x0=X0, top=2.05, gap=0.24, max_w=6.9)
+        chk = panel(*lines, x0=X0, top=2.05, gap=0.24, max_w=6.7)
         self.play(FadeIn(chk[0]), FadeIn(chk[1]))
         self.glow(chk[1], VGroup(fa, dA, dB), OK)
         self.play(FadeIn(chk[2]))
