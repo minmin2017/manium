@@ -139,6 +139,10 @@ def arc_arrow(center, r, start, sweep, color, sw=4):
 
 class ExamScene(SafeScene):
     _cap = None
+    PACE = 1.8   # reading time: every wait() is stretched (exam-cram clip, Min reads Thai captions)
+
+    def wait(self, duration=1.0, *args, **kwargs):
+        return super().wait(duration * self.PACE, *args, **kwargs)
 
     def say(self, txt, size=21):
         new = caption_top(txt, size=size, max_w=13.0)
@@ -148,10 +152,12 @@ class ExamScene(SafeScene):
         else:
             self.play(FadeIn(new), run_time=0.6)
         self._cap = new
+        super().wait(1.2)
 
     def glow(self, term, fig, color, rt=1.4):
-        anims = [Indicate(term, color=WHITE, scale_factor=1.2),
-                 Circumscribe(term, color=color, buff=0.08, stroke_width=4, fade_out=True)]
+        wide = term.width > 3.2 or isinstance(term, Text)
+        anims = [Indicate(term, color=WHITE, scale_factor=1.0 if wide else 1.2),
+                 Circumscribe(term, color=color, buff=0.04, stroke_width=3, fade_out=True)]
         if fig is not None:
             anims.append(Indicate(fig, color=WHITE, scale_factor=1.0))
         self.play(*anims, run_time=rt)
@@ -356,7 +362,7 @@ class G40_ExamNomenclature(ExamScene):
             stack(M(r"N_{min} = \frac{2k}{\sin^2\phi} = 17.1 \Rightarrow 18", 30, WARN),
                   T("เลยจุดม่วง = สัมผัสใต้ base circle = interference", 19, WARN)),
         )
-        for rw, y in zip(brows, [1.75, 0.75, -0.25, -1.25, -2.25]):
+        for rw, y in zip(brows, [1.9, 0.85, -0.2, -1.25, -2.4]):
             place_left(rw, 2.25, y)
 
         self.say("P = จุดที่วงพิตช์ 2 วงสัมผัสกัน บนเส้นต่อศูนย์กลาง → ระยะศูนย์กลาง C = R1 + R2")
@@ -461,8 +467,9 @@ class G41_ExamRevertedDesign(ExamScene):
         X0 = 0.1
 
         def panel(*mobs, top=2.05, gap=0.22):
+            for mo in mobs:
+                fit_width(mo, 6.6)
             g = VGroup(*mobs).arrange(DOWN, aligned_edge=LEFT, buff=gap)
-            fit_width(g, 6.75)
             g.move_to([X0 + g.width / 2, top - g.height / 2, 0])
             return g
 
@@ -677,9 +684,10 @@ class G42_ExamPlanetaryEx74(ExamScene):
 
         X0 = -0.45
 
-        def panel(*mobs, top=2.1, gap=0.2, max_w=7.2):
+        def panel(*mobs, top=2.1, gap=0.2, max_w=7.1):
+            for mo in mobs:
+                fit_width(mo, max_w)
             g = VGroup(*mobs).arrange(DOWN, aligned_edge=LEFT, buff=gap)
-            fit_width(g, max_w)
             g.move_to([X0 + g.width / 2, top - g.height / 2, 0])
             return g
 
@@ -757,7 +765,7 @@ class G42_ExamPlanetaryEx74(ExamScene):
         ccol = [RING_G, GEAR_IN, GEAR_MID, ARM_G]
         cells = [
             [r"X", r"X", r"X", r"X"],
-            [r"+\tfrac{20}{80}Y = \tfrac{Y}{4}", r"-\tfrac{20}{40}Y = -\tfrac{Y}{2}", r"Y", r"0"],
+            [r"+\tfrac{1}{4}Y", r"-\tfrac{1}{2}Y", r"Y", r"0"],
             [r"X + \tfrac{Y}{4}", r"X - \tfrac{Y}{2}", r"X + Y", r"X"],
         ]
         rlab = ["1. ล็อกทั้งก้อน", "2. ตรึง arm", "รวม (จริง)"]
@@ -784,7 +792,14 @@ class G42_ExamPlanetaryEx74(ExamScene):
         self.play(FadeIn(rows_m[1]))
         self.say("แถว 2: ตรึง arm (= 0) ให้ planet หมุน Y แล้วไล่อัตราทด: ring ขบใน +, sun ขบนอก −")
         run(dict(A=0.0, S=-0.25, P=0.5, R=0.125), 4.0)
+        note = M(r"\text{ring: } +\tfrac{N_3}{N_1}Y = +\tfrac{20}{80}Y,\quad \text{sun: } -\tfrac{N_3}{N_2}Y = -\tfrac{20}{40}Y",
+                 26, GRAYTXT)
+        fit_width(note, 7.0)
+        note.move_to([X0 + note.width / 2, yh - 3.75 * dy, 0])
         self.glow(rows_m[1][3], pl, GEAR_MID)
+        self.play(FadeIn(note))
+        self.glow(rows_m[1][1], ring, RING_G)
+        self.glow(rows_m[1][2], sun, GEAR_IN)
         self.play(Create(hl2), FadeIn(rows_m[2]))
         self.wait(1.0)
 
@@ -793,7 +808,7 @@ class G42_ExamPlanetaryEx74(ExamScene):
             M(r"\text{ring: } 50 + \frac{Y}{4} = 0\ \Rightarrow\ Y = -200", 30, RING_G),
             M(r"\text{sun: } 50 - \frac{1}{2}(-200) = +150\ \text{rad/s (ccw)}", 30, GEAR_IN),
             M(r"\text{planet: } 50 + (-200) = -150\ \text{rad/s (cw)}", 30, GEAR_MID),
-            top=-0.5, gap=0.16)
+            top=-0.85, gap=0.14)
         tags = tags_at()
         self.say("รู้ arm กับ ring → ตั้ง 2 สมการจากแถวรวม แก้ X, Y แล้วอ่านคำตอบ")
         self.play(FadeIn(tags))
@@ -808,7 +823,7 @@ class G42_ExamPlanetaryEx74(ExamScene):
         self.wait(2.0)
 
         # step 5: check + real motion
-        self.play(FadeOut(VGroup(head, hl, hl2, *rows_m, sol)))
+        self.play(FadeOut(VGroup(head, hl, hl2, *rows_m, sol, note)))
         chk = panel(
             T("ขั้น 4 — ตรวจ", 22, OK),
             T("สูตร = 150, ตาราง = 150 → ตรงกัน", 20, OK),
