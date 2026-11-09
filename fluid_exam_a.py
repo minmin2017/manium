@@ -563,7 +563,9 @@ class FX02_TakeHomePumpPower(ExamScene):
         self.glow(h1, VGroup(cyl, lb["W"], lb["v"]), W_C)
         self.show(h2)
         self.glow(h2[2], VGroup(shaft, cyl), WHITE)
-        self.play(Create(SurroundingRectangle(h2[6], color=OK, buff=0.08)))
+        box8 = SurroundingRectangle(h2[6], color=OK, buff=0.08)
+        self.play(Create(box8))
+        self.rows.add(box8)
         h3 = prow(T("ข้อ 9  ทั้งระบบ (รวมมอเตอร์ไฟฟ้า)", 24, OK), 3.35)
         h4 = prow(MP(r"\eta_{total}", "=", r"\frac{W v}{P_{el}}", "=", r"\frac{2943}{5134}", "=", r"57.3\%",
                      size=38, colors={6: OK}), 4.5)
@@ -571,6 +573,7 @@ class FX02_TakeHomePumpPower(ExamScene):
         self.glow(h4[2], VGroup(plug, pel, cyl), WHITE)
         box9 = SurroundingRectangle(h4[6], color=OK, buff=0.08)
         self.play(Create(box9))
+        self.rows.add(box9)
         h5 = prow(T("ขั้น 4 ตรวจ: 0.774 × 0.871 = 0.674 ✓   0.674 × 0.85 = 0.573 ✓", 20), 5.6)
         self.show(h5)
         self.wait(1.5)
@@ -624,7 +627,7 @@ def motor_figure():
         inl=lab(M(r"p,\ Q_A", 28, Q_C), HM[0] + 0.3, HM[1] + 1.65),
         out=lab(T("ไปถัง", 20, RET_C), HM[0] + 0.3, HM[1] - 1.6),
         name=lab(T("มอเตอร์ไฮดรอลิก", 20), HM[0] - 2.45, HM[1] + 1.15),
-        sh=M(r"T_A,\ N", 28, TQ_C).move_to(HM + P2(2.0, 0.65)),
+        sh=M(r"T_A,\ N", 28, TQ_C).move_to(HM + P2(2.0, 0.95)),
     )
     return dict(body=body, inl=inl, a_in=a_in, out=out, a_out=a_out, shaft=shaft, rot=rot, vd=vd, lb=lb)
 
@@ -635,7 +638,7 @@ class FX03_MotorEfficiency(ExamScene):
         return place_left(g, -6.9, -2.75)
 
     def construct(self):
-        self.header("มอเตอร์ไฮดรอลิก: η_v  η_m  η_o  กำลัง แรงบิด", "การบ้าน 7-34M · 7-36M · 7-37E")
+        self.header("มอเตอร์ไฮดรอลิก: ประสิทธิภาพ กำลัง แรงบิด", "7-34M · 7-36M · 7-37E")
         f = motor_figure()
         lb = f["lb"]
         self.say("มอเตอร์ไฮดรอลิก = ปั๊มกลับด้าน: น้ำมันความดันสูงไหลเข้า (p, Q) → เพลาหมุนออก (T, N)")
@@ -758,10 +761,10 @@ class FX03_MotorEfficiency(ExamScene):
         self.show(d2)
         self.show(d3)
         self.show(d4)
-        warn = prow(T("η_v = 90% ไม่ต้องใช้หา η_o (ใช้หา η_m = 0.825/0.90 = 91.7%)", 20, WARN), 5.95)
+        warn = prow(T("η_v = 90% ไม่ต้องใช้หา η_o (ใช้หา η_m = 91.7%)", 22, WARN), 5.95)
         self.show(warn)
         self.glow(warn, g[2], WARN)
-        d5 = prow(T("ขั้น 4 ตรวจ (SI): 26.92 kW / 32.62 kW = 82.5% ✓ เฉลยตำรา 82.4% ✓", 20), 6.6)
+        d5 = prow(T("ขั้น 4 ตรวจ (SI) ได้ 82.5% ✓  เฉลยตำรา 82.4% ✓", 22), 6.6)
         self.show(d5)
         self.wait(2.0)
         self.clear_panel()
