@@ -136,7 +136,7 @@ class FXB1_Cushion(ExamScene):
         rod_end = x0 + PW / 2 + S + L_rod
         box = Rectangle(width=1.0, height=1.0, color=GEAR_OUT, fill_color=GEAR_OUT,
                         fill_opacity=0.25).move_to([rod_end + 0.5, 0, 0])
-        w_lb = T("W = 1000 lb", 20, GEAR_OUT).next_to(box, UP, buff=0.12)
+        w_lb = VGroup(T("W", 18, GEAR_OUT), T("1000 lb", 18, GEAR_OUT)).arrange(DOWN, buff=0.06).move_to(box)
         f_ar = harrow(rod_end + 0.9, rod_end + 0.1, -0.68, GRAYTXT, 4)
         f_lb = T("f = 0.15W", 20, GRAYTXT).move_to([rod_end + 0.5, -0.98, 0])
         mover = VGroup(piston, plunger, rod, box, w_lb, f_ar, f_lb)
@@ -275,10 +275,10 @@ class FXB1_Cushion(ExamScene):
 
         # ---------------- step 4
         self.step(4, "ตรวจ")
-        c1 = T("ตำรา 816 psi → ต่าง 0.25 % (ปัดเศษ v กับ a)", 22, OK)
-        c2 = T("SI: p2 = 5.615 MPa = 814.4 psi ✓", 22, OK)
-        c3 = T("p2 > p1 เพราะ A2 < A และยังต้องหยุดมวลด้วย ✓", 22, OK)
-        g3 = self.rows([c1, c2, c3], PX, -1.3, 0.6, PMW)
+        c1 = T("ตำรา 816 psi: ต่าง 0.25 % (ปัดเศษ)", 24, OK)
+        c2 = T("SI: 5.615 MPa = 814.4 psi ✓", 24, OK)
+        c3 = T("p2 > p1 เพราะ A2 < A ✓", 24, OK)
+        g3 = self.rows([c1, c2, c3], PX, -1.3, 0.62, PMW)
         for c in g3:
             self.play(FadeIn(c, shift=0.15 * UP))
             self.wait(1.4)
@@ -293,11 +293,11 @@ class FXB2_Moisture(ExamScene):
 
     def construct(self):
         self.head("hw08 น้ำในลมอัด", "W08-09 · hw08")
-        yb = -1.35
+        yb = -1.6
         BLU = "#4FC3F7"
         intake = Arrow([-6.85, yb, 0], [-4.35, yb, 0], buff=0, color=LIVE, stroke_width=6)
-        in_lb1 = T("300 cfm, 1 atm", 19, GRAYTXT).move_to([-5.65, -1.95, 0])
-        in_lb2 = T("30°C, 40%RH", 19, GRAYTXT).move_to([-5.65, -2.3, 0])
+        in_lb1 = T("300 cfm, 1 atm", 19, GRAYTXT).move_to([-5.65, -2.2, 0])
+        in_lb2 = T("30°C, 40%RH", 19, GRAYTXT).move_to([-5.65, -2.55, 0])
 
         def unit(x, l1, l2, col):
             b = RoundedRectangle(width=2.0, height=0.85, corner_radius=0.12, color=col,
@@ -310,21 +310,21 @@ class FXB2_Moisture(ExamScene):
         links = VGroup(pipe([(-2.3, yb), (-1.4, yb)], LIVE, 5),
                        pipe([(0.6, yb), (1.5, yb)], LIVE, 5))
         out = Arrow([3.5, yb, 0], [6.85, yb, 0], buff=0, color=LIVE, stroke_width=6)
-        out_lb = T("ท่อลมใช้งาน", 19, GRAYTXT).move_to([5.2, -1.95, 0])
+        out_lb = T("ท่อลมใช้งาน", 19, GRAYTXT).move_to([5.2, -2.2, 0])
 
         def drop(x, y):
             return VGroup(Triangle(color=BLU, fill_color=BLU, fill_opacity=1).scale(0.09)
                           .move_to([x, y + 0.07, 0]),
                           Circle(radius=0.09, color=BLU, fill_color=BLU,
                                  fill_opacity=1).move_to([x, y, 0]))
-        d2 = VGroup(Line([-0.4, yb - 0.43, 0], [-0.4, -2.25, 0], color=BLU), drop(-0.4, -2.4))
-        d3 = VGroup(Line([2.5, yb - 0.43, 0], [2.5, -2.25, 0], color=BLU), drop(2.5, -2.4))
-        dw = drop(-5.65, -1.05)
-        ds = drop(5.2, -1.05)
-        lw = T("Water in = ?", 21, BLU).move_to([-5.65, -2.95, 0])
-        l2 = T("Drain 2 = ?", 21, BLU).move_to([-0.4, -2.95, 0])
-        l3 = T("Drain 3 = ?", 21, BLU).move_to([2.5, -2.95, 0])
-        ls = T("Water sys = ?", 21, BLU).move_to([5.2, -2.95, 0])
+        d2 = VGroup(Line([-0.4, yb - 0.43, 0], [-0.4, -2.5, 0], color=BLU), drop(-0.4, -2.65))
+        d3 = VGroup(Line([2.5, yb - 0.43, 0], [2.5, -2.5, 0], color=BLU), drop(2.5, -2.65))
+        dw = drop(-5.65, -1.3)
+        ds = drop(5.2, -1.3)
+        lw = T("Water in = ?", 21, BLU).move_to([-5.65, -3.2, 0])
+        l2 = T("Drain 2 = ?", 21, BLU).move_to([-0.4, -3.2, 0])
+        l3 = T("Drain 3 = ?", 21, BLU).move_to([2.5, -3.2, 0])
+        ls = T("Water sys = ?", 21, BLU).move_to([5.2, -3.2, 0])
 
         # ---------------- step 1
         self.step(1, "เข้าใจโจทย์")
@@ -363,11 +363,11 @@ class FXB2_Moisture(ExamScene):
         f2 = M(r"\omega", r"= 0.622\,\frac{P_v}{P - P_v}", size=36)
         f2[0].set_color(OK)
         f3 = M(r"m_a", r"= \frac{P_a V}{R_a T}", r"\quad (T\ \text{in K})", size=36)
-        g = self.rows([f1, f2, f3], 0, 1.9, 0.78, 12.0)
+        g = self.rows([f1, f2, f3], 0, 2.0, 0.95, 12.0)
         self.play(FadeIn(f1)); self.glow(f1[3], aft, YEL)
         self.cap("P_g ดูที่อุณหภูมิของจุดนั้น (30, 42 หรือ 6°C) ไม่ใช่ 30°C ทุกจุด")
         self.play(FadeIn(f2))
-        w_lbs = VGroup(*[T(s, 20, OK).move_to([x, -0.6, 0]) for s, x in
+        w_lbs = VGroup(*[T(s, 20, OK).move_to([x, -0.85, 0]) for s, x in
                          (("ω1", -5.65), ("ω1", -3.3), ("ω2", -0.4), ("ω3", 2.5))])
         self.play(FadeIn(w_lbs))
         self.glow(f2[0], w_lbs, OK)
@@ -390,18 +390,18 @@ class FXB2_Moisture(ExamScene):
         a1 = M(r"P_g(30) = 4 + \frac{30 - 28.96}{32.88 - 28.96}(1) = 4.265\ \text{kPa}", size=32)
         a2 = M(r"P_v = 0.40\times 4.265 = 1.706,\quad P_a = 101.325 - 1.706 = 99.62\ \text{kPa}", size=32)
         a3 = M(r"\omega_1 = 0.622\times\frac{1.706}{99.62} = 0.010653", size=32, color=OK)
-        g = self.rows([a1, a2, a3], 0, 1.95, 0.8, 12.4)
+        g = self.rows([a1, a2, a3], 0, 2.0, 0.95, 12.4)
         self.cap("จุดที่ 1 อากาศเข้า: เปิดตาราง (สไลด์ W08 หน้า 12) แล้ว interpolate", wait=0.8)
         self.play(FadeIn(a1)); self.glow(a1, in_lb2, YEL)
         self.play(FadeIn(a2)); self.play(FadeIn(a3))
-        self.play(Transform(w_lbs[0], T("ω1 = 10.65 g/kg", 19, OK).move_to([-5.65, -0.6, 0])),
-                  Transform(w_lbs[1], T("10.65 g/kg", 19, OK).move_to([-3.3, -0.6, 0])))
+        self.play(Transform(w_lbs[0], T("ω1 = 10.65 g/kg", 19, OK).move_to([-5.65, -0.85, 0])),
+                  Transform(w_lbs[1], T("10.65 g/kg", 19, OK).move_to([-3.3, -0.85, 0])))
         self.glow(a3, w_lbs[0], OK)
         self.play(FadeOut(g))
         b1 = M(r"V = 300\times 0.028317 = 8.495\ \text{m}^3/\text{min},\quad T = 303.15\ \text{K}", size=32)
         b2 = M(r"m_a = \frac{99.62\times 8.495}{0.287\times 303.15} = 9.727\ \text{kg/min}", size=32)
         b3 = M(r"\text{Water in} = 0.010653\times 9.727\times 840 = 87.0\ \text{L/day}", size=32, color=BLU)
-        g = self.rows([b1, b2, b3], 0, 1.95, 0.8, 12.4)
+        g = self.rows([b1, b2, b3], 0, 2.0, 0.95, 12.4)
         self.play(FadeIn(b1)); self.glow(b1, in_lb1, YEL)
         self.play(FadeIn(b2))
         self.cap("เวลา 14 hr × 60 = 840 min ต่อวัน (ไม่ใช่ 24 hr)", wait=0.8)
@@ -412,26 +412,26 @@ class FXB2_Moisture(ExamScene):
         c1 = M(r"P_2 = 650 + 101.325 = 751.3\ \text{kPa abs}", size=32)
         c2 = M(r"\text{no condensing: } P_v = 1.706\times\frac{751.3}{101.325} = 12.65 > P_g(42) = 8.274", size=32, color=WARN)
         c3 = M(r"\omega_2 = 0.622\times\frac{8.274}{751.3 - 8.274} = 0.006926", size=32, color=OK)
-        g = self.rows([c1, c2, c3], 0, 1.95, 0.8, 12.4)
+        g = self.rows([c1, c2, c3], 0, 2.0, 0.95, 12.4)
         self.cap("จุดที่ 2 aftercooler: ความดันต้องเป็นสัมบูรณ์ 6.5 barg → 751.3 kPa", wait=0.8)
         self.play(FadeIn(c1)); self.glow(c1, comp, METAL)
         self.play(FadeIn(c2)); self.glow(c2, aft, WARN)
         self.cap("ไอน้ำ 12.65 kPa > ที่ 42°C อุ้มได้ 8.274 kPa → อุ้มไม่ไหว น้ำกลั่นจริง")
         self.play(FadeIn(c3))
-        self.play(Transform(w_lbs[2], T("ω2 = 6.93 g/kg", 19, OK).move_to([-0.4, -0.6, 0])))
+        self.play(Transform(w_lbs[2], T("ω2 = 6.93 g/kg", 19, OK).move_to([-0.4, -0.85, 0])))
         self.glow(c3, w_lbs[2], OK)
         self.play(FadeOut(g))
         e1 = M(r"\text{Drain 2} = (0.010653 - 0.006926)(9.727)(840) = 30.4\ \text{L/day}", size=32, color=BLU)
         e2 = M(r"P_g(6) = 0.6113 + \frac{6 - 0.01}{6.98 - 0.01}(0.3887) = 0.9453\ \text{kPa}", size=32)
         e3 = M(r"\omega_3 = 0.622\times\frac{0.9453}{751.3 - 0.945} = 0.000784", size=32, color=OK)
-        g = self.rows([e1, e2, e3], 0, 1.95, 0.8, 12.4)
+        g = self.rows([e1, e2, e3], 0, 2.0, 0.95, 12.4)
         self.play(FadeIn(e1))
         self.play(Transform(l2, T("Drain 2 = 30.4", 21, BLU).move_to(l2)))
         self.glow(e1, d2, BLU)
         self.cap("จุดที่ 3 dryer: เย็นถึง 6°C ที่ความดันเดิม → อิ่มตัวที่ 6°C", wait=0.8)
         self.play(FadeIn(e2)); self.glow(e2, dry, OK)
         self.play(FadeIn(e3))
-        self.play(Transform(w_lbs[3], T("ω3 = 0.78 g/kg", 19, OK).move_to([2.5, -0.6, 0])))
+        self.play(Transform(w_lbs[3], T("ω3 = 0.78 g/kg", 19, OK).move_to([2.5, -0.85, 0])))
         self.glow(e3, w_lbs[3], OK)
         self.play(FadeOut(g))
         h1 = M(r"\text{Drain 3} = (0.006926 - 0.000784)(9.727)(840) = 50.2\ \text{L/day}", size=32, color=BLU)
@@ -468,7 +468,7 @@ class FXB3_PumpEff(ExamScene):
 
     def construct(self):
         self.head("ประสิทธิภาพปั๊ม: สูตรสอบ + กับดัก", "W04 · ข้อ 5-51E")
-        yb = -1.65
+        yb = -2.0
         elec = Arrow([-6.85, yb, 0], [-5.65, yb, 0], buff=0, color=CURRENT, stroke_width=6)
         el_lb = T("ไฟฟ้า", 19, CURRENT).move_to([-6.25, yb - 0.45, 0])
         mot = VGroup(RoundedRectangle(width=1.8, height=0.9, corner_radius=0.12, color=METAL,
@@ -482,10 +482,10 @@ class FXB3_PumpEff(ExamScene):
         oil = Arrow([-0.35, yb, 0], [3.4, yb, 0], buff=0, color=LIVE, stroke_width=6)
         oil_lb = M(r"P,\ Q_A", size=30, color=LIVE).move_to([1.5, yb + 0.42, 0])
         fl_lb = T("กำลังของไหล", 19, LIVE).move_to([4.5, yb, 0])
-        fric = Arrow([-1.35, yb - 0.5, 0], [-2.0, -2.85, 0], buff=0, color=WARN, stroke_width=4)
-        fr_lb = T("เสียดทาน → ηm", 19, WARN).move_to([-2.7, -3.15, 0])
-        leak = Arrow([-0.55, yb - 0.5, 0], [0.1, -2.85, 0], buff=0, color=WARN, stroke_width=4)
-        lk_lb = T("รั่วไหล → ηv", 19, WARN).move_to([0.8, -3.15, 0])
+        fric = Arrow([-1.35, yb - 0.5, 0], [-2.0, -3.2, 0], buff=0, color=WARN, stroke_width=4)
+        fr_lb = T("เสียดทาน → ηm", 19, WARN).move_to([-2.7, -3.5, 0])
+        leak = Arrow([-0.55, yb - 0.5, 0], [0.1, -3.2, 0], buff=0, color=WARN, stroke_width=4)
+        lk_lb = T("รั่วไหล → ηv", 19, WARN).move_to([0.8, -3.5, 0])
 
         self.step(1, "เข้าใจ")
         self.play(GrowArrow(elec), FadeIn(el_lb, mot), run_time=0.9)
@@ -498,15 +498,15 @@ class FXB3_PumpEff(ExamScene):
         self.cap("เสียที่ 2: น้ำมันรั่วภายใน → ไหลออกจริง Q_A น้อยกว่าทฤษฎี Q_T")
 
         self.step(2, "สูตร")
-        r1 = M(r"\eta_v", r"=", r"\frac{Q_A}{Q_T}", r",\quad Q_T =", r"V_D N", size=34)
+        r1 = M(r"\eta_v", r"=", r"\frac{Q_A}{Q_T}", r",\quad Q_T =", r"V_D N", size=38)
         r1[0].set_color(WARN)
-        r2 = M(r"\eta_m", r"=", r"\frac{T_T}{T_A}", r",\quad T_T =", r"\frac{P V_D}{2\pi}", size=34)
+        r2 = M(r"\eta_m", r"=", r"\frac{T_T}{T_A}", r",\quad T_T =", r"\frac{P V_D}{2\pi}", size=38)
         r2[0].set_color(WARN)
-        r3 = M(r"\eta_o", r"=", r"\eta_v\,\eta_m", r"=", r"\frac{HP_{out}}{HP_{in}}", size=34)
+        r3 = M(r"\eta_o", r"=", r"\eta_v\,\eta_m", r"=", r"\frac{HP_{out}}{HP_{in}}", size=38)
         r3[0].set_color(OK)
         r4 = M(r"HP_{out} = \frac{P(\text{psi})\,Q(\text{gpm})}{1714}", r"\qquad",
                r"HP_{in} = \frac{T(\text{in lb})\,N(\text{rpm})}{63025}", size=32)
-        g = self.rows([r1, r2, r3, r4], 0.6, 2.0, 0.82, 11.0)
+        g = self.rows([r1, r2, r3, r4], 0.6, 2.0, 0.97, 11.0)
         self.play(FadeIn(r1)); self.glow(r1[2], oil_lb, LIVE); self.glow(r1[4], pump, GEAR_IN)
         self.cap("ηv = ไหลจริง / ไหลทฤษฎี (Q_T = ปริมาตรต่อรอบ × รอบ)", wait=1.8)
         self.play(FadeIn(r2)); self.glow(r2[2], sh_lb, TORQUE)
@@ -524,20 +524,20 @@ class FXB3_PumpEff(ExamScene):
         q1 = M(r"HP_{out} = \frac{1000\times 24}{1714} = 14.0\ \text{hp}", size=32, color=LIVE)
         q2 = M(r"HP_{in} = \frac{1100\times 1000}{63025} = 17.45\ \text{hp}", size=32, color=TORQUE)
         q3 = M(r"\eta_o = \frac{14.0}{17.45} = 80\%", size=36, color=OK)
-        g = self.rows([giv, q1, q2, q3], 0.6, 2.0, 0.82, 11.5)
+        g = self.rows([giv, q1, q2, q3], 0.6, 2.0, 0.97, 11.5)
         self.play(FadeIn(giv))
         self.cap("โจทย์ให้: ปั๊ม 6 in³/rev ส่ง 24 gpm ที่ 1000 rpm, 1000 psi, แรงบิดเข้า 1100 in·lb",
                  wait=2.0)
         self.play(FadeIn(q1)); self.glow(q1, oil_lb, LIVE)
         self.play(FadeIn(q2)); self.glow(q2, sh_lb, TORQUE)
         self.play(FadeIn(q3))
-        self.cap("(a) ηo = 80 %", color=OK, wait=1.5)
+        self.cap("(a) ηo = 80 %  (แบบ 1: หา HP ออกและเข้า แล้วหารกัน)", color=OK, wait=3.0)
         self.play(FadeOut(q1, q2, q3))
         w1 = M(r"T_T = \frac{1000\times 6}{2\pi} = 954.9\ \text{in lb}", size=32, color=TORQUE)
         w2 = M(r"\eta_m = \frac{954.9}{1100} = 86.8\%", size=32, color=WARN)
         w3 = M(r"Q_T = \frac{6\times 1000}{231} = 25.97\ \text{gpm}", r",\quad \eta_v = \frac{24}{25.97} = 92.4\%",
                size=32, color=WARN)
-        self.rows([w1, w2, w3], 0.6, 1.18, 0.82, 11.5)
+        self.rows([w1, w2, w3], 0.6, 1.03, 0.97, 11.5)
         self.play(FadeIn(w1)); self.glow(w1, pump, GEAR_IN)
         self.cap("(b) แรงบิดทฤษฎี T_T = 954.9 in·lb — ไม่ใช่ 1100 ที่โจทย์ให้", color=YEL)
         self.play(FadeIn(w2)); self.glow(w2, fric, WARN)
@@ -550,7 +550,7 @@ class FXB3_PumpEff(ExamScene):
               size=38, color=OK)
         self.rows([k], 0.6, 1.95, 0.8, 11.0)
         self.play(FadeIn(k))
-        self.cap("ηv × ηm ต้องได้ ηo กลับมา → ตัวเลขสอดคล้องกัน", color=OK)
+        self.cap("ηv × ηm ต้องได้ ηo กลับมา → ตัวเลขสอดคล้องกัน", color=OK, wait=3.5)
         tr = VGroup(T("① T_A > T_T เสมอ (1100 > 954.9) ส่วนต่างคือเสียดทาน", 22, YEL),
                     T("② ย้อนจากกำลังออก → เข้า: หารด้วย η (ไม่ใช่คูณ)", 22, YEL),
                     T("③ ได้ η เกิน 100 % = คิดผิดแน่นอน", 22, YEL),
@@ -674,7 +674,7 @@ class FXB4_Cascade(ExamScene):
         def sbox(x, y, name):
             b = Rectangle(width=0.62 if len(name) < 4 else 1.1, height=0.36, color=WHITE,
                           fill_color=BLACK, fill_opacity=1).move_to([x, y, 0])
-            return VGroup(b, T(name, 17, WHITE).move_to(b))
+            return VGroup(b, T(name, 17, WHITE).move_to(b)).set_z_index(3)
         r_A1 = pipe([(-6.2, y1), (-6.2, yv), (-5.6, yv)])
         s_a1 = sbox(-3.0, y1, "a1")
         r_a1 = pipe([(-3.0, y1 + 0.18), (-3.0, -0.2), (-1.75, -0.2), (-1.75, yv), (-1.2, yv)])
@@ -698,7 +698,7 @@ class FXB4_Cascade(ExamScene):
             "3) b1 (จาก L1) → L2 มีลม → B−",
             "4) b0 (จาก L2) → A−",
             "จบ: L2 ค้างไว้ รอ START")]).arrange(DOWN, buff=0.2, aligned_edge=LEFT)
-        fit_width(tbl, 4.0)
+        fit_width(tbl, 4.2)
         tbl.move_to([PX, -1.55, 0])
         self.play(FadeOut(cnt))
 
@@ -750,7 +750,7 @@ class FXB4_Cascade(ExamScene):
         chk = T("ทุกขณะ มีลมแค่เส้นเดียว\n→ สัญญาณกรุ๊ปเก่าถูกตัดเอง", 20, OK)
         self.rows([chk], PX, 1.0, 0.8, 4.2)
         self.play(FadeIn(chk))
-        self.glow(chk, VGroup(L1, L2), OK)
+        self.glow(chk)
         self.cap("สูตรสอบ: เส้นลม = จำนวนกรุ๊ป, วาล์วคาสเคด = กรุ๊ป − 1 (ตัวอย่าง 3 กรุ๊ป → 2 ตัว)",
                  color=YEL, wait=4.0)
         self.wait(1.5)
