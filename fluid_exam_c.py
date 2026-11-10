@@ -222,13 +222,13 @@ class FXC2_ConductorSize(ExamScene):
     def construct(self):
         self.head("ความเร็วสูงสุด → ขนาดท่อ", "W06 · hydraulic06 หน้า 5")
         yc = -0.7
-        rs, rd = 0.33, 0.15            # drawn half-heights (46.1 : 20.4)
+        rs, rd = 0.45, 0.199           # drawn half-heights (46.1 : 20.4)
         xs0, xs1 = -5.45, -3.4
         pc = np.array([-2.95, yc, 0])
         xd0, xd1 = -2.5, 0.75
-        tank = Rectangle(width=1.3, height=1.6, color=METAL, stroke_width=4).move_to(
+        tank = Rectangle(width=1.3, height=1.9, color=METAL, stroke_width=4).move_to(
             [-6.15, yc - 0.1, 0])
-        oil = Rectangle(width=1.2, height=1.1, stroke_width=0, fill_color=LIVE,
+        oil = Rectangle(width=1.2, height=1.4, stroke_width=0, fill_color=LIVE,
                         fill_opacity=0.35).move_to([-6.15, yc - 0.35, 0])
         sp = Rectangle(width=xs1 - xs0, height=2 * rs, color=METAL, stroke_width=3,
                        fill_color=LIVE, fill_opacity=0.15).move_to(
@@ -241,16 +241,18 @@ class FXC2_ConductorSize(ExamScene):
         out_tip = Arrow([xd1 - 0.05, yc, 0], [1.25, yc, 0], buff=0, color=LIVE,
                         stroke_width=5, max_tip_length_to_length_ratio=0.4)
         s_lb = VGroup(T("ท่อดูด", 20, WHITE), T("v ≤ 1.2 m/s", 20, LIVE)).arrange(
-            DOWN, buff=0.08).move_to([-4.45, 0.15, 0])
+            DOWN, buff=0.08).move_to([-4.45, 0.3, 0])
         d_lb = VGroup(T("ท่อจ่าย", 20, WHITE), T("v ≤ 6.1 m/s", 20, WARN)).arrange(
             DOWN, buff=0.08).move_to([-0.85, 0.0, 0])
-        q_lb = T("Q = 0.002 m³/s", 20, CURRENT).move_to([-2.95, -1.6, 0])
+        q_lb = T("Q = 0.002 m³/s", 20, CURRENT).move_to([-2.95, 1.0, 0])
+        q_ar = arr((-2.95, 0.82), (-2.95, yc + 0.47), CURRENT, 2)
         ds_dim = dim((-3.75, yc - rs), (-3.75, yc + rs), YEL, tip=0.1)
         dd_dim = dim((0.35, yc - rd), (0.35, yc + rd), YEL, sw=2, tip=0.07)
-        ds_lb = T("Ds = ?", 22, YEL).move_to([-4.75, -1.45, 0])
-        dd_lb = T("Dd = ?", 22, YEL).move_to([0.35, -1.45, 0])
-        ds_ar = arr((-4.4, -1.35), (-3.8, yc - rs + 0.05), YEL, 2)
-        dd_ar = arr((0.35, -1.25), (0.35, yc - rd - 0.03), YEL, 2)
+        DSP, DDP = [-4.45, -1.7, 0], [0.35, -1.6, 0]
+        ds_lb = T("Ds = ?", 22, YEL).move_to(DSP)
+        dd_lb = T("Dd = ?", 22, YEL).move_to(DDP)
+        ds_ar = arr((-4.15, -1.5), (-3.8, yc - rs + 0.05), YEL, 2)
+        dd_ar = arr((0.35, -1.42), (0.35, yc - rd - 0.03), YEL, 2)
 
         tt = ValueTracker(0.0)
         VS, VD = 0.25, 0.25 * 6.1 / 1.2
@@ -274,7 +276,7 @@ class FXC2_ConductorSize(ExamScene):
         self.play(FadeIn(tank, oil), Create(sp), FadeIn(pump), Create(dp),
                   GrowArrow(out_tip), run_time=1.4)
         self.add(flow)
-        self.play(FadeIn(q_lb))
+        self.play(FadeIn(q_lb), GrowArrow(q_ar))
         self.cap("ปั๊มจ่าย Q = 0.002 m³/s (= 120 L/min) ผ่านท่อดูดแล้วออกท่อจ่าย")
         self.play(tt.animate.set_value(4), FadeIn(s_lb), FadeIn(d_lb), run_time=4,
                   rate_func=linear)
@@ -324,11 +326,11 @@ class FXC2_ConductorSize(ExamScene):
         self.cap("ท่อดูด: ใช้ v = 1.2 m/s", color=LIVE, wait=0.8)
         self.play(FadeIn(s1)); self.glow(s1[0], s_lb[1], LIVE)
         self.play(FadeIn(s2)); self.glow(s2[1], ds_dim, YEL)
-        self.play(Transform(ds_lb, T("Ds = 46.1 mm", 22, YEL).move_to([-4.75, -1.45, 0])))
+        self.play(Transform(ds_lb, T("Ds = 46.1 mm", 22, YEL).move_to(DSP)))
         self.cap("ท่อจ่าย: ใช้ v = 6.1 m/s", color=WARN, wait=0.8)
         self.play(FadeIn(s3)); self.glow(s3[0], d_lb[1], WARN)
         self.play(FadeIn(s4)); self.glow(s4[1], dd_dim, YEL)
-        self.play(Transform(dd_lb, T("Dd = 20.4 mm", 22, YEL).move_to([0.35, -1.45, 0])))
+        self.play(Transform(dd_lb, T("Dd = 20.4 mm", 22, YEL).move_to(DDP)))
         self.cap("ระวัง m → mm: 0.0461 m = 46.1 mm , 0.0204 m = 20.4 mm", wait=2.0)
         self.play(FadeOut(g3))
         ans = VGroup(M(r"D_s \ge 46.1\ \text{mm}", size=42, color=WARN),
@@ -340,9 +342,9 @@ class FXC2_ConductorSize(ExamScene):
         # ---------------- step 4
         self.step(4, "ตรวจ")
         cs = Circle(radius=0.85, color=LIVE, stroke_width=4, fill_color=LIVE,
-                    fill_opacity=0.2).move_to([-4.3, -2.9, 0])
+                    fill_opacity=0.2).move_to([-4.3, -3.0, 0])
         cd = Circle(radius=0.376, color=WARN, stroke_width=4, fill_color=WARN,
-                    fill_opacity=0.2).move_to([-1.6, -2.9, 0])
+                    fill_opacity=0.2).move_to([-1.6, -3.0, 0])
         cs_lb = T("46.1", 20, WHITE).move_to(cs)
         cd_lb = T("20.4 mm", 20, WHITE).next_to(cd, RIGHT, buff=0.15)
         self.play(FadeIn(cs, cd, cs_lb, cd_lb))
@@ -498,25 +500,25 @@ class FXC4_PipeTableBP(ExamScene):
     sched 80 ID 0.957 t 0.179 BP~20,580 (S = 55,000 psi assumed, not on slide)."""
 
     def construct(self):
-        self.head("อ่านตาราง pipe → t → BP (Sch 40 vs 80)",
-                  "W06 · hydraulic06 หน้า 7 + 10")
-        cols = [-6.25, -4.85, -3.35, -1.85]
+        self.head("ตาราง pipe → t → BP (Sch 40 vs 80)",
+                  "W06 · หน้า 7+10")
+        cols = [-6.3, -4.65, -2.85, -1.0]
         hdr = ["Nominal", "OD", "ID Sch40", "ID Sch80"]
         data = [["1/2", "0.840", "0.622", "0.546"],
                 ["3/4", "1.050", "0.824", "0.742"],
                 ["1", "1.315", "1.049", "0.957"],
                 ["1-1/4", "1.660", "1.380", "1.278"]]
-        y0, rh = 1.85, 0.5
-        head_row = VGroup(*[T(h, 20, OK).move_to([cols[i], y0, 0])
+        y0, rh = 1.9, 0.55
+        head_row = VGroup(*[T(h, 23, OK).move_to([cols[i], y0, 0])
                             for i, h in enumerate(hdr)])
-        cells = [VGroup(*[T(v, 21, WHITE).move_to([cols[i], y0 - (r + 1) * rh, 0])
+        cells = [VGroup(*[T(v, 25, WHITE).move_to([cols[i], y0 - (r + 1) * rh, 0])
                           for i, v in enumerate(row)]) for r, row in enumerate(data)]
         grid = VGroup(
-            Line([-7.0, y0 - rh / 2, 0], [-1.1, y0 - rh / 2, 0], color=GRAYTXT,
+            Line([-7.0, y0 - rh / 2, 0], [-0.25, y0 - rh / 2, 0], color=GRAYTXT,
                  stroke_width=2),
-            Line([-5.55, y0 + rh / 2, 0], [-5.55, y0 - 4.5 * rh, 0], color=GRAYTXT,
+            Line([-5.5, y0 + rh / 2, 0], [-5.5, y0 - 4.5 * rh, 0], color=GRAYTXT,
                  stroke_width=2),
-            Line([-4.1, y0 + rh / 2, 0], [-4.1, y0 - 4.5 * rh, 0], color=GRAYTXT,
+            Line([-3.8, y0 + rh / 2, 0], [-3.8, y0 - 4.5 * rh, 0], color=GRAYTXT,
                  stroke_width=2))
         table = VGroup(head_row, *cells, grid)
         row1 = cells[2]
@@ -527,19 +529,17 @@ class FXC4_PipeTableBP(ExamScene):
         c80 = np.array([-2.5, -2.45, 0])
         r40 = ring(c40, RO, RO * 1.049 / 1.315)
         r80 = ring(c80, RO, RO * 0.957 / 1.315)
-        l40 = T("Sch 40", 22, LIVE).move_to(c40 + [-1.65, 0.45, 0])
-        l80 = T("Sch 80", 22, WARN).move_to(c80 + [1.65, 0.45, 0])
+        l40 = T("Sch 40", 24, LIVE).move_to(c40 + [-1.6, 0, 0])
+        l80 = T("Sch 80", 24, WARN).move_to(c80 + [1.6, 0, 0])
         do40 = VGroup(dim(c40 + [-RO, RO + 0.17, 0], c40 + [RO, RO + 0.17, 0], GRAYTXT,
                           sw=2, tip=0.1),
                       dim(c80 + [-RO, RO + 0.17, 0], c80 + [RO, RO + 0.17, 0], GRAYTXT,
                           sw=2, tip=0.1))
         do_lb = T("OD 1.315 เท่ากัน", 20, GRAYTXT).move_to([-3.6, -1.08, 0])
-        t40_lb = T("t40 = ?", 20, LIVE).move_to(c40 + [-1.65, -0.2, 0])
-        t80_lb = T("t80 = ?", 20, WARN).move_to(c80 + [1.65, -0.2, 0])
-        t40_ar = arr((t40_lb.get_right()[0] + 0.05, t40_lb.get_center()[1]),
-                     (c40[0] - RO * 0.86, c40[1] - 0.1), LIVE, 2)
-        t80_ar = arr((t80_lb.get_left()[0] - 0.05, t80_lb.get_center()[1]),
-                     (c80[0] + RO * 0.8, c80[1] - 0.1), WARN, 2)
+        t40_lb = T("t40 = ?", 22, LIVE).move_to(c40 + [0, -1.25, 0])
+        t80_lb = T("t80 = ?", 22, WARN).move_to(c80 + [0, -1.25, 0])
+        t40_ar = arr((c40[0], c40[1] - 1.07), (c40[0], c40[1] - RO * 0.88), LIVE, 2)
+        t80_ar = arr((c80[0], c80[1] - 1.07), (c80[0], c80[1] - RO * 0.86), WARN, 2)
 
         # ---------------- step 1
         self.step(1, "เข้าใจโจทย์")
@@ -590,9 +590,9 @@ class FXC4_PipeTableBP(ExamScene):
         s3[1].set_color(LIVE); s4[1].set_color(WARN)
         g3 = self.rows([s1, s2, s3, s4], PX, 1.8, 1.05, PMW)
         self.play(FadeIn(s1)); self.glow(s1[0], VGroup(row1[1], row1[2]), LIVE)
-        self.play(Transform(t40_lb, T("t40 = 0.133", 20, LIVE).move_to(t40_lb)))
+        self.play(Transform(t40_lb, T("t40 = 0.133", 22, LIVE).move_to(t40_lb)))
         self.play(FadeIn(s2)); self.glow(s2[0], VGroup(row1[1], row1[3]), WARN)
-        self.play(Transform(t80_lb, T("t80 = 0.179", 20, WARN).move_to(t80_lb)))
+        self.play(Transform(t80_lb, T("t80 = 0.179", 22, WARN).move_to(t80_lb)))
         self.cap("Sch 80 หนากว่า: 0.179 in เทียบกับ 0.133 in")
         self.play(FadeIn(s3)); self.glow(s3[1], r40, LIVE)
         self.play(FadeIn(s4)); self.glow(s4[1], r80, WARN)
