@@ -175,6 +175,7 @@ class H6_05_PipeThreads(SafeScene):
     # ---------------------------------------------------------------- helpers
     def step(self, n, name):
         m = T(f"ขั้น {n} · {name}", 22, OK)
+        fit_width(m, (-self.ttl.width / 2) - (-7.11 + 0.3) - 0.35)
         m.move_to([-7.11 + 0.3 + m.width / 2, TITLE_Y, 0])
         if self.step_m is not None:
             self.play(FadeOut(self.step_m, run_time=0.3))
@@ -209,6 +210,7 @@ class H6_05_PipeThreads(SafeScene):
         self.step_m = None
         self.cap_m = None
         ttl = title("เกลียวท่อ (Pipe Threads)", size=28)
+        self.ttl = ttl
         ref = page_ref("hydraulic06 · หน้า 8", size=18)
         self.play(FadeIn(ttl), FadeIn(ref))
         self.cap("ท่อน้ำมันขันเข้ากับข้อต่อด้วยเกลียว — ทำไมน้ำมันแรงดันสูงไม่รั่วออกมา?",
@@ -392,7 +394,7 @@ class H6_05_PipeThreads(SafeScene):
         self.play(FadeOut(lab_tp, a_tp), run_time=0.4)
 
         # ===== 5. the two thread types on page 8, one at a time =====
-        self.step(5, "เทียบเกลียว 2 แบบในหน้า 8")
+        self.step(5, "เทียบ 2 แบบ")
         red = z_gaps(TC_STD, TR_STD)
         tagA = T("แบบที่ 1: เกลียวมาตรฐาน (Standard เช่น NPT)", 26, WHITE).move_to([0, 2.05, 0])
         self.cap("หน้า 8 มีเกลียวเรียว 2 แบบ — ดูทีละแบบ", wait=0)
