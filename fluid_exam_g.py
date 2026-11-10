@@ -99,7 +99,7 @@ class ExamScene(SafeScene):
         return m
 
     def glow(self, term, fig=None, color=YEL, rt=1.3):
-        sf = 1.0 if (term.width > 3.2 or isinstance(term, Text)) else 1.2
+        sf = 1.0 if (term.width > 3.2 or any(isinstance(m, Text) for m in term.get_family())) else 1.2
         an = [Indicate(term, color=WHITE, scale_factor=sf),
               Circumscribe(term, color=color, buff=0.04, stroke_width=3, fade_out=True)]
         if fig is not None:
@@ -355,7 +355,7 @@ class FXG2_FreeAir(ExamScene):
         a_mid = harrow(-2.3, -1.65, 0.5, HIGH, 4)
         a_out = harrow(-0.35, 1.25, -0.3, HIGH, 5)
         q2_l = fit_width(M(r"Q_2 = 30\ \text{cfm}", size=28, color=HIGH), 1.55)
-        q2_l.move_to([0.5, 0.05, 0])
+        q2_l.move_to([0.5, 0.32, 0])
         s1 = VGroup(T("สถานะ 1: อากาศรอบตัว", 19, AIR),
                     M(r"P_1 = 14.7\ \text{psia}", size=28, color=AIR),
                     M(r"T_1 = 70^\circ\text{F}", size=28, color=AIR),
@@ -373,11 +373,11 @@ class FXG2_FreeAir(ExamScene):
         self.play(GrowArrow(a_in), FadeIn(comp))
         self.play(GrowArrow(a_mid), FadeIn(tank))
         parcel = big.copy()
-        self.play(FadeOut(big_l, run_time=0.3))
+        self.play(FadeOut(big_l, run_time=0.3), FadeOut(comp[1], run_time=0.3))
         self.play(Transform(parcel, small, path_arc=-1.8), run_time=2.0)
         self.add(small)
         self.remove(parcel)
-        self.play(FadeIn(big_l, run_time=0.3))
+        self.play(FadeIn(big_l, run_time=0.3), FadeIn(comp[1], run_time=0.3))
         self.cap("ลมก้อนเดียวกัน (มวลเท่ากัน): ข้างนอกตัวใหญ่ · ในถังถูกอัดจนเล็ก")
         self.play(FadeIn(s1), FadeIn(s2))
         self.play(GrowArrow(a_out), FadeIn(q2_l))
@@ -650,7 +650,7 @@ class FXG3_HPReceiver(ExamScene):
         qc_l = M(r"Q_c", size=30, color=AIR).move_to([-4.67, 0.95, 0])
         gc = np.array([-1.0, 0.9, 0])
         gauge = Circle(radius=0.55, color=METAL, stroke_width=3, fill_color=DARK,
-                       fill_opacity=1).move_to(gc)
+                       fill_opacity=1).move_to(gc).set_z_index(1)
         stem = Line([-2.0, 0.9, 0], [-1.55, 0.9, 0], color=METAL, stroke_width=4)
 
         def gang(p):
@@ -665,7 +665,8 @@ class FXG3_HPReceiver(ExamScene):
         tk80 = T("80", 17, AIR).move_to(rim(80, 0.82))
         tk100 = T("100", 17, WARN).move_to(rim(100, 0.85))
         needle = always_redraw(lambda: Line(gc, rim(pt.get_value(), 0.45), color=YEL,
-                                            stroke_width=4))
+                                            stroke_width=4).set_z_index(4))
+        ticks.set_z_index(2)
         pmax_l = M(r"P_{max} = 100\ \text{psi}", size=28, color=WARN).move_to([-0.55, -0.05, 0])
         pmin_l = M(r"P_{min} = 80\ \text{psi}", size=28, color=AIR).move_to([-0.55, -0.55, 0])
         a_r = harrow(-2.0, 1.2, -1.1, HIGH, 5)
