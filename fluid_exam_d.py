@@ -96,8 +96,10 @@ class ExamScene(SafeScene):
             r.move_to([x, y0 - i * gap, 0])
         return VGroup(*rows)
 
-    def relabel(self, old, txt, size, color):
+    def relabel(self, old, txt, size, color, left=False):
         new = T(txt, size, color).move_to(old.get_center())
+        if left:
+            new.align_to(old, LEFT)
         self.play(Transform(old, new))
 
 
@@ -270,11 +272,11 @@ class FXD2_IntensifierWorked(ExamScene):
 
     def construct(self):
         self.head("Pressure intensifier: แทนค่าทีละขั้น", "W06 · หน้า 24")
-        xl, xj, xe = -6.5, -3.7, -1.0
-        R1 = 1.1
+        xl, xj, xe = -6.7, -3.5, -0.6
+        R1 = 1.3
         R2 = R1 / np.sqrt(5)
-        PW, d = 0.3, 2.6
-        x0, x1 = -6.0, -4.8
+        PW, d = 0.3, 3.0
+        x0, x1 = -6.2, -4.8
         xb = ValueTracker(x0)
         A1C, A2C = YEL, GEAR_OUT
 
@@ -305,23 +307,24 @@ class FXD2_IntensifierWorked(ExamScene):
         f_lb = M(r"F", size=30, color=FORCE).move_to([x0 + 0.575, 0.85, 0])
         mover = VGroup(bigP, rod, smP, f_ar, f_lb)
 
-        inlet = varrow(-6.25, 2.1, 1.2, LIVE, 5)
-        p1_lb = T("P1 = 1000 psi", 20, LIVE)
-        p1_lb.move_to([-6.0 + p1_lb.width / 2, 1.85, 0])
-        q1_lb = T("Q1 = 20 gpm", 20, LIVE)
-        q1_lb.move_to([-6.0 + q1_lb.width / 2, 1.45, 0])
-        outlet = harrow(xe, 0.35, 0, HIGH, 5)
-        q2_lb = T("Q2 = ?", 20, HIGH).move_to([-0.3, 0.4, 0])
-        p2_lb = T("P2 = ?", 20, HIGH).move_to([-2.3, 1.0, 0])
-        p2_ar = varrow(-2.3, 0.82, 0.52, HIGH, 3)
-        a1_lb = T("A1 = 10 in²", 20, A1C).move_to([-5.1, -1.45, 0])
-        a2_lb = T("A2 = 2 in²", 20, A2C).move_to([-2.35, -1.45, 0])
+        inlet = varrow(-6.45, 2.2, 1.4, LIVE, 5)
+        p1_lb = T("P1 = 1000 psi", 22, LIVE)
+        p1_lb.move_to([-6.2 + p1_lb.width / 2, 2.0, 0])
+        q1_lb = T("Q1 = 20 gpm", 22, LIVE)
+        q1_lb.move_to([-6.2 + q1_lb.width / 2, 1.6, 0])
+        outlet = harrow(xe, 0.8, 0, HIGH, 5)
+        q2_lb = T("Q2 = ?", 22, HIGH)
+        q2_lb.move_to([-0.45 + q2_lb.width / 2, 0.45, 0])
+        p2_lb = T("P2 = ?", 22, HIGH).move_to([-2.0, 1.15, 0])
+        p2_ar = varrow(-2.0, 0.95, 0.63, HIGH, 3)
+        a1_lb = T("A1 = 10 in²", 22, A1C).move_to([-5.1, -1.7, 0])
+        a2_lb = T("A2 = 2 in²", 22, A2C).move_to([-2.05, -1.7, 0])
         for m in (p1_lb, q1_lb, q2_lb, p2_lb, a1_lb, a2_lb, f_lb):
             m.set_z_index(3)
-        xd1 = dim((x0, -2.0), (x1, -2.0), WHITE)
-        xd2 = dim((x0 + d, -2.0), (x1 + d, -2.0), WHITE)
-        xl1 = M(r"x", size=30).move_to([(x0 + x1) / 2, -2.3, 0])
-        xl2 = M(r"x", size=30).move_to([(x0 + x1) / 2 + d, -2.3, 0])
+        xd1 = dim((x0, -2.3), (x1, -2.3), WHITE)
+        xd2 = dim((x0 + d, -2.3), (x1 + d, -2.3), WHITE)
+        xl1 = M(r"x", size=30).move_to([(x0 + x1) / 2, -2.6, 0])
+        xl2 = M(r"x", size=30).move_to([(x0 + x1) / 2 + d, -2.6, 0])
 
         def stroke(a, b, rt=2.2):
             back = a - bigP.get_x()
@@ -394,13 +397,13 @@ class FXD2_IntensifierWorked(ExamScene):
         self.glow(s2[1], VGroup(a1_lb, a2_lb), A1C)
         b2 = SurroundingRectangle(s2[2], color=HIGH, buff=0.12)
         self.play(Create(b2))
-        self.relabel(p2_lb, "P2 = 5000 psi", 20, HIGH)
+        self.relabel(p2_lb, "P2 = 5000 psi", 22, HIGH)
         self.cap("P2 = 5000 psi (สูงขึ้น 10/2 = 5 เท่า)", color=HIGH)
         self.play(FadeIn(s3))
         self.glow(s3[1], VGroup(q1_lb, a2_lb), LIVE)
         b3 = SurroundingRectangle(s3[2], color=HIGH, buff=0.12)
         self.play(Create(b3))
-        self.relabel(q2_lb, "Q2 = 4 gpm", 20, HIGH)
+        self.relabel(q2_lb, "Q2 = 4 gpm", 22, HIGH, left=True)
         self.cap("Q2 = 4 gpm (ลดลง 5 เท่า)", color=HIGH)
 
         # ---------------- step 4
