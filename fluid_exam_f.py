@@ -44,13 +44,13 @@ def tick(x, y, w=0.14, color=WHITE):
 
 def lab_left(s, x, y, size=18, color=GRAYTXT):
     m = T(s, size, color)
-    m.move_to([x - 0.25 - m.width / 2, y, 0])
+    m.move_to([x - 0.36 - m.width / 2, y, 0])
     return m
 
 
 def lab_right(s, x, y, size=18, color=GRAYTXT):
     m = T(s, size, color)
-    m.move_to([x + 0.25 + m.width / 2, y, 0])
+    m.move_to([x + 0.36 + m.width / 2, y, 0])
     return m
 
 
@@ -115,7 +115,7 @@ class ExamScene(SafeScene):
         elif side == "left":
             new.move_to([anchor_x - 0.25 - new.width / 2, old.get_y(), 0])
         else:
-            new.move_to(old.get_center())
+            new.move_to(old.get_center()).align_to(old, LEFT)
         self.play(Transform(old, new))
 
 
@@ -410,7 +410,7 @@ class FX18_GasLaws3(ExamScene):
         self.cap("ตั้งทิ้งไว้จนเย็นลงเหลือ 68 °F → ความดันในถังเหลือเท่าไร?", color=WHITE)
         self.play(FadeIn(q3, q4))
         pa_c = p_arrows(xT, -1.0 + (ycG + 1.0) * 1.15 + 0.15, 0.3)
-        self.play(Transform(pa0, pa_c))
+        self.play(Transform(pa0, pa_c), mG0[0].animate.set_fill(LIVE, opacity=0.45))
         self.cap("ถังปิด = ปริมาตรคงที่ → ใช้ Gay-Lussac")
         self.glow(kG, pins, YEL)
 
@@ -506,7 +506,7 @@ class FX19_ScfmCylinder(ExamScene):
             return VGroup(
                 Rectangle(width=0.22, height=1.14, stroke_width=0, fill_color=METAL,
                           fill_opacity=1).move_to([x, by, 0]),
-                Line([x + 0.11, by, 0], [x + 3.0, by, 0], color=METAL, stroke_width=8),
+                Line([x + 0.11, by, 0], [x + 4.0, by, 0], color=METAL, stroke_width=8),
                 hspring(x + 0.11, bx1 - 0.03))
 
         a_m = always_redraw(air)
@@ -518,7 +518,7 @@ class FX19_ScfmCylinder(ExamScene):
         circ = Circle(radius=0.5, color=METAL, stroke_width=4, fill_color=LIVE,
                       fill_opacity=0.35).move_to(cc)
         Dd = dim(cc + [-0.5, 0, 0], cc + [0.5, 0, 0], LIVE)
-        Dl = T("D = 1.75 in", 20, LIVE).move_to(cc + [1.3, 0, 0])
+        Dl = T("D = 1.75 in", 20, LIVE).move_to(cc + [1.45, 0, 0])
         Al = M(r"A = \tfrac{\pi}{4}D^2", size=28, color=LIVE).move_to(cc + [0, -0.85, 0])
 
         # ---------------- step 1
