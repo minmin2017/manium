@@ -580,13 +580,13 @@ class FXD3_AccumWeightSpring(ExamScene):
         self.play(FadeIn(t3))
         b3 = SurroundingRectangle(t3, color=FORCE, buff=0.1)
         self.play(Create(b3))
-        self.relabel(ps_lb, "2.04 MPa", 20, WHITE)
+        self.relabel(ps_lb, "2.04 MPa", 20, WHITE, left=True)
         self.play(sp.animate.set_value(60), run_time=2.0)
         self.cap("อัดต่อถึง x = 60 mm (น้ำมันเข้ามาเก็บมากขึ้น)")
         self.play(FadeIn(t4))
         b5 = SurroundingRectangle(t4, color=FORCE, buff=0.1)
         self.play(Create(b5))
-        self.relabel(ps_lb, "6.11 MPa", 20, WHITE)
+        self.relabel(ps_lb, "6.11 MPa", 20, WHITE, left=True)
         self.cap("ได้ P = 2.04 MPa ที่ x = 20 mm และ 6.11 MPa ที่ x = 60 mm", color=FORCE)
 
         # ---------------- step 4
@@ -603,9 +603,9 @@ class FXD3_AccumWeightSpring(ExamScene):
         self.play(FadeIn(c1, shift=0.15 * UP))
         self.cap("น้ำมันเหลือมากหรือน้อย ความดันแบบน้ำหนักก็ไม่เปลี่ยน")
         self.play(sp.animate.set_value(20), run_time=1.4)
-        self.relabel(ps_lb, "2.04 MPa", 20, WHITE)
+        self.relabel(ps_lb, "2.04 MPa", 20, WHITE, left=True)
         self.play(sp.animate.set_value(60), run_time=1.4)
-        self.relabel(ps_lb, "6.11 MPa", 20, WHITE)
+        self.relabel(ps_lb, "6.11 MPa", 20, WHITE, left=True)
         self.play(FadeIn(c2, shift=0.15 * UP), FadeIn(c3, shift=0.15 * UP))
         self.cap("แบบสปริง: น้ำมันยิ่งมาก สปริงยิ่งถูกอัด ความดันยิ่งสูง ตรงกับสไลด์")
         self.cap("ออกสอบ: ความดันคงที่ = weighted · ไม่ต้อง pre-charge = spring", wait=2.6)
@@ -627,7 +627,7 @@ class FXD4_AccumBoyleSizing(ExamScene):
         Hi = ytop - ybot
         g3 = 7.5633 / 15.0508
         g2 = 12.5633 / 15.0508
-        xs = [-6.0, -3.6, -1.2]
+        xs = [-5.7, -3.3, -0.9]
 
         def parts(x, g, vtex, ly=None):
             gas = Rectangle(width=W - 0.16, height=max(g * Hi, 0.01), stroke_width=0,
@@ -705,7 +705,7 @@ class FXD4_AccumBoyleSizing(ExamScene):
         e3[0].set_color(YEL)
         e4 = M(r"V_1", r"=", r"\frac{\Delta V}{p_1\left(\frac{1}{p_2}-\frac{1}{p_3}\right)}",
                size=38)
-        self.rows([e1, e2, e3, e4], 1.85, 1.05)
+        self.rows([e1, e2, e3, e4], 1.85, 1.22)
         self.play(FadeIn(e1))
         self.cap("กฎของ Boyle (อุณหภูมิคงที่): p × V ของแก๊สก้อนเดิมคงที่")
         self.glow(e1[0], lb_b[1], P1C)
@@ -756,11 +756,11 @@ class FXD4_AccumBoyleSizing(ExamScene):
         s4 = M(r"V_1 = \frac{5}{0.3322} = 15.05\ \text{L}", size=40, color=P1C)
         self.rows([s1, s2, s3, s4], 0.85, 1.1)
         self.play(FadeIn(s1))
-        self.relabel(lb_b[1], "p1 = 101.013 bar(abs)", 18, P1C)
+        self.relabel(lb_b[1], "p1 = 101.013 abs", 18, P1C)
         self.cap("บวก 1.013 ทุกตัว: gauge → absolute")
         self.play(FadeIn(s2))
-        self.relabel(lb_d[1], "p3 = 201.013 bar(abs)", 18, P3C)
-        self.relabel(lb_f[1], "p2 = 121.013 bar(abs)", 18, P2C)
+        self.relabel(lb_d[1], "p3 = 201.013 abs", 18, P3C)
+        self.relabel(lb_f[1], "p2 = 121.013 abs", 18, P2C)
         self.play(FadeIn(s3))
         self.glow(s3, dv_lb, YEL)
         self.cap("ΔV = 5 L อยู่ข้างบน · ใส่ p2 (ต่ำสุด) และ p3 (สูงสุด) ให้ถูกช่อง")
@@ -785,8 +785,8 @@ class FXD4_AccumBoyleSizing(ExamScene):
         # ---------------- step 4
         self.step(4, "ตรวจ")
         c1 = M(r"V_2 - V_3 = 12.56 - 7.56 = 5.00\ \text{L}", size=34, color=OK)
-        c2 = T("ถ้าใช้ gauge (ผิด): V1 = 15.00 L → ถังเล็กไปนิด", 22, WHITE)
-        c3 = T("ความดันต่ำ เช่น 1/2/4 bar(g): gauge 20.0 L vs abs 18.76 L", 22, WHITE)
+        c2 = T("ใช้ gauge (ผิด): V1 = 15.00 L", 24, WHITE)
+        c3 = T("1/2/4 bar(g): gauge 20.0 L · abs 18.76 L", 24, WHITE)
         self.rows([c1, c2, c3], -1.4, 0.7)
         self.play(FadeIn(c1, shift=0.15 * UP))
         self.glow(c1, brace, OK)
@@ -794,7 +794,7 @@ class FXD4_AccumBoyleSizing(ExamScene):
         self.play(FadeIn(c2, shift=0.15 * UP))
         self.cap("ที่ความดันสูง gauge กับ absolute ต่างกันน้อย (15.00 vs 15.05)")
         self.play(FadeIn(c3, shift=0.15 * UP))
-        self.cap("แต่ที่ความดันต่ำต่างกันมาก (~7%) → ข้อสอบต้องใช้ absolute เสมอ")
+        self.cap("ความดันต่ำ เช่น p1/p2/p3 = 1/2/4 bar(g): ต่างกัน ~7% → ต้องใช้ absolute เสมอ")
         self.cap("กับดัก: p1 = pre-charge (ต่ำสุด) · p2 = ใช้งานต่ำสุด · p3 = สูงสุด อย่าสลับ p2 กับ p3",
                  color=YEL, wait=4.0)
         self.wait(1.5)
