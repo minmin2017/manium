@@ -355,7 +355,7 @@ class FXG2_FreeAir(ExamScene):
         a_mid = harrow(-2.3, -1.65, 0.5, HIGH, 4)
         a_out = harrow(-0.35, 1.25, -0.3, HIGH, 5)
         q2_l = fit_width(M(r"Q_2 = 30\ \text{cfm}", size=28, color=HIGH), 1.55)
-        q2_l.move_to([0.5, 0.32, 0])
+        q2_l.move_to([0.62, 0.32, 0])
         s1 = VGroup(T("สถานะ 1: อากาศรอบตัว", 19, AIR),
                     M(r"P_1 = 14.7\ \text{psia}", size=28, color=AIR),
                     M(r"T_1 = 70^\circ\text{F}", size=28, color=AIR),
@@ -809,8 +809,10 @@ class FXG4_ValvePipe(ExamScene):
                r")}{", r"T_1", r"}}", size=40)
         e2 = M(r"C_v = \frac{Q}{22.7\sqrt{P_2\,(P_1-P_2)/T_1}}", size=36, color=OK)
         e3 = T("Q = scfm · P = psia · T = °R", 22, GRAYTXT)
-        e4 = T("ถ้า P2 < 0.53·P1 → choked: ลมที่คอวาล์วเร็วเท่าเสียง Q ไม่เพิ่มอีก", 22, WARN)
+        e4 = T("ถ้า P2 < 0.53·P1 → choked", 24, WARN)
+        e4b = T("ลมที่คอวาล์วเร็วเท่าเสียง Q ไม่เพิ่มอีก", 22, WARN)
         self.rows([e1, e2, e3, e4], 1.85, 1.2)
+        self.rows([e4b], -2.35)
         self.play(FadeIn(e1))
         self.cap("ลมยุบตัวได้ → อัตราไหลขึ้นกับ P2, ความดันตก และอุณหภูมิ", wait=1.0)
         self.glow(e1[0], a_q, HIGH)
@@ -820,12 +822,12 @@ class FXG4_ValvePipe(ExamScene):
         self.glow(e1[9], t1_l, YEL)
         self.play(FadeIn(e2))
         self.cap("ย้ายข้างหา Cv")
-        self.play(FadeIn(e3), FadeIn(e4))
+        self.play(FadeIn(e3), FadeIn(e4), FadeIn(e4b))
         self.cap("ทุกค่าเป็นค่าสัมบูรณ์ · ตรวจ choked ทุกครั้ง", color=WARN)
 
         # ---------------- step 3
         self.step(3, "แทนค่า")
-        self.play(FadeOut(VGroup(e1, e3, e4)))
+        self.play(FadeOut(VGroup(e1, e3, e4, e4b)))
         self.play(e2.animate.move_to([PX, 1.85, 0]))
         s1 = M(r"P_1 = 100 + 14.7 = 114.7\ \text{psia}", size=32, color=HIGH)
         s2 = M(r"P_2 = 114.7 - 12 = 102.7\ \text{psia}", size=32, color=HIGH)
@@ -854,8 +856,8 @@ class FXG4_ValvePipe(ExamScene):
 
         # ---------------- step 4
         self.step(4, "ตรวจ")
-        c1 = T("P2/P1 = 102.7/114.7 = 0.895 > 0.53 → ไม่ choked ✓", 22, OK)
-        c2 = T("เลือกวาล์ว Cv ≥ 1.46 (เล็กกว่านี้ ความดันตกเกิน 12 psi)", 22, OK)
+        c1 = T("P2/P1 = 0.895 > 0.53 → ไม่ choked ✓", 26, OK)
+        c2 = T("เลือกวาล์วที่ Cv ≥ 1.46", 26, OK)
         self.rows([c1, c2], -2.65, 0.62)
         self.play(FadeIn(c1, shift=0.1 * UP))
         self.glow(c1, VGroup(gauges[1], gauges[3]), OK)
@@ -965,7 +967,7 @@ class FXG4_ValvePipe(ExamScene):
         tap = VMobject(color=OK, stroke_width=5).set_points_as_corners(
             [np.array(p, dtype=float) for p in
              [[1.0, -2.95, 0], [1.0, -2.45, 0], [1.6, -2.45, 0], [1.6, -2.75, 0]]])
-        gl = T("ท่อแยกต่อจากด้านบน (gooseneck)", 18, OK).move_to([-1.0, -2.6, 0])
+        gl = T("ท่อแยกต่อจากด้านบน (gooseneck)", 19, OK).move_to([-1.75, -2.4, 0])
         wl = T("น้ำนอนก้นท่อ", 17, AIR).move_to([2.3, -3.7, 0])
         self.play(Create(gp), FadeIn(water))
         self.play(Create(tap), FadeIn(gl), FadeIn(wl))
