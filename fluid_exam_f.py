@@ -654,8 +654,8 @@ class FX20_MoistureMass(ExamScene):
                      color=GRAYTXT, stroke_width=4, max_tip_length_to_length_ratio=0.3)
         ydp = yT(28.6)
         dpl = DashedLine([xd - 0.3, ydp, 0], [xw + 0.3, ydp, 0], color=YEL, stroke_width=3)
-        dpt = T("Tdp ≈ 28.6 °C", 18, YEL)
-        dpt.move_to([xw + 0.35 + dpt.width / 2, ydp, 0])
+        dpt = T("Tdp 28.6 °C", 16, YEL)
+        dpt.move_to([xw + 0.35 + dpt.width / 2, ydp + 0.18, 0])
 
         bx0, bx1, by0, by1 = -3.3, 1.1, -2.6, 1.85
         box = Rectangle(width=bx1 - bx0, height=by1 - by0, color=METAL, stroke_width=4)
