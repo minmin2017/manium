@@ -391,7 +391,7 @@ class FXH2_ShiftRegister(ExamScene):
         for n in "AB":
             vv[n][1].set_fill(CC[n], 0.45)
         fig = VGroup(*figs)
-        PX = 4.7
+        PX = 3.65
         MX = [-6.3, -4.5, -2.9, -1.1]
         VS = [-5.9, -4.9, -2.5, -1.5]
         PIL = ["A+", "A-", "B+", "B-"]
@@ -413,7 +413,7 @@ class FXH2_ShiftRegister(ExamScene):
         self.play(FadeIn(seq))
         self.cap("ลำดับตัวอย่างหน้า 10: A+ A− B+ B− · ลองต่อลิมิตวาล์วสั่งตรงๆ ก่อน")
         self.play(*[Create(o) for o in outs], *[FadeIn(b) for b in boxes], run_time=1.4)
-        drows = VGroup(*[T(s, 22) for s in ("START → A+", "a1 → A−", "a0 → B+", "b1 → B−")])
+        drows = VGroup(*[T(s, 25) for s in ("START → A+", "a1 → A−", "a0 → B+", "b1 → B−")])
         drows.arrange(DOWN, buff=0.22, aligned_edge=LEFT).move_to([PX, 0.3, 0])
         self.play(FadeIn(drows))
         self.cap("ต่อตรง: ลิมิตวาล์วของสเต็ปก่อน สั่งสเต็ปถัดไปทันที")
@@ -434,8 +434,8 @@ class FXH2_ShiftRegister(ExamScene):
                   Indicate(outs[2], color=WARN, scale_factor=1.0))
         self.cap("b1 สั่ง B− แต่สาย B+ ยังมีลมจาก a0 → วาล์ว B ไม่ขยับ = สัญญาณค้าง (Signal Overlap)",
                  color=WARN, wait=3.2)
-        trap = T("a0 กดค้างตลอดที่ B ทำงาน → B+ ค้าง", 21, WARN)
-        self.rows([trap], PX, -1.05, 0.6, 4.2)
+        trap = T("a0 กดค้างตลอดที่ B ทำงาน → B+ ค้าง", 24, WARN)
+        self.rows([trap], PX, -1.05, 0.6, 6.2)
         self.play(FadeIn(trap))
         self.glow(trap, mk["a0"], WARN)
 
@@ -446,12 +446,12 @@ class FXH2_ShiftRegister(ExamScene):
         move("B", -1)
         self.play(FadeOut(drows, run_time=0.35))
         self.play(FadeOut(trap, run_time=0.35))
-        fx = VGroup(T("แก้ 1: Cascade", 22, YEL),
+        fx = VGroup(T("แก้ 1: Cascade", 25, YEL),
                     M(r"A+\ |\ A-\ B+\ |\ B-", size=34),
-                    T("3 กรุ๊ป → 3 เส้น, วาล์วคาสเคด 3−1 = 2 ตัว", 20),
-                    T("แก้ 2: Shift Register", 22, YEL),
-                    T("1 สเต็ป = 1 โมดูล → 4 โมดูล", 20))
-        self.rows(list(fx), PX, 1.05, 0.6, 4.2)
+                    T("3 กรุ๊ป → 3 เส้น, วาล์วคาสเคด 3−1 = 2 ตัว", 23),
+                    T("แก้ 2: Shift Register", 25, YEL),
+                    T("1 สเต็ป = 1 โมดูล → 4 โมดูล", 23))
+        self.rows(list(fx), PX, 1.05, 0.6, 6.2)
         self.play(FadeIn(fx[0]), FadeIn(fx[1]))
         self.cap("Cascade: ตัดกรุ๊ปตามกฎตัวอักษรซ้ำ → A+ | A− B+ | B− = 3 กรุ๊ป")
         self.play(FadeIn(fx[2]))
@@ -462,8 +462,8 @@ class FXH2_ShiftRegister(ExamScene):
         # ---------------- 3 module
         self.step(3, "โมดูลทำงานยังไง")
         self.play(*[b.animate.move_to([MX[i], -2.75, 0]) for i, b in enumerate(boxes)], run_time=1.0)
-        mods = VGroup(*[VGroup(Rectangle(width=0.9, height=0.8, color=WHITE),
-                               T(f"M{i + 1}", 22).move_to([MX[i], ym, 0])).move_to([MX[i], ym, 0])
+        mods = VGroup(*[VGroup(Rectangle(width=0.9, height=0.8, color=WHITE).move_to([MX[i], ym, 0]),
+                               T(f"M{i + 1}", 24).move_to([MX[i], ym, 0]))
                         for i in range(4)])
         ins = VGroup(*[Arrow([MX[i], -2.57, 0], [MX[i], ym - 0.4, 0], buff=0, color=METAL,
                              stroke_width=3, max_tip_length_to_length_ratio=0.25) for i in range(4)])
@@ -476,11 +476,11 @@ class FXH2_ShiftRegister(ExamScene):
         self.play(FadeIn(mods), GrowFromEdge(ins, DOWN), run_time=1.2)
         self.play(*[GrowArrow(a) for a in arms], *[GrowArrow(r) for r in rsts], run_time=1.0)
         self.play(FadeOut(fx, run_time=0.35))
-        mr = VGroup(T("โมดูล = หน่วยจำ (Bistable 3/2) + AND", 21, YEL),
-                    T("set: โมดูลก่อนเปิดทาง AND ลิมิตวาล์ว", 20, OK),
-                    T("ออก: สั่งลูกสูบ + เปิดทางโมดูลถัดไป", 20, OK),
-                    T("reset: โมดูลถัดไปทำงาน → ตัดโมดูลก่อน", 20, WARN))
-        self.rows(list(mr), PX, 1.0, 0.62, 4.2)
+        mr = VGroup(T("โมดูล = หน่วยจำ (Bistable 3/2) + AND", 24, YEL),
+                    T("set: โมดูลก่อนเปิดทาง AND ลิมิตวาล์ว", 23, OK),
+                    T("ออก: สั่งลูกสูบ + เปิดทางโมดูลถัดไป", 23, OK),
+                    T("reset: โมดูลถัดไปทำงาน → ตัดโมดูลก่อน", 23, WARN))
+        self.rows(list(mr), PX, 1.0, 0.62, 6.2)
         for i, r in enumerate(mr):
             self.play(FadeIn(r), run_time=0.5)
             if i == 1:
@@ -492,13 +492,13 @@ class FXH2_ShiftRegister(ExamScene):
         # ---------------- 4 step-through
         self.step(4, "เดินทีละสเต็ป")
         self.play(FadeOut(mr, run_time=0.35))
-        tbl = VGroup(*[T(s, 21) for s in (
+        tbl = VGroup(*[T(s, 23) for s in (
             "1) START·b0 → M1 → A+",
             "2) a1·M1 → M2 → A− · reset M1",
             "3) a0·M2 → M3 → B+ · reset M2",
             "4) b1·M3 → M4 → B− · reset M3",
             "จบ: b0 = B กลับบ้าน รอ START")]).arrange(DOWN, buff=0.24, aligned_edge=LEFT)
-        fit_width(tbl, 4.2)
+        fit_width(tbl, 6.2)
         tbl.move_to([PX, 0.2, 0])
         MC = [CC["A"], CC["A"], CC["B"], CC["B"]]
 
@@ -543,12 +543,12 @@ class FXH2_ShiftRegister(ExamScene):
         # ---------------- 5 check
         self.step(5, "ตรวจ + สรุป")
         self.play(FadeOut(tbl, run_time=0.35))
-        sm = VGroup(T("ทุกขณะ มีโมดูลทำงานแค่ตัวเดียว", 21, OK),
-                    T("สเต็ปเยอะ = แค่เพิ่มโมดูล ไม่ต้องคิดกรุ๊ป", 20),
-                    T("หาจุดเสียง่าย: ไฟลมโชว์ทีละสเต็ป", 20),
-                    T("START ผ่าน Shuttle (OR) เลือก Manual/Auto", 20),
-                    T("+ Interlock b0 ยืนยันว่าอยู่จุดเริ่ม", 20))
-        self.rows(list(sm), PX, 1.0, 0.6, 4.2)
+        sm = VGroup(T("ทุกขณะ มีโมดูลทำงานแค่ตัวเดียว", 24, OK),
+                    T("สเต็ปเยอะ = แค่เพิ่มโมดูล ไม่ต้องคิดกรุ๊ป", 23),
+                    T("หาจุดเสียง่าย: ไฟลมโชว์ทีละสเต็ป", 23),
+                    T("START ผ่าน Shuttle (OR) เลือก Manual/Auto", 23),
+                    T("+ Interlock b0 ยืนยันว่าอยู่จุดเริ่ม", 23))
+        self.rows(list(sm), PX, 1.0, 0.6, 6.2)
         self.play(FadeIn(sm[0]))
         self.glow(sm[0], mods, OK)
         self.play(FadeIn(sm[1]), FadeIn(sm[2]))
@@ -568,7 +568,7 @@ def wire(points, color=DEAD):
     return pipe(points, color, 3)
 
 
-def contact(x, y, name, nc=False, lab_up=True, size=17):
+def contact(x, y, name, nc=False, lab_up=True, size=20):
     p = VGroup(Line([x - 0.12, y - 0.2, 0], [x - 0.12, y + 0.2, 0], stroke_width=4, color=WHITE),
                Line([x + 0.12, y - 0.2, 0], [x + 0.12, y + 0.2, 0], stroke_width=4, color=WHITE))
     bridge = Line([x - 0.12, y, 0], [x + 0.12, y, 0], stroke_width=5, color=WHITE)
@@ -579,7 +579,7 @@ def contact(x, y, name, nc=False, lab_up=True, size=17):
     return g, bridge
 
 
-def coil(x, y, name, size=17, inside=False):
+def coil(x, y, name, size=20, inside=False):
     c = Circle(radius=0.25, color=WHITE, stroke_width=3).move_to([x, y, 0])
     lb = T(name, size, GRAYTXT).move_to([x, y, 0] if inside else [x, y + 0.45, 0])
     return c, lb
@@ -610,10 +610,10 @@ class FXH3_RelayLatch(ExamScene):
         for sym, txt in ((VGroup(no_s[0]), "NO ปกติเปิด: กดแล้วต่อ ปล่อยแล้วดับ → ปุ่ม START"),
                          (VGroup(nc_s[0], nc_s[1], nc_b), "NC ปกติปิด: กดแล้วตัด → ปุ่ม STOP"),
                          (co_s, "คอยล์รีเลย์ 1CR: ได้ไฟ → หน้าสัมผัส 1CR-x ทุกตัวสลับพร้อมกัน")):
-            t = T(txt, 21)
-            fit_width(t, 5.6)
-            leg.add(VGroup(sym.copy(), t).arrange(RIGHT, buff=0.35))
-        leg.arrange(DOWN, buff=0.45, aligned_edge=LEFT).move_to([0, 0.2, 0])
+            t = T(txt, 27)
+            fit_width(t, 10.5)
+            leg.add(VGroup(sym.copy().scale(1.5), t).arrange(RIGHT, buff=0.45))
+        leg.arrange(DOWN, buff=0.7, aligned_edge=LEFT).move_to([0, 0.2, 0])
         for i, r in enumerate(leg):
             self.play(FadeIn(r), run_time=0.6)
             self.cap(["หน้าสัมผัส NO (Normally Open) · ใช้เป็นปุ่ม START",
@@ -682,6 +682,7 @@ class FXH3_RelayLatch(ExamScene):
                     (xc + 0.78, yv + 0.12), (xc + 0.88, yv - 0.12), (xc + 0.96, yv)], WHITE, 2)
         spr_lb = T("สปริง", 17, GRAYTXT).move_to([xc + 1.45, yv, 0])
         cylfig = VGroup(bar, mv, nm, ls_mk, va, sol, sol_lb, spr, spr_lb, feeds(xc, yv, yc, 2.0))
+        cylfig.scale(1.35, about_point=np.array([2.6, 2.0, 0]))
         self.play(FadeIn(cylfig), run_time=1.0)
         self.cap("วาล์ว 5/2 โซลินอยด์เดี่ยว สปริงคืน: SOL A ได้ไฟ → A+ · ไฟดับ → สปริงดัน A−")
         cr2, b_cr2 = contact(-3.2, y2, "1CR-2")
@@ -704,14 +705,14 @@ class FXH3_RelayLatch(ExamScene):
                   solc.animate.set_fill(CURRENT, 0.6), sol.animate.set_fill(CURRENT, 0.6))
         self.play(bridge_on(b_start, False), w3.animate.set_color(DEAD), w4.animate.set_color(DEAD),
                   *paint([br1, br2], True), shift_valve(va, "L", "#4FC3F7"),
-                  mv.animate.shift(1.0 * RIGHT), run_time=1.6)
+                  mv.animate.shift(1.35 * RIGHT), run_time=1.6)
         self.cap("กด START → 1CR แลตช์ → 1CR-2 ปิด → SOL A ได้ไฟ → A ยืดออก (A+)")
         self.play(Indicate(ls_mk, color=WARN, scale_factor=1.0), bridge_on(b_ls1, False))
         self.play(*paint(r1_hold, False), cr1c.animate.set_fill(CURRENT, 0))
         self.play(bridge_on(b_hold, False), bridge_on(b_cr2, False), *paint(r2, False),
                   solc.animate.set_fill(CURRENT, 0), sol.animate.set_fill(CURRENT, 0))
         self.cap("ก้านชน 1LS → NC เปิด → ตัดไฟ 1CR → 1CR-1 และ 1CR-2 เปิด → SOL A ดับ", color=WARN)
-        self.play(shift_valve(va, "R", "#4FC3F7"), mv.animate.shift(1.0 * LEFT), run_time=1.4)
+        self.play(shift_valve(va, "R", "#4FC3F7"), mv.animate.shift(1.35 * LEFT), run_time=1.4)
         self.play(bridge_on(b_ls1, True))
         self.cap("สปริงดีดสปูลกลับ → A หดกลับ (A−) · 1LS ปล่อยแล้ว แต่แลตช์หลุดไปแล้ว จึงหยุดรอ START")
 
@@ -736,7 +737,7 @@ class FXH3_RelayLatch(ExamScene):
                   solc.animate.set_fill(CURRENT, 0.6), sol.animate.set_fill(CURRENT, 0.6))
         self.play(bridge_on(b_start, False), w3.animate.set_color(DEAD), w4.animate.set_color(DEAD),
                   *paint([br1, br2], True), shift_valve(va, "L", "#4FC3F7"),
-                  mv.animate.shift(1.0 * RIGHT), run_time=1.6)
+                  mv.animate.shift(1.35 * RIGHT), run_time=1.6)
         self.play(Indicate(ls_mk, color=WARN, scale_factor=1.0), bridge_on(b_ls3),
                   *paint([u1, u2, u3], True), tmc.animate.set_fill(YEL, 0.5))
         self.cap("A ยืดชน 1LS → T1 ได้ไฟ เริ่มนับเวลา · หน้าสัมผัสยังไม่เปลี่ยน", wait=0.5)
@@ -746,7 +747,7 @@ class FXH3_RelayLatch(ExamScene):
         self.play(bridge_on(b_hold, False), bridge_on(b_cr2, False), *paint(r2, False),
                   solc.animate.set_fill(CURRENT, 0), sol.animate.set_fill(CURRENT, 0))
         self.cap("ครบ 5 s → T1 (NC) เปิด → 1CR ดับ → SOL A ดับ", color=WARN, wait=1.6)
-        self.play(shift_valve(va, "R", "#4FC3F7"), mv.animate.shift(1.0 * LEFT),
+        self.play(shift_valve(va, "R", "#4FC3F7"), mv.animate.shift(1.35 * LEFT),
                   bridge_on(b_ls3, False), *paint([u1, u2, u3], False),
                   tmc.animate.set_fill(YEL, 0), run_time=1.4)
         self.play(ChangeDecimalToValue(tval, 0.0), bridge_on(b_t1, True), run_time=0.6)
@@ -754,14 +755,15 @@ class FXH3_RelayLatch(ExamScene):
 
         # ---------------- 5 check
         self.step(5, "ตรวจ + สรุป")
-        sm = VGroup(T("แลตช์ = 1CR-1 (NO) ขนานปุ่ม START · STOP (NC) อนุกรม", 21, OK),
-                    T("On-Delay (TON): ได้ไฟ → รอครบเวลา → หน้าสัมผัสจึงสลับ", 21),
-                    T("Off-Delay (TOF): ได้ไฟ → สลับทันที · ตัดไฟ → ค้างต่อตามเวลา", 21))
-        self.rows(list(sm), PX, -2.65, 0.5, PW)
-        self.play(FadeIn(sm[0]))
+        sm = VGroup(T("แลตช์ = 1CR-1 (NO) ขนานปุ่ม START", 24, OK),
+                    T("STOP (NC) อนุกรม กดแล้วปลดแลตช์", 24, OK),
+                    T("TON: ได้ไฟ → รอครบเวลา → หน้าสัมผัสสลับ", 24),
+                    T("TOF: สลับทันที · ตัดไฟแล้วค้างต่อตามเวลา", 24))
+        self.rows(list(sm), PX + 0.2, -1.05, 0.62, 6.6)
+        self.play(FadeIn(sm[0]), FadeIn(sm[1]))
         self.glow(sm[0], VGroup(hold, stop))
-        self.play(FadeIn(sm[1]))
         self.play(FadeIn(sm[2]))
+        self.play(FadeIn(sm[3]))
         self.cap("สรุป: ปุ่มกดติดปล่อยดับ → ต้องแลตช์ · ลิมิตสวิตช์/ไทม์เมอร์ใช้ตัดแลตช์เพื่อสั่งถอย",
                  color=YEL, wait=4.0)
         self.wait(1.0)
@@ -803,20 +805,20 @@ class FXH4_TwoCylLadder(ExamScene):
         self.play(FadeIn(fig), run_time=1.2)
         seq = M(r"\text{START}", r"\to A+", r"\to B+", r"\to A-", r"\to B-", size=36)
         fit_width(seq, 6.4)
-        seq.move_to([PX, -0.55, 0])
+        seq.move_to([PX, -0.8, 0])
         self.play(FadeIn(seq))
         self.cap("ลำดับหน้า 9: START → A+ → B+ → A− → B− · ลิมิตสวิตช์ a0 a1 b0 b1 ที่ปลายก้าน")
         self.cap("วาล์ว 5/2 โซลินอยด์คู่ (A+/A−): จ่ายไฟแวบเดียวก็พอ วาล์วจำตำแหน่งไว้เอง")
 
         # ---------------- 2 ladder
         self.step(2, "เขียนแลดเดอร์")
-        rails = VGroup(Line([XL, 1.85, 0], [XL, -2.4, 0], color=WHITE, stroke_width=4),
-                       Line([XR, 1.85, 0], [XR, -2.4, 0], color=WHITE, stroke_width=4))
+        rails = VGroup(Line([XL, 1.85, 0], [XL, -2.75, 0], color=WHITE, stroke_width=4),
+                       Line([XR, 1.85, 0], [XR, -2.75, 0], color=WHITE, stroke_width=4))
         rl = VGroup(T("+24V", 18, CURRENT).move_to([XL, 2.07, 0]),
                     T("0V", 18, GRAYTXT).move_to([XR, 2.07, 0]))
         self.play(Create(rails), FadeIn(rl), run_time=0.8)
         self.cap("หลัก: ลิมิตสวิตช์ที่สเต็ปก่อนชน → สั่งโซลินอยด์ของสเต็ปถัดไป")
-        YR = [1.2, 0.2, -0.8, -1.8]
+        YR = [1.2, 0.05, -1.1, -2.25]
         spec = [(["START", "b0"], "A+", "A", "START กับ b0 (B อยู่บ้าน) → SOL A+"),
                 (["a1"], "B+", "B", "A ยืดสุดชน a1 → SOL B+"),
                 (["b1"], "A-", "A", "B ยืดสุดชน b1 → SOL A−"),
@@ -878,20 +880,20 @@ class FXH4_TwoCylLadder(ExamScene):
         # ---------------- 4 check + trap + PLC
         self.step(4, "ตรวจ + กับดัก + PLC")
         self.play(FadeOut(seq, run_time=0.35))
-        ck = VGroup(T("ตรวจ: ตอนสั่งแต่ละสเต็ป คอยล์ฝั่งตรงข้ามดับเสมอ → ไม่ชน", 21, OK),
-                    T("A+ A− B+ B− (หน้า 10): a0 กดค้างตลอดที่ B ทำงาน", 21, WARN),
-                    T("→ B+ กับ B− ได้ไฟพร้อมกัน → ต้องใช้รีเลย์แบ่งสเต็ป", 21, WARN))
-        self.rows(list(ck), PX, -0.45, 0.55, 6.6)
+        ck = VGroup(T("ตรวจ: ทุกสเต็ป คอยล์ฝั่งตรงข้ามดับแล้ว → ไม่ชน", 24, OK),
+                    T("หน้า 10: A+ A− B+ B− → a0 กดค้างตลอดที่ B ทำงาน", 24, WARN),
+                    T("→ B+ กับ B− ได้ไฟพร้อมกัน → ใช้รีเลย์แบ่งสเต็ป", 24, WARN))
+        self.rows(list(ck), PX, -0.45, 0.58, 6.8)
         self.play(FadeIn(ck[0]))
         self.cap("ลำดับ A+ B+ A− B− ต่อตรงได้ เพราะลิมิตสวิตช์ของคำสั่งเก่าถูกปล่อยก่อนเสมอ", color=OK)
         self.play(FadeIn(ck[1]), FadeIn(ck[2]))
         self.glow(ck[1], mk["a0"], WARN)
         self.cap("กับดัก: ลำดับ A+ A− B+ B− ใช้วิธีนี้ไม่ได้ → ใช้ Stepping Relays (เหมือน Shift Register)",
                  color=WARN, wait=3.0)
-        io = VGroup(T("PLC (หน้า 17): X004 = START · X000 = a0 · X001 = a1", 21),
-                    T("X002 = b0 · X003 = b1 · Y001 = Sol A · Y002 = Sol B", 21),
-                    T("เปลี่ยนลำดับ = แก้โปรแกรม ไม่ต้องรื้อสายไฟ/สายลม", 21, YEL))
-        self.rows(list(io), PX, -2.25, 0.5, 6.6)
+        io = VGroup(T("PLC หน้า 17: START=X004 · a0=X000 · a1=X001", 24),
+                    T("b0=X002 · b1=X003 · Sol A=Y001 · Sol B=Y002", 24),
+                    T("เปลี่ยนลำดับ = แก้โปรแกรม ไม่ต้องรื้อสาย", 24, YEL))
+        self.rows(list(io), PX, -2.35, 0.58, 6.8)
         self.play(FadeIn(io[0]), FadeIn(io[1]))
         self.cap("PLC: ลิมิตสวิตช์/ปุ่มเข้าขา X (Input) · โซลินอยด์ต่อขา Y (Output)")
         self.play(FadeIn(io[2]))
